@@ -1,0 +1,24 @@
+require 'ransack/configuration'
+
+module Ransack
+  extend Configuration
+end
+
+Ransack.configure do |config|
+  Ransack::Constants::AREL_PREDICATES.each do |name|
+    config.add_predicate name, :arel_predicate => name
+  end
+
+  Ransack::Constants::DERIVED_PREDICATES.each do |args|
+    config.add_predicate *args
+  end
+end
+
+require 'ransack/translate'
+require 'ransack/search'
+require 'ransack/adapters/active_record'
+require 'ransack/helpers'
+require 'action_controller'
+
+ActiveRecord::Base.extend Ransack::Adapters::ActiveRecord::Base
+ActionController::Base.helper Ransack::Helpers::FormHelper
