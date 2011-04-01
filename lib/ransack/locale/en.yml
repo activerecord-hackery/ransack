@@ -1,5 +1,6 @@
 en:
   ransack:
+    search: "search"
     predicate: "predicate"
     and: "and"
     or: "or"

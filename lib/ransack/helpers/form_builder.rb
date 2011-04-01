@@ -11,6 +11,12 @@ module Ransack
         super(method, text, options, &block)
       end
 
+      def submit(value=nil, options={})
+        value, options = nil, value if value.is_a?(Hash)
+        value ||= Translate.word(:search).titleize
+        super(value, options)
+      end
+
       def attribute_select(options = {}, html_options = {})
         raise ArgumentError, "attribute_select must be called inside a search FormBuilder!" unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
