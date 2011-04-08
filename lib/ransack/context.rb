@@ -56,8 +56,9 @@ module Ransack
         association_parts = []
         found_assoc = nil
         while !found_assoc && segments.size > 0 && association_parts << segments.shift do
-          if found_assoc = get_association(association_parts.join('_'), base)
-            base = traverse(segments.join('_'), found_assoc.klass)
+          assoc, klass = unpolymorphize_association(association_parts.join('_'))
+          if found_assoc = get_association(assoc, base)
+            base = traverse(segments.join('_'), klass || found_assoc.klass)
           end
         end
         raise ArgumentError, "No association matches #{str}" unless found_assoc
@@ -74,15 +75,24 @@ module Ransack
       association_parts = []
       if (segments = str.split(/_/)).size > 0
         while segments.size > 0 && !base.columns_hash[segments.join('_')] && association_parts << segments.shift do
-          if found_assoc = get_association(association_parts.join('_'), base)
+          assoc, klass = unpolymorphize_association(association_parts.join('_'))
+          if found_assoc = get_association(assoc, base)
             path += association_parts
             association_parts = []
-            base = klassify(found_assoc)
+            base = klassify(klass || found_assoc)
           end
         end
       end
 
       path.join('_')
+    end
+
+    def unpolymorphize_association(str)
+      if (match = str.match(/_of_(.+?)_type$/)) && Kernel.const_defined?(match.captures.first)
+        [match.pre_match, Kernel.const_get(match.captures.first)]
+      else
+        [str, nil]
+      end
     end
 
     def searchable_columns(str = '')

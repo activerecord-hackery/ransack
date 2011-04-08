@@ -20,5 +20,4 @@ require 'ransack/adapters/active_record'
 require 'ransack/helpers'
 require 'action_controller'
 
-ActiveRecord::Base.extend Ransack::Adapters::ActiveRecord::Base
 ActionController::Base.helper Ransack::Helpers::FormHelper

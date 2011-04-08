@@ -8,7 +8,6 @@ module Ransack
         # Because the AR::Associations namespace is insane
         JoinDependency = ::ActiveRecord::Associations::JoinDependency
         JoinPart = JoinDependency::JoinPart
-        JoinAssociation = JoinDependency::JoinAssociation
 
         def evaluate(search, opts = {})
           relation = @object.where(accept(search.base)).order(accept(search.sorts))
@@ -24,8 +23,9 @@ module Ransack
             remainder = []
             found_assoc = nil
             while !found_assoc && remainder.unshift(segments.pop) && segments.size > 0 do
-              if found_assoc = get_association(segments.join('_'), klass)
-                exists = attribute_method?(remainder.join('_'), found_assoc.klass)
+              assoc, poly_class = unpolymorphize_association(segments.join('_'))
+              if found_assoc = get_association(assoc, klass)
+                exists = attribute_method?(remainder.join('_'), poly_class || found_assoc.klass)
               end
             end
           end
@@ -68,8 +68,9 @@ module Ransack
             remainder = []
             found_assoc = nil
             while remainder.unshift(segments.pop) && segments.size > 0 && !found_assoc do
-              if found_assoc = get_association(segments.join('_'), parent)
-                join = build_or_find_association(found_assoc.name, parent)
+              assoc, klass = unpolymorphize_association(segments.join('_'))
+              if found_assoc = get_association(assoc, parent)
+                join = build_or_find_association(found_assoc.name, parent, klass)
                 attribute = get_attribute(remainder.join('_'), join)
               end
             end
@@ -132,13 +133,14 @@ module Ransack
           join_dependency.graft(*stashed_association_joins)
         end
 
-        def build_or_find_association(name, parent = @base)
+        def build_or_find_association(name, parent = @base, klass = nil)
           found_association = @join_dependency.join_associations.detect do |assoc|
             assoc.reflection.name == name &&
-            assoc.parent == parent
+            assoc.parent == parent &&
+            (!klass || assoc.klass == klass)
           end
           unless found_association
-            @join_dependency.send(:build, name.to_sym, parent, Arel::Nodes::OuterJoin)
+            @join_dependency.send(:build_polymorphic, name.to_sym, parent, Arel::Nodes::OuterJoin, klass)
             found_association = @join_dependency.join_associations.last
             # Leverage the stashed association functionality in AR
             @object = @object.joins(found_association)

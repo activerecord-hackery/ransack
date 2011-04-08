@@ -22,6 +22,15 @@ module Ransack
         condition.value.should eq 'Ernie'
       end
 
+      it 'creates Conditions for polymorphic belongs_to association attributes' do
+        search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
+        condition = search.base[:notable_of_Person_type_name_eq]
+        condition.should be_a Nodes::Condition
+        condition.predicate.name.should eq 'eq'
+        condition.attributes.first.name.should eq 'notable_of_Person_type_name'
+        condition.value.should eq 'Ernie'
+      end
+
       it 'discards empty conditions' do
         search = Search.new(Person, :children_name_eq => '')
         condition = search.base[:children_name_eq]
@@ -82,6 +91,13 @@ module Ransack
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
         where.to_sql.should match /"children_people"\."name" = 'Ernie' OR "people"\."name" = 'Ernie'/
+      end
+
+      it 'evaluates polymorphic belongs_to association conditions contextually' do
+        search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
+        search.result.should be_an ActiveRecord::Relation
+        where = search.result.where_values.first
+        where.to_sql.should match /"people"."name" = 'Ernie'/
       end
 
       it 'evaluates nested conditions' do
