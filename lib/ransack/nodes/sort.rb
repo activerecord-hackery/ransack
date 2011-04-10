@@ -1,6 +1,8 @@
 module Ransack
   module Nodes
     class Sort < Node
+      include Bindable
+
       attr_reader :name, :attr, :dir
       i18n_word :asc, :desc
 
@@ -22,12 +24,12 @@ module Ransack
       end
 
       def valid?
-        @attr
+        attr
       end
 
       def name=(name)
         @name = name
-        @attr = contextualize(name) unless name.blank?
+        context.bind(self, name) unless name.blank?
       end
 
       def dir=(dir)

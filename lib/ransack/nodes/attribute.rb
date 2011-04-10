@@ -1,8 +1,12 @@
 module Ransack
   module Nodes
     class Attribute < Node
-      attr_reader :name, :attr
+      include Bindable
+
+      attr_reader :name
+
       delegate :blank?, :==, :to => :name
+      delegate :engine, :to => :context
 
       def initialize(context, name = nil)
         super(context)
@@ -11,11 +15,23 @@ module Ransack
 
       def name=(name)
         @name = name
-        @attr = contextualize(name) unless name.blank?
+        context.bind(self, name) unless name.blank?
       end
 
       def valid?
-        @attr
+        attr
+      end
+
+      def ransacker
+        klass._ransackers[attr_name] if klass.respond_to?(:_ransackers)
+      end
+
+      def type
+        if ransacker
+          return ransacker[:type]
+        else
+          context.type_for(attr)
+        end
       end
 
       def eql?(other)

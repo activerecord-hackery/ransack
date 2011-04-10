@@ -36,9 +36,10 @@ module Ransack
       @engine = @base.arel_engine
       @arel_visitor = Arel::Visitors.visitor_for @engine
       @default_table = Arel::Table.new(@base.table_name, :as => @base.aliased_table_name, :engine => @engine)
-      @attributes = Hash.new do |hash, key|
-        if attribute = get_attribute(key.to_s)
-          hash[key] = attribute
+      @bind_pairs = Hash.new do |hash, key|
+        parent, attr_name = get_parent_and_attribute_name(key.to_s)
+        if parent && attr_name
+          hash[key] = [parent, attr_name]
         end
       end
     end
@@ -46,7 +47,12 @@ module Ransack
     # Convert a string representing a chain of associations and an attribute
     # into the attribute itself
     def contextualize(str)
-      @attributes[str]
+      parent, attr_name = @bind_pairs[str]
+      table_for(parent)[attr_name]
+    end
+
+    def bind(object, str)
+      object.parent, object.attr_name = @bind_pairs[str]
     end
 
     def traverse(str, base = @base)

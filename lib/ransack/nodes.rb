@@ -1,3 +1,4 @@
+require 'ransack/nodes/bindable'
 require 'ransack/nodes/node'
 require 'ransack/nodes/attribute'
 require 'ransack/nodes/value'

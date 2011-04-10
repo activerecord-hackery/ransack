@@ -17,7 +17,7 @@ module Ransack
         def attribute_method?(str, klass = @klass)
           exists = false
 
-          if column = get_column(str, klass)
+          if get_ransacker(str, klass) || get_column(str, klass)
             exists = true
           elsif (segments = str.split(/_/)).size > 1
             remainder = []
@@ -33,19 +33,9 @@ module Ransack
           exists
         end
 
-        def type_for(attr)
-          return nil unless attr
-          name    = attr.name.to_s
-          table   = attr.relation.table_name
-
-          unless @engine.connection_pool.table_exists?(table)
-            raise "No table named #{table} exists"
-          end
-
-          @engine.connection_pool.columns_hash[table][name].type
+        def table_for(parent)
+          parent.table
         end
-
-        private
 
         def klassify(obj)
           if Class === obj && ::ActiveRecord::Base > obj
@@ -59,11 +49,26 @@ module Ransack
           end
         end
 
-        def get_attribute(str, parent = @base)
-          attribute = nil
+        def type_for(attr)
+          return nil unless attr
+          name    = attr.name.to_s
+          table   = attr.relation.table_name
 
-          if column = get_column(str, parent)
-            attribute = parent.table[str]
+          unless @engine.connection_pool.table_exists?(table)
+            raise "No table named #{table} exists"
+          end
+
+          @engine.connection_pool.columns_hash[table][name].type
+        end
+
+
+        private
+
+        def get_parent_and_attribute_name(str, parent = @base)
+          attr_name = nil
+
+          if get_ransacker(str, parent) || get_column(str, parent)
+            attr_name = str
           elsif (segments = str.split(/_/)).size > 1
             remainder = []
             found_assoc = nil
@@ -71,12 +76,17 @@ module Ransack
               assoc, klass = unpolymorphize_association(segments.join('_'))
               if found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(found_assoc.name, parent, klass)
-                attribute = get_attribute(remainder.join('_'), join)
+                parent, attr_name = get_parent_and_attribute_name(remainder.join('_'), join)
               end
             end
           end
 
-          attribute
+          [parent, attr_name]
+        end
+
+        def get_ransacker(str, parent = @base)
+          klass = klassify(parent)
+          klass._ransackers[str] if klass.respond_to?(:_ransackers)
         end
 
         def get_column(str, parent = @base)

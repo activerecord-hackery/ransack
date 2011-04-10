@@ -191,7 +191,7 @@ module Ransack
         if predicate && predicate.type
           predicate.type
         elsif attributes.size > 0
-          @context.type_for(attributes.first.attr)
+          attributes.first.type
         end
       end
 
