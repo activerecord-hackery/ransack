@@ -27,11 +27,11 @@ module Ransack
 
     def format(vals)
       if formatter
-        vals.select {|v| validator ? validator.call(v.value_before_cast) : !v.blank?}.
-             map {|v| formatter.call(v.value)}
+        vals.select {|v| validator ? validator.call(v.value) : !v.blank?}.
+             map {|v| formatter.call(v.cast_to_type(type))}
       else
-        vals.select {|v| validator ? validator.call(v.value_before_cast) : !v.blank?}.
-             map {|v| v.value}
+        vals.select {|v| validator ? validator.call(v.value) : !v.blank?}.
+             map {|v| v.cast_to_type(type)}
       end
     end
 
@@ -47,7 +47,7 @@ module Ransack
 
     def validate(vals)
       if validator
-        vals.select {|v| validator.call(v.value_before_cast)}.any?
+        vals.select {|v| validator.call(v.value)}.any?
       else
         vals.select {|v| !v.blank?}.any?
       end

@@ -26,9 +26,11 @@ module Ransack
 
         describe '#ransacker' do
           it 'creates ransack attributes' do
-            ancestors = Person.singleton_class.ancestors.size
-            Person.ransacker :backwards_name
+            Person.ransacker :backwards_name do |parent|
+              parent.table[:backwards_name]
+            end
             s = Person.search(:backwards_name_eq => 'blah')
+            s.result.to_sql.should match /"people"."backwards_name" = 'blah'/
           end
         end
 

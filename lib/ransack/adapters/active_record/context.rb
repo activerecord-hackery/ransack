@@ -61,7 +61,6 @@ module Ransack
           @engine.connection_pool.columns_hash[table][name].type
         end
 
-
         private
 
         def get_parent_and_attribute_name(str, parent = @base)

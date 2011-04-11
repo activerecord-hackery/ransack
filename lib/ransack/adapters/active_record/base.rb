@@ -18,7 +18,8 @@ module Ransack
           end
 
           opts[:type] ||= :string
-          opts[:call] ||= block || lambda {|parent| parent.table[name]}
+          opts[:args] ||= [:parent]
+          opts[:callable] ||= block || (method(name) if method_defined?(name)) || proc {|parent| parent.table[name]}
 
           _ransackers[name.to_s] = opts
         end

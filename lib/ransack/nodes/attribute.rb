@@ -22,16 +22,20 @@ module Ransack
         attr
       end
 
-      def ransacker
-        klass._ransackers[attr_name] if klass.respond_to?(:_ransackers)
-      end
-
       def type
         if ransacker
           return ransacker[:type]
         else
           context.type_for(attr)
         end
+      end
+
+      def apply_predicate_with_values(predicate, values)
+        attr.send(predicate.arel_predicate, predicate.format(values))
+      end
+
+      def cast_value(value)
+        value.cast_to_type(type)
       end
 
       def eql?(other)
@@ -47,6 +51,7 @@ module Ransack
       def persisted?
         false
       end
+
     end
   end
 end

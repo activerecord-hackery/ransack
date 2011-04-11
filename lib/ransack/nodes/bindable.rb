@@ -5,7 +5,11 @@ module Ransack
       attr_accessor :parent, :attr_name
 
       def attr
-        @attr ||= context.table_for(parent)[attr_name]
+        @attr ||= ransacker ? ransacker[:callable].call(parent) : context.table_for(parent)[attr_name]
+      end
+
+      def ransacker
+        klass._ransackers[attr_name] if klass.respond_to?(:_ransackers)
       end
 
       def klass
