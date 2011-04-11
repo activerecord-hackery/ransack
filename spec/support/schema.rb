@@ -17,6 +17,10 @@ class Person < ActiveRecord::Base
   ransacker :reversed_name, :formatter => proc {|v| v.reverse} do |parent|
     parent.table[:name]
   end
+
+  ransacker :doubled_name do |parent|
+    Arel::Nodes::InfixOperation.new('||', parent.table[:name], parent.table[:name])
+  end
 end
 
 class Article < ActiveRecord::Base

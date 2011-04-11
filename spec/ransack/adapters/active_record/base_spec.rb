@@ -35,6 +35,11 @@ module Ransack
             s = Person.search(:children_reversed_name_eq => 'htimS cirA')
             s.result.to_sql.should match /"children_people"."name" = 'Aric Smith'/
           end
+
+          it 'allows an "attribute" to be an InfixOperation' do
+            s = Person.search(:doubled_name_eq => 'Aric SmithAric Smith')
+            s.result.first.should eq Person.find_by_name('Aric Smith')
+          end
         end
 
       end
