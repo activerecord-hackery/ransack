@@ -26,12 +26,14 @@ module Ransack
 
         describe '#ransacker' do
           it 'creates ransack attributes' do
-            Person.ransacker :reversed_name, :formatter => proc {|v| v.reverse} do |parent|
-              parent.table[:name]
-            end
             s = Person.search(:reversed_name_eq => 'htimS cirA')
             s.result.should have(1).person
             s.result.first.should eq Person.find_by_name('Aric Smith')
+          end
+
+          it 'allows access of attributes through associations' do
+            s = Person.search(:children_reversed_name_eq => 'htimS cirA')
+            s.result.to_sql.should match /"children_people"."name" = 'Aric Smith'/
           end
         end
 

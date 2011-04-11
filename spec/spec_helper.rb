@@ -1,6 +1,7 @@
 require 'machinist/active_record'
 require 'sham'
 require 'faker'
+require 'ransack'
 
 Time.zone = 'Eastern Time (US & Canada)'
 
@@ -24,5 +25,3 @@ RSpec.configure do |config|
 
   config.include RansackHelper
 end
-
-require 'ransack'

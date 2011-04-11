@@ -13,6 +13,10 @@ class Person < ActiveRecord::Base
   has_many   :authored_article_comments, :through => :articles,
              :class_name => 'Comment', :foreign_key => :person_id
   has_many   :notes, :as => :notable
+
+  ransacker :reversed_name, :formatter => proc {|v| v.reverse} do |parent|
+    parent.table[:name]
+  end
 end
 
 class Article < ActiveRecord::Base
