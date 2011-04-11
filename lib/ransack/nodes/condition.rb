@@ -166,20 +166,36 @@ module Ransack
       end
       alias :p :predicate_name
 
-      def apply_predicate
-        if attributes.size > 1
+      def arel_predicate
+        predicates = attributes.map do |attr|
+          attr.attr.send(predicate.arel_predicate, formatted_values_for_attribute(attr))
+        end
+
+        if predicates.size > 1
           case combinator
           when 'and'
-            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(
-              attributes.map {|a| a.apply_predicate_with_values(predicate, values)}
-            ))
+            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
           when 'or'
-            attributes.inject(attributes.shift.apply_predicate_with_values(predicate, values)) do |memo, a|
-              memo.or(a.apply_predicate_with_values(predicate, values))
-            end
+            predicates.inject(&:or)
           end
         else
-          attributes.first.apply_predicate_with_values(predicate, values)
+          predicates.first
+        end
+      end
+
+      def validated_values
+        values.select {|v| predicate.validator ? predicate.validator.call(v.value) : v.present?}
+      end
+
+      def casted_values_for_attribute(attr)
+        validated_values.map {|v| v.cast_to_type(predicate.type || attr.type)}
+      end
+
+      def formatted_values_for_attribute(attr)
+        casted_values_for_attribute(attr).map do |val|
+          val = attr.ransacker[:formatter].call(val) if attr.ransacker && attr.ransacker[:formatter]
+          val = predicate.formatter.call(val) if predicate.formatter
+          val
         end
       end
 

@@ -25,16 +25,6 @@ module Ransack
       @compound = opts[:compound]
     end
 
-    def format(vals)
-      if formatter
-        vals.select {|v| validator ? validator.call(v.value) : !v.blank?}.
-             map {|v| formatter.call(v.cast_to_type(type))}
-      else
-        vals.select {|v| validator ? validator.call(v.value) : !v.blank?}.
-             map {|v| v.cast_to_type(type)}
-      end
-    end
-
     def eql?(other)
       self.class == other.class &&
       self.name == other.name

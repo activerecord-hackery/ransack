@@ -3,7 +3,7 @@ module Ransack
     class Sort < Node
       include Bindable
 
-      attr_reader :name, :attr, :dir
+      attr_reader :name, :dir
       i18n_word :asc, :desc
 
       class << self

@@ -10,7 +10,8 @@ module Ransack
         JoinPart = JoinDependency::JoinPart
 
         def evaluate(search, opts = {})
-          relation = @object.where(accept(search.base)).order(accept(search.sorts))
+          viz = Visitor.new
+          relation = @object.where(viz.accept(search.base)).order(viz.accept(search.sorts))
           opts[:distinct] ? relation.group(@klass.arel_table[@klass.primary_key]) : relation
         end
 

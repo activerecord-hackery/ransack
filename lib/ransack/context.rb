@@ -1,3 +1,5 @@
+require 'ransack/visitor'
+
 module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
@@ -103,65 +105,6 @@ module Ransack
 
     def searchable_columns(str = '')
       traverse(str).column_names
-    end
-
-    def accept(object)
-      visit(object)
-    end
-
-    def can_accept?(object)
-      respond_to? DISPATCH[object.class]
-    end
-
-    def visit_Array(object)
-      object.map {|o| accept(o)}.compact
-    end
-
-    def visit_Ransack_Nodes_Condition(object)
-      object.apply_predicate if object.valid?
-    end
-
-    def visit_Ransack_Nodes_And(object)
-      nodes = object.values.map {|o| accept(o)}.compact
-      return nil unless nodes.size > 0
-
-      if nodes.size > 1
-        Arel::Nodes::Grouping.new(Arel::Nodes::And.new(nodes))
-      else
-        nodes.first
-      end
-    end
-
-    def visit_Ransack_Nodes_Sort(object)
-      object.attr.send(object.dir) if object.valid?
-    end
-
-    def visit_Ransack_Nodes_Or(object)
-      nodes = object.values.map {|o| accept(o)}.compact
-      return nil unless nodes.size > 0
-
-      if nodes.size > 1
-        nodes.inject(&:or)
-      else
-        nodes.first
-      end
-    end
-
-    def quoted?(object)
-      case object
-      when Arel::Nodes::SqlLiteral, Bignum, Fixnum
-        false
-      else
-        true
-      end
-    end
-
-    def visit(object)
-      send(DISPATCH[object.class], object)
-    end
-
-    DISPATCH = Hash.new do |hash, klass|
-      hash[klass] = "visit_#{klass.name.gsub('::', '_')}"
     end
 
   end

@@ -2,7 +2,7 @@ module Ransack
   module Nodes
     class Value < Node
       attr_accessor :value
-      delegate :blank?, :to => :value
+      delegate :blank?, :present?, :to => :value
 
       def initialize(context, value = nil)
         super(context)
@@ -53,7 +53,6 @@ module Ransack
          end
        end
 
-       # FIXME: doesn't seem to be casting, even with Time.zone.local
        def cast_to_time(val)
          if val.is_a?(Array)
            Time.zone.local(*val) rescue nil
@@ -61,7 +60,7 @@ module Ransack
            unless val.acts_like?(:time)
              val = val.is_a?(String) ? Time.zone.parse(val) : val.to_time rescue val
            end
-           val.in_time_zone
+           val.in_time_zone rescue nil
          end
        end
 

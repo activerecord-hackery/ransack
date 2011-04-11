@@ -5,7 +5,7 @@ module Ransack
 
       attr_reader :name
 
-      delegate :blank?, :==, :to => :name
+      delegate :blank?, :present?, :==, :to => :name
       delegate :engine, :to => :context
 
       def initialize(context, name = nil)
@@ -28,10 +28,6 @@ module Ransack
         else
           context.type_for(attr)
         end
-      end
-
-      def apply_predicate_with_values(predicate, values)
-        attr.send(predicate.arel_predicate, predicate.format(values))
       end
 
       def cast_value(value)
