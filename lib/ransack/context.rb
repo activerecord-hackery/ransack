@@ -3,6 +3,7 @@ require 'ransack/visitor'
 module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
+    attr_accessor :auth_object
 
     class << self
 
@@ -103,8 +104,8 @@ module Ransack
       end
     end
 
-    def searchable_columns(str = '')
-      traverse(str).column_names
+    def searchable_attributes(str = '')
+      traverse(str).ransackable_attributes(auth_object)
     end
 
   end

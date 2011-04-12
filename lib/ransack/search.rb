@@ -13,9 +13,10 @@ module Ransack
              :build_and, :build_or, :build_condition,
              :translate, :to => :base
 
-    def initialize(object, params = {})
+    def initialize(object, params = {}, options = {})
       params ||= {}
       @context = Context.for(object)
+      @context.auth_object = options[:auth_object]
       @base = Nodes::And.new(@context)
       build(params.with_indifferent_access)
     end

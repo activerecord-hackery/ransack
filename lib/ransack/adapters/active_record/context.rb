@@ -18,7 +18,7 @@ module Ransack
         def attribute_method?(str, klass = @klass)
           exists = false
 
-          if get_ransacker(str, klass) || get_column(str, klass)
+          if ransackable_attribute?(str, klass)
             exists = true
           elsif (segments = str.split(/_/)).size > 1
             remainder = []
@@ -67,14 +67,15 @@ module Ransack
         def get_parent_and_attribute_name(str, parent = @base)
           attr_name = nil
 
-          if get_ransacker(str, parent) || get_column(str, parent)
+          if ransackable_attribute?(str, klassify(parent))
             attr_name = str
           elsif (segments = str.split(/_/)).size > 1
             remainder = []
             found_assoc = nil
             while remainder.unshift(segments.pop) && segments.size > 0 && !found_assoc do
               assoc, klass = unpolymorphize_association(segments.join('_'))
-              if found_assoc = get_association(assoc, parent)
+              if ransackable_association?(assoc, klassify(parent))
+                found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(found_assoc.name, parent, klass)
                 parent, attr_name = get_parent_and_attribute_name(remainder.join('_'), join)
               end
@@ -84,13 +85,12 @@ module Ransack
           [parent, attr_name]
         end
 
-        def get_ransacker(str, parent = @base)
-          klass = klassify(parent)
-          klass._ransackers[str] if klass.respond_to?(:_ransackers)
+        def ransackable_attribute?(str, klass)
+          klass.ransackable_attributes(auth_object).include? str
         end
 
-        def get_column(str, parent = @base)
-          klassify(parent).columns_hash[str]
+        def ransackable_association?(str, klass)
+          klass.ransackable_associations(auth_object).include? str
         end
 
         def get_association(str, parent = @base)

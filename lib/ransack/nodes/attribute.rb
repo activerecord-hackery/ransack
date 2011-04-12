@@ -24,7 +24,7 @@ module Ransack
 
       def type
         if ransacker
-          return ransacker[:type]
+          return ransacker.type
         else
           context.type_for(attr)
         end

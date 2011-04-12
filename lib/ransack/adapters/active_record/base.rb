@@ -5,23 +5,27 @@ module Ransack
 
         def self.extended(base)
           alias :search :ransack unless base.method_defined? :search
-        end
-
-        def ransack(params = {})
-          Search.new(self, params)
-        end
-
-        def ransacker(name, opts = {}, &block)
-          unless method_defined?(:_ransackers)
+          base.instance_eval do
             class_attribute :_ransackers
             self._ransackers ||= {}
           end
+        end
 
-          opts[:type] ||= :string
-          opts[:args] ||= [:parent]
-          opts[:callable] ||= block || (method(name) if method_defined?(name)) || proc {|parent| parent.table[name]}
+        def ransack(params = {}, options = {})
+          Search.new(self, params, options)
+        end
 
-          _ransackers[name.to_s] = opts
+        def ransacker(name, opts = {}, &block)
+          Ransacker.new(self, name, opts, &block)
+        end
+
+        # TODO: Let's actually do some authorization. Whitelist-only.
+        def ransackable_attributes(auth_object)
+          column_names + _ransackers.keys
+        end
+
+        def ransackable_associations(auth_object)
+          reflect_on_all_associations.map {|a| a.name.to_s}
         end
 
       end

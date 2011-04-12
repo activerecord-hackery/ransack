@@ -193,7 +193,7 @@ module Ransack
 
       def formatted_values_for_attribute(attr)
         casted_values_for_attribute(attr).map do |val|
-          val = attr.ransacker[:formatter].call(val) if attr.ransacker && attr.ransacker[:formatter]
+          val = attr.ransacker.formatter.call(val) if attr.ransacker && attr.ransacker.formatter
           val = predicate.formatter.call(val) if predicate.formatter
           val
         end

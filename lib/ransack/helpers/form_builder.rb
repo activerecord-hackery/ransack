@@ -25,7 +25,7 @@ module Ransack
           collection = bases.map do |base|
             [
               Translate.association(base, :context => object.context),
-              object.context.searchable_columns(base).map do |c|
+              object.context.searchable_attributes(base).map do |c|
                 [
                   attr_from_base_and_column(base, c),
                   Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
@@ -38,7 +38,7 @@ module Ransack
             objectify_options(options), @default_options.merge(html_options)
           )
         else
-          collection = object.context.searchable_columns(bases.first).map do |c|
+          collection = object.context.searchable_attributes(bases.first).map do |c|
             [
               attr_from_base_and_column(bases.first, c),
               Translate.attribute(attr_from_base_and_column(bases.first, c), :context => object.context)
@@ -59,7 +59,7 @@ module Ransack
           collection = bases.map do |base|
             [
               Translate.association(base, :context => object.context),
-              object.context.searchable_columns(base).map do |c|
+              object.context.searchable_attributes(base).map do |c|
                 [
                   attr_from_base_and_column(base, c),
                   Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
@@ -75,7 +75,7 @@ module Ransack
             objectify_options(options), @default_options.merge(html_options)
           )
         else
-          collection = object.context.searchable_columns(bases.first).map do |c|
+          collection = object.context.searchable_attributes(bases.first).map do |c|
             [
               attr_from_base_and_column(bases.first, c),
               Translate.attribute(attr_from_base_and_column(bases.first, c), :context => object.context)
