@@ -12,7 +12,7 @@ module Ransack
         def evaluate(search, opts = {})
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base)).order(viz.accept(search.sorts))
-          opts[:distinct] ? relation.group(@klass.arel_table[@klass.primary_key]) : relation
+          opts[:distinct] ? relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
         end
 
         def attribute_method?(str, klass = @klass)
@@ -98,7 +98,7 @@ module Ransack
         end
 
         def join_dependency(relation)
-          if relation.respond_to?(:join_dependency) # MetaWhere will enable this
+          if relation.respond_to?(:join_dependency) # Squeel will enable this
             relation.join_dependency
           else
             build_join_dependency(relation)
@@ -112,7 +112,7 @@ module Ransack
               'string_join'
             when Hash, Symbol, Array
               'association_join'
-            when ActiveRecord::Associations::JoinDependency::JoinAssociation
+            when ::ActiveRecord::Associations::JoinDependency::JoinAssociation
               'stashed_join'
             when Arel::Nodes::Join
               'join_node'

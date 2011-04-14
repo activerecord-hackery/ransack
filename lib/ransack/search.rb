@@ -22,7 +22,7 @@ module Ransack
     end
 
     def result(opts = {})
-      @result ||= @context.evaluate(self, opts)
+      @context.evaluate(self, opts)
     end
 
     def build(params)

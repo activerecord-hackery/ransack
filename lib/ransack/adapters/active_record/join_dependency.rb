@@ -18,11 +18,7 @@ module Ransack
         def graft_with_ransack(*associations)
           associations.each do |association|
             join_associations.detect {|a| association == a} ||
-            (
-              association.options[:polymorphic] ?
-              build_polymorphic(association.reflection.name, association.find_parent_in(self) || join_base, association.join_type, association.reflection.klass) :
-              build(association.reflection.name, association.find_parent_in(self) || join_base, association.join_type)
-            )
+              build_polymorphic(association.reflection.name, association.find_parent_in(self) || join_base, association.join_type, association.reflection.klass)
           end
           self
         end

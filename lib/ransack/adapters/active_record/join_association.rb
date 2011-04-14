@@ -26,7 +26,7 @@ module Ransack
         end
 
         def ==(other)
-          super && reflection.klass == other.reflection.klass
+          super && active_record == other.active_record
         end
 
         # This is a temporary hack. Jon's going to refactor this in AR to
