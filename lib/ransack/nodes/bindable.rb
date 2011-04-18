@@ -16,6 +16,10 @@ module Ransack
         @klass ||= context.klassify(parent)
       end
 
+      def bound?
+        attr_name.present? && parent.present?
+      end
+
       def reset_binding!
         @parent = @attr_name = @attr = @klass = nil
       end

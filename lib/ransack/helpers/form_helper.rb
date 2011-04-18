@@ -16,6 +16,7 @@ module Ransack
           :id => options[:as] ? "#{options[:as]}_search" : "#{search.klass.to_s.underscore}_search",
           :method => :get
         }
+        options[:as] ||= 'q'
         options[:html].reverse_merge!(html_options)
         options[:builder] ||= FormBuilder
 

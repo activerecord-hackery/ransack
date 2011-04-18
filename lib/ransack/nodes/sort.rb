@@ -24,7 +24,7 @@ module Ransack
       end
 
       def valid?
-        attr
+        bound? && attr
       end
 
       def name=(name)
