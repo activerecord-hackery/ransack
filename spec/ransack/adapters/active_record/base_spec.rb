@@ -39,7 +39,7 @@ module Ransack
           it 'allows an "attribute" to be an InfixOperation' do
             s = Person.search(:doubled_name_eq => 'Aric SmithAric Smith')
             s.result.first.should eq Person.find_by_name('Aric Smith')
-          end
+          end if defined?(Arel::Nodes::InfixOperation)
         end
 
       end

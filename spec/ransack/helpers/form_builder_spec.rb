@@ -20,6 +20,10 @@ module Ransack
           include router.url_helpers
         end
 
+        @controller.view_context_class.class_eval do
+          include router.url_helpers
+        end
+
         @s = Person.search
         @controller.view_context.search_form_for @s do |f|
           @f = f
