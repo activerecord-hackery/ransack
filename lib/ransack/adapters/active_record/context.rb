@@ -51,9 +51,9 @@ module Ransack
         end
 
         def type_for(attr)
-          return nil unless attr
-          name    = attr.name.to_s
-          table   = attr.relation.table_name
+          return nil unless attr && attr.valid?
+          name    = attr.arel_attribute.name.to_s
+          table   = attr.arel_attribute.relation.table_name
 
           unless @engine.connection_pool.table_exists?(table)
             raise "No table named #{table} exists"

@@ -26,7 +26,7 @@ module Ransack
         if ransacker
           return ransacker.type
         else
-          context.type_for(attr)
+          context.type_for(self)
         end
       end
 

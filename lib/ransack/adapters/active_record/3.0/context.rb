@@ -53,16 +53,8 @@ module Ransack
         end
 
         def type_for(attr)
-          return nil unless attr
-          name    = attr.name.to_s
-          table   = attr.relation.name
-
-          unless @engine.connection.table_exists?(table)
-            raise "No table named #{table} exists"
-          end
-
-          # TODO: optimize
-          @engine.connection.columns(table).detect {|c| c.name == name}.type
+          return nil unless attr && attr.valid?
+          klassify(attr.parent).columns_hash[attr.arel_attribute.name.to_s].type
         end
 
         private
