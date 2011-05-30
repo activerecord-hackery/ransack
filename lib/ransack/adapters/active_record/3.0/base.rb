@@ -19,7 +19,6 @@ module Ransack
           Ransacker.new(self, name, opts, &block)
         end
 
-        # TODO: Let's actually do some authorization. Whitelist-only.
         def ransackable_attributes(auth_object)
           column_names + _ransackers.keys
         end

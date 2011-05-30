@@ -1,11 +1,15 @@
 source "http://rubygems.org"
 gemspec
 
-gem 'arel', :git => 'git://github.com/rails/arel.git'
-gem 'rack', :git => 'git://github.com/rack/rack.git'
-
-git 'git://github.com/rails/rails.git' do
+if ENV['RAILS_VERSION'] == 'release'
   gem 'activesupport'
   gem 'activerecord'
   gem 'actionpack'
+else
+  gem 'arel',  :git => 'git://github.com/rails/arel.git'
+  git 'git://github.com/rails/rails.git' do
+    gem 'activesupport'
+    gem 'activerecord'
+    gem 'actionpack'
+  end
 end
