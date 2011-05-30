@@ -2,6 +2,8 @@ require 'ransack/configuration'
 
 module Ransack
   extend Configuration
+
+  class UntraversableAssociationError < StandardError; end;
 end
 
 Ransack.configure do |config|

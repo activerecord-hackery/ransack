@@ -65,12 +65,14 @@ module Ransack
         association_parts = []
         found_assoc = nil
         while !found_assoc && segments.size > 0 && association_parts << segments.shift do
+          # Strip the _of_Model_type text from the association name, but hold
+          # onto it in klass, for use as the next base
           assoc, klass = unpolymorphize_association(association_parts.join('_'))
           if found_assoc = get_association(assoc, base)
             base = traverse(segments.join('_'), klass || found_assoc.klass)
           end
         end
-        raise ArgumentError, "No association matches #{str}" unless found_assoc
+        raise UntraversableAssociationError, "No association matches #{str}" unless found_assoc
       end
 
       klassify(base)
@@ -104,8 +106,20 @@ module Ransack
       end
     end
 
+    def ransackable_attribute?(str, klass)
+      klass.ransackable_attributes(auth_object).include? str
+    end
+
+    def ransackable_association?(str, klass)
+      klass.ransackable_associations(auth_object).include? str
+    end
+
     def searchable_attributes(str = '')
       traverse(str).ransackable_attributes(auth_object)
+    end
+
+    def searchable_associations(str = '')
+      traverse(str).ransackable_associations(auth_object)
     end
 
   end

@@ -74,8 +74,7 @@ module Ransack
             found_assoc = nil
             while remainder.unshift(segments.pop) && segments.size > 0 && !found_assoc do
               assoc, klass = unpolymorphize_association(segments.join('_'))
-              if ransackable_association?(assoc, klassify(parent))
-                found_assoc = get_association(assoc, parent)
+              if found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(found_assoc.name, parent, klass)
                 parent, attr_name = get_parent_and_attribute_name(remainder.join('_'), join)
               end
@@ -85,16 +84,10 @@ module Ransack
           [parent, attr_name]
         end
 
-        def ransackable_attribute?(str, klass)
-          klass.ransackable_attributes(auth_object).include? str
-        end
-
-        def ransackable_association?(str, klass)
-          klass.ransackable_associations(auth_object).include? str
-        end
-
         def get_association(str, parent = @base)
-          klassify(parent).reflect_on_all_associations.detect {|a| a.name.to_s == str}
+          klass = klassify parent
+          ransackable_association?(str, klass) &&
+          klass.reflect_on_all_associations.detect {|a| a.name.to_s == str}
         end
 
         def join_dependency(relation)

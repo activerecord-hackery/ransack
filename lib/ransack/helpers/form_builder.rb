@@ -22,19 +22,8 @@ module Ransack
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
-          collection = bases.map do |base|
-            [
-              Translate.association(base, :context => object.context),
-              object.context.searchable_attributes(base).map do |c|
-                [
-                  attr_from_base_and_column(base, c),
-                  Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
-                ]
-              end
-            ]
-          end
           @template.grouped_collection_select(
-            @object_name, :name, collection, :last, :first, :first, :last,
+            @object_name, :name, attribute_collection_for_bases(bases), :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         else
@@ -55,20 +44,9 @@ module Ransack
         raise ArgumentError, "sort_select must be called inside a search FormBuilder!" unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
-        if bases.any?
-          collection = bases.map do |base|
-            [
-              Translate.association(base, :context => object.context),
-              object.context.searchable_attributes(base).map do |c|
-                [
-                  attr_from_base_and_column(base, c),
-                  Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
-                ]
-              end
-            ]
-          end
+        if bases.size > 1
           @template.grouped_collection_select(
-            @object_name, :name, collection, :last, :first, :first, :last,
+            @object_name, :name, attribute_collection_for_bases(bases), :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           ) + @template.collection_select(
             @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
@@ -159,7 +137,7 @@ module Ransack
           obj.map do |key, value|
             case value
             when Array, Hash
-              bases_array(value, key.to_s)
+              association_array(value, key.to_s)
             else
               [key.to_s, [key, value].join('_')]
             end
@@ -171,6 +149,24 @@ module Ransack
 
       def attr_from_base_and_column(base, column)
         [base, column].reject {|v| v.blank?}.join('_')
+      end
+
+      def attribute_collection_for_bases(bases)
+        bases.map do |base|
+          begin
+          [
+            Translate.association(base, :context => object.context),
+            object.context.searchable_attributes(base).map do |c|
+              [
+                attr_from_base_and_column(base, c),
+                Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
+              ]
+            end
+          ]
+          rescue UntraversableAssociationError => e
+            nil
+          end
+        end.compact
       end
 
     end
