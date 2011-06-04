@@ -28,7 +28,7 @@ module Ransack
 
         def extract_attributes_and_predicate(key)
           str = key.dup
-          name = Ransack::Configuration.predicate_keys.detect {|p| str.sub!(/_#{p}$/, '')}
+          name = Ransack.predicate_keys.detect {|p| str.sub!(/_#{p}$/, '')}
           predicate = Predicate.named(name)
           raise ArgumentError, "No valid predicate for #{key}" unless predicate
           attributes = str.split(/_and_|_or_/)

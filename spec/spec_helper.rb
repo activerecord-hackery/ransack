@@ -4,6 +4,7 @@ require 'faker'
 require 'ransack'
 
 Time.zone = 'Eastern Time (US & Canada)'
+I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 
 Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)].each do |f|
   require f

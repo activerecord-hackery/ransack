@@ -19,12 +19,11 @@ module Ransack
           Ransacker.new(self, name, opts, &block)
         end
 
-        # TODO: Let's actually do some authorization. Whitelist-only.
-        def ransackable_attributes(auth_object)
+        def ransackable_attributes(auth_object = nil)
           column_names + _ransackers.keys
         end
 
-        def ransackable_associations(auth_object)
+        def ransackable_associations(auth_object = nil)
           reflect_on_all_associations.map {|a| a.name.to_s}
         end
 

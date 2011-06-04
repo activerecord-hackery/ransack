@@ -7,7 +7,7 @@ module Ransack
     mattr_accessor :predicates
     self.predicates = {}
 
-    def self.predicate_keys
+    def predicate_keys
       predicates.keys.sort {|a,b| b.length <=> a.length}
     end
 

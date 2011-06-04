@@ -198,7 +198,7 @@ module Ransack
 
       def strip_predicate_and_index(str)
         string = str.split(/\(/).first
-        Ransack::Configuration.predicate_keys.detect {|p| string.sub!(/_#{p}$/, '')}
+        Ransack.predicate_keys.detect {|p| string.sub!(/_#{p}$/, '')}
         string
       end
 
