@@ -4,6 +4,8 @@ en:
     predicate: "predicate"
     and: "and"
     or: "or"
+    any: "any"
+    all: "all"
     combinator: "combinator"
     attribute: "attribute"
     value: "value"

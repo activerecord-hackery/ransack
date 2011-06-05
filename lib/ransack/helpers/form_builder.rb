@@ -128,14 +128,21 @@ module Ransack
       end
 
       def combinator_select(options = {}, html_options = {})
-        choices = Nodes::Condition === object ? [:or, :and] : [:and, :or]
         @template.collection_select(
-          @object_name, :m, choices.map {|o| [o.to_s, Translate.word(o)]}, :first, :last,
+          @object_name, :m, combinator_choices, :first, :last,
           objectify_options(options), @default_options.merge(html_options)
         )
       end
 
       private
+
+      def combinator_choices
+        if Nodes::Condition === object
+          [['or', Translate.word(:any)], ['and', Translate.word(:all)]]
+        else
+          [['and', Translate.word(:all)], ['or', Translate.word(:any)]]
+        end
+      end
 
       def association_array(obj, prefix = nil)
         ([prefix] + case obj
