@@ -4,15 +4,11 @@ module Ransack
 
     class << self
       def named(name)
-        Configuration.predicates[name.to_s]
+        Ransack.predicates[name.to_s]
       end
 
       def for_attribute_name(attribute_name)
-        self.named(Configuration.predicate_keys.detect {|p| attribute_name.to_s.match(/_#{p}$/)})
-      end
-
-      def collection
-        Configuration.predicates.map {|k, v| [k, Translate.predicate(k)]}
+        self.named(Ransack.predicate_keys.detect {|p| attribute_name.to_s.match(/_#{p}$/)})
       end
     end
 

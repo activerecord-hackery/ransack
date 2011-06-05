@@ -9,15 +9,15 @@ module Ransack
     attr_reader :base, :context
 
     delegate :object, :klass, :to => :context
-    delegate :new_and, :new_or, :new_condition,
-             :build_and, :build_or, :build_condition,
+    delegate :new_grouping, :new_condition,
+             :build_grouping, :build_condition,
              :translate, :to => :base
 
     def initialize(object, params = {}, options = {})
       params ||= {}
       @context = Context.for(object)
       @context.auth_object = options[:auth_object]
-      @base = Nodes::And.new(@context)
+      @base = Nodes::Grouping.new(@context, 'and')
       build(params.with_indifferent_access)
     end
 

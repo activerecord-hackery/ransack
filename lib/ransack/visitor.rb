@@ -17,7 +17,11 @@ module Ransack
       object.arel_predicate if object.valid?
     end
 
-    def visit_Ransack_Nodes_And(object)
+    def visit_Ransack_Nodes_Grouping(object)
+      object.combinator == 'or' ? visit_or(object) : visit_and(object)
+    end
+
+    def visit_and(object)
       nodes = object.values.map {|o| accept(o)}.compact
       return nil unless nodes.size > 0
 
@@ -28,11 +32,7 @@ module Ransack
       end
     end
 
-    def visit_Ransack_Nodes_Sort(object)
-      object.attr.send(object.dir) if object.valid?
-    end
-
-    def visit_Ransack_Nodes_Or(object)
+    def visit_or(object)
       nodes = object.values.map {|o| accept(o)}.compact
       return nil unless nodes.size > 0
 
@@ -41,6 +41,10 @@ module Ransack
       else
         nodes.first
       end
+    end
+
+    def visit_Ransack_Nodes_Sort(object)
+      object.attr.send(object.dir) if object.valid?
     end
 
     def quoted?(object)

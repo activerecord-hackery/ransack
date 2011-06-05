@@ -38,40 +38,82 @@ module Ransack
         end
       end
 
-      it 'localizes labels' do
-        html = @f.label :name_cont
-        html.should match /Full Name contains/
+      describe '#label' do
+
+        it 'localizes attribute names' do
+          html = @f.label :name_cont
+          html.should match /Full Name contains/
+        end
+
       end
 
-      it 'localizes submit' do
-        html = @f.submit
-        html.should match /"Search"/
+      describe '#submit' do
+
+        it 'localizes :search when no default value given' do
+          html = @f.submit
+          html.should match /"Search"/
+        end
+
       end
 
-      it 'returns ransackable attributes for attribute_select' do
-        html = @f.attribute_select
-        html.split(/\n/).should have(Person.ransackable_attributes.size + 1).lines
-        Person.ransackable_attributes.each do |attribute|
-          html.should match /<option value="#{attribute}">/
+      describe '#attribute_select' do
+
+        it 'returns ransackable attributes' do
+          html = @f.attribute_select
+          html.split(/\n/).should have(Person.ransackable_attributes.size + 1).lines
+          Person.ransackable_attributes.each do |attribute|
+            html.should match /<option value="#{attribute}">/
+          end
+        end
+
+        it 'returns ransackable attributes for associations with :associations' do
+          attributes = Person.ransackable_attributes + Article.ransackable_attributes.map {|a| "articles_#{a}"}
+          html = @f.attribute_select :associations => ['articles']
+          html.split(/\n/).should have(attributes.size).lines
+          attributes.each do |attribute|
+            html.should match /<option value="#{attribute}">/
+          end
+        end
+
+        it 'returns option groups for base and associations with :associations' do
+          html = @f.attribute_select :associations => ['articles']
+          [Person, Article].each do |model|
+            html.should match /<optgroup label="#{model}">/
+          end
+        end
+
+      end
+
+      describe '#predicate_select' do
+
+        it 'returns predicates with predicate_select' do
+          html = @f.predicate_select
+          Ransack.predicate_keys.each do |key|
+            html.should match /<option value="#{key}">/
+          end
+        end
+
+        it 'filters predicates with single-value :only' do
+          html = @f.predicate_select :only => 'eq'
+          Ransack.predicate_keys.reject {|k| k =~ /^eq/}.each do |key|
+            html.should_not match /<option value="#{key}">/
+          end
+        end
+
+        it 'filters predicates with multi-value :only' do
+          html = @f.predicate_select :only => [:eq, :lt]
+          Ransack.predicate_keys.reject {|k| k =~ /^(eq|lt)/}.each do |key|
+            html.should_not match /<option value="#{key}">/
+          end
+        end
+
+        it 'excludes compounds when :compounds => false' do
+          html = @f.predicate_select :compounds => false
+          Ransack.predicate_keys.select {|k| k =~ /_(any|all)$/}.each do |key|
+            html.should_not match /<option value="#{key}">/
+          end
         end
       end
-
-      it 'returns ransackable attributes for associations in attribute_select with associations' do
-        attributes = Person.ransackable_attributes + Article.ransackable_attributes.map {|a| "articles_#{a}"}
-        html = @f.attribute_select :associations => ['articles']
-        html.split(/\n/).should have(attributes.size).lines
-        attributes.each do |attribute|
-          html.should match /<option value="#{attribute}">/
-        end
-      end
-
-      it 'returns option groups for base and associations in attribute_select with associations' do
-        html = @f.attribute_select :associations => ['articles']
-        [Person, Article].each do |model|
-          html.should match /<optgroup label="#{model}">/
-        end
-      end
-
     end
   end
 end

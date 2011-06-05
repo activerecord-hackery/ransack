@@ -77,12 +77,8 @@ module Ransack
         search_fields(:c, args, block)
       end
 
-      def and_fields(*args, &block)
-        search_fields(:n, args, block)
-      end
-
-      def or_fields(*args, &block)
-        search_fields(:o, args, block)
+      def grouping_fields(*args, &block)
+        search_fields(:g, args, block)
       end
 
       def attribute_fields(*args, &block)
@@ -114,15 +110,27 @@ module Ransack
       end
 
       def predicate_select(options = {}, html_options = {})
+        options[:compounds] = true if options[:compounds].nil?
+        keys = options[:compounds] ? Ransack.predicate_keys : Ransack.predicate_keys.reject {|k| k.match(/_(any|all)$/)}
+        if only = options[:only]
+          if only.respond_to? :call
+            keys = keys.select {|k| only.call(k)}
+          else
+            only = Array.wrap(only).map(&:to_s)
+            keys = keys.select {|k| only.include? k.sub(/_(any|all)$/, '')}
+          end
+        end
+
         @template.collection_select(
-          @object_name, :p, Predicate.collection, :first, :last,
+          @object_name, :p, keys.map {|k| [k, Translate.predicate(k)]}, :first, :last,
           objectify_options(options), @default_options.merge(html_options)
         )
       end
 
       def combinator_select(options = {}, html_options = {})
+        choices = Nodes::Condition === object ? [:or, :and] : [:and, :or]
         @template.collection_select(
-          @object_name, :m, [['or', Translate.word(:or)], ['and', Translate.word(:and)]], :first, :last,
+          @object_name, :m, choices.map {|o| [o.to_s, Translate.word(o)]}, :first, :last,
           objectify_options(options), @default_options.merge(html_options)
         )
       end

@@ -39,30 +39,34 @@ module Ransack
 
       it 'accepts arrays of groupings' do
         search = Search.new(Person,
-          :o => [
-            {:name_eq => 'Ernie', :children_name_eq => 'Ernie'},
-            {:name_eq => 'Bert', :children_name_eq => 'Bert'},
+          :g => [
+            {:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'},
+            {:m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert'},
           ]
         )
-        ors = search.ors
+        ors = search.groupings
         ors.should have(2).items
         or1, or2 = ors
-        or1.should be_a Nodes::Or
-        or2.should be_a Nodes::Or
+        or1.should be_a Nodes::Grouping
+        or1.combinator.should eq 'or'
+        or2.should be_a Nodes::Grouping
+        or2.combinator.should eq 'or'
       end
 
       it 'accepts "attributes" hashes for groupings' do
         search = Search.new(Person,
-          :o => {
-            '0' => {:name_eq => 'Ernie', :children_name_eq => 'Ernie'},
-            '1' => {:name_eq => 'Bert', :children_name_eq => 'Bert'},
+          :g => {
+            '0' => {:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'},
+            '1' => {:m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert'},
           }
         )
-        ors = search.ors
+        ors = search.groupings
         ors.should have(2).items
         or1, or2 = ors
-        or1.should be_a Nodes::Or
-        or2.should be_a Nodes::Or
+        or1.should be_a Nodes::Grouping
+        or1.combinator.should eq 'or'
+        or2.should be_a Nodes::Grouping
+        or2.combinator.should eq 'or'
       end
 
       it 'accepts "attributes" hashes for conditions' do
@@ -102,7 +106,8 @@ module Ransack
 
       it 'evaluates nested conditions' do
         search = Search.new(Person, :children_name_eq => 'Ernie',
-          :o => [{
+          :g => [{
+            :m => 'or',
             :name_eq => 'Ernie',
             :children_children_name_eq => 'Ernie'
           }]
@@ -114,9 +119,9 @@ module Ransack
 
       it 'evaluates arrays of groupings' do
         search = Search.new(Person,
-          :o => [
-            {:name_eq => 'Ernie', :children_name_eq => 'Ernie'},
-            {:name_eq => 'Bert', :children_name_eq => 'Bert'},
+          :g => [
+            {:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'},
+            {:m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert'},
           ]
         )
         search.result.should be_an ActiveRecord::Relation
@@ -125,7 +130,7 @@ module Ransack
       end
 
       it 'returns distinct records when passed :distinct => true' do
-        search = Search.new(Person, :o => [{:comments_body_cont => 'e', :articles_comments_body_cont => 'e'}])
+        search = Search.new(Person, :g => [{:m => 'or', :comments_body_cont => 'e', :articles_comments_body_cont => 'e'}])
         search.result.should have(920).items
         search.result(:distinct => true).should have(330).items
         search.result.all.uniq.should eq search.result(:distinct => true).all
@@ -195,9 +200,9 @@ module Ransack
       end
 
       it 'allows chaining to access nested conditions' do
-        @s.ors = [{:name_eq => 'Ernie', :children_name_eq => 'Ernie'}]
-        @s.ors.first.name_eq.should eq 'Ernie'
-        @s.ors.first.children_name_eq.should eq 'Ernie'
+        @s.groupings = [{:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'}]
+        @s.groupings.first.name_eq.should eq 'Ernie'
+        @s.groupings.first.children_name_eq.should eq 'Ernie'
       end
     end
 
