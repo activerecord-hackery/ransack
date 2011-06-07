@@ -7,10 +7,6 @@ module Ransack
     mattr_accessor :predicates
     self.predicates = {}
 
-    def predicate_keys
-      predicates.keys.sort {|a,b| b.length <=> a.length}
-    end
-
     def configure
       yield self
     end

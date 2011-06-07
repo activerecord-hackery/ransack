@@ -111,7 +111,7 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        keys = options[:compounds] ? Ransack.predicate_keys : Ransack.predicate_keys.reject {|k| k.match(/_(any|all)$/)}
+        keys = options[:compounds] ? Predicate.names : Predicate.names.reject {|k| k.match(/_(any|all)$/)}
         if only = options[:only]
           if only.respond_to? :call
             keys = keys.select {|k| only.call(k)}

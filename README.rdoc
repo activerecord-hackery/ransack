@@ -1,5 +1,0 @@
-= Ransack
-
-Don't use me.
-
-Seriously, I'm not anywhere close to ready for public consumption, yet.

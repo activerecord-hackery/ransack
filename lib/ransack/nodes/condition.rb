@@ -28,7 +28,7 @@ module Ransack
 
         def extract_attributes_and_predicate(key)
           str = key.dup
-          name = Ransack.predicate_keys.detect {|p| str.sub!(/_#{p}$/, '')}
+          name = Predicate.detect_and_strip_from_string!(str)
           predicate = Predicate.named(name)
           raise ArgumentError, "No valid predicate for #{key}" unless predicate
           attributes = str.split(/_and_|_or_/)
@@ -194,7 +194,7 @@ module Ransack
       def formatted_values_for_attribute(attr)
         casted_values_for_attribute(attr).map do |val|
           val = attr.ransacker.formatter.call(val) if attr.ransacker && attr.ransacker.formatter
-          val = predicate.formatter.call(val) if predicate.formatter
+          val = predicate.format(val)
           val
         end
       end

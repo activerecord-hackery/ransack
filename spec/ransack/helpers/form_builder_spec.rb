@@ -88,28 +88,28 @@ module Ransack
 
         it 'returns predicates with predicate_select' do
           html = @f.predicate_select
-          Ransack.predicate_keys.each do |key|
+          Predicate.names.each do |key|
             html.should match /<option value="#{key}">/
           end
         end
 
         it 'filters predicates with single-value :only' do
           html = @f.predicate_select :only => 'eq'
-          Ransack.predicate_keys.reject {|k| k =~ /^eq/}.each do |key|
+          Predicate.names.reject {|k| k =~ /^eq/}.each do |key|
             html.should_not match /<option value="#{key}">/
           end
         end
 
         it 'filters predicates with multi-value :only' do
           html = @f.predicate_select :only => [:eq, :lt]
-          Ransack.predicate_keys.reject {|k| k =~ /^(eq|lt)/}.each do |key|
+          Predicate.names.reject {|k| k =~ /^(eq|lt)/}.each do |key|
             html.should_not match /<option value="#{key}">/
           end
         end
 
         it 'excludes compounds when :compounds => false' do
           html = @f.predicate_select :compounds => false
-          Ransack.predicate_keys.select {|k| k =~ /_(any|all)$/}.each do |key|
+          Predicate.names.select {|k| k =~ /_(any|all)$/}.each do |key|
             html.should_not match /<option value="#{key}">/
           end
         end

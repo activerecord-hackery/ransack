@@ -18,7 +18,7 @@ module Ransack
       original_name = key.to_s
       base_class = context.klass
       base_ancestors = base_class.ancestors.select { |x| x.respond_to?(:model_name) }
-      predicate = Ransack.predicate_keys.detect {|p| original_name.match(/_#{p}$/)}
+      predicate = Predicate.detect_from_string(original_name)
       attributes_str = original_name.sub(/_#{predicate}$/, '')
       attribute_names = attributes_str.split(/_and_|_or_/)
       combinator = attributes_str.match(/_and_/) ? :and : :or
