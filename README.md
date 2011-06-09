@@ -26,7 +26,7 @@ If you'd like to add your own custom Ransack predicates:
                            :formatter => proc {|v| "#{v}-diddly"},
                            # Validate a value. An "invalid" value won't be used in a search.
                            # Below is default.
-                           :validator => proc {|v| v.present?}
+                           :validator => proc {|v| v.present?},
                            # Should compounds be created? Will use the compound (any/all) version
                            # of the arel_predicate to create a corresponding any/all version of
                            # your predicate. (Default: true)
