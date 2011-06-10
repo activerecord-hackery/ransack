@@ -14,8 +14,6 @@ module Ransack
       @callable = opts[:callable] || block ||
                   (@klass.method(name) if @klass.respond_to?(name)) ||
                   proc {|parent| parent.table[name]}
-
-      @klass._ransackers[name.to_s] = self
     end
 
     def attr_from(bindable)

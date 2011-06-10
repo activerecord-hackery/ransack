@@ -5,7 +5,7 @@ module Ransack
 
         def self.extended(base)
           alias :search :ransack unless base.method_defined? :search
-          base.instance_eval do
+          base.class_eval do
             class_attribute :_ransackers
             self._ransackers ||= {}
           end
@@ -16,7 +16,7 @@ module Ransack
         end
 
         def ransacker(name, opts = {}, &block)
-          Ransacker.new(self, name, opts, &block)
+          self._ransackers = _ransackers.merge name.to_s => Ransacker.new(self, name, opts, &block)
         end
 
         def ransackable_attributes(auth_object = nil)
