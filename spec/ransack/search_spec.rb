@@ -129,12 +129,6 @@ module Ransack
         where.to_sql.should match /\("people"."name" = 'Ernie' OR "children_people"."name" = 'Ernie'\) AND \("people"."name" = 'Bert' OR "children_people"."name" = 'Bert'\)/
       end
 
-      it 'returns distinct records when passed :distinct => true' do
-        search = Search.new(Person, :g => [{:m => 'or', :comments_body_cont => 'e', :articles_comments_body_cont => 'e'}])
-        search.result.should have(920).items
-        search.result(:distinct => true).should have(330).items
-        search.result.all.uniq.should eq search.result(:distinct => true).all
-      end
     end
 
     describe '#sorts=' do

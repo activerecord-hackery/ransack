@@ -11,8 +11,7 @@ module Ransack
 
         def evaluate(search, opts = {})
           viz = Visitor.new
-          relation = @object.where(viz.accept(search.base)).order(viz.accept(search.sorts))
-          opts[:distinct] ? relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
+          @object.where(viz.accept(search.base)).order(viz.accept(search.sorts))
         end
 
         def attribute_method?(str, klass = @klass)
