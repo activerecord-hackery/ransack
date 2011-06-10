@@ -55,15 +55,13 @@ If you're coming from MetaSearch, things to note:
      is passed to it.
   3. Common ActiveRecord::Relation methods are no longer delegated by the search object.
      Instead, you will get your search results (an ActiveRecord::Relation in the case of
-     the ActiveRecord adapter) via a call to `Search#result`. If passed `:distinct => true`,
-     `result` will generate a `SELECT DISTINCT` to avoid returning duplicate rows, even if
-     conditions on a join would otherwise result in some.
+     the ActiveRecord adapter) via a call to `Search#result`.
 
 In your controller:
 
     def index
       @q = Person.search(params[:q])
-      @people = @q.result(:distinct => true)
+      @people = @q.result
     end
 
 In your view:
