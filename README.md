@@ -4,10 +4,11 @@ Ransack is a rewrite of [MetaSearch](http://metautonomo.us/projects/metasearch).
 supports many of the same features as MetaSearch, its underlying implementation differs
 greatly from MetaSearch, and _backwards compatibility is not a design goal._
 
-Ransack enables the creation of both simple and advanced search forms against your
-application's models. If you're looking for something that simplifies query generation
-at the model or controller layer, you're probably not looking for Ransack (or MetaSearch,
-for that matter). Try [Squeel](http://metautonomo.us/projects/squeel) instead.
+Ransack enables the creation of both simple and [advanced](http://ransack-demo.heroku.com)
+search forms against your application's models. If you're looking for something that
+simplifies query generation at the model or controller layer, you're probably not looking
+for Ransack (or MetaSearch, for that matter). Try 
+[Squeel](http://metautonomo.us/projects/squeel) instead.
 
 ## Getting started
 
@@ -55,13 +56,21 @@ If you're coming from MetaSearch, things to note:
      is passed to it.
   3. Common ActiveRecord::Relation methods are no longer delegated by the search object.
      Instead, you will get your search results (an ActiveRecord::Relation in the case of
-     the ActiveRecord adapter) via a call to `Search#result`.
+     the ActiveRecord adapter) via a call to `Search#result`. If passed `:distinct => true`,
+     `result` will generate a `SELECT DISTINCT` to avoid returning duplicate rows, even if
+     conditions on a join would otherwise result in some.
+     
+     Please note that for many databases, a sort on an associated table's columns will
+     result in invalid SQL with `:distinct => true` -- in those cases, you're on your own,
+     and will need to modify the result as needed to allow these queries to work. Thankfully,
+     9 times out of 10, sort against the search's base is sufficient, though, as that's
+     generally what's being displayed on your results page.
 
 In your controller:
 
     def index
       @q = Person.search(params[:q])
-      @people = @q.result
+      @people = @q.result(:distinct => true)
     end
 
 In your view:
@@ -106,7 +115,8 @@ This means you'll need to tweak your routes...
                             :html => {:method => :post} do |f| %>
 
 Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
-construct much more complex search forms.
+construct much more complex search forms, such as the one on the
+[demo page](http://ransack-demo.heroku.com).
 
 **more docs to come**
 
