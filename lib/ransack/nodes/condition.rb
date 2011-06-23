@@ -4,8 +4,6 @@ module Ransack
       i18n_word :attribute, :predicate, :combinator, :value
       i18n_alias :a => :attribute, :p => :predicate, :m => :combinator, :v => :value
 
-      delegate :cast_value, :to => :first_attribute
-
       attr_reader :predicate
 
       class << self
@@ -20,7 +18,9 @@ module Ransack
               :m => combinator,
               :v => [values]
             )
-            predicate.validate(condition.values) ? condition : nil
+            # TODO: Figure out what to do with multiple types of attributes, if anything.
+            # Tempted to go with "garbage in, garbage out" on this one
+            predicate.validate(condition.values, condition.default_type) ? condition : nil
           end
         end
 
@@ -37,15 +37,11 @@ module Ransack
       end
 
       def valid?
-        attributes.detect(&:valid?) && predicate && valid_arity? && predicate.validate(values) && valid_combinator?
+        attributes.detect(&:valid?) && predicate && valid_arity? && predicate.validate(values, default_type) && valid_combinator?
       end
 
       def valid_arity?
         values.size <= 1 || predicate.compound || %w(in not_in).include?(predicate.name)
-      end
-
-      def first_attribute
-        attributes.first
       end
 
       def attributes
@@ -117,7 +113,7 @@ module Ransack
       end
 
       def value
-        predicate.compound ? values.map {|v| cast_value(v)} : cast_value(values.first)
+        predicate.compound ? values.map {|v| v.cast(default_type)} : values.first.cast(default_type)
       end
 
       def build(params)
@@ -188,7 +184,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map {|v| v.cast_to_type(predicate.type || attr.type)}
+        validated_values.map {|v| v.cast(predicate.type || attr.type)}
       end
 
       def formatted_values_for_attribute(attr)
@@ -197,6 +193,10 @@ module Ransack
           val = predicate.format(val)
           val
         end
+      end
+
+      def default_type
+        predicate.type || (attributes.first && attributes.first.type)
       end
 
       private

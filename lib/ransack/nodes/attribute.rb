@@ -30,10 +30,6 @@ module Ransack
         end
       end
 
-      def cast_value(value)
-        value.cast_to_type(type)
-      end
-
       def eql?(other)
         self.class == other.class &&
         self.name == other.name

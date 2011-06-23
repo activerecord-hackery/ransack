@@ -39,7 +39,7 @@ module Ransack
       @arel_predicate = opts[:arel_predicate]
       @type = opts[:type]
       @formatter = opts[:formatter]
-      @validator = opts[:validator]
+      @validator = opts[:validator] || lambda { |v| v.present? }
       @compound = opts[:compound]
     end
 
@@ -61,12 +61,8 @@ module Ransack
       end
     end
 
-    def validate(vals)
-      if validator
-        vals.select {|v| validator.call(v.value)}.any?
-      else
-        vals.select {|v| v.present?}.any?
-      end
+    def validate(vals, type = @type)
+      vals.select {|v| validator.call(type ? v.cast(type) : v.value)}.any?
     end
 
   end

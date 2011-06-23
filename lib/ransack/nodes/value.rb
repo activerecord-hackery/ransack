@@ -2,7 +2,7 @@ module Ransack
   module Nodes
     class Value < Node
       attr_accessor :value
-      delegate :blank?, :present?, :to => :value
+      delegate :present?, :blank?, :to => :value
 
       def initialize(context, value = nil)
         super(context)
@@ -23,7 +23,7 @@ module Ransack
         value.hash
       end
 
-      def cast_to_type(type)
+      def cast(type)
          case type
          when :date
            cast_to_date(value)
