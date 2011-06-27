@@ -5,10 +5,6 @@ module Ransack
     module ActiveRecord
       module JoinDependency
 
-        # Yes, I'm using alias_method_chain here. No, I don't feel too
-        # bad about it. JoinDependency, or, to call it by its full proper
-        # name, ::ActiveRecord::Associations::JoinDependency, is one of the
-        # most "for internal use only" chunks of ActiveRecord.
         def self.included(base)
           base.class_eval do
             alias_method_chain :graft, :ransack
