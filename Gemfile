@@ -1,6 +1,5 @@
 source "http://rubygems.org"
 gemspec
-gem 'squeel'
 
 if ENV['RAILS_VERSION'] == 'release'
   gem 'activesupport'
