@@ -7,7 +7,8 @@ module Ransack
 
         def self.included(base)
           base.class_eval do
-            alias_method_chain :graft, :ransack
+            # Squeel's graft is more capable than Ransack's.
+            alias_method_chain :graft, :ransack unless defined?(Squeel)
           end
         end
 
