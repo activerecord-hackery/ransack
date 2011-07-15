@@ -41,7 +41,7 @@ module Ransack
       end
 
       def valid_arity?
-        values.size <= 1 || predicate.compound || %w(in not_in).include?(predicate.name)
+        values.size <= 1 || predicate.wants_array
       end
 
       def attributes
@@ -188,11 +188,12 @@ module Ransack
       end
 
       def formatted_values_for_attribute(attr)
-        casted_values_for_attribute(attr).map do |val|
+        formatted = casted_values_for_attribute(attr).map do |val|
           val = attr.ransacker.formatter.call(val) if attr.ransacker && attr.ransacker.formatter
           val = predicate.format(val)
           val
         end
+        predicate.wants_array ? formatted : formatted.first
       end
 
       def default_type

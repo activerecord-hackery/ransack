@@ -1,6 +1,6 @@
 module Ransack
   class Predicate
-    attr_reader :name, :arel_predicate, :type, :formatter, :validator, :compound
+    attr_reader :name, :arel_predicate, :type, :formatter, :validator, :compound, :wants_array
 
     class << self
 
@@ -41,6 +41,7 @@ module Ransack
       @formatter = opts[:formatter]
       @validator = opts[:validator] || lambda { |v| v.present? }
       @compound = opts[:compound]
+      @wants_array = @compound || ['in', 'not_in'].include?(@arel_predicate)
     end
 
     def eql?(other)
