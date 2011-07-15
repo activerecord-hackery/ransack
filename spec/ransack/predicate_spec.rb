@@ -21,5 +21,18 @@ module Ransack
       end
     end
 
+    describe 'null' do
+      it 'generates a value IS NULL query' do
+        @s.name_null = true
+        @s.result.to_sql.should match /"people"."name" IS NULL/
+      end
+    end
+
+    describe 'not_null' do
+      it 'generates a value IS NOT NULL query' do
+        @s.name_not_null = true
+        @s.result.to_sql.should match /"people"."name" IS NOT NULL/
+      end
+    end
   end
 end
