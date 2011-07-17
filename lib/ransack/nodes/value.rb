@@ -65,10 +65,12 @@ module Ransack
        end
 
        def cast_to_boolean(val)
-         if val.is_a?(String) && val.blank?
-           nil
+         if Constants::TRUE_VALUES.include?(val)
+           true
+         elsif Constants::FALSE_VALUES.include?(val)
+           false
          else
-           Constants::TRUE_VALUES.include?(val)
+           nil
          end
        end
 

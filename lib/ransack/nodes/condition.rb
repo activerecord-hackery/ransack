@@ -180,7 +180,7 @@ module Ransack
       end
 
       def validated_values
-        values.select {|v| predicate.validator ? predicate.validator.call(v.value) : v.present?}
+        values.select {|v| predicate.validator.call(v.value)}
       end
 
       def casted_values_for_attribute(attr)

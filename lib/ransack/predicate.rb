@@ -39,7 +39,7 @@ module Ransack
       @arel_predicate = opts[:arel_predicate]
       @type = opts[:type]
       @formatter = opts[:formatter]
-      @validator = opts[:validator] || lambda { |v| v.present? }
+      @validator = opts[:validator] || lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
       @compound = opts[:compound]
       @wants_array = @compound || ['in', 'not_in'].include?(@arel_predicate)
     end
