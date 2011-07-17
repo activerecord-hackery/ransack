@@ -26,3 +26,16 @@ RSpec.configure do |config|
 
   config.include RansackHelper
 end
+
+RSpec::Matchers.define :be_like do |expected|
+  match do |actual|
+    actual.gsub(/^\s+|\s+$/, '').gsub(/\s+/, ' ').strip ==
+      expected.gsub(/^\s+|\s+$/, '').gsub(/\s+/, ' ').strip
+  end
+end
+
+RSpec::Matchers.define :have_attribute_method do |expected|
+  match do |actual|
+    actual.attribute_method?(expected)
+  end
+end

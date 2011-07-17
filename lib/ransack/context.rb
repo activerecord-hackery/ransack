@@ -25,10 +25,6 @@ module Ransack
         end
       end
 
-      def can_accept?(object)
-        method_defined? DISPATCH[object.class]
-      end
-
     end
 
     def initialize(object)
