@@ -126,7 +126,12 @@ module Ransack
         )
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /\("people"."name" = 'Ernie' OR "children_people"."name" = 'Ernie'\) AND \("people"."name" = 'Bert' OR "children_people"."name" = 'Bert'\)/
+        sql = where.to_sql
+        first, second = sql.split(/ AND /)
+        first.should match /"people"."name" = 'Ernie'/
+        first.should match /"children_people"."name" = 'Ernie'/
+        second.should match /"people"."name" = 'Bert'/
+        second.should match /"children_people"."name" = 'Bert'/
       end
 
       it 'returns distinct records when passed :distinct => true' do

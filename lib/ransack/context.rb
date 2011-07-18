@@ -95,7 +95,7 @@ module Ransack
     end
 
     def unpolymorphize_association(str)
-      if (match = str.match(/_of_(.+?)_type$/)) && Kernel.const_defined?(match.captures.first)
+      if (match = str.match(/_of_(.+?)_type$/))
         [match.pre_match, Kernel.const_get(match.captures.first)]
       else
         [str, nil]
