@@ -16,7 +16,7 @@ module Ransack
               :a => attributes,
               :p => predicate.name,
               :m => combinator,
-              :v => [values]
+              :v => %w(in not_in).include?(predicate.arel_predicate) ? Array(values) : [values]
             )
             # TODO: Figure out what to do with multiple types of attributes, if anything.
             # Tempted to go with "garbage in, garbage out" on this one
@@ -113,7 +113,7 @@ module Ransack
       end
 
       def value
-        predicate.compound ? values.map {|v| v.cast(default_type)} : values.first.cast(default_type)
+        predicate.wants_array ? values.map {|v| v.cast(default_type)} : values.first.cast(default_type)
       end
 
       def build(params)
