@@ -31,6 +31,16 @@ module Ransack
         condition.value.should eq 'Ernie'
       end
 
+      it 'creates Conditions for multiple polymorphic belongs_to association attributes' do
+        search = Search.new(Note, :notable_of_Person_type_name_or_notable_of_Article_type_title_eq => 'Ernie')
+        condition = search.base[:notable_of_Person_type_name_or_notable_of_Article_type_title_eq]
+        condition.should be_a Nodes::Condition
+        condition.predicate.name.should eq 'eq'
+        condition.attributes.first.name.should eq 'notable_of_Person_type_name'
+        condition.attributes.last.name.should eq 'notable_of_Article_type_title'
+        condition.value.should eq 'Ernie'
+      end
+
       it 'discards empty conditions' do
         search = Search.new(Person, :children_name_eq => '')
         condition = search.base[:children_name_eq]

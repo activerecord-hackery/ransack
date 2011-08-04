@@ -135,7 +135,7 @@ module Ransack
           found_association = @join_dependency.join_associations.detect do |assoc|
             assoc.reflection.name == name &&
             assoc.parent == parent &&
-            (!klass || assoc.klass == klass)
+            (!klass || assoc.reflection.klass == klass)
           end
           unless found_association
             @join_dependency.send(:build_polymorphic, name.to_sym, parent, Arel::Nodes::OuterJoin, klass)
