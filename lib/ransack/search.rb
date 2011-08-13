@@ -49,8 +49,10 @@ module Ransack
           sort = Nodes::Sort.new(@context).build(attrs)
           self.sorts << sort
         end
-      else
+      when String
         self.sorts = [args]
+      else
+        raise ArgumentError, "Invalid argument (#{args.class}) supplied to sorts="
       end
     end
     alias :s= :sorts=

@@ -73,6 +73,10 @@ module Ransack
         search_fields(:s, args, block)
       end
 
+      def sort_link(attribute, *args)
+        @template.sort_link @object, attribute, *args
+      end
+
       def condition_fields(*args, &block)
         search_fields(:c, args, block)
       end

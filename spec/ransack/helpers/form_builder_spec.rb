@@ -47,6 +47,14 @@ module Ransack
 
       end
 
+      describe '#sort_link' do
+        subject { @f.sort_link :name, :controller => 'people' }
+
+        it { should match /people\?q%5Bs%5D=name\+asc/}
+        it { should match /sort_link/}
+        it { should match /Full Name<\/a>/}
+      end
+
       describe '#submit' do
 
         it 'localizes :search when no default value given' do

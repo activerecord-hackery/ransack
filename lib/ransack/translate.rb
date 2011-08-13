@@ -12,7 +12,7 @@ module Ransack
 
     def self.attribute(key, options = {})
       unless context = options.delete(:context)
-        raise ArgumentError, "A context is required to translate associations"
+        raise ArgumentError, "A context is required to translate attributes"
       end
 
       original_name = key.to_s
