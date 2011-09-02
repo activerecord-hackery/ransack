@@ -16,7 +16,7 @@ module Ransack
               :a => attributes,
               :p => predicate.name,
               :m => combinator,
-              :v => %w(in not_in).include?(predicate.arel_predicate) ? Array(values) : [values]
+              :v => predicate.wants_array ? Array(values) : [values]
             )
             # TODO: Figure out what to do with multiple types of attributes, if anything.
             # Tempted to go with "garbage in, garbage out" on this one
