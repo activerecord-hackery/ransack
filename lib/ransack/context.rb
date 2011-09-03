@@ -7,30 +7,31 @@ module Ransack
 
     class << self
 
-      def for(object)
-        context = Class === object ? for_class(object) : for_object(object)
+      def for(object, options = {})
+        context = Class === object ? for_class(object, options) : for_object(object, options)
         context or raise ArgumentError, "Don't know what context to use for #{object}"
       end
 
-      def for_class(klass)
+      def for_class(klass, options = {})
         if klass < ActiveRecord::Base
-          Adapters::ActiveRecord::Context.new(klass)
+          Adapters::ActiveRecord::Context.new(klass, options)
         end
       end
 
-      def for_object(object)
+      def for_object(object, options = {})
         case object
         when ActiveRecord::Relation
-          Adapters::ActiveRecord::Context.new(object.klass)
+          Adapters::ActiveRecord::Context.new(object.klass, options)
         end
       end
 
     end
 
-    def initialize(object)
+    def initialize(object, options = {})
       @object = object.scoped
       @klass = @object.klass
       @join_dependency = join_dependency(@object)
+      @join_type = options[:join_type] || Arel::OuterJoin
       @base = @join_dependency.join_base
       @engine = @base.arel_engine
       @arel_visitor = Arel::Visitors.visitor_for @engine

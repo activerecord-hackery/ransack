@@ -15,7 +15,7 @@ module Ransack
 
     def initialize(object, params = {}, options = {})
       params ||= {}
-      @context = Context.for(object)
+      @context = Context.for(object, options)
       @context.auth_object = options[:auth_object]
       @base = Nodes::Grouping.new(@context, 'and')
       build(params.with_indifferent_access)

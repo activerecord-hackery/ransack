@@ -1,5 +1,5 @@
 require 'ransack/context'
-require 'active_record'
+require 'polyamorous'
 
 module Ransack
   module Adapters
@@ -143,7 +143,7 @@ module Ransack
             (!klass || assoc.reflection.klass == klass)
           end
           unless found_association
-            @join_dependency.send(:build_polymorphic, name.to_sym, parent, Arel::Nodes::OuterJoin, klass)
+            @join_dependency.send(:build, Polyamorous::Join.new(name, @join_type, klass), parent)
             found_association = @join_dependency.join_associations.last
             # Leverage the stashed association functionality in AR
             @object = @object.joins(found_association)
