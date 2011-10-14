@@ -113,7 +113,7 @@ module Ransack
         output
       end
 
-      def predicate_select(options = {}, html_options = {})
+      def self.predicate_keys(options={})
         options[:compounds] = true if options[:compounds].nil?
         keys = options[:compounds] ? Predicate.names : Predicate.names.reject {|k| k.match(/_(any|all)$/)}
         if only = options[:only]
@@ -124,6 +124,11 @@ module Ransack
             keys = keys.select {|k| only.include? k.sub(/_(any|all)$/, '')}
           end
         end
+        keys
+      end
+
+      def predicate_select(options = {}, html_options = {})
+        keys = FormBuilder.predicate_keys(options)
 
         @template.collection_select(
           @object_name, :p, keys.map {|k| [k, Translate.predicate(k)]}, :first, :last,
