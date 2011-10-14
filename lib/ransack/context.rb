@@ -59,15 +59,17 @@ module Ransack
       str ||= ''
 
       if (segments = str.split(/_/)).size > 0
-        association_parts = []
+        remainder = []
         found_assoc = nil
-        while !found_assoc && segments.size > 0 && association_parts << segments.shift do
+        while !found_assoc && segments.size > 0 do
           # Strip the _of_Model_type text from the association name, but hold
           # onto it in klass, for use as the next base
-          assoc, klass = unpolymorphize_association(association_parts.join('_'))
+          assoc, klass = unpolymorphize_association(segments.join('_'))
           if found_assoc = get_association(assoc, base)
-            base = traverse(segments.join('_'), klass || found_assoc.klass)
+            base = traverse(remainder.join('_'), klass || found_assoc.klass)
           end
+
+          remainder.unshift segments.pop
         end
         raise UntraversableAssociationError, "No association matches #{str}" unless found_assoc
       end
