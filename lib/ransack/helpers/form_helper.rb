@@ -40,7 +40,7 @@ module Ransack
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
         default_order = options.delete :default_order
         no_order_indicator = options.delete :no_order_indicator
-        current_dir = prev_attr == attr_name ? prev_dir : nil
+        current_dir = prev_attr == attr_name && !no_order_indicator ? prev_dir : nil
 
         if current_dir
           new_dir = current_dir == 'desc' ? 'asc' : 'desc'
@@ -54,8 +54,7 @@ module Ransack
         options.merge!(
           :q => search_params.merge(:s => "#{attr_name} #{new_dir}")
         )
-        link_name = no_order_indicator ? ERB::Util.h(name).html_safe : [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe
-        link_to link_name,
+        link_to [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe,
                 url_for(options),
                 html_options
       end
