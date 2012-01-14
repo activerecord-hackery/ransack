@@ -82,7 +82,8 @@ module Ransack
         attrs = opts[:attributes] || 1
         vals = opts[:values] || 1
         condition = Condition.new(@context)
-        condition.predicate = Predicate.named('eq')
+        condition.predicate_name = opts[:predicate] || 'eq'
+        condition.is_default = true
         attrs.times { condition.build_attribute }
         vals.times { condition.build_value }
         condition

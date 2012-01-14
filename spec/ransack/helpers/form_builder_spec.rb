@@ -115,6 +115,16 @@ module Ransack
           end
         end
 
+        it 'sorts predicate keys based on order of :only array, with :compounds => false' do
+          ordered_keys = @f.send(:predicate_keys, :compounds => false, :only => [:cont, :blank, :eq, :unknown])
+          ordered_keys.should == %w(cont blank eq)
+        end
+
+        it 'sorts predicate keys based on order of :only array, with :compounds => true' do
+          ordered_keys = @f.send(:predicate_keys, :compounds => true, :only => [:cont, :blank, :eq, :unknown])
+          ordered_keys.should == %w(cont cont_any cont_all blank eq eq_any eq_all)
+        end
+
         it 'excludes compounds when :compounds => false' do
           html = @f.predicate_select :compounds => false
           Predicate.names.select {|k| k =~ /_(any|all)$/}.each do |key|
