@@ -5,3 +5,6 @@ rvm:
   - rbx
   - rbx-2.0
   - ruby-head
+
+env:
+  - RAILS=3-2-stable
