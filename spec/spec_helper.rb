@@ -20,7 +20,13 @@ Sham.define do
 end
 
 RSpec.configure do |config|
-  config.before(:suite) { Schema.create }
+  config.before(:suite) do
+    puts '=' * 80
+    puts "Running specs against ActiveRecord #{ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
+    puts '=' * 80
+    Schema.create
+  end
+
   config.before(:all)   { Sham.reset(:before_all) }
   config.before(:each)  { Sham.reset(:before_each) }
 

@@ -34,7 +34,6 @@ module Ransack
       @join_type = options[:join_type] || Arel::OuterJoin
       @base = @join_dependency.join_base
       @engine = @base.arel_engine
-      @arel_visitor = Arel::Visitors.visitor_for @engine
       @default_table = Arel::Table.new(@base.table_name, :as => @base.aliased_table_name, :engine => @engine)
       @bind_pairs = Hash.new do |hash, key|
         parent, attr_name = get_parent_and_attribute_name(key.to_s)

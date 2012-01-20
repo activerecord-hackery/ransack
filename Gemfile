@@ -11,10 +11,8 @@ when /\// # A path
   {:path => arel}
 when /^v/ # A tagged version
   {:git => 'git://github.com/rails/arel.git', :tag => arel}
-when /^\w-$/ # A branch name
-  {:git => 'git://github.com/rails/arel.git', :branch => arel}
 else
-  arel
+  {:git => 'git://github.com/rails/arel.git', :branch => arel}
 end
 
 gem 'arel', arel_opts

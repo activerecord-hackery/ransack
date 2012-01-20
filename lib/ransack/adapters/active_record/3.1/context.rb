@@ -1,15 +1,13 @@
 require 'ransack/context'
 require 'polyamorous'
-require 'ransack/adapters/active_record/3.0/compat'
 
 module Ransack
-
   module Adapters
     module ActiveRecord
       class Context < ::Ransack::Context
         # Because the AR::Associations namespace is insane
-        JoinDependency = ::ActiveRecord::Associations::ClassMethods::JoinDependency
-        JoinBase = JoinDependency::JoinBase
+        JoinDependency = ::ActiveRecord::Associations::JoinDependency
+        JoinPart = JoinDependency::JoinPart
         
         def initialize(object, options = {})
           super
@@ -59,7 +57,14 @@ module Ransack
 
         def type_for(attr)
           return nil unless attr && attr.valid?
-          klassify(attr.parent).columns_hash[attr.arel_attribute.name.to_s].type
+          name    = attr.arel_attribute.name.to_s
+          table   = attr.arel_attribute.relation.table_name
+
+          unless @engine.connection_pool.table_exists?(table)
+            raise "No table named #{table} exists"
+          end
+
+          @engine.connection_pool.columns_hash[table][name].type
         end
 
         private
@@ -105,7 +110,7 @@ module Ransack
               'string_join'
             when Hash, Symbol, Array
               'association_join'
-            when ::ActiveRecord::Associations::ClassMethods::JoinDependency::JoinAssociation
+            when ::ActiveRecord::Associations::JoinDependency::JoinAssociation
               'stashed_join'
             when Arel::Nodes::Join
               'join_node'
@@ -121,7 +126,7 @@ module Ransack
             x.strip
           }.uniq
 
-          join_list = relation.send :custom_join_sql, (string_joins + join_nodes)
+          join_list = relation.send :custom_join_ast, relation.table.from(relation.table), string_joins
 
           join_dependency = JoinDependency.new(
             relation.klass,
