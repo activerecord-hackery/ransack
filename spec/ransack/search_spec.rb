@@ -124,7 +124,8 @@ module Ransack
         )
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"."name" = 'Ernie' AND \("people"."name" = 'Ernie' OR "children_people_2"."name" = 'Ernie'\)/
+        where.to_sql.should match /"children_people"."name" = 'Ernie'/
+        where.to_sql.should match /\("people"."name" = 'Ernie' OR "children_people_2"."name" = 'Ernie'\)/
       end
 
       it 'evaluates arrays of groupings' do
