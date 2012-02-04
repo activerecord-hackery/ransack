@@ -22,5 +22,6 @@ require 'ransack/ransacker'
 require 'ransack/adapters/active_record'
 require 'ransack/helpers'
 require 'action_controller'
+require 'chronic'
 
 ActionController::Base.helper Ransack::Helpers::FormHelper
