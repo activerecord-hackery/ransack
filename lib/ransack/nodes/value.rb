@@ -43,7 +43,9 @@ module Ransack
        end
 
        def cast_to_date(val)
-         if val.respond_to?(:to_date)
+         if val.is_a?(String)
+           Chronic.parse(val).in_time_zone.to_date rescue nil
+         elsif val.respond_to?(:to_date)
            val.to_date rescue nil
          else
            y, m, d = *[val].flatten
@@ -58,7 +60,7 @@ module Ransack
            Time.zone.local(*val) rescue nil
          else
            unless val.acts_like?(:time)
-             val = val.is_a?(String) ? Time.zone.parse(val) : val.to_time rescue val
+             val = val.is_a?(String) ? Chronic.parse(val) : val.to_time rescue nil
            end
            val.in_time_zone rescue nil
          end
