@@ -26,6 +26,15 @@ module Ransack
           @engine.connection.schema_cache.columns_hash[table][name].type
         end
         
+        def evaluate(search, opts = {})
+          viz = Visitor.new
+          relation = @object.where(viz.accept(search.base))
+          if search.sorts.any?
+            relation = relation.except(:order).order(viz.accept(search.sorts))
+          end
+          opts[:distinct] ? relation.uniq : relation
+        end
+        
       end
     end
   end

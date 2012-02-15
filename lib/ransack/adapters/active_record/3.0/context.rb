@@ -18,7 +18,10 @@ module Ransack
 
         def evaluate(search, opts = {})
           viz = Visitor.new
-          relation = @object.except(:order).where(viz.accept(search.base)).order(viz.accept(search.sorts))
+          relation = @object.where(viz.accept(search.base))
+          if search.sorts.any?
+            relation = relation.except(:order).order(viz.accept(search.sorts))
+          end
           opts[:distinct] ? relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
         end
 
