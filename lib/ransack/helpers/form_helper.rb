@@ -27,7 +27,7 @@ module Ransack
       def sort_link(search, attribute, *args)
         raise TypeError, "First argument must be a Ransack::Search!" unless Search === search
 
-        search_params = params[:q] || {}.with_indifferent_access
+        search_params = params[search.context.search_key] || {}.with_indifferent_access
 
         attr_name = attribute.to_s
 
@@ -50,9 +50,9 @@ module Ransack
         html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
         css = ['sort_link', current_dir].compact.join(' ')
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
-        options.merge!(
-          :q => search_params.merge(:s => "#{attr_name} #{new_dir}")
-        )
+        query_hash = {}
+        query_hash[search.context.search_key] = search_params.merge(:s => "#{attr_name} #{new_dir}")
+        options.merge!(query_hash)
         link_to [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe,
                 url_for(options),
                 html_options
