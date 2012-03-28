@@ -25,6 +25,12 @@ module Ransack
       end
 
       def sort_link(search, attribute, *args)
+        # Extract out a routing proxy for url_for scoping later
+        if search.is_a?(Array)
+          routing_proxy = search.shift
+          search = search.first
+        end
+
         raise TypeError, "First argument must be a Ransack::Search!" unless Search === search
 
         search_params = params[:q] || {}.with_indifferent_access
@@ -53,9 +59,11 @@ module Ransack
         options.merge!(
           :q => search_params.merge(:s => "#{attr_name} #{new_dir}")
         )
+        options.merge!(:use_route => routing_proxy) if routing_proxy
+
         link_to [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe,
-                url_for(options),
-                html_options
+          url_for(options),
+          html_options
       end
 
       private

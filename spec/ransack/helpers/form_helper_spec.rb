@@ -26,7 +26,7 @@ module Ransack
       end
 
       describe '#sort_link' do
-        subject { @controller.view_context.sort_link(Person.search(:sorts => ['name desc']), :name, :controller => 'people') }
+        subject { @controller.view_context.sort_link([:main_app, Person.search(:sorts => ['name desc'])], :name, :controller => 'people') }
 
         it { should match /people\?q%5Bs%5D=name\+asc/}
         it { should match /sort_link desc/}
