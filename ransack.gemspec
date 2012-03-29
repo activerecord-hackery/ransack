@@ -6,9 +6,9 @@ Gem::Specification.new do |s|
   s.name        = "ransack"
   s.version     = Ransack::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Ernie Miller"]
-  s.email       = ["ernie@metautonomo.us"]
-  s.homepage    = "http://metautonomo.us/projects/ransack"
+  s.authors     = ["Ernie Miller", "Ryan Bigg"]
+  s.email       = ["ernie@erniemiller.org", "radarlistener@gmail.com"]
+  s.homepage    = "http://erniemiller.org/projects/ransack"
   s.summary     = %q{Object-based searching for ActiveRecord (currently).}
   s.description = %q{Ransack is the successor to the MetaSearch gem. It improves and expands upon MetaSearch's functionality, but does not have a 100%-compatible API.}
 
