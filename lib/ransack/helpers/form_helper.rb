@@ -59,10 +59,14 @@ module Ransack
         options.merge!(
           :q => search_params.merge(:s => "#{attr_name} #{new_dir}")
         )
-        options.merge!(:use_route => routing_proxy) if routing_proxy
+        url = if routing_proxy
+          send(routing_proxy).url_for(options)
+        else
+          url_for(options)
+        end
 
         link_to [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe,
-          url_for(options),
+          url,
           html_options
       end
 
