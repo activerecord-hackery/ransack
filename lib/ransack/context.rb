@@ -32,7 +32,7 @@ module Ransack
       @klass = @object.klass
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::OuterJoin
-      @search_key = options[:search_key] || :q
+      @search_key = options[:search_key] || Ransack.options[:search_key]
       @base = @join_dependency.join_base
       @engine = @base.arel_engine
       @default_table = Arel::Table.new(@base.table_name, :as => @base.aliased_table_name, :engine => @engine)
