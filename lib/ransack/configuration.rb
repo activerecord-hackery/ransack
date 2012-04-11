@@ -35,7 +35,7 @@ module Ransack
     end
 
     # default search_key that, it can be overridden on sort_link level
-    def set_search_key_name(name)
+    def search_key=(name)
       self.options[:search_key] = name
     end
 
