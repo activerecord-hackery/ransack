@@ -60,7 +60,7 @@ module Ransack
         query_hash[search.context.search_key] = search_params.merge(:s => "#{attr_name} #{new_dir}")
         options.merge!(query_hash)
 
-        url = if routing_proxy
+        url = if routing_proxy && respond_to?(routing_proxy)
           send(routing_proxy).url_for(options)
         else
           url_for(options)
