@@ -138,7 +138,7 @@ module Ransack
           )
 
           join_nodes.each do |join|
-            join_dependency.table_aliases[join.left.name.downcase] = 1
+            join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
           join_dependency.graft(*stashed_association_joins)
