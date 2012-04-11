@@ -37,7 +37,7 @@ module Ransack
       before = Ransack.options.clone
 
       Ransack.configure do |config|
-        config.set_search_key_name(:query)
+        config.search_key = :query
       end
 
       Ransack.options[:search_key].should eq :query
