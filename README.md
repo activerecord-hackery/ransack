@@ -102,31 +102,6 @@ Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBu
 construct much more complex search forms, such as the one on the
 [demo page](http://ransack-demo.heroku.com).
 
-## Configuration
-
-You can configure ransack. Best place where to put configuration is initializer. Create a file
-in config/initializers/ransack.rb with this content.
-
-    Ransack.configure do |config|
-      config.set_search_key_name(:query) # Changes default search parameter key name
-                                         # default is :q, this can be however overridden on
-                                         # ransack search creation.
-    end
-
-## Custom search parameter key changing
-
-Sometimes there are situations when you cannot use default search parameter name. E.g. you have
-two searches on one page. You can force another name using :search_key options. You must set
-it when creating a new search object.
-
-    # in controller:
-    @search = Log.search(params[:log_search, :search_key => :log_search)
-
-    # in view:
-    sort_link(@search) # this will read :search_key from @search object
-
-**more docs to come**
-
 ## Contributions
 
 To support the project:
