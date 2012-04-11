@@ -33,7 +33,7 @@ module Ransack
 
         raise TypeError, "First argument must be a Ransack::Search!" unless Search === search
 
-        search_params = params[:q] || {}.with_indifferent_access
+        search_params = params[search.context.search_key] || {}.with_indifferent_access
 
         attr_name = attribute.to_s
 
@@ -56,9 +56,9 @@ module Ransack
         html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
         css = ['sort_link', current_dir].compact.join(' ')
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
-        options.merge!(
-          :q => search_params.merge(:s => "#{attr_name} #{new_dir}")
-        )
+        query_hash = {}
+        query_hash[search.context.search_key] = search_params.merge(:s => "#{attr_name} #{new_dir}")
+        options.merge!(query_hash)
         url = if routing_proxy
           send(routing_proxy).url_for(options)
         else

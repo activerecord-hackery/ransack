@@ -3,7 +3,7 @@ require 'ransack/visitor'
 module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
-    attr_accessor :auth_object
+    attr_accessor :auth_object, :search_key
 
     class << self
 
@@ -32,6 +32,7 @@ module Ransack
       @klass = @object.klass
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::OuterJoin
+      @search_key = options[:search_key] || :q
       @base = @join_dependency.join_base
       @engine = @base.arel_engine
       @default_table = Arel::Table.new(@base.table_name, :as => @base.aliased_table_name, :engine => @engine)
