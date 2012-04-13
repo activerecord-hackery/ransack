@@ -7,7 +7,7 @@ greatly from MetaSearch, and _backwards compatibility is not a design goal._
 Ransack enables the creation of both simple and [advanced](http://ransack-demo.heroku.com)
 search forms against your application's models. If you're looking for something that
 simplifies query generation at the model or controller layer, you're probably not looking
-for Ransack (or MetaSearch, for that matter). Try 
+for Ransack (or MetaSearch, for that matter). Try
 [Squeel](http://metautonomo.us/projects/squeel) instead.
 
 ## Getting started
@@ -15,27 +15,11 @@ for Ransack (or MetaSearch, for that matter). Try
 In your Gemfile:
 
     gem "ransack"  # Last officially released gem
-    # gem "ransack", :git => "git://github.com/ernie/ransack.git" # Track git repo
 
-If you'd like to add your own custom Ransack predicates:
+Or if you want to use the bleeding edge:
 
-    Ransack.configure do |config|
-      config.add_predicate 'equals_diddly', # Name your predicate
-                           # What non-compound ARel predicate will it use? (eq, matches, etc)
-                           :arel_predicate => 'eq',
-                           # Format incoming values as you see fit. (Default: Don't do formatting)
-                           :formatter => proc {|v| "#{v}-diddly"},
-                           # Validate a value. An "invalid" value won't be used in a search.
-                           # Below is default.
-                           :validator => proc {|v| v.present?},
-                           # Should compounds be created? Will use the compound (any/all) version
-                           # of the arel_predicate to create a corresponding any/all version of
-                           # your predicate. (Default: true)
-                           :compounds => true,
-                           # Force a specific column type for type-casting of supplied values.
-                           # (Default: use type from DB column)
-                           :type => :string
-    end
+    gem "ransack", :git => "git://github.com/ernie/ransack.git" # Track git repo
+
 
 ## Usage
 
@@ -49,9 +33,10 @@ requires very little setup effort.
 If you're coming from MetaSearch, things to note:
 
   1. The default param key for search params is now `:q`, instead of `:search`. This is
-     primarily to shorten query strings, though advanced queries (below) will still 
+     primarily to shorten query strings, though advanced queries (below) will still
      run afoul of URL length limits in most browsers and require a switch to HTTP 
-     POST requests.
+     POST requests. This key is
+[configurable](https://github.com/ernie/ransack/wiki/Configuration)
   2. `form_for` is now `search_form_for`, and validates that a Ransack::Search object
      is passed to it.
   3. Common ActiveRecord::Relation methods are no longer delegated by the search object.
@@ -59,7 +44,7 @@ If you're coming from MetaSearch, things to note:
      the ActiveRecord adapter) via a call to `Search#result`. If passed `:distinct => true`,
      `result` will generate a `SELECT DISTINCT` to avoid returning duplicate rows, even if
      conditions on a join would otherwise result in some.
-     
+
      Please note that for many databases, a sort on an associated table's columns will
      result in invalid SQL with `:distinct => true` -- in those cases, you're on your own,
      and will need to modify the result as needed to allow these queries to work. Thankfully,
@@ -85,7 +70,7 @@ In your view:
 
 `cont` (contains) and `start` (starts with) are just two of the available search predicates.
 See Constants for a full list.
-    
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to generate
@@ -108,26 +93,21 @@ This means you'll need to tweak your routes...
       index
       render :index
     end
-    
+
 ... and update your `search_form_for` line in the view ...
 
-    <%= search_form_for @q, :url => search_people_path, 
+    <%= search_form_for @q, :url => search_people_path,
                             :html => {:method => :post} do |f| %>
 
 Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
 construct much more complex search forms, such as the one on the
 [demo page](http://ransack-demo.heroku.com).
 
-**more docs to come**
-
 ## Contributions
 
-If you'd like to support the continued development of Ransack, please consider
-[making a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=48Q9HY64L3TWA).
+To support the project:
 
-To support the project in other ways:
-
-* Use Ransack in your apps, and let me know if you encounter anything that's broken or missing.
+* Use Ransack in your apps, and let us know if you encounter anything that's broken or missing.
   A failing spec is awesome. A pull request is even better!
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful to you. The more
   people who are using the project, the quicker we can find and fix bugs!

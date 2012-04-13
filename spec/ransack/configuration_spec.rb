@@ -27,5 +27,23 @@ module Ransack
       Ransack.predicates.should_not have_key 'test_predicate_without_compound_any'
       Ransack.predicates.should_not have_key 'test_predicate_without_compound_all'
     end
+
+    it 'should have default value for search key' do
+      Ransack.options[:search_key].should eq :q
+    end
+
+    it 'changes default search key parameter' do
+      # store original state so we can restore it later
+      before = Ransack.options.clone
+
+      Ransack.configure do |config|
+        config.search_key = :query
+      end
+
+      Ransack.options[:search_key].should eq :query
+
+      # restore original state so we don't break other tests
+      Ransack.options = before
+    end
   end
 end

@@ -124,7 +124,9 @@ module Ransack
         )
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"."name" = 'Ernie' AND \("people"."name" = 'Ernie' OR "children_people_2"."name" = 'Ernie'\)/
+        where.to_sql.should match /"children_people"."name" = 'Ernie'/
+        where.to_sql.should match /"people"."name" = 'Ernie'/
+        where.to_sql.should match /"children_people_2"."name" = 'Ernie'/
       end
 
       it 'evaluates arrays of groupings' do
@@ -146,7 +148,7 @@ module Ransack
 
       it 'returns distinct records when passed :distinct => true' do
         search = Search.new(Person, :g => [{:m => 'or', :comments_body_cont => 'e', :articles_comments_body_cont => 'e'}])
-        search.result.should have(920).items
+        search.result.all.should have(920).items
         search.result(:distinct => true).should have(330).items
         search.result.all.uniq.should eq search.result(:distinct => true).all
       end

@@ -3,21 +3,9 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '3-1-stable'
-arel = ENV['AREL'] || '~> 2.2.1'
+rails = ENV['RAILS'] || '3-2-stable'
 
-arel_opts = case arel
-when /\// # A path
-  {:path => arel}
-when /^v/ # A tagged version
-  {:git => 'git://github.com/rails/arel.git', :tag => arel}
-when /^\w-$/ # A branch name
-  {:git => 'git://github.com/rails/arel.git', :branch => arel}
-else
-  arel
-end
-
-gem 'arel', arel_opts
+gem 'arel', '3.0.2'
 
 case rails
 when /\// # A path
