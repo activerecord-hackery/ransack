@@ -45,5 +45,15 @@ module Ransack
       # restore original state so we don't break other tests
       Ransack.options = before
     end
+
+    it 'adds predicates that take arrays, overriding compounds' do
+      Ransack.configure do |config|
+        config.add_predicate :test_array_predicate, :wants_array => true, :compounds => true
+      end
+
+      Ransack.predicates['test_array_predicate'].wants_array.should eq true
+      Ransack.predicates.should_not have_key 'test_array_predicate_any'
+      Ransack.predicates.should_not have_key 'test_array_predicate_all'
+    end
   end
 end
