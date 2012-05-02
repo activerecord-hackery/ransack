@@ -90,6 +90,20 @@ module Ransack
         conditions.should have(2).items
         conditions.map {|c| c.class}.should eq [Nodes::Condition, Nodes::Condition]
       end
+
+      it 'creates Conditions for custom predicates that take arrays' do
+        Ransack.configure do |config|
+          config.add_predicate 'ary_pred',
+          :wants_array => true
+        end
+
+        search = Search.new(Person, :name_ary_pred => ['Ernie', 'Bert'])
+        condition = search.base[:name_ary_pred]
+        condition.should be_a Nodes::Condition
+        condition.predicate.name.should eq 'ary_pred'
+        condition.attributes.first.name.should eq 'name'
+        condition.value.should eq ['Ernie', 'Bert']
+      end
     end
 
     describe '#result' do

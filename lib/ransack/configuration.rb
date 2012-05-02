@@ -19,6 +19,7 @@ module Ransack
       opts[:name] = name
       compounds = opts.delete(:compounds)
       compounds = true if compounds.nil?
+      compounds = false if opts[:wants_array]
       opts[:arel_predicate] = opts[:arel_predicate].to_s
 
       self.predicates[name] = Predicate.new(opts)
