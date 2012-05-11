@@ -4,7 +4,7 @@ Ransack is a rewrite of [MetaSearch](http://metautonomo.us/projects/metasearch).
 supports many of the same features as MetaSearch, its underlying implementation differs
 greatly from MetaSearch, and _backwards compatibility is not a design goal._
 
-Ransack enables the creation of both simple and [advanced](http://ransack-demo.heroku.com)
+Ransack enables the creation of both simple and [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
 search forms against your application's models. If you're looking for something that
 simplifies query generation at the model or controller layer, you're probably not looking
 for Ransack (or MetaSearch, for that matter). Try
