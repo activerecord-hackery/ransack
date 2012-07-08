@@ -45,6 +45,7 @@ module Ransack
 
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
         default_order = options.delete :default_order
+        no_order_symbol = options.delete :no_order_symbol
         current_dir = prev_attr == attr_name ? prev_dir : nil
 
         if current_dir
@@ -66,7 +67,7 @@ module Ransack
           url_for(options)
         end
 
-        link_to [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe,
+        link_to [ERB::Util.h(name), (no_order_symbol ? nil : order_indicator_for(current_dir))].compact.join(' ').html_safe,
           url,
           html_options
       end
