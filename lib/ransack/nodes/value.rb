@@ -98,6 +98,10 @@ module Ransack
          end
        end
 
+      def inspect
+        "Value <#{value}>"
+      end
+
        def array_of_arrays?(val)
          Array === val && Array === val.first
        end

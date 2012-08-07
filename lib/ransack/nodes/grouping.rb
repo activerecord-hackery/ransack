@@ -154,6 +154,13 @@ module Ransack
         self
       end
 
+      def inspect
+        data =[['conditions', conditions], ['combinator', combinator]].reject { |e|
+          e[1].blank?
+        }.map { |v| "#{v[0]}: #{v[1]}" }.join(', ')
+        "Grouping <#{data}>"
+      end
+
       private
 
       def write_attribute(name, val)

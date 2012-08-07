@@ -200,6 +200,13 @@ module Ransack
         predicate.type || (attributes.first && attributes.first.type)
       end
 
+      def inspect
+        data =[['attributes', a.try(:map, &:name)], ['predicate', p], ['combinator', m], ['values', v.try(:map, &:value)]].reject { |e|
+          e[1].blank?
+        }.map { |v| "#{v[0]}: #{v[1]}" }.join(', ')
+        "Condition <#{data}>"
+      end
+
       private
 
       def valid_combinator?
