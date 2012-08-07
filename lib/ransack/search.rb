@@ -90,6 +90,10 @@ module Ransack
       end
     end
 
+    def inspect
+      "Ransack::Search<class: #{klass.name}, base: #{base.inspect}>"
+    end
+
     private
 
     def collapse_multiparameter_attributes!(attrs)
