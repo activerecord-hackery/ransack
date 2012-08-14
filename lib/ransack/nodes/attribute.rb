@@ -44,6 +44,10 @@ module Ransack
         false
       end
 
+      def inspect
+        "Attribute <#{name}>"
+      end
+
     end
   end
 end

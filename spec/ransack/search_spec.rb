@@ -104,6 +104,11 @@ module Ransack
         condition.attributes.first.name.should eq 'name'
         condition.value.should eq ['Ernie', 'Bert']
       end
+
+      it 'does not evaluate the query on #inspect' do
+        search = Search.new(Person, :children_id_in => [1, 2, 3])
+        search.inspect.should_not match /ActiveRecord/
+      end
     end
 
     describe '#result' do
