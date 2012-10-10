@@ -13,8 +13,8 @@ module Ransack
         end
         options[:html] ||= {}
         html_options = {
-          :class  => options[:as] ? "#{options[:as]}_search" : "#{search.klass.to_s.underscore}_search",
-          :id => options[:as] ? "#{options[:as]}_search" : "#{search.klass.to_s.underscore}_search",
+          :class  => options[:class].present? ? "#{options[:class]}" : "#{search.klass.to_s.underscore}_search",
+          :id => options[:id].present? ? "#{options[:id]}" : "#{search.klass.to_s.underscore}_search",
           :method => :get
         }
         options[:as] ||= 'q'
