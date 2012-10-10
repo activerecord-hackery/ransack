@@ -43,6 +43,11 @@ module Ransack
             s = Person.search(:doubled_name_eq => 'Aric SmithAric Smith')
             s.result.first.should eq Person.find_by_name('Aric Smith')
           end if defined?(Arel::Nodes::InfixOperation)
+
+          it "doesn't break #count if using InfixOperations" do
+            s = Person.search(:doubled_name_eq => 'Aric SmithAric Smith')
+            s.result.count.should eq 1
+          end if defined?(Arel::Nodes::InfixOperation)
         end
 
         describe '#ransackable_attributes' do

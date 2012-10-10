@@ -1,19 +1,20 @@
 require 'ransack/context'
 require 'ransack/adapters/active_record/3.1/context'
+require 'ransack/adapters/active_record/compat'
 require 'polyamorous'
 
 module Ransack
   module Adapters
     module ActiveRecord
       class Context < ::Ransack::Context
-        
+
         # Redefine a few things that have changed with 3.2.
-        
+
         def initialize(object, options = {})
           super
           @arel_visitor = @engine.connection.visitor
         end
-        
+
         def type_for(attr)
           return nil unless attr && attr.valid?
           name    = attr.arel_attribute.name.to_s
@@ -25,7 +26,7 @@ module Ransack
 
           @engine.connection.schema_cache.columns_hash[table][name].type
         end
-        
+
         def evaluate(search, opts = {})
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
@@ -34,7 +35,7 @@ module Ransack
           end
           opts[:distinct] ? relation.uniq : relation
         end
-        
+
       end
     end
   end
