@@ -34,7 +34,7 @@ If you're coming from MetaSearch, things to note:
 
   1. The default param key for search params is now `:q`, instead of `:search`. This is
      primarily to shorten query strings, though advanced queries (below) will still
-     run afoul of URL length limits in most browsers and require a switch to HTTP 
+     run afoul of URL length limits in most browsers and require a switch to HTTP
      POST requests. This key is
 [configurable](https://github.com/ernie/ransack/wiki/Configuration)
   2. `form_for` is now `search_form_for`, and validates that a Ransack::Search object
@@ -102,6 +102,56 @@ This means you'll need to tweak your routes...
 Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
 construct much more complex search forms, such as the one on the
 [demo page](http://ransack-demo.heroku.com).
+
+### has_many and belongs_to associations
+
+You can easily use Ransack to search in associated objects.
+
+Given you have these associations ...
+
+    class Employee < ActiveRecord::Base
+      belongs_to :supervisor
+
+      # has attribute last_name:string
+    end
+
+    class Department < ActiveRecord::Base
+      has_many :supervisors
+
+      # has attribute title:string
+    end
+
+    class Supervisor < ActiveRecord::Base
+      belongs_to :department
+      has_many :employees
+
+      # has attribute last_name:string
+    end
+
+... and a controller ...
+
+    class SupervisorsController < ApplicationController
+      def index
+        @search = Supervisor.search(params[:q])
+        @supervisors = @search.result(:distinct => true)
+      end
+    end
+
+... you might set up your form like this ...
+
+    <%= search_form_for @search do |f| %>
+      <%= f.label :last_name_cont %>
+      <%= f.text_field :last_name_cont %>
+
+      <%= f.label :department_title_cont %>
+      <%= f.text_field :department_title_cont %>
+
+      <%= f.label :employees_last_name_cont %>
+      <%= f.text_field :employees_last_name_cont %>
+
+      <%= f.submit "search" %>
+    <% end %>
+
 
 ## Contributions
 
