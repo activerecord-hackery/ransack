@@ -69,7 +69,7 @@ In your view:
     <% end %>
 
 `cont` (contains) and `start` (starts with) are just two of the available search predicates.
-See Constants for a full list.
+See [Constants](https://github.com/ernie/ransack/blob/master/lib/ransack/constants.rb) for a full list and the [wiki](https://github.com/ernie/ransack/wiki/Basic-Searching) for more description.
 
 ### Advanced Mode
 
