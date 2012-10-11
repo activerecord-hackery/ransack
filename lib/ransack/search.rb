@@ -72,7 +72,7 @@ module Ransack
       Nodes::Sort.new(@context).build(opts)
     end
 
-    def respond_to?(method_id, include_private=false)
+    def respond_to?(method_id, include_private = false)
       super or begin
         method_name = method_id.to_s
         writer = method_name.sub!(/\=$/, '')
