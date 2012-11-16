@@ -21,7 +21,7 @@ en:
       not_eq_any: "not equal to any"
       not_eq_all: "not equal to all"
       matches: "matches"
-      matches_any: "matches_any"
+      matches_any: "matches any"
       matches_all: "matches all"
       does_not_match: "doesn't match"
       does_not_match_any: "doesn't match any"
