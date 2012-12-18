@@ -21,9 +21,9 @@ module Ransack
     ]
 
     module_function
-    # replace % _  \ to \% \_ \\
+    # replace % \ to \% \\
     def escape_wildcards(unescaped)
-      unescaped.gsub(/\\/){ "\\\\" }.gsub(/%/, "\\%").gsub(/_/, "\\_")
+      unescaped.gsub(/\\/){ "\\\\" }.gsub(/%/, "\\%")
     end
   end
 end
