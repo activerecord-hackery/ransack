@@ -30,6 +30,7 @@ module Ransack
         @s.result.to_sql.should match /"people"."name" LIKE '%ric%'/
       end
       it 'escapes %, _ and \\ in value' do
+        pending 'Revert escaping of underscore characater from #171'
         @s.name_cont = '%_\\'
         @s.result.to_sql.should match /"people"."name" LIKE '%\\%\\_\\\\%'/
       end
