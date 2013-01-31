@@ -1,5 +1,7 @@
 # Ransack
 
+[![Build Status](https://travis-ci.org/ernie/ransack.png?branch=master)](https://travis-ci.org/ernie/ransack)
+
 Ransack is a rewrite of [MetaSearch](http://metautonomo.us/projects/metasearch). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
 greatly from MetaSearch, and _backwards compatibility is not a design goal._
