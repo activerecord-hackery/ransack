@@ -13,7 +13,7 @@ module Ransack
         expect { subject.result }.to_not raise_error
       end
       it "escapes '%', '.' and '\\\\' in value" do
-        subject.public_send(:"#{method}=", '%._\\')
+        subject.send(:"#{method}=", '%._\\')
         subject.result.to_sql.should match(regexp)
       end
     end
