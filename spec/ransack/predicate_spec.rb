@@ -7,6 +7,17 @@ module Ransack
       @s = Search.new(Person)
     end
 
+    shared_examples 'wildcard escaping' do |method, regexp|
+      it 'automatically converts integers to strings' do
+        subject.parent_id_cont = 1
+        expect { subject.result }.to_not raise_error
+      end
+      it "escapes '%', '.' and '\\\\' in value" do
+        subject.send(:"#{method}=", '%._\\')
+        subject.result.to_sql.should match(regexp)
+      end
+    end
+
     describe 'eq' do
       it 'generates an equality condition for boolean true' do
         @s.awesome_eq = true
@@ -25,17 +36,21 @@ module Ransack
     end
 
     describe 'cont' do
+      it_has_behavior 'wildcard escaping', :name_cont, /"people"."name" LIKE '%\\%\\._\\\\%'/ do
+        subject { @s }
+      end
+
       it 'generates a LIKE query with value surrounded by %' do
         @s.name_cont = 'ric'
         @s.result.to_sql.should match /"people"."name" LIKE '%ric%'/
       end
-      it 'escapes %, . and \\ in value' do
-        @s.name_cont = '%._\\'
-        @s.result.to_sql.should match /"people"."name" LIKE '%\\%\\._\\\\%'/
-      end
     end
 
     describe 'not_cont' do
+      it_has_behavior 'wildcard escaping', :name_not_cont, /"people"."name" NOT LIKE '%\\%\\._\\\\%'/ do
+        subject { @s }
+      end
+
       it 'generates a NOT LIKE query with value surrounded by %' do
         @s.name_not_cont = 'ric'
         @s.result.to_sql.should match /"people"."name" NOT LIKE '%ric%'/
