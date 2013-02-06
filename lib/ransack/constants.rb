@@ -23,7 +23,7 @@ module Ransack
     module_function
     # replace % \ to \% \\
     def escape_wildcards(unescaped)
-      unescaped.gsub(/([\\|\%|.])/, '\\\\\\1')
+      unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
     end
   end
 end
