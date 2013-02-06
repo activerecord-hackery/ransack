@@ -20,7 +20,7 @@ Sham.define do
 end
 
 RSpec.configure do |config|
-  config.alias_it_behaves_like_to :it_has_behavior, 'has behavior'
+  config.alias_it_should_behave_like_to :it_has_behavior, 'has behavior'
 
   config.before(:suite) do
     puts '=' * 80
