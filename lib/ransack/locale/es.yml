@@ -29,7 +29,7 @@ es:
       lt: "menor que"
       lt_any: "menor que cualquier"
       lt_all: "menor o igual a"
-      lteq: "less than or equal to"
+      lteq: "menor que o igual a"
       lteq_any: "menor o igual a cualquier"
       lteq_all: "menor o igual a todos"
       gt: "mayor que"
