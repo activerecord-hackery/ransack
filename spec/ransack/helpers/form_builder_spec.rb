@@ -7,7 +7,7 @@ module Ransack
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people
-        match ':controller(/:action(/:id(.:format)))'
+        match ':controller(/:action(/:id(.:format)))', :via => :get
       end
 
       include router.url_helpers
@@ -50,7 +50,7 @@ module Ransack
       describe '#sort_link' do
         subject { @f.sort_link :name, :controller => 'people' }
 
-        it { should match /people\?q%5Bs%5D=name\+asc/}
+        it { should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/}
         it { should match /sort_link/}
         it { should match /Full Name<\/a>/}
       end

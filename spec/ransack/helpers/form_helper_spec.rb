@@ -7,7 +7,7 @@ module Ransack
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people
-        match ':controller(/:action(/:id(.:format)))'
+        match ':controller(/:action(/:id(.:format)))', :via => :get
       end
 
       include router.url_helpers
@@ -27,7 +27,7 @@ module Ransack
 
       describe '#sort_link with default search_key' do
         subject { @controller.view_context.sort_link([:main_app, Person.search(:sorts => ['name desc'])], :name, :controller => 'people') }
-        it { should match /people\?q%5Bs%5D=name\+asc/ }
+        it { should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/ }
         it { should match /sort_link desc/ }
         it { should match /Full Name &#9660;/ }
       end
@@ -36,14 +36,14 @@ module Ransack
         subject { @controller.view_context.sort_link(Person.search({:sorts => ['name desc']}, :search_key => :people_search),
                                                      :name, :controller => 'people') }
 
-        it { should match /people\?people_search%5Bs%5D=name\+asc/ }
+        it { should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/ }
       end
 
       describe '#sort_link with default search_key defined as string' do
         subject { @controller.view_context.sort_link(Person.search({:sorts => ['name desc']}, :search_key => 'people_search'),
                                                        :name, :controller => 'people') }
 
-        it { should match /people\?people_search%5Bs%5D=name\+asc/ }
+        it { should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/ }
       end
     end
   end
