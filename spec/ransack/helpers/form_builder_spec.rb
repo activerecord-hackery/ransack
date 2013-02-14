@@ -55,6 +55,10 @@ module Ransack
           sort_link.should match /Full Name<\/a>/
         end
 
+        it { should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/}
+        it { should match /sort_link/}
+        it { should match /Full Name<\/a>/}
+
         it 'sort_link for common attribute' do
           sort_link = @f.sort_link :id, :controller => 'people'
           sort_link.should match /id<\/a>/
