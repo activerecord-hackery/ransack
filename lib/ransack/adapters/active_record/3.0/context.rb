@@ -16,6 +16,10 @@ module Ransack
           @arel_visitor = Arel::Visitors.visitor_for @engine
         end
 
+        def relation_for(object)
+          object.scoped
+        end
+
         def evaluate(search, opts = {})
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
