@@ -46,8 +46,7 @@ end
 
 module Schema
   def self.create
-    ActiveRecord::Base.silence do
-      ActiveRecord::Migration.verbose = false
+    silence_stream(STDOUT) do
 
       ActiveRecord::Schema.define do
         create_table :people, :force => true do |t|
