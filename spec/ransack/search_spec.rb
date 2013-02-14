@@ -167,9 +167,9 @@ module Ransack
 
       it 'returns distinct records when passed :distinct => true' do
         search = Search.new(Person, :g => [{:m => 'or', :comments_body_cont => 'e', :articles_comments_body_cont => 'e'}])
-        search.result.all.should have(920).items
+        search.result.to_a.should have(920).items
         search.result(:distinct => true).should have(330).items
-        search.result.all.uniq.should eq search.result(:distinct => true).all
+        search.result.to_a.uniq.should eq search.result(:distinct => true).to_a
       end
     end
 
