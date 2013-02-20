@@ -23,6 +23,11 @@ module Ransack
           column_names + _ransackers.keys
         end
 
+        def ransortable_attributes(auth_object = nil)
+          # Here so users can overwrite the attributes that show up in the sort_select
+          ransackable_attributes(auth_object)
+        end
+
         def ransackable_associations(auth_object = nil)
           reflect_on_all_associations.map {|a| a.name.to_s}
         end
