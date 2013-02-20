@@ -23,16 +23,11 @@ module Ransack
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           @template.grouped_collection_select(
-            @object_name, :name, attribute_collection_for_bases(bases), :last, :first, :first, :last,
+            @object_name, :name, searchable_attribute_collection_for_bases(bases), :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         else
-          collection = object.context.searchable_attributes(bases.first).map do |c|
-            [
-              attr_from_base_and_column(bases.first, c),
-              Translate.attribute(attr_from_base_and_column(bases.first, c), :context => object.context)
-            ]
-          end
+          collection = searchable_attribute_collection_for_base(bases.first)
           @template.collection_select(
             @object_name, :name, collection, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
@@ -46,19 +41,14 @@ module Ransack
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           @template.grouped_collection_select(
-            @object_name, :name, attribute_collection_for_bases(bases), :last, :first, :first, :last,
+            @object_name, :name, sortable_attribute_collection_for_bases(bases), :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           ) + @template.collection_select(
             @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         else
-          collection = object.context.searchable_attributes(bases.first).map do |c|
-            [
-              attr_from_base_and_column(bases.first, c),
-              Translate.attribute(attr_from_base_and_column(bases.first, c), :context => object.context)
-            ]
-          end
+          collection = sortable_attribute_collection_for_base(bases.first)
           @template.collection_select(
             @object_name, :name, collection, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
@@ -170,17 +160,29 @@ module Ransack
         [base, column].reject {|v| v.blank?}.join('_')
       end
 
-      def attribute_collection_for_bases(bases)
+      def attribute_collection_for_base(attributes, base=nil)
+        attributes.map do |c|
+          [
+            attr_from_base_and_column(base, c),
+            Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
+          ]
+        end
+      end
+
+      def sortable_attribute_collection_for_base(base=nil)
+        attribute_collection_for_base(object.context.sortable_attributes(base), base)
+      end
+
+      def searchable_attribute_collection_for_base(base=nil)
+        attribute_collection_for_base(object.context.searchable_attributes(base), base)
+      end
+
+      def sortable_attribute_collection_for_bases(bases)
         bases.map do |base|
           begin
           [
             Translate.association(base, :context => object.context),
-            object.context.searchable_attributes(base).map do |c|
-              [
-                attr_from_base_and_column(base, c),
-                Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
-              ]
-            end
+            sortable_attribute_collection_for_base(base)
           ]
           rescue UntraversableAssociationError => e
             nil
@@ -188,6 +190,18 @@ module Ransack
         end.compact
       end
 
+      def searchable_attribute_collection_for_bases(bases)
+        bases.map do |base|
+          begin
+          [
+            Translate.association(base, :context => object.context),
+            searchable_attribute_collection_for_base(base)
+          ]
+          rescue UntraversableAssociationError => e
+            nil
+          end
+        end.compact
+      end
     end
   end
 end
