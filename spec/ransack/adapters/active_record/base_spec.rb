@@ -58,6 +58,14 @@ module Ransack
           it { should include 'doubled_name' }
         end
 
+        describe '#ransortable_attributes' do
+          subject { Person.ransortable_attributes }
+
+          it { should include 'name' }
+          it { should include 'reversed_name' }
+          it { should include 'doubled_name' }
+        end
+
         describe '#ransackable_associations' do
           subject { Person.ransackable_associations }
 
