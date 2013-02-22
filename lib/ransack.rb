@@ -4,6 +4,7 @@ module Ransack
   extend Configuration
 
   class UntraversableAssociationError < StandardError; end;
+  class UnknownConditionError < StandardError; end;
 end
 
 Ransack.configure do |config|
