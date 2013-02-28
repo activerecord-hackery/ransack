@@ -58,6 +58,10 @@ module Ransack
             s = Person.search(:children_reversed_name_eq => 'Testing')
             s.result.to_sql.should match /LEFT OUTER JOIN/
           end
+
+          it "should function correctly when nil is passed in" do
+            s = Person.search(nil)
+          end
         end
 
         describe '#ransackable_attributes' do
