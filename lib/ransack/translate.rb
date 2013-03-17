@@ -73,6 +73,7 @@ module Ransack
             :"#{associated_class.i18n_scope}.attributes.#{associated_class.model_name.underscore}.#{attr_name}" :
             :"#{context.klass.i18n_scope}.attributes.#{context.klass.model_name.underscore}.#{attr_name}"
           ),
+          :".attributes.#{attr_name}",
           attr_name.humanize
         ]
       )
