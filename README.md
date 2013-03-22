@@ -10,7 +10,7 @@ Ransack enables the creation of both simple and [advanced](http://ransack-demo.h
 search forms against your application's models. If you're looking for something that
 simplifies query generation at the model or controller layer, you're probably not looking
 for Ransack (or MetaSearch, for that matter). Try
-[Squeel](http://metautonomo.us/projects/squeel) instead.
+[Squeel](https://github.com/ernie/squeel) instead.
 
 ## Getting started
 
