@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ernie/ransack.png?branch=master)](https://travis-ci.org/ernie/ransack)
 
-Ransack is a rewrite of [MetaSearch](http://metautonomo.us/projects/metasearch). While it
+Ransack is a rewrite of [MetaSearch](https://github.com/ernie/meta_search). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
 greatly from MetaSearch, and _backwards compatibility is not a design goal._
 
@@ -10,7 +10,7 @@ Ransack enables the creation of both simple and [advanced](http://ransack-demo.h
 search forms against your application's models. If you're looking for something that
 simplifies query generation at the model or controller layer, you're probably not looking
 for Ransack (or MetaSearch, for that matter). Try
-[Squeel](http://metautonomo.us/projects/squeel) instead.
+[Squeel](https://github.com/ernie/squeel) instead.
 
 ## Getting started
 
