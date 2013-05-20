@@ -53,7 +53,7 @@ module Ransack
             obj
           elsif obj.respond_to? :klass
             obj.klass
-          elsif obj.respond_to? :active_record
+          elsif obj.respond_to? :base_klass
             obj.active_record
           else
             raise ArgumentError, "Don't know how to klassify #{obj}"
