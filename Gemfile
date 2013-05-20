@@ -3,9 +3,10 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '3-2-stable'
+rails = ENV['RAILS'] || '4-0-stable'
 
-gem 'arel', '3.0.2'
+gem 'arel'
+gem 'polyamorous', '0.6.2'
 
 case rails
 when /\// # A path

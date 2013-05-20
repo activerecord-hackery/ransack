@@ -54,11 +54,7 @@ module Ransack
           elsif obj.respond_to? :klass
             obj.klass
           elsif obj.respond_to? :base_klass
-<<<<<<< HEAD
             obj.base_klass
-=======
-            obj.active_record
->>>>>>> 0d1631ac18b4c71f597c88bb8f6e9eeee53fe12b
           else
             raise ArgumentError, "Don't know how to klassify #{obj}"
           end
