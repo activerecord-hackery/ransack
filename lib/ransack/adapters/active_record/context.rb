@@ -22,7 +22,7 @@ module Ransack
 
           schema_cache = @engine.connection.schema_cache    
           raise "No table named #{table} exists" unless schema_cache.table_exists?(table)  
-          schema_cache.columns_hash[table][name].type
+          schema_cache.columns_hash(table)[name].type
         end
 
         def evaluate(search, opts = {})
