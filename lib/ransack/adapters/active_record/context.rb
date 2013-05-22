@@ -32,6 +32,18 @@ module Ransack
           opts[:distinct] ? relation.uniq : relation
         end
 
+        def klassify(obj)
+          if Class === obj && ::ActiveRecord::Base > obj
+            obj
+          elsif obj.respond_to? :klass
+            obj.klass
+          elsif obj.respond_to? :base_klass
+            obj.base_klass
+          else
+            raise ArgumentError, "Don't know how to klassify #{obj}"
+          end
+        end
+
       end
     end
   end
