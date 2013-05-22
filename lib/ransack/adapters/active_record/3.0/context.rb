@@ -52,18 +52,6 @@ module Ransack
           parent.table
         end
 
-        def klassify(obj)
-          if Class === obj && ::ActiveRecord::Base > obj
-            obj
-          elsif obj.respond_to? :klass
-            obj.klass
-          elsif obj.respond_to? :active_record
-            obj.active_record
-          else
-            raise ArgumentError, "Don't know how to klassify #{obj}"
-          end
-        end
-
         def type_for(attr)
           return nil unless attr && attr.valid?
           klassify(attr.parent).columns_hash[attr.arel_attribute.name.to_s].type
