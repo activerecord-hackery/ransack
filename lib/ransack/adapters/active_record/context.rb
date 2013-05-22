@@ -13,6 +13,10 @@ module Ransack
           @arel_visitor = @engine.connection.visitor
         end
 
+        def relation_for(object)
+          object.all
+        end
+
         def type_for(attr)
           return nil unless attr && attr.valid?
           name    = attr.arel_attribute.name.to_s
