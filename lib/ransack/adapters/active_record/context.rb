@@ -17,6 +17,25 @@ module Ransack
           object.all
         end
 
+        def type_for(attr)
+          return nil unless attr && attr.valid?
+          name    = attr.arel_attribute.name.to_s
+          table   = attr.arel_attribute.relation.table_name
+
+          schema_cache = @engine.connection.schema_cache
+          raise "No table named #{table} exists" unless schema_cache.table_exists?(table)
+          schema_cache.columns_hash(table)[name].type
+        end
+
+        def evaluate(search, opts = {})
+          viz = Visitor.new
+          relation = @object.where(viz.accept(search.base))
+          if search.sorts.any?
+            relation = relation.except(:order).reorder(viz.accept(search.sorts))
+          end
+          opts[:distinct] ? relation.distinct : relation
+        end
+
       end
     end
   end

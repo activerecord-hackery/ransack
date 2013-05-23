@@ -44,6 +44,20 @@ module Ransack
       end
     end
 
+    def klassify(obj)
+      if Class === obj && ::ActiveRecord::Base > obj
+        obj
+      elsif obj.respond_to? :klass
+        obj.klass
+      elsif obj.respond_to? :active_record # rails 3
+        obj.active_record
+      elsif obj.respond_to? :base_klass    # rails 4
+        obj.base_klass
+      else
+        raise ArgumentError, "Don't know how to klassify #{obj}"
+      end
+    end
+
     # Convert a string representing a chain of associations and an attribute
     # into the attribute itself
     def contextualize(str)

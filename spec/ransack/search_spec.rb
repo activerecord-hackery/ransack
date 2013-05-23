@@ -217,6 +217,11 @@ module Ransack
         id_sort.dir.should eq 'desc'
         name_sort.dir.should eq 'asc'
       end
+
+      it 'overrides existing sort' do
+         @s.sorts = 'id asc'
+         @s.result.first.id.should eq 1
+       end
     end
 
     describe '#method_missing' do

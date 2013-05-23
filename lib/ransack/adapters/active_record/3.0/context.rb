@@ -24,9 +24,10 @@ module Ransack
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
           if search.sorts.any?
-            relation = relation.except(:order).order(viz.accept(search.sorts))
+            relation = relation.except(:order).reorder(viz.accept(search.sorts))
           end
-          opts[:distinct] ? relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
+          opts[:distinct] ? relation.select(
+          "DISTINCT #{@klass.quoted_table_name}.*") : relation
         end
 
         def attribute_method?(str, klass = @klass)
@@ -51,19 +52,7 @@ module Ransack
         def table_for(parent)
           parent.table
         end
-
-        def klassify(obj)
-          if Class === obj && ::ActiveRecord::Base > obj
-            obj
-          elsif obj.respond_to? :klass
-            obj.klass
-          elsif obj.respond_to? :base_klass
-            obj.base_klass
-          else
-            raise ArgumentError, "Don't know how to klassify #{obj}"
-          end
-        end
-
+        
         def type_for(attr)
           return nil unless attr && attr.valid?
           klassify(attr.parent).columns_hash[attr.arel_attribute.name.to_s].type
