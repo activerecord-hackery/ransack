@@ -28,7 +28,7 @@ module Ransack
     end
 
     def initialize(object, options = {})
-      @object = object.all
+      @object = relation_for(object)
       @klass = @object.klass
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::OuterJoin

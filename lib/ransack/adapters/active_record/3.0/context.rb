@@ -10,10 +10,14 @@ module Ransack
         # Because the AR::Associations namespace is insane
         JoinDependency = ::ActiveRecord::Associations::ClassMethods::JoinDependency
         JoinBase = JoinDependency::JoinBase
-        
+
         def initialize(object, options = {})
           super
           @arel_visitor = Arel::Visitors.visitor_for @engine
+        end
+
+        def relation_for(object)
+          object.scoped
         end
 
         def evaluate(search, opts = {})
