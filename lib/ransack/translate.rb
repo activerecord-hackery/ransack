@@ -68,7 +68,7 @@ module Ransack
           :"ransack.attributes.#{associated_class.model_name.singular}.#{attr_name}" :
           :"ransack.attributes.#{context.klass.model_name.singular}.#{attr_name}"
         ),
-        default: [
+        :default => [
           (associated_class ?
             :"#{associated_class.i18n_scope}.attributes.#{associated_class.model_name.singular}.#{attr_name}" :
             :"#{context.klass.i18n_scope}.attributes.#{context.klass.model_name.singular}.#{attr_name}"
