@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ernie/ransack.png?branch=master)](https://travis-ci.org/ernie/ransack)
 
-Ransack is a rewrite of [MetaSearch](http://metautonomo.us/projects/metasearch). While it
+Ransack is a rewrite of [MetaSearch](https://github.com/ernie/meta_search). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
 greatly from MetaSearch, and _backwards compatibility is not a design goal._
 
@@ -10,18 +10,21 @@ Ransack enables the creation of both simple and [advanced](http://ransack-demo.h
 search forms against your application's models. If you're looking for something that
 simplifies query generation at the model or controller layer, you're probably not looking
 for Ransack (or MetaSearch, for that matter). Try
-[Squeel](http://metautonomo.us/projects/squeel) instead.
+[Squeel](https://github.com/ernie/squeel) instead.
 
 ## Getting started
 
 In your Gemfile:
 
-    gem "ransack"  # Last officially released gem
+```ruby
+gem "ransack"  # Last officially released gem
+```
 
 Or if you want to use the bleeding edge:
 
-    gem "ransack", :git => "git://github.com/ernie/ransack.git" # Track git repo
-
+```ruby
+gem "ransack", :git => "git://github.com/ernie/ransack.git" # Track git repo
+```
 
 ## Usage
 
@@ -55,20 +58,24 @@ If you're coming from MetaSearch, things to note:
 
 In your controller:
 
-    def index
-      @q = Person.search(params[:q])
-      @people = @q.result(:distinct => true)
-    end
+```ruby
+def index
+  @q = Person.search(params[:q])
+  @people = @q.result(:distinct => true)
+end
+```
 
 In your view:
 
-    <%= search_form_for @q do |f| %>
-      <%= f.label :name_cont %>
-      <%= f.text_field :name_cont %>
-      <%= f.label :articles_title_start %>
-      <%= f.text_field :articles_title_start %>
-      <%= f.submit %>
-    <% end %>
+```erb
+<%= search_form_for @q do |f| %>
+  <%= f.label :name_cont %>
+  <%= f.text_field :name_cont %>
+  <%= f.label :articles_title_start %>
+  <%= f.text_field :articles_title_start %>
+  <%= f.submit %>
+<% end %>
+```
 
 `cont` (contains) and `start` (starts with) are just two of the available search predicates.
 See [Constants](https://github.com/ernie/ransack/blob/master/lib/ransack/constants.rb) for a full list and the [wiki](https://github.com/ernie/ransack/wiki/Basic-Searching) for more description.
@@ -83,23 +90,29 @@ parameter string will typically force you to use the HTTP POST method instead of
 
 This means you'll need to tweak your routes...
 
-    resources :people do
-      collection do
-        match 'search' => 'people#search', :via => [:get, :post], :as => :search
-      end
-    end
+```ruby
+resources :people do
+  collection do
+    match 'search' => 'people#search', :via => [:get, :post], :as => :search
+  end
+end
+```
 
 ... and add another controller action ...
 
-    def search
-      index
-      render :index
-    end
+```ruby
+def search
+  index
+  render :index
+end
+```
 
 ... and update your `search_form_for` line in the view ...
 
-    <%= search_form_for @q, :url => search_people_path,
-                            :html => {:method => :post} do |f| %>
+```erb
+<%= search_form_for @q, :url => search_people_path,
+                        :html => {:method => :post} do |f| %>
+```
 
 Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
 construct much more complex search forms, such as the one on the
@@ -111,48 +124,54 @@ You can easily use Ransack to search in associated objects.
 
 Given you have these associations ...
 
-    class Employee < ActiveRecord::Base
-      belongs_to :supervisor
+```ruby
+class Employee < ActiveRecord::Base
+  belongs_to :supervisor
 
-      # has attribute last_name:string
-    end
+  # has attribute last_name:string
+end
 
-    class Department < ActiveRecord::Base
-      has_many :supervisors
+class Department < ActiveRecord::Base
+  has_many :supervisors
 
-      # has attribute title:string
-    end
+  # has attribute title:string
+end
 
-    class Supervisor < ActiveRecord::Base
-      belongs_to :department
-      has_many :employees
+class Supervisor < ActiveRecord::Base
+  belongs_to :department
+  has_many :employees
 
-      # has attribute last_name:string
-    end
+  # has attribute last_name:string
+end
+```
 
 ... and a controller ...
 
-    class SupervisorsController < ApplicationController
-      def index
-        @search = Supervisor.search(params[:q])
-        @supervisors = @search.result(:distinct => true)
-      end
-    end
+```ruby
+class SupervisorsController < ApplicationController
+  def index
+    @search = Supervisor.search(params[:q])
+    @supervisors = @search.result(:distinct => true)
+  end
+end
+```
 
 ... you might set up your form like this ...
 
-    <%= search_form_for @search do |f| %>
-      <%= f.label :last_name_cont %>
-      <%= f.text_field :last_name_cont %>
+```erb
+<%= search_form_for @search do |f| %>
+  <%= f.label :last_name_cont %>
+  <%= f.text_field :last_name_cont %>
 
-      <%= f.label :department_title_cont %>
-      <%= f.text_field :department_title_cont %>
+  <%= f.label :department_title_cont %>
+  <%= f.text_field :department_title_cont %>
 
-      <%= f.label :employees_last_name_cont %>
-      <%= f.text_field :employees_last_name_cont %>
+  <%= f.label :employees_last_name_cont %>
+  <%= f.text_field :employees_last_name_cont %>
 
-      <%= f.submit "search" %>
-    <% end %>
+  <%= f.submit "search" %>
+<% end %>
+```
 
 
 ## Contributions
