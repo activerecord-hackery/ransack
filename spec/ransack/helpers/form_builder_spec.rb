@@ -50,7 +50,7 @@ module Ransack
       describe '#sort_link' do
         it 'sort_link for ransack attribute' do
           sort_link = @f.sort_link :name, :controller => 'people'
-          sort_link.should match /people\?q%5Bs%5D=name\+asc/
+          sort_link.should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/
           sort_link.should match /sort_link/
           sort_link.should match /Full Name<\/a>/
         end
