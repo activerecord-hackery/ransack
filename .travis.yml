@@ -8,7 +8,7 @@ rvm:
   - ruby-head
 
 env:
-  - RAILS=master
+  - RAILS=4-0-0
   - RAILS=4-0-stable
   - RAILS=3-2-stable
   - RAILS=3-1-stable
@@ -17,14 +17,14 @@ env:
 matrix:
   exclude:
     - rvm: 1.8.7
-      env: RAILS=master
+      env: RAILS=4-0-0
     - rvm: 1.8.7
       env: RAILS=4-0-stable
     - rvm: ree
-      env: RAILS=master
+      env: RAILS=4-0-0
     - rvm: ree
       env: RAILS=4-0-stable
     - rvm: rbx-18mode
-      env: RAILS=master
+      env: RAILS=4-0-0
     - rvm: rbx-18mode
       env: RAILS=4-0-stable
