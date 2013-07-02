@@ -17,13 +17,15 @@ for Ransack (or MetaSearch, for that matter). Try
 In your Gemfile:
 
 ```ruby
-gem "ransack"  # Last officially released gem
+gem 'ransack', github: 'ernie/ransack', branch: 'rails-4'  # For Rails 4
 ```
 
-Or if you want to use the bleeding edge:
+```ruby
+gem "ransack"  # Latest official release for Rails 3
+```
 
 ```ruby
-gem "ransack", :git => "git://github.com/ernie/ransack.git" # Track git repo
+gem "ransack", git: "git://github.com/ernie/ransack.git" # Track git repo for Rails 3
 ```
 
 ## Usage
@@ -61,7 +63,7 @@ In your controller:
 ```ruby
 def index
   @q = Person.search(params[:q])
-  @people = @q.result(:distinct => true)
+  @people = @q.result(distinct: true)
 end
 ```
 
@@ -93,7 +95,7 @@ This means you'll need to tweak your routes...
 ```ruby
 resources :people do
   collection do
-    match 'search' => 'people#search', :via => [:get, :post], :as => :search
+    match 'search' => 'people#search', via: [:get, :post], as: :search
   end
 end
 ```
@@ -110,8 +112,8 @@ end
 ... and update your `search_form_for` line in the view ...
 
 ```erb
-<%= search_form_for @q, :url => search_people_path,
-                        :html => {:method => :post} do |f| %>
+<%= search_form_for @q, url: search_people_path,
+                        html: {method: :post} do |f| %>
 ```
 
 Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
@@ -151,7 +153,7 @@ end
 class SupervisorsController < ApplicationController
   def index
     @search = Supervisor.search(params[:q])
-    @supervisors = @search.result(:distinct => true)
+    @supervisors = @search.result(distinct: true)
   end
 end
 ```
