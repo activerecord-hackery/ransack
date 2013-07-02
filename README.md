@@ -17,13 +17,19 @@ for Ransack (or MetaSearch, for that matter). Try
 In your Gemfile:
 
 ```ruby
-gem "ransack"  # Last officially released gem
+gem "ransack"  # Last officially released gem (Rails 3)
 ```
 
-Or if you want to use the bleeding edge:
+Or if you want to use the bleeding edge (Rails 3):
 
 ```ruby
 gem "ransack", :git => "git://github.com/ernie/ransack.git" # Track git repo
+```
+
+For Rails 4, specify the 'rails-4' branch:
+
+```ruby
+gem 'ransack', :github => 'ernie/ransack', :branch => 'rails-4'
 ```
 
 ## Usage
