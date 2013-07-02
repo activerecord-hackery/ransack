@@ -5,7 +5,7 @@ rvm:
   - 2.0.0
   - ree
   - rbx-18mode
-  - ruby-head
+#  - ruby-head
 
 env:
   - RAILS=3-2-stable
