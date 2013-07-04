@@ -1,6 +1,4 @@
 rvm:
-  - 1.8.7
-  - 1.9.2
   - 1.9.3
   - 2.0.0
   - ree
@@ -10,13 +8,9 @@ rvm:
 env:
   - RAILS=4-0-stable
   - RAILS=3-2-stable
-  - RAILS=3-1-stable
-  - RAILS=3-0-stable
 
 matrix:
   exclude:
-    - rvm: 1.8.7
-      env: RAILS=4-0-stable
     - rvm: ree
       env: RAILS=4-0-stable
     - rvm: rbx-18mode
