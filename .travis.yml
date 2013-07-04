@@ -1,17 +1,7 @@
 rvm:
   - 1.9.3
   - 2.0.0
-  - ree
-  - rbx-18mode
 #  - ruby-head
 
 env:
   - RAILS=4-0-stable
-  - RAILS=3-2-stable
-
-matrix:
-  exclude:
-    - rvm: ree
-      env: RAILS=4-0-stable
-    - rvm: rbx-18mode
-      env: RAILS=4-0-stable
