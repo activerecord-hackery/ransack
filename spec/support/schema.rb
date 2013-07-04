@@ -6,7 +6,7 @@ ActiveRecord::Base.establish_connection(
 )
 
 class Person < ActiveRecord::Base
-  default_scope order('id DESC')
+  default_scope { order('id DESC') }
   belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :children, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :articles
