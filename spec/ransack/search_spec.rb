@@ -5,7 +5,7 @@ module Ransack
 
     describe '#build' do
       it 'creates Conditions for top-level attributes' do
-        search = Search.new(Person, :name_eq => 'Ernie')
+        search = Search.new(Person, name_eq: 'Ernie')
         condition = search.base[:name_eq]
         condition.should be_a Nodes::Condition
         condition.predicate.name.should eq 'eq'
@@ -14,7 +14,7 @@ module Ransack
       end
 
       it 'creates Conditions for association attributes' do
-        search = Search.new(Person, :children_name_eq => 'Ernie')
+        search = Search.new(Person, children_name_eq: 'Ernie')
         condition = search.base[:children_name_eq]
         condition.should be_a Nodes::Condition
         condition.predicate.name.should eq 'eq'
@@ -23,7 +23,7 @@ module Ransack
       end
 
       it 'creates Conditions for polymorphic belongs_to association attributes' do
-        search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
+        search = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie')
         condition = search.base[:notable_of_Person_type_name_eq]
         condition.should be_a Nodes::Condition
         condition.predicate.name.should eq 'eq'
@@ -32,7 +32,7 @@ module Ransack
       end
 
       it 'creates Conditions for multiple polymorphic belongs_to association attributes' do
-        search = Search.new(Note, :notable_of_Person_type_name_or_notable_of_Article_type_title_eq => 'Ernie')
+        search = Search.new(Note, notable_of_Person_type_name_or_notable_of_Article_type_title_eq: 'Ernie')
         condition = search.base[:notable_of_Person_type_name_or_notable_of_Article_type_title_eq]
         condition.should be_a Nodes::Condition
         condition.predicate.name.should eq 'eq'
@@ -42,16 +42,16 @@ module Ransack
       end
 
       it 'discards empty conditions' do
-        search = Search.new(Person, :children_name_eq => '')
+        search = Search.new(Person, children_name_eq: '')
         condition = search.base[:children_name_eq]
         condition.should be_nil
       end
 
       it 'accepts arrays of groupings' do
         search = Search.new(Person,
-          :g => [
-            {:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'},
-            {:m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert'},
+          g: [
+            { m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' },
+            { m: 'or', name_eq: 'Bert',  children_name_eq: 'Bert' },
           ]
         )
         ors = search.groupings
@@ -65,9 +65,9 @@ module Ransack
 
       it 'accepts "attributes" hashes for groupings' do
         search = Search.new(Person,
-          :g => {
-            '0' => {:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'},
-            '1' => {:m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert'},
+          g: {
+            '0' => { m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' },
+            '1' => { m: 'or', name_eq: 'Bert',  children_name_eq: 'Bert' },
           }
         )
         ors = search.groupings
@@ -81,9 +81,9 @@ module Ransack
 
       it 'accepts "attributes" hashes for conditions' do
         search = Search.new(Person,
-          :c => {
-            '0' => {:a => ['name'], :p => 'eq', :v => ['Ernie']},
-            '1' => {:a => ['children_name', 'parent_name'], :p => 'eq', :v => ['Ernie'], :m => 'or'}
+          c: {
+            '0' => { a: ['name'], p: 'eq', v: ['Ernie'] },
+            '1' => { a: ['children_name', 'parent_name'], p: 'eq', v: ['Ernie'], m: 'or' }
           }
         )
         conditions = search.base.conditions
@@ -94,10 +94,10 @@ module Ransack
       it 'creates Conditions for custom predicates that take arrays' do
         Ransack.configure do |config|
           config.add_predicate 'ary_pred',
-          :wants_array => true
+          wants_array: true
         end
 
-        search = Search.new(Person, :name_ary_pred => ['Ernie', 'Bert'])
+        search = Search.new(Person, name_ary_pred: ['Ernie', 'Bert'])
         condition = search.base[:name_ary_pred]
         condition.should be_a Nodes::Condition
         condition.predicate.name.should eq 'ary_pred'
@@ -106,39 +106,39 @@ module Ransack
       end
 
       it 'does not evaluate the query on #inspect' do
-        search = Search.new(Person, :children_id_in => [1, 2, 3])
+        search = Search.new(Person, children_id_in: [1, 2, 3])
         search.inspect.should_not match /ActiveRecord/
       end
     end
 
     describe '#result' do
       it 'evaluates conditions contextually' do
-        search = Search.new(Person, :children_name_eq => 'Ernie')
+        search = Search.new(Person, children_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
         where.to_sql.should match /"children_people"\."name" = 'Ernie'/
       end
 
       it 'evaluates compound conditions contextually' do
-        search = Search.new(Person, :children_name_or_name_eq => 'Ernie')
+        search = Search.new(Person, children_name_or_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
         where.to_sql.should match /"children_people"\."name" = 'Ernie' OR "people"\."name" = 'Ernie'/
       end
 
       it 'evaluates polymorphic belongs_to association conditions contextually' do
-        search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
+        search = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
         where.to_sql.should match /"people"."name" = 'Ernie'/
       end
 
       it 'evaluates nested conditions' do
-        search = Search.new(Person, :children_name_eq => 'Ernie',
-          :g => [{
-            :m => 'or',
-            :name_eq => 'Ernie',
-            :children_children_name_eq => 'Ernie'
+        search = Search.new(Person, children_name_eq: 'Ernie',
+          g: [{
+            m: 'or',
+            name_eq: 'Ernie',
+            children_children_name_eq: 'Ernie'
           }]
         )
         search.result.should be_an ActiveRecord::Relation
@@ -150,9 +150,9 @@ module Ransack
 
       it 'evaluates arrays of groupings' do
         search = Search.new(Person,
-          :g => [
-            {:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'},
-            {:m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert'},
+          g: [
+            { m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie'},
+            { m: 'or', name_eq: 'Bert',  children_name_eq: 'Bert'},
           ]
         )
         search.result.should be_an ActiveRecord::Relation
@@ -165,11 +165,13 @@ module Ransack
         second.should match /"children_people"."name" = 'Bert'/
       end
 
-      it 'returns distinct records when passed :distinct => true' do
-        search = Search.new(Person, :g => [{:m => 'or', :comments_body_cont => 'e', :articles_comments_body_cont => 'e'}])
-        search.result.all.should have(920).items
-        search.result(:distinct => true).should have(330).items
-        search.result.all.uniq.should eq search.result(:distinct => true).all
+      it 'returns distinct records when passed distinct: true' do
+        search = Search.new(Person, g: [
+          { m: 'or', comments_body_cont: 'e', articles_comments_body_cont: 'e' }
+        ])
+        search.result.load.should have(920).items
+        search.result(distinct: true).should have(330).items
+        search.result.load.uniq.should eq search.result(distinct: true).load
       end
     end
 
@@ -202,12 +204,12 @@ module Ransack
       it 'creates sorts based on multiple attributes/directions in hash format' do
         @s.sorts = {
           '0' => {
-            :name => 'id',
-            :dir => 'desc'
+            name: 'id',
+            dir: 'desc'
           },
           '1' => {
-            :name => 'name',
-            :dir => 'asc'
+            name: 'name',
+            dir: 'asc'
           }
         }
         @s.sorts.should have(2).items
@@ -239,7 +241,7 @@ module Ransack
       end
 
       it 'allows chaining to access nested conditions' do
-        @s.groupings = [{:m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie'}]
+        @s.groupings = [{ m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' }]
         @s.groupings.first.name_eq.should eq 'Ernie'
         @s.groupings.first.children_name_eq.should eq 'Ernie'
       end
