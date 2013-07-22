@@ -59,11 +59,12 @@ module Ransack
         query_hash = {}
         query_hash[search.context.search_key] = search_params.merge(:s => "#{attr_name} #{new_dir}")
         options.merge!(query_hash)
+        options_for_url = params.merge options
 
         url = if routing_proxy && respond_to?(routing_proxy)
-          send(routing_proxy).url_for(options)
+          send(routing_proxy).url_for(options_for_url)
         else
-          url_for(options)
+          url_for(options_for_url)
         end
 
         link_to [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe,
