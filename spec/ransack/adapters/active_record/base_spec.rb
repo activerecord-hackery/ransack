@@ -48,6 +48,21 @@ module Ransack
             s = Person.search(:doubled_name_eq => 'Aric SmithAric Smith')
             s.result.count.should eq 1
           end if defined?(Arel::Nodes::InfixOperation)
+
+          it "should remove empty key value pairs from the params hash" do
+            s = Person.search(:children_reversed_name_eq => '')
+            s.result.to_sql.should_not match /LEFT OUTER JOIN/
+          end
+
+          it "should keep proper key value pairs in the params hash" do
+            s = Person.search(:children_reversed_name_eq => 'Testing')
+            s.result.to_sql.should match /LEFT OUTER JOIN/
+          end
+
+          it "should function correctly when nil is passed in" do
+            s = Person.search(nil)
+          end
+
         end
 
         describe '#ransackable_attributes' do

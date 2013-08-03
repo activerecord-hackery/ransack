@@ -12,11 +12,13 @@ module Ransack
         end
 
         def ransack(params = {}, options = {})
-          Search.new(self, params, options)
+          Search.new(self, params ? params.delete_if {
+            |k, v| v.blank? && v != false } : params, options)
         end
 
         def ransacker(name, opts = {}, &block)
-          self._ransackers = _ransackers.merge name.to_s => Ransacker.new(self, name, opts, &block)
+          self._ransackers = _ransackers.merge name.to_s => Ransacker.new(
+            self, name, opts, &block)
         end
 
         def ransackable_attributes(auth_object = nil)
@@ -24,7 +26,7 @@ module Ransack
         end
 
         def ransackable_associations(auth_object = nil)
-          reflect_on_all_associations.map {|a| a.name.to_s}
+          reflect_on_all_associations.map { |a| a.name.to_s }
         end
 
       end
