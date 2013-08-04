@@ -7,7 +7,7 @@ module Ransack
     mattr_accessor :predicates, :options
     self.predicates = {}
     self.options = {
-        :search_key => :q
+        search_key: :q
     }
 
     def configure
@@ -27,9 +27,9 @@ module Ransack
       ['_any', '_all'].each do |suffix|
         self.predicates[name + suffix] = Predicate.new(
           opts.merge(
-            :name => name + suffix,
-            :arel_predicate => opts[:arel_predicate] + suffix,
-            :compound => true
+            name: name + suffix,
+            arel_predicate: opts[:arel_predicate] + suffix,
+            compound: true
           )
         )
       end if compounds

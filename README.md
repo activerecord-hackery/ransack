@@ -25,13 +25,13 @@ gem "ransack"  # Last officially released gem (Rails 3)
 Or if you want to use the bleeding edge (Rails 3):
 
 ```ruby
-gem "ransack", :git => "git://github.com/ernie/ransack.git" # Track git repo (Rails 3)
+gem "ransack", github: "ernie/ransack" # Track git repo (Rails 3)
 ```
 
 For Rails 4, specify the "rails-4" branch:
 
 ```ruby
-gem "ransack", github: "ernie/ransack", branch: "rails-4" # Use rails 4 branch
+gem "ransack", github: "ernie/ransack", branch: "rails-4" # Use the Rails 4 branch
 ```
 
 ## Usage
@@ -54,12 +54,12 @@ If you're coming from MetaSearch, things to note:
      is passed to it.
   3. Common ActiveRecord::Relation methods are no longer delegated by the search object.
      Instead, you will get your search results (an ActiveRecord::Relation in the case of
-     the ActiveRecord adapter) via a call to `Search#result`. If passed `:distinct => true`,
+     the ActiveRecord adapter) via a call to `Search#result`. If passed `distinct: true`,
      `result` will generate a `SELECT DISTINCT` to avoid returning duplicate rows, even if
      conditions on a join would otherwise result in some.
 
      Please note that for many databases, a sort on an associated table's columns will
-     result in invalid SQL with `:distinct => true` -- in those cases, you're on your own,
+     result in invalid SQL with `distinct: true` -- in those cases, you're on your own,
      and will need to modify the result as needed to allow these queries to work. Thankfully,
      9 times out of 10, sort against the search's base is sufficient, though, as that's
      generally what's being displayed on your results page.
@@ -119,7 +119,7 @@ end
 
 ```erb
 <%= search_form_for @q, url: search_people_path,
-                        html: {method: :post} do |f| %>
+                        html: { method: :post } do |f| %>
 ```
 
 Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
