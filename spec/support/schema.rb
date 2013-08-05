@@ -6,7 +6,11 @@ ActiveRecord::Base.establish_connection(
 )
 
 class Person < ActiveRecord::Base
-  default_scope order('id DESC')
+  if ActiveRecord::VERSION::STRING =~ /^3/
+    default_scope order('id DESC')
+  else
+    default_scope { order(id: :desc) }
+  end
   belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :children, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :articles
@@ -46,46 +50,44 @@ end
 
 module Schema
   def self.create
-    ActiveRecord::Base.silence do
-      ActiveRecord::Migration.verbose = false
+    ActiveRecord::Migration.verbose = false
 
-      ActiveRecord::Schema.define do
-        create_table :people, :force => true do |t|
-          t.integer  :parent_id
-          t.string   :name
-          t.integer  :salary
-          t.boolean  :awesome, :default => false
-          t.timestamps
-        end
-
-        create_table :articles, :force => true do |t|
-          t.integer :person_id
-          t.string  :title
-          t.text    :body
-        end
-
-        create_table :comments, :force => true do |t|
-          t.integer :article_id
-          t.integer :person_id
-          t.text    :body
-        end
-
-        create_table :tags, :force => true do |t|
-          t.string :name
-        end
-
-        create_table :articles_tags, :force => true, :id => false do |t|
-          t.integer :article_id
-          t.integer :tag_id
-        end
-
-        create_table :notes, :force => true do |t|
-          t.integer :notable_id
-          t.string  :notable_type
-          t.string  :note
-        end
-
+    ActiveRecord::Schema.define do
+      create_table :people, :force => true do |t|
+        t.integer  :parent_id
+        t.string   :name
+        t.integer  :salary
+        t.boolean  :awesome, :default => false
+        t.timestamps
       end
+
+      create_table :articles, :force => true do |t|
+        t.integer :person_id
+        t.string  :title
+        t.text    :body
+      end
+
+      create_table :comments, :force => true do |t|
+        t.integer :article_id
+        t.integer :person_id
+        t.text    :body
+      end
+
+      create_table :tags, :force => true do |t|
+        t.string :name
+      end
+
+      create_table :articles_tags, :force => true, :id => false do |t|
+        t.integer :article_id
+        t.integer :tag_id
+      end
+
+      create_table :notes, :force => true do |t|
+        t.integer :notable_id
+        t.string  :notable_type
+        t.string  :note
+      end
+
     end
 
     10.times do
