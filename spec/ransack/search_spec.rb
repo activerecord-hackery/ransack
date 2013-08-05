@@ -167,7 +167,7 @@ module Ransack
 
       it 'returns distinct records when passed :distinct => true' do
         search = Search.new(Person, :g => [{:m => 'or', :comments_body_cont => 'e', :articles_comments_body_cont => 'e'}])
-        if ActiveRecord::VERSION::STRING =~ /^3/
+        if ActiveRecord::VERSION::MAJOR == 3
           all_or_load, uniq_or_distinct = :all, :uniq
         else
           all_or_load, uniq_or_distinct = :load, :distinct

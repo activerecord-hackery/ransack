@@ -6,7 +6,7 @@ ActiveRecord::Base.establish_connection(
 )
 
 class Person < ActiveRecord::Base
-  if ActiveRecord::VERSION::STRING =~ /^3/
+  if ActiveRecord::VERSION::MAJOR == 3
     default_scope order('id DESC')
   else
     default_scope { order(id: :desc) }

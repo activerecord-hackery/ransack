@@ -23,7 +23,7 @@ module Ransack
     module_function
     # replace % \ to \% \\
     def escape_wildcards(unescaped)
-      if ActiveRecord::VERSION::STRING =~ /^3/
+      if ActiveRecord::VERSION::MAJOR == 3
         unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
       else
         unescaped.to_s.gsub(/\\/){ "\\\\" }.gsub(/%/, "\\%")

@@ -14,7 +14,7 @@ module Ransack
       end
 
       it (
-        if ActiveRecord::VERSION::STRING =~ /^3/
+        if ActiveRecord::VERSION::MAJOR == 3
           "escapes '%', '.' and '\\\\' in value"
         else
           "escapes % and \\ in value"
@@ -45,7 +45,7 @@ module Ransack
     describe 'cont' do
   
       it_has_behavior 'wildcard escaping', :name_cont, (
-        if ActiveRecord::VERSION::STRING =~ /^3/
+        if ActiveRecord::VERSION::MAJOR == 3
           /"people"."name" LIKE '%\\%\\._\\\\%'/
         else
           /"people"."name" LIKE '%\\%._\\\\%'/ 
@@ -61,7 +61,7 @@ module Ransack
 
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont, (
-        if ActiveRecord::VERSION::STRING =~ /^3/
+        if ActiveRecord::VERSION::MAJOR == 3
           /"people"."name" NOT LIKE '%\\%\\._\\\\%'/
         else
           /"people"."name" NOT LIKE '%\\%._\\\\%'/
