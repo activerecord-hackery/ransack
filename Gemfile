@@ -1,11 +1,11 @@
-source "http://rubygems.org"
+source "https://rubygems.org"
 gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '3-2-stable'
+rails = ENV['RAILS'] || '4-0-stable'
 
-gem 'arel', '3.0.2'
+gem 'arel'
 
 case rails
 when /\// # A path

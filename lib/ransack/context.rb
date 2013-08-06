@@ -28,7 +28,7 @@ module Ransack
     end
 
     def initialize(object, options = {})
-      @object = object.scoped
+      @object = relation_for(object)
       @klass = @object.klass
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::OuterJoin
@@ -41,6 +41,20 @@ module Ransack
         if parent && attr_name
           hash[key] = [parent, attr_name]
         end
+      end
+    end
+
+    def klassify(obj)
+      if Class === obj && ::ActiveRecord::Base > obj
+        obj
+      elsif obj.respond_to? :klass
+        obj.klass
+      elsif obj.respond_to? :active_record  # Rails 3
+        obj.active_record
+      elsif obj.respond_to? :base_klass     # Rails 4
+        obj.base_klass
+      else
+        raise ArgumentError, "Don't know how to klassify #{obj}"
       end
     end
 

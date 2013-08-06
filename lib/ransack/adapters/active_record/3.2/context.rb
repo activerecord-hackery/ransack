@@ -1,5 +1,5 @@
 require 'ransack/context'
-require 'ransack/adapters/active_record/3.2/context'
+require 'ransack/adapters/active_record/3.1/context'
 require 'ransack/adapters/active_record/compat'
 require 'polyamorous'
 
@@ -8,13 +8,15 @@ module Ransack
     module ActiveRecord
       class Context < ::Ransack::Context
 
+        # Redefine a few things for ActiveRecord 3.2.
+
         def initialize(object, options = {})
           super
           @arel_visitor = @engine.connection.visitor
         end
 
         def relation_for(object)
-          object.all
+          object.scoped
         end
 
         def type_for(attr)
@@ -24,7 +26,7 @@ module Ransack
 
           schema_cache = @engine.connection.schema_cache
           raise "No table named #{table} exists" unless schema_cache.table_exists?(table)
-          schema_cache.columns_hash(table)[name].type
+          schema_cache.columns_hash[table][name].type
         end
 
         def evaluate(search, opts = {})
@@ -33,7 +35,7 @@ module Ransack
           if search.sorts.any?
             relation = relation.except(:order).reorder(viz.accept(search.sorts))
           end
-          opts[:distinct] ? relation.distinct : relation
+          opts[:distinct] ? relation.uniq : relation
         end
 
       end

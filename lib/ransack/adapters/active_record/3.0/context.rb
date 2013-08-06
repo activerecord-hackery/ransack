@@ -10,10 +10,16 @@ module Ransack
         # Because the AR::Associations namespace is insane
         JoinDependency = ::ActiveRecord::Associations::ClassMethods::JoinDependency
         JoinBase = JoinDependency::JoinBase
-        
+
+        # Redefine a few things for ActiveRecord 3.0.
+
         def initialize(object, options = {})
           super
           @arel_visitor = Arel::Visitors.visitor_for @engine
+        end
+
+        def relation_for(object)
+          object.scoped
         end
 
         def evaluate(search, opts = {})
@@ -46,18 +52,6 @@ module Ransack
 
         def table_for(parent)
           parent.table
-        end
-
-        def klassify(obj)
-          if Class === obj && ::ActiveRecord::Base > obj
-            obj
-          elsif obj.respond_to? :klass
-            obj.klass
-          elsif obj.respond_to? :active_record
-            obj.active_record
-          else
-            raise ArgumentError, "Don't know how to klassify #{obj}"
-          end
         end
 
         def type_for(attr)
