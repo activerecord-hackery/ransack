@@ -4,4 +4,7 @@ rvm:
   - 2.0.0
 
 env:
+  - RAILS=4-0-stable
   - RAILS=3-2-stable
+  - RAILS=3-1-stable
+  - RAILS=3-0-stable
