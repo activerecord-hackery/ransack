@@ -9,7 +9,9 @@ class Person < ActiveRecord::Base
   if ActiveRecord::VERSION::MAJOR == 3
     default_scope order('id DESC')
   else
-    default_scope { order(id: :desc) }
+    default_scope { order('id DESC') }
+    # The new activerecord syntax "{ order(id: :desc) }" does not work
+    # with Ruby 1.8.7 which we still need to support for Rails 3
   end
   belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :children, :class_name => 'Person', :foreign_key => :parent_id

@@ -164,7 +164,7 @@ module Ransack
         else
           [obj]
         end).
-        compact.flat_map { |v| [prefix, v].compact.join('_') }
+        compact.flatten.map { |v| [prefix, v].compact.join('_') }
       end
 
       def attr_from_base_and_column(base, column)

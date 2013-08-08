@@ -32,7 +32,7 @@ module Ransack
             :name, :controller => 'people'
           )
         }
-        it { should match (
+        it { should match(
           if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
             /people\?q%5Bs%5D=name\+asc/
           else
@@ -50,7 +50,7 @@ module Ransack
             :name, :controller => 'people'
           )
         }
-        it { should match (
+        it { should match(
           if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
             /people\?people_search%5Bs%5D=name\+asc/
           else
@@ -66,7 +66,7 @@ module Ransack
             :name, :controller => 'people'
           )
         }
-        it { should match (
+        it { should match(
           if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
             /people\?people_search%5Bs%5D=name\+asc/
           else
@@ -78,7 +78,7 @@ module Ransack
 
       context 'view has existing parameters' do
         before do
-          @controller.view_context.params.merge!({exist: 'existing'})
+          @controller.view_context.params.merge!({ :exist => 'existing' })
         end
         describe '#sort_link should not remove existing params' do
           subject {
