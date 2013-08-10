@@ -27,6 +27,10 @@ module Ransack
           reflect_on_all_associations.map {|a| a.name.to_s}
         end
 
+        def ransackable_search_term?(term)
+          Nodes::Grouping.new(Context.for(self), "and").attribute_method?(term.to_s)
+        end
+
       end
     end
   end

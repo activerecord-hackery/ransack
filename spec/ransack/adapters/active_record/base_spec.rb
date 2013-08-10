@@ -66,6 +66,15 @@ module Ransack
           it { should include 'articles' }
         end
 
+        describe '#ransackable_search_term?' do
+          it 'determines if a provided search key for a model can be ransackable' do
+            Person.ransackable_search_term?('name_eq').should be_true
+            Person.ransackable_search_term?(:name_eq).should be_true
+            Person.ransackable_search_term?('does_not_exist_eq').should be_false
+            Person.ransackable_search_term?(:does_not_exist_eq).should be_false
+          end
+        end
+
       end
     end
   end

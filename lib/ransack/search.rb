@@ -31,7 +31,11 @@ module Ransack
         when 's', 'sorts'
           send("#{key}=", value)
         else
-          base.send("#{key}=", value) if base.attribute_method?(key)
+          if base.attribute_method?(key)
+            base.send("#{key}=", value)
+          else 
+            raise UnknownConditionError, "Unknown search condition: #{key}" unless Ransack.options[:ignore_unknown_conditions]
+          end
         end
       end
       self

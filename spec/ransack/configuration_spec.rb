@@ -55,5 +55,24 @@ module Ransack
       Ransack.predicates.should_not have_key 'test_array_predicate_any'
       Ransack.predicates.should_not have_key 'test_array_predicate_all'
     end
+
+    it 'throws errors on non-existent conditions if you tell it to' do
+      # store original state so we can restore it later
+      before = Ransack.options.clone
+
+      Ransack.configure do |config|
+        config.ignore_unknown_conditions = false
+      end
+
+      expect {Search.new(Person, {'not_a_condition' => 'foo'})}.to raise_error UnknownConditionError
+
+      # restore original state so we don't break other tests
+      Ransack.options = before
+    end
+
+    it 'ignores non-existent conditions by default' do
+      expect {Search.new(Person, {'not_a_condition' => 'foo'})}.to_not raise_error(UnknownConditionError)
+    end
+
   end
 end
