@@ -3,7 +3,7 @@ module Ransack
 
     attr_reader :name, :type, :formatter, :args
 
-    delegate :call, :to => :@callable
+    delegate :call, to: :@callable
 
     def initialize(klass, name, opts = {}, &block)
       @klass, @name = klass, name

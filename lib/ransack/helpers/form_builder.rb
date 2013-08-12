@@ -7,7 +7,8 @@ module Ransack
         options = args.extract_options!
         text = args.first
         i18n = options[:i18n] || {}
-        text ||= object.translate(method, i18n.reverse_merge(:include_associations => true)) if object.respond_to? :translate
+        text ||= object.translate(method, i18n.reverse_merge(include_associations: true)
+          ) if object.respond_to? :translate
         super(method, text, options, &block)
       end
 
@@ -18,52 +19,72 @@ module Ransack
       end
 
       def attribute_select(options = {}, html_options = {})
-        raise ArgumentError, "attribute_select must be called inside a search FormBuilder!" unless object.respond_to?(:context)
+        raise ArgumentError,
+          "attribute_select must be called inside a search FormBuilder!" unless object.
+          respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           @template.grouped_collection_select(
-            @object_name, :name, attribute_collection_for_bases(bases), :last, :first, :first, :last,
+            @object_name, :name,
+            attribute_collection_for_bases(bases),
+            :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         else
           collection = object.context.searchable_attributes(bases.first).map do |c|
             [
               attr_from_base_and_column(bases.first, c),
-              Translate.attribute(attr_from_base_and_column(bases.first, c), :context => object.context)
+              Translate.attribute(
+                attr_from_base_and_column(bases.first, c), context: object.context)
             ]
           end
           @template.collection_select(
-            @object_name, :name, collection, :first, :last,
+            @object_name, :name,
+            collection,
+            :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         end
       end
 
       def sort_select(options = {}, html_options = {})
-        raise ArgumentError, "sort_select must be called inside a search FormBuilder!" unless object.respond_to?(:context)
+        raise ArgumentError,
+          "sort_select must be called inside a search FormBuilder!" unless object.
+          respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           @template.grouped_collection_select(
-            @object_name, :name, attribute_collection_for_bases(bases), :last, :first, :first, :last,
+            @object_name, :name,
+            attribute_collection_for_bases(bases),
+            :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
-          ) + @template.collection_select(
-            @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
+          ) +
+          @template.collection_select(
+            @object_name, :dir,
+            [['asc', object.translate('asc')], ['desc', object.translate('desc')]],
+            :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         else
           collection = object.context.searchable_attributes(bases.first).map do |c|
             [
               attr_from_base_and_column(bases.first, c),
-              Translate.attribute(attr_from_base_and_column(bases.first, c), :context => object.context)
+              Translate.attribute(
+                attr_from_base_and_column(bases.first, c), context: object.context)
             ]
           end
           @template.collection_select(
-            @object_name, :name, collection, :first, :last,
+            @object_name, :name,
+            collection,
+            :first, :last,
             objectify_options(options), @default_options.merge(html_options)
-          ) + @template.collection_select(
-            @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
+          ) +
+          @template.collection_select(
+            @object_name, :dir,
+            [['asc', object.translate('asc')], ['desc', object.translate('desc')]],
+            :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         end
@@ -108,32 +129,39 @@ module Ransack
         name = "#{options[:object_name] || object_name}[#{name}]"
         output = ActiveSupport::SafeBuffer.new
         objects.each do |child|
-          output << @template.fields_for("#{name}[#{options[:child_index] || nested_child_index(name)}]", child, options, &block)
+          output << @template.fields_for("#{name}[#{
+            options[:child_index] || nested_child_index(name)
+            }]", child, options, &block)
         end
         output
       end
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        keys = options[:compounds] ? Predicate.names : Predicate.names.reject {|k| k.match(/_(any|all)$/)}
+        keys = options[:compounds] ? Predicate.names : Predicate.names.
+          reject { |k| k.match(/_(any|all)$/) }
         if only = options[:only]
           if only.respond_to? :call
-            keys = keys.select {|k| only.call(k)}
+            keys = keys.select { |k| only.call(k) }
           else
             only = Array.wrap(only).map(&:to_s)
-            keys = keys.select {|k| only.include? k.sub(/_(any|all)$/, '')}
+            keys = keys.select { |k| only.include? k.sub(/_(any|all)$/, '') }
           end
         end
 
         @template.collection_select(
-          @object_name, :p, keys.map {|k| [k, Translate.predicate(k)]}, :first, :last,
+          @object_name, :p,
+          keys.map { |k| [k, Translate.predicate(k)] },
+          :first, :last,
           objectify_options(options), @default_options.merge(html_options)
         )
       end
 
       def combinator_select(options = {}, html_options = {})
         @template.collection_select(
-          @object_name, :m, combinator_choices, :first, :last,
+          @object_name, :m,
+          combinator_choices,
+          :first, :last,
           objectify_options(options), @default_options.merge(html_options)
         )
       end
@@ -163,8 +191,7 @@ module Ransack
           end
         else
           [obj]
-        end
-        ).
+        end).
         compact.flat_map { |v| [prefix, v].compact.join('_') }
       end
 
@@ -176,11 +203,12 @@ module Ransack
         bases.map do |base|
           begin
           [
-            Translate.association(base, :context => object.context),
+            Translate.association(base, context: object.context),
             object.context.searchable_attributes(base).map do |c|
               [
                 attr_from_base_and_column(base, c),
-                Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
+                Translate.attribute(
+                  attr_from_base_and_column(base, c), context: object.context)
               ]
             end
           ]

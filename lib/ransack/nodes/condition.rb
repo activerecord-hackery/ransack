@@ -37,7 +37,8 @@ module Ransack
       end
 
       def valid?
-        attributes.detect(&:valid?) && predicate && valid_arity? && predicate.validate(values, default_type) && valid_combinator?
+        attributes.detect(&:valid?) && predicate && valid_arity? && predicate.
+          validate(values, default_type) && valid_combinator?
       end
 
       def valid_arity?
@@ -62,7 +63,8 @@ module Ransack
             self.attributes << attr if attr.valid?
           end
         else
-          raise ArgumentError, "Invalid argument (#{args.class}) supplied to attributes="
+          raise ArgumentError,
+            "Invalid argument (#{args.class}) supplied to attributes="
         end
       end
       alias :a= :attributes=
@@ -85,7 +87,8 @@ module Ransack
             self.values << val
           end
         else
-          raise ArgumentError, "Invalid argument (#{args.class}) supplied to values="
+          raise ArgumentError,
+            "Invalid argument (#{args.class}) supplied to values="
         end
       end
       alias :v= :values=
@@ -95,7 +98,7 @@ module Ransack
       end
 
       def combinator=(val)
-        @combinator = ['and', 'or'].detect {|v| v == val.to_s} || nil
+        @combinator = ['and', 'or'].detect { |v| v == val.to_s } || nil
       end
       alias :m= :combinator=
       alias :m :combinator
@@ -113,7 +116,8 @@ module Ransack
       end
 
       def value
-        predicate.wants_array ? values.map {|v| v.cast(default_type)} : values.first.cast(default_type)
+        predicate.wants_array ? values.map {|v| v.cast(default_type)} : values.
+          first.cast(default_type)
       end
 
       def build(params)
@@ -201,17 +205,22 @@ module Ransack
       end
 
       def inspect
-        data =[['attributes', a.try(:map, &:name)], ['predicate', p], ['combinator', m], ['values', v.try(:map, &:value)]].reject { |e|
-          e[1].blank?
-        }.map { |v| "#{v[0]}: #{v[1]}" }.join(', ')
+        data = [
+                ['attributes', a.try(:map, &:name)],
+                ['predicate', p],
+                ['combinator', m],
+                ['values', v.try(:map, &:value)]
+               ].
+               reject { |e| e[1].blank? }.
+               map { |v| "#{v[0]}: #{v[1]}" }.
+               join(', ')
         "Condition <#{data}>"
       end
 
       private
 
       def valid_combinator?
-        attributes.size < 2 ||
-        ['and', 'or'].include?(combinator)
+        attributes.size < 2 || ['and', 'or'].include?(combinator)
       end
 
     end
