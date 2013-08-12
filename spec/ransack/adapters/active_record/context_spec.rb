@@ -13,7 +13,7 @@ module Ransack
         end
 
         describe '#evaluate' do
-          it 'evaluates search obects' do
+          it 'evaluates search objects' do
             search = Search.new(Person, :name_eq => 'Joe Blow')
             result = subject.evaluate(search)
 
