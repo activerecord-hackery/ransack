@@ -14,12 +14,10 @@ module Ransack
              :translate, to: :base
 
     def initialize(object, params = {}, options = {})
-      params ||= {}
+      (params ||= {}).delete_if { |k, v| v.blank? && v != false }
       @context = Context.for(object, options)
       @context.auth_object = options[:auth_object]
       @base = Nodes::Grouping.new(@context, 'and')
-      params = (params.delete_if { |k, v| v.blank? && v != false }
-        ) if params.present?
       build(params.with_indifferent_access)
     end
 
