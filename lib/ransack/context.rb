@@ -131,6 +131,10 @@ module Ransack
       traverse(str).ransackable_attributes(auth_object)
     end
 
+    def sortable_attributes(str = '')
+      traverse(str).ransortable_attributes(auth_object)
+    end
+
     def searchable_associations(str = '')
       traverse(str).ransackable_associations(auth_object)
     end
