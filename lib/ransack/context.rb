@@ -35,6 +35,8 @@ module Ransack
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @base = @join_dependency.join_base
       @engine = @base.arel_engine
+      @options = Ransack.options[:context_options] || {}
+
       @default_table = Arel::Table.new(@base.table_name, :as => @base.aliased_table_name, :engine => @engine)
       @bind_pairs = Hash.new do |hash, key|
         parent, attr_name = get_parent_and_attribute_name(key.to_s)

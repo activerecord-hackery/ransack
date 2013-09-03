@@ -181,12 +181,13 @@ module Ransack
         else
           all_or_load, uniq_or_distinct = :load, :distinct
         end
-        search.result.send(all_or_load).
-          should have(920).items
-        search.result(:distinct => true).
+
+        search.result.
           should have(330).items
-        search.result.send(all_or_load).send(uniq_or_distinct).
-          should eq search.result(:distinct => true).send(all_or_load)
+        search.result(:distinct => false).send(all_or_load).
+          should have(920).items
+        search.result.
+          should eq search.result(:distinct => false).send(all_or_load).send(uniq_or_distinct)
       end
     end
 

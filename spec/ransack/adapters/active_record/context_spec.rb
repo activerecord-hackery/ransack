@@ -13,20 +13,53 @@ module Ransack
         end
 
         describe '#evaluate' do
-          it 'evaluates search objects' do
+          it 'evaluates search objects DISTINCTly by default' do
             search = Search.new(Person, :name_eq => 'Joe Blow')
             result = subject.evaluate(search)
 
             result.should be_an ::ActiveRecord::Relation
             result.to_sql.should match /"name" = 'Joe Blow'/
+            result.to_sql.should match /SELECT DISTINCT/
           end
 
-          it 'SELECTs DISTINCT when :distinct => true' do
+          describe 'with user defined custom options of distinct: false' do
+            let(:previous_options) { Ransack.options.clone }
+
+            before do 
+              Ransack.configure do |config|
+                config.context_options = { :distinct => false }
+              end
+            end
+
+            it 'evaluates a search with the distinct: false option' do
+              search = Search.new(Person, :name_eq => 'Joe Blow')
+
+              result = subject.evaluate(search)
+
+              result.should be_an ::ActiveRecord::Relation
+              result.to_sql.should_not match /SELECT DISTINCT/ 
+            end
+
+            it 'evaluates searches with distinct: true when specified in search' do
+              search = Search.new(Person, :name_eq => 'Joe Blow')
+              result = subject.evaluate(search, :distinct => true)
+
+              result.should be_an ::ActiveRecord::Relation
+              result.to_sql.should match /SELECT DISTINCT/
+
+              # Return to default options value
+              Ransack.configure do |config|
+                config.context_options = { :distinct => true }
+              end
+            end
+          end
+
+          it 'Does not SELECT DISTINCT when :distinct => false' do
             search = Search.new(Person, :name_eq => 'Joe Blow')
-            result = subject.evaluate(search, :distinct => true)
+            result = subject.evaluate(search, :distinct => false)
 
             result.should be_an ::ActiveRecord::Relation
-            result.to_sql.should match /SELECT DISTINCT/
+            result.to_sql.should_not match /SELECT DISTINCT/
           end
         end
 

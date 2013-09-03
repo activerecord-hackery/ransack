@@ -7,7 +7,10 @@ module Ransack
     mattr_accessor :predicates, :options
     self.predicates = {}
     self.options = {
-        :search_key => :q
+        :search_key => :q,
+        :context_options => {
+          :distinct => true
+        }
     }
 
     def configure
@@ -40,5 +43,8 @@ module Ransack
       self.options[:search_key] = name
     end
 
+    def context_options=(opts = {})
+      self.options[:context_options] = opts
+    end
   end
 end

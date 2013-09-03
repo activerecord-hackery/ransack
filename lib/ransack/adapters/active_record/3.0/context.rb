@@ -23,11 +23,15 @@ module Ransack
         end
 
         def evaluate(search, opts = {})
+          # merge ransack init configuration options with result options
+          opts = @options.merge opts
+
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
           if search.sorts.any?
             relation = relation.except(:order).reorder(viz.accept(search.sorts))
           end
+
           opts[:distinct] ? relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
         end
 
