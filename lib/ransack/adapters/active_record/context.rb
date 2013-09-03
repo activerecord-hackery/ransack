@@ -28,14 +28,16 @@ module Ransack
         end
 
         def evaluate(search, opts = {})
+          opts = @options.merge opts
+          
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
           if search.sorts.any?
             relation = relation.except(:order).reorder(viz.accept(search.sorts))
           end
+
           opts[:distinct] ? relation.distinct : relation
         end
-
       end
     end
   end

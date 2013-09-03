@@ -46,6 +46,18 @@ module Ransack
       Ransack.options = before
     end
 
+    it 'changes default Context evaluate options' do
+      before = Ransack.options.clone
+
+      Ransack.configure do |config|
+        config.context_options = { :distinct => false }
+      end
+      
+      Ransack.options[:context_options][:distinct].should eq false
+
+      Ransack.options = before
+    end
+
     it 'adds predicates that take arrays, overriding compounds' do
       Ransack.configure do |config|
         config.add_predicate :test_array_predicate, :wants_array => true, :compounds => true
