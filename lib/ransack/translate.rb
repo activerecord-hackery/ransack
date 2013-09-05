@@ -23,7 +23,7 @@ module Ransack
       attribute_names = attributes_str.split(/_and_|_or_/)
       combinator = attributes_str.match(/_and_/) ? :and : :or
       defaults = base_ancestors.map do |klass|
-        :"ransack.attributes.#{klass.model_name.singular}.#{original_name}"
+        :"ransack.attributes.#{i18n_key(klass)}.#{original_name}"
       end
 
       translated_names = attribute_names.map do |attr|
@@ -50,7 +50,7 @@ module Ransack
         raise ArgumentError, "A context is required to translate associations"
       end
 
-      defaults = key.blank? ? [:"#{context.klass.i18n_scope}.models.#{context.klass.model_name.singular}"] : [:"ransack.associations.#{context.klass.model_name.singular}.#{key}"]
+      defaults = key.blank? ? [:"#{context.klass.i18n_scope}.models.#{i18n_key(context.klass)}"] : [:"ransack.associations.#{i18n_key(context.klass)}.#{key}"]
       defaults << context.traverse(key).model_name.human
       options = {:count => 1, :default => defaults}
       I18n.translate(defaults.shift, options)
@@ -65,20 +65,20 @@ module Ransack
       interpolations = {}
       interpolations[:attr_fallback_name] = I18n.translate(
         (associated_class ?
-          :"ransack.attributes.#{associated_class.model_name.singular}.#{attr_name}" :
-          :"ransack.attributes.#{context.klass.model_name.singular}.#{attr_name}"
+          :"ransack.attributes.#{i18n_key(associated_class)}.#{attr_name}" :
+          :"ransack.attributes.#{i18n_key(context.klass)}.#{attr_name}"
         ),
         :default => [
           (associated_class ?
-            :"#{associated_class.i18n_scope}.attributes.#{associated_class.model_name.singular}.#{attr_name}" :
-            :"#{context.klass.i18n_scope}.attributes.#{context.klass.model_name.singular}.#{attr_name}"
+            :"#{associated_class.i18n_scope}.attributes.#{i18n_key(associated_class)}.#{attr_name}" :
+            :"#{context.klass.i18n_scope}.attributes.#{i18n_key(context.klass)}.#{attr_name}"
           ),
           :".attributes.#{attr_name}",
           attr_name.humanize
         ]
       )
       defaults = [
-        :"ransack.attributes.#{context.klass.model_name.singular}.#{name}"
+        :"ransack.attributes.#{i18n_key(context.klass)}.#{name}"
       ]
       if include_associations && associated_class
         defaults << '%{association_name} %{attr_fallback_name}'
@@ -88,6 +88,14 @@ module Ransack
       end
       options = {:count => 1, :default => defaults}
       I18n.translate(defaults.shift, options.merge(interpolations))
+    end
+
+    def self.i18n_key(klass)
+      if ActiveRecord::VERSION::MAJOR == 3 && ActiveRecord::VERSION::MINOR == 0
+        klass.model_name.i18n_key.to_s.tr('.', '/')
+      else
+        klass.model_name.i18n_key.to_s
+      end
     end
   end
 end
