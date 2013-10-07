@@ -57,6 +57,10 @@ module Ransack
         @s.name_cont = 'ric'
         @s.result.to_sql.should match /"people"."name" LIKE '%ric%'/
       end
+      it 'escapes % and \\ in value' do
+        @s.name_cont = '%\\'
+        @s.result.to_sql.should match /"people"."name" LIKE '%\\%\\\\%'/
+      end
     end
 
     describe 'not_cont' do

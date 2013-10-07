@@ -173,6 +173,11 @@ end
 <% end %>
 ```
 
+## I18n
+
+Take a look at our locale file on ``lib/ransack/locale/en.yml`` to check all available messages. You may also be interested in one of the many translations that are available on:
+
+http://www.localeapp.com/projects/2999
 
 ## Contributions
 
