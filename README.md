@@ -173,6 +173,37 @@ end
 <% end %>
 ```
 
+### Authorization
+
+By default Ransack exposes search for any model column, so take care to
+sanitize params and only pass allowed keys. Alternately, you can define these
+methods on your model classes for applying selective authorization based on a
+given auth object: 
+
+* `def ransackable_attributes(auth_object = nil)`
+* `def ransackable_associations(auth_object = nil)`
+* `def ransackable_scopes(auth_object = nil)`
+* `def ransortable_attributes(auth_object = nil)` (for sorting)
+
+Any values not included in the arrays returned from these methods will be
+ignored.  The auth object should be optional when building the search, and is
+ignored by default:
+
+```
+Employee.search({'salary_gt' => 100000}, {auth_object: current_user})
+```
+
+### Scopes
+
+Searching by scope requires defining a whitelist of `ransackable_scopes` on the
+model class. By default all class methods (e.g. scopes) are ignored. Scopes
+will be applied for matching `true` values, or for given values if the scope
+accepts a value:
+
+```
+Employee.search({'active' => true, 'hired_since' => '2013-01-01'})
+```
+
 ## I18n
 
 Take a look at our locale file on ``lib/ransack/locale/en.yml`` to check all available messages. You may also be interested in one of the many translations that are available on:
