@@ -33,6 +33,7 @@ module Ransack
       end
 
       def dir=(dir)
+        dir = dir && dir.downcase
         @dir = %w(asc desc).include?(dir) ? dir : 'asc'
       end
 
