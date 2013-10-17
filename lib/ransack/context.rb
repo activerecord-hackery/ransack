@@ -66,12 +66,12 @@ module Ransack
     end
 
     def chain_scope(scope, args)
-      scope_method = @klass.public_method(scope)
+      scope_method = @klass.method(scope)
       return unless scope_method && args != false
       @object = if scope_method.arity < 1 && args == true
-                  @object.public_send(scope)
+                  @object.send(scope)
                 else
-                  @object.public_send(scope, *args)
+                  @object.send(scope, *args)
                 end
     end
 

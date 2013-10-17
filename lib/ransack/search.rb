@@ -26,16 +26,12 @@ module Ransack
     end
 
     def build(params)
-      attribute_method = proc { |k| @base.attribute_method?(k) }
-      scope_method     = proc { |k| @context.ransackable_scope?(k, @context.object) }
-
       collapse_multiparameter_attributes!(params).each do |key, value|
-        case key
-        when 's', 'sorts'
+        if key == 's' || key == 'sorts'
           send("#{key}=", value)
-        when attribute_method
+        elsif @base.attribute_method?(key)
           base.send("#{key}=", value)
-        when scope_method
+        elsif @context.ransackable_scope?(key, @context.object)
           @context.chain_scope(key, value)
         end
       end
