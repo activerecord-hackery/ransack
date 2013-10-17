@@ -20,15 +20,12 @@ module Ransack
 
           context 'with scopes' do
             before do
-              Person.stub! :ransackable_scopes => [:public, :over_age]
-              Person.scope :restricted,  -> { Person.where("restricted = 1") }
-              Person.scope :public,      -> { Person.where("public = 1") }
-              Person.scope :over_age, ->(y) { Person.where(["age > ?", y]) }
+              Person.stub! :ransackable_scopes => [:active, :over_age]
             end
 
             it "applies true scopes" do
-              search =  Person.search('public' => true)
-              search.result.to_sql.should include "public = 1"
+              search =  Person.search('active' => true)
+              search.result.to_sql.should include "active = 1"
             end
 
             it "ignores unlisted scopes" do
@@ -37,8 +34,8 @@ module Ransack
             end
 
             it "ignores false scopes" do
-              search = Person.search('public' => false)
-              search.result.to_sql.should_not include "public"
+              search = Person.search('active' => false)
+              search.result.to_sql.should_not include "active"
             end
 
             it "passes values to scopes" do
@@ -47,9 +44,9 @@ module Ransack
             end
 
             it "chains scopes" do
-              search = Person.search('over_age' => 18, 'public' => true)
+              search = Person.search('over_age' => 18, 'active' => true)
               search.result.to_sql.should include "age > 18"
-              search.result.to_sql.should include "public = 1"
+              search.result.to_sql.should include "active = 1"
             end
           end
 
