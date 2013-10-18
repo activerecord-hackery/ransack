@@ -213,6 +213,15 @@ module Ransack
         sort.dir.should eq 'desc'
       end
 
+      it 'creates sorts based on a single attribute and without direction' do
+        @s.sorts = 'id'
+        @s.sorts.should have(1).item
+        sort = @s.sorts.first
+        sort.should be_a Nodes::Sort
+        sort.name.should eq 'id'
+        sort.dir.should eq 'asc'
+      end
+
       it 'creates sorts based on multiple attributes/directions in array format' do
         @s.sorts = ['id desc', 'name asc']
         @s.sorts.should have(2).items
@@ -227,6 +236,18 @@ module Ransack
 
       it 'creates sorts based on multiple attributes and uppercase directions in array format' do
         @s.sorts = ['id DESC', 'name ASC']
+        @s.sorts.should have(2).items
+        sort1, sort2 = @s.sorts
+        sort1.should be_a Nodes::Sort
+        sort1.name.should eq 'id'
+        sort1.dir.should eq 'desc'
+        sort2.should be_a Nodes::Sort
+        sort2.name.should eq 'name'
+        sort2.dir.should eq 'asc'
+      end
+
+      it 'creates sorts based on multiple attributes and different directions in array format' do
+        @s.sorts = ['id DESC', 'name']
         @s.sorts.should have(2).items
         sort1, sort2 = @s.sorts
         sort1.should be_a Nodes::Sort
@@ -254,6 +275,19 @@ module Ransack
         @s.sorts = {
             '0' => { :name => 'id', :dir => 'DESC' },
             '1' => { :name => 'name', :dir => 'ASC' }
+        }
+        @s.sorts.should have(2).items
+        @s.sorts.should be_all { |s| Nodes::Sort === s }
+        id_sort = @s.sorts.detect { |s| s.name == 'id' }
+        name_sort = @s.sorts.detect { |s| s.name == 'name' }
+        id_sort.dir.should eq 'desc'
+        name_sort.dir.should eq 'asc'
+      end
+
+      it 'creates sorts based on multiple attributes and different directions in hash format' do
+        @s.sorts = {
+            '0' => { :name => 'id', :dir => 'DESC' },
+            '1' => { :name => 'name', :dir => nil }
         }
         @s.sorts.should have(2).items
         @s.sorts.should be_all { |s| Nodes::Sort === s }
