@@ -105,16 +105,10 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        keys = options[:compounds] ? Predicate.names : Predicate.names.reject {|k| k.match(/_(any|all)$/)}
-        if only = options[:only]
-          if only.respond_to? :call
-            keys = keys.select {|k| only.call(k)}
-          else
-            only = Array.wrap(only).map(&:to_s)
-            keys = keys.select {|k| only.include? k.sub(/_(any|all)$/, '')}
-          end
-        end
-
+        keys = predicate_keys(options)
+        # If condition is newly built with build_condition(),
+        # then replace the default predicate with the first in the ordered list
+        @object.predicate_name = keys.first if @object.default?
         @template.collection_select(
           @object_name, :p, keys.map {|k| [k, Translate.predicate(k)]}, :first, :last,
           objectify_options(options), @default_options.merge(html_options)
@@ -129,6 +123,22 @@ module Ransack
       end
 
       private
+
+      def predicate_keys(options)
+        keys = options[:compounds] ? Predicate.names : Predicate.names.reject {|k| k.match(/_(any|all)$/)}
+        if only = options[:only]
+          if only.respond_to? :call
+            keys = keys.select {|k| only.call(k)}
+          else
+            only = Array.wrap(only).map(&:to_s)
+            # Create compounds hash, e.g. {"eq" => ["eq", "eq_any", "eq_all"], "blank" => ["blank"]}
+            key_groups = keys.inject(Hash.new([])){ |h,k| h[k.sub(/_(any|all)$/, '')] += [k]; h }
+            # Order compounds hash by 'only' keys
+            keys = only.map {|k| key_groups[k] }.flatten.compact
+          end
+        end
+        keys
+      end
 
       def combinator_choices
         if Nodes::Condition === object

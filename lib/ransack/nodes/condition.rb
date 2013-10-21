@@ -4,7 +4,8 @@ module Ransack
       i18n_word :attribute, :predicate, :combinator, :value
       i18n_alias :a => :attribute, :p => :predicate, :m => :combinator, :v => :value
 
-      attr_reader :predicate
+      attr_accessor :predicate
+      attr_writer :is_default
 
       class << self
         def extract(context, key, values)
@@ -130,6 +131,10 @@ module Ransack
         false
       end
 
+      def default?
+        @is_default
+      end
+
       def key
         @key ||= attributes.map(&:name).join("_#{combinator}_") + "_#{predicate.name}"
       end
@@ -151,11 +156,6 @@ module Ransack
         self.predicate = Predicate.named(name)
       end
       alias :p= :predicate_name=
-
-      def predicate=(predicate)
-        @predicate = predicate
-        predicate
-      end
 
       def predicate_name
         predicate.name if predicate
