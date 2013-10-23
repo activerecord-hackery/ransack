@@ -1,4 +1,3 @@
-require 'ransack/context'
 require 'ransack/adapters/active_record/3.2/context'
 require 'ransack/adapters/active_record/compat'
 require 'polyamorous'

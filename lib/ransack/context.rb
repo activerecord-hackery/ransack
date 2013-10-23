@@ -1,5 +1,3 @@
-require 'ransack/visitor'
-
 module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor

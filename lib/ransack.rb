@@ -1,6 +1,15 @@
-require 'ransack/configuration'
-
 module Ransack
+  autoload :Configuration,  'ransack/configuration'
+  autoload :Constants,      'ransack/constants'
+  autoload :Context,        'ransack/context'
+  autoload :Helpers,        'ransack/helpers'
+  autoload :Naming,         'ransack/naming'
+  autoload :Nodes,          'ransack/nodes'
+  autoload :Predicate,      'ransack/predicate'
+  autoload :Ransacker,      'ransack/ransacker'
+  autoload :Search,         'ransack/search'
+  autoload :Visitor,        'ransack/visitor'
+
   extend Configuration
 
   class UntraversableAssociationError < StandardError; end;
@@ -17,10 +26,7 @@ Ransack.configure do |config|
 end
 
 require 'ransack/translate'
-require 'ransack/search'
-require 'ransack/ransacker'
 require 'ransack/adapters/active_record'
-require 'ransack/helpers'
 require 'action_controller'
 
 ActionController::Base.helper Ransack::Helpers::FormHelper
