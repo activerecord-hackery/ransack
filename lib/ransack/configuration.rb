@@ -1,6 +1,3 @@
-require 'ransack/constants'
-require 'ransack/predicate'
-
 module Ransack
   module Configuration
 

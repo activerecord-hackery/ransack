@@ -1,7 +1,3 @@
-require 'ransack/nodes'
-require 'ransack/context'
-require 'ransack/naming'
-
 module Ransack
   class Search
     include Naming
