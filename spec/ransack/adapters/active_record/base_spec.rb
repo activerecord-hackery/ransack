@@ -48,6 +48,21 @@ module Ransack
             s = Person.search(:doubled_name_eq => 'Aric SmithAric Smith')
             s.result.count.should eq 1
           end if defined?(Arel::Nodes::InfixOperation)
+
+          it 'allows sort by "only_sort" field' do
+            s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_sort"}})
+            s.result.to_sql.should match /ORDER BY "people"."name" \|\| "only_sort" \|\| "people"."name" ASC/
+          end
+
+          it "doesn't sort by 'only_search' field" do
+            s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_search"}})
+            s.result.to_sql.should_not match /ORDER BY "people"."name" \|\| "only_search" \|\| "people"."name" ASC/
+          end
+
+          it "can't be searched by 'only_sort'" do
+            s = Person.search(:only_sort_eq => 'htimS cirA')
+            s.result.to_sql.should_not match /'htimS cirA'/
+          end
         end
 
         describe '#ransackable_attributes' do
@@ -56,6 +71,8 @@ module Ransack
           it { should include 'name' }
           it { should include 'reversed_name' }
           it { should include 'doubled_name' }
+          it { should include 'only_search' }
+          it { should_not include 'only_sort' }
         end
 
         describe '#ransortable_attributes' do
@@ -64,6 +81,8 @@ module Ransack
           it { should include 'name' }
           it { should include 'reversed_name' }
           it { should include 'doubled_name' }
+          it { should include 'only_sort' }
+          it { should_not include 'only_search' }
         end
 
         describe '#ransackable_associations' do
