@@ -19,7 +19,8 @@ module Ransack
       end
 
       def valid?
-        bound? && attr
+        bound? && attr &&
+          context.klassify(parent).ransackable_attributes.include?(attr_name)
       end
 
       def type

@@ -29,11 +29,11 @@ class Person < ActiveRecord::Base
     Arel::Nodes::InfixOperation.new('||', parent.table[:name], parent.table[:name])
   end
 
-  ransacker :only_search, :formatter => proc {|v| "only_search#{v}"} do |parent|
+  ransacker :only_search do |parent|
     Arel::Nodes::InfixOperation.new('|| "only_search" ||', parent.table[:name], parent.table[:name])
   end
 
-  ransacker :only_sort, :formatter => proc {|v| "only_sort#{v}"} do |parent|
+  ransacker :only_sort do |parent|
     Arel::Nodes::InfixOperation.new('|| "only_sort" ||', parent.table[:name], parent.table[:name])
   end
 

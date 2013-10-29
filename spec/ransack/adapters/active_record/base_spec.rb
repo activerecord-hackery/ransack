@@ -59,9 +59,14 @@ module Ransack
             s.result.to_sql.should_not match /ORDER BY "people"."name" \|\| "only_search" \|\| "people"."name" ASC/
           end
 
+          it 'allows search by "only_search" field' do
+            s = Person.search(:only_search_eq => 'htimS cirA')
+            s.result.to_sql.should match /WHERE "people"."name" \|\| "only_search" \|\| "people"."name" = 'htimS cirA'/
+          end
+
           it "can't be searched by 'only_sort'" do
             s = Person.search(:only_sort_eq => 'htimS cirA')
-            s.result.to_sql.should_not match /'htimS cirA'/
+            s.result.to_sql.should_not match /WHERE "people"."name" \|\| "only_sort" \|\| "people"."name" = 'htimS cirA'/
           end
         end
 
