@@ -1,9 +1,28 @@
 require 'active_record'
 
-ActiveRecord::Base.establish_connection(
-  adapter: 'sqlite3',
-  database: ':memory:'
-)
+case ENV['DB']
+when "mysql"
+  ActiveRecord::Base.establish_connection(
+    adapter:  'mysql2',
+    database: 'ransack',
+    encoding: 'utf8'
+  )
+when "postgres"
+  ActiveRecord::Base.establish_connection(
+    adapter: 'postgresql',
+    database: 'ransack',
+    username: 'postgres',
+    min_messages: 'warning'
+  )
+else
+  # Assume SQLite3
+  ActiveRecord::Base.establish_connection(
+    adapter: 'sqlite3',
+    database: ':memory:'
+  )
+end
+
+
 
 class Person < ActiveRecord::Base
   default_scope { order(id: :desc) }

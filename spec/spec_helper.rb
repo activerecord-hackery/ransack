@@ -24,7 +24,8 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     puts '=' * 80
-    puts "Running specs against ActiveRecord #{ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
+    connection_name = ActiveRecord::Base.connection.adapter_name
+    puts "Running specs against #{connection_name}, ActiveRecord #{ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
     puts '=' * 80
     Schema.create
   end
