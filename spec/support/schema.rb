@@ -75,6 +75,7 @@ module Schema
       create_table :people, :force => true do |t|
         t.integer  :parent_id
         t.string   :name
+        t.string   :email
         t.integer  :salary
         t.boolean  :awesome, :default => false
         t.timestamps
