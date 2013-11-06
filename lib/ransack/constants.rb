@@ -27,7 +27,7 @@ module Ransack
         when "SQLite"
           unescaped
         else
-          # Necessary for PostgreSQL
+          # Necessary for PostgreSQL and MySQL
           unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
       end
     end
