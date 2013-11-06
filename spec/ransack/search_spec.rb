@@ -169,8 +169,8 @@ module Ransack
         search = Search.new(Person, g: [
           { m: 'or', comments_body_cont: 'e', articles_comments_body_cont: 'e' }
         ])
-        search.result.load.should have(920).items
-        search.result(distinct: true).should have(330).items
+        search.result.load.should have(9000).items
+        search.result(distinct: true).should have(10).items
         search.result.load.uniq.should eq search.result(distinct: true).load
       end
     end

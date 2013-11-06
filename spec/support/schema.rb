@@ -114,11 +114,8 @@ module Schema
         end
         Note.make(notable: article)
         10.times do
-          Comment.make(article: article)
+          Comment.make(article: article, person: person)
         end
-      end
-      2.times do
-        Comment.make(person: person)
       end
     end
 
