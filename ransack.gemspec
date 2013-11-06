@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sqlite3', '~> 1.3.3'
   s.add_development_dependency 'pg', '0.17.0'
   s.add_development_dependency 'mysql2', '0.3.13'
+  s.add_development_dependency 'pry', '0.9.12.2'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
