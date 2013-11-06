@@ -36,24 +36,24 @@ module Ransack
     end
 
     describe 'cont' do
-      it_has_behavior 'wildcard escaping', :name_cont, /"people"."name" LIKE '%\\%._\\\\%'/ do
+      it_has_behavior 'wildcard escaping', :name_cont, /"people"."name" I?LIKE '%\\%._\\\\%'/ do
         subject { @s }
       end
 
       it 'generates a LIKE query with value surrounded by %' do
         @s.name_cont = 'ric'
-        @s.result.to_sql.should match /"people"."name" LIKE '%ric%'/
+        @s.result.to_sql.should match /"people"."name" I?LIKE '%ric%'/
       end
     end
 
     describe 'not_cont' do
-      it_has_behavior 'wildcard escaping', :name_not_cont, /"people"."name" NOT LIKE '%\\%._\\\\%'/ do
+      it_has_behavior 'wildcard escaping', :name_not_cont, /"people"."name" NOT I?LIKE '%\\%._\\\\%'/ do
         subject { @s }
       end
 
       it 'generates a NOT LIKE query with value surrounded by %' do
         @s.name_not_cont = 'ric'
-        @s.result.to_sql.should match /"people"."name" NOT LIKE '%ric%'/
+        @s.result.to_sql.should match /"people"."name" NOT I?LIKE '%ric%'/
       end
     end
 
