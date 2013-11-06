@@ -3,7 +3,7 @@ rvm:
   - 2.0.0
 
 env:
--   RAILS=4-0-stable DB=sqlite
+  - RAILS=4-0-stable DB=sqlite
   - RAILS=4-0-stable DB=mysql
   - RAILS=4-0-stable DB=postgres
   - RAILS=3-2-stable DB=sqlite
