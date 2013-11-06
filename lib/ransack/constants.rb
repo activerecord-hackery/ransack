@@ -23,10 +23,12 @@ module Ransack
     module_function
     # replace % \ to \% \\
     def escape_wildcards(unescaped)
-      if ActiveRecord::VERSION::MAJOR == 3
-        unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
-      else
-        unescaped.to_s.gsub(/\\/){ "\\\\" }.gsub(/%/, "\\%")
+      case ActiveRecord::Base.connection.adapter_name
+        when "SQLite"
+          unescaped
+        else
+          # Necessary for PostgreSQL
+          unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
       end
     end
 
