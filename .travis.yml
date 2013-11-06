@@ -12,3 +12,7 @@ env:
   - RAILS=3-0-stable DB=sqlite
   - RAILS=3-0-stable DB=mysql
   - RAILS=3-0-stable DB=postgres
+
+before_script:
+  - mysql -e 'create database ransack;'
+  - psql -c 'create database ransack;' -U postgres
