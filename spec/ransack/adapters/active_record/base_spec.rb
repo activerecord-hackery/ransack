@@ -23,7 +23,7 @@ module Ransack
           # For infix tests
           def self.sane_adapter?
             case ::ActiveRecord::Base.connection.adapter_name
-              when "SQLite3" || "PostgreSQL"
+              when "SQLite3", "PostgreSQL"
                 true
               else
                 false
