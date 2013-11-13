@@ -75,6 +75,12 @@ module Ransack
             s = Person.search(name_cont: "\\WINNER\\")
             s.result.exists?.should be_true
           end
+
+          it "should function correctly when an attribute name has 'and' in it" do
+            p = Person.create!(foo_and_bar: 'qqq')
+            s = Person.search(foo_and_bar_eq: 'qqq')
+            s.result.to_a.should eq [p]
+          end
         end
 
         describe '#ransackable_attributes' do

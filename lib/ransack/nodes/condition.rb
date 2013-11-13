@@ -8,7 +8,7 @@ module Ransack
 
       class << self
         def extract(context, key, values)
-          attributes, predicate = extract_attributes_and_predicate(key)
+          attributes, predicate = extract_attributes_and_predicate(context, key)
           if attributes.size > 0
             combinator = key.match(/_(or|and)_/) ? $1 : nil
             condition = self.new(context)
@@ -26,12 +26,12 @@ module Ransack
 
         private
 
-        def extract_attributes_and_predicate(key)
+        def extract_attributes_and_predicate(context, key)
           str = key.dup
           name = Predicate.detect_and_strip_from_string!(str)
           predicate = Predicate.named(name)
           raise ArgumentError, "No valid predicate for #{key}" unless predicate
-          attributes = str.split(/_and_|_or_/)
+          attributes = context.attribute_method?(str) ? [str] : str.split(/_and_|_or_/)
           [attributes, predicate]
         end
       end
