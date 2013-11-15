@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/ernie/ransack"
   s.summary     = %q{Object-based searching for ActiveRecord (currently).}
   s.description = %q{Ransack is the successor to the MetaSearch gem. It improves and expands upon MetaSearch's functionality, but does not have a 100%-compatible API.}
+  s.license     = 'MIT'
 
   s.rubyforge_project = "ransack"
 
