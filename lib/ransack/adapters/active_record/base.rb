@@ -24,21 +24,21 @@ module Ransack
         #spare_from_ransack will accept a list of attributes and remove them from ransackable_attributes
         #this method allows for dynamic reconstruction of the ransackable_attributes and also provides some short cut methods such as :time_stamps, :association_keys, :primary
         def spare_from_ransack(*attribs)
-           self._spare = attribs.map do |a| 
-              case a.to_sym
-                #remove time_stamp fields 
-                when :time_stamps
-                  ["created_at","updated_at"]
-                #requires spare_ransack to be called after associations in the file
-                when :association_keys
-                  reflect_on_all_associations.select{|a| a.macro == :belongs_to}.collect{|a| a.options[:foreign_key] || "#{a.name}_id"}
-                #remove primary key field 
-                when :primary
-                  primary_key
-                else
-                  a.to_s
-              end
-            end.flatten
+          self._spare = attribs.map do |a| 
+            case a.to_sym
+              #remove time_stamp fields 
+              when :time_stamps
+                ["created_at","updated_at"]
+              #requires spare_ransack to be called after associations in the file
+              when :association_keys
+                reflect_on_all_associations.select{|a| a.macro == :belongs_to}.collect{|a| a.options[:foreign_key] || "#{a.name}_id"}
+              #remove primary key field 
+              when :primary
+                primary_key
+              else
+                a.to_s
+            end
+          end.flatten
         end
         def ransackable_attributes(auth_object = nil)
           (column_names - _spare) + _ransackers.keys
