@@ -29,7 +29,7 @@ module Ransack
               #remove time_stamp fields 
               when :time_stamps
                 ["created_at","updated_at"]
-              #requires spare_ransack to be called after associations in the file
+              #requires spare_from_ransack to be called after associations in the file
               when :association_keys
                 reflect_on_all_associations.select{|a| a.macro == :belongs_to}.collect{|a| a.options[:foreign_key] || "#{a.name}_id"}
               #remove primary key field 
