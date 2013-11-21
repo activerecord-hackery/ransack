@@ -84,7 +84,51 @@ module Ransack
           it { should include 'reversed_name' }
           it { should include 'doubled_name' }
         end
-
+        
+         describe "#spare_from_ransack" do
+           
+          context "with given attribute" do
+            subject { Person.ransackable_attributes }
+            
+            it { should include 'name'}
+            
+            Person.spare_from_ransack :name
+            
+            it { should_not include 'name' }
+            it { should include 'reversed_name' }
+            it { should include 'doubled_name' }
+          end
+          
+          context "with :primary" do 
+            subject { Person.ransackable_attributes }
+            
+            it { should include Person.primary_key }
+            
+            Person.spare_from_ransack :primary
+            
+            it { should_not include Person.primary_key }
+          end
+          context "with :assocation_keys" do
+            subject { Person.ransackable_attributes }
+            
+            it { should include "parent_id" }
+            
+            Person.spare_from_ransack :association_keys
+            
+            it { should_not include "parent_id" }
+          end
+          context "with :time_stamps" do
+            subject { Person.ransackable_attributes }
+            
+            it { should include "created_at" }
+            it { should include "updated_at" }
+            
+            Person.spare_from_ransack :time_stamps
+            
+            it { should_not include "created_at" }
+            it { should_not include "updated_at" }
+          end
+        end
         describe '#ransortable_attributes' do
           subject { Person.ransortable_attributes }
 
