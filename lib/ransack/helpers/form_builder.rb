@@ -43,16 +43,27 @@ module Ransack
           @template.grouped_collection_select(
             @object_name, :name, sortable_attribute_collection_for_bases(bases), :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
-          ) + @template.collection_select(
-            @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
-            objectify_options(options), @default_options.merge(html_options)
           )
         else
           collection = sortable_attribute_collection_for_base(bases.first)
           @template.collection_select(
             @object_name, :name, collection, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
-          ) + @template.collection_select(
+          )
+        end
+      end
+
+      def sort_direction(options = {}, html_options = {})
+        raise ArgumentError, "sort_direction must be called inside a search FormBuilder!" unless object.respond_to?(:context)
+        bases = [''] + association_array(options[:associations])
+        if bases.size > 1
+          @template.collection_select(
+            @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
+            objectify_options(options), @default_options.merge(html_options)
+          )
+        else
+          collection = sortable_attribute_collection_for_base(bases.first)
+          @template.collection_select(
             @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
