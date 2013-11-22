@@ -1,6 +1,6 @@
 # Ransack
 
-[![Build Status](https://travis-ci.org/ernie/ransack.png?branch=master)](https://travis-ci.org/ernie/ransack)
+[![Build Status](https://travis-ci.org/activerecord-hackery/ransack)](https://travis-ci.org/ernie/ransack)
 
 Ransack is a rewrite of [MetaSearch](https://github.com/ernie/meta_search). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
