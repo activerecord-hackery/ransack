@@ -37,12 +37,24 @@ class Person < ActiveRecord::Base
     Arel::Nodes::InfixOperation.new('|| "only_sort" ||', parent.table[:name], parent.table[:name])
   end
 
+  ransacker :only_admin do |parent|
+    Arel::Nodes::InfixOperation.new('|| "only_admin" ||', parent.table[:name], parent.table[:name])
+  end
+
   def self.ransackable_attributes(auth_object = nil)
-    column_names + _ransackers.keys - ['only_sort']
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_sort']
+    else
+      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+    end
   end
 
   def self.ransortable_attributes(auth_object = nil)
-    column_names + _ransackers.keys - ['only_search']
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_search']
+    else
+      column_names + _ransackers.keys - ['only_search', 'only_admin']
+    end
   end
 end
 

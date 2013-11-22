@@ -25,7 +25,7 @@ module Ransack
 
       def valid?
         bound? && attr &&
-          context.klassify(parent).ransortable_attributes.include?(attr_name)
+          context.klassify(parent).ransortable_attributes(context.auth_object).include?(attr_name)
       end
 
       def name=(name)
