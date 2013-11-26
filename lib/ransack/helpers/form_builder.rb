@@ -34,8 +34,13 @@ module Ransack
           )
         end
       end
-
+      
       def sort_select(options = {}, html_options = {})
+        sort_attribute_select(options, html_options) +
+        sort_direction_select(options, html_options)
+      end
+
+      def sort_attribute_select(options = {}, html_options = {})
         raise ArgumentError, "sort_select must be called inside a search FormBuilder!" unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
@@ -53,7 +58,7 @@ module Ransack
         end
       end
 
-      def sort_direction(options = {}, html_options = {})
+      def sort_direction_select(options = {}, html_options = {})
         raise ArgumentError, "sort_direction must be called inside a search FormBuilder!" unless object.respond_to?(:context)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
