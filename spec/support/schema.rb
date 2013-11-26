@@ -46,18 +46,6 @@ class Person < ActiveRecord::Base
     Arel::Nodes::InfixOperation.new('||', parent.table[:name], parent.table[:name])
   end
 
-  ransacker :only_search do |parent|
-    Arel::Nodes::InfixOperation.new('|| "only_search" ||', parent.table[:name], parent.table[:name])
-  end
-
-  ransacker :only_sort do |parent|
-    Arel::Nodes::InfixOperation.new('|| "only_sort" ||', parent.table[:name], parent.table[:name])
-  end
-
-  ransacker :only_admin do |parent|
-    Arel::Nodes::InfixOperation.new('|| "only_admin" ||', parent.table[:name], parent.table[:name])
-  end
-
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       column_names + _ransackers.keys - ['only_sort']
@@ -104,6 +92,9 @@ module Schema
         t.integer  :parent_id
         t.string   :name
         t.string   :email
+        t.string   :only_search
+        t.string   :only_sort
+        t.string   :only_admin
         t.integer  :salary
         t.boolean  :awesome, :default => false
         t.timestamps

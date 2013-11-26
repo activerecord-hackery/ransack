@@ -11,12 +11,15 @@ Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)].each do 
 end
 
 Sham.define do
-  name     { Faker::Name.name }
-  title    { Faker::Lorem.sentence }
-  body     { Faker::Lorem.paragraph }
-  salary   {|index| 30000 + (index * 1000)}
-  tag_name { Faker::Lorem.words(3).join(' ') }
-  note     { Faker::Lorem.words(7).join(' ') }
+  name        { Faker::Name.name }
+  title       { Faker::Lorem.sentence }
+  body        { Faker::Lorem.paragraph }
+  salary      {|index| 30000 + (index * 1000)}
+  tag_name    { Faker::Lorem.words(3).join(' ') }
+  note        { Faker::Lorem.words(7).join(' ') }
+  only_admin  { Faker::Lorem.words(3).join(' ') }
+  only_search { Faker::Lorem.words(3).join(' ') }
+  only_sort   { Faker::Lorem.words(3).join(' ') }
 end
 
 RSpec.configure do |config|

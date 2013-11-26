@@ -78,42 +78,42 @@ module Ransack
 
           it 'allows sort by "only_sort" field' do
             s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_sort"}})
-            s.result.to_sql.should match /ORDER BY "people"."name" \|\| "only_sort" \|\| "people"."name" ASC/
+            s.result.to_sql.should match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_sort")} ASC/
           end
 
           it "doesn't sort by 'only_search' field" do
             s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_search"}})
-            s.result.to_sql.should_not match /ORDER BY "people"."name" \|\| "only_search" \|\| "people"."name" ASC/
+            s.result.to_sql.should_not match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_search")} ASC/
           end
 
           it 'allows search by "only_search" field' do
             s = Person.search(:only_search_eq => 'htimS cirA')
-            s.result.to_sql.should match /WHERE "people"."name" \|\| "only_search" \|\| "people"."name" = 'htimS cirA'/
+            s.result.to_sql.should match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_search")} = 'htimS cirA'/
           end
 
           it "can't be searched by 'only_sort'" do
             s = Person.search(:only_sort_eq => 'htimS cirA')
-            s.result.to_sql.should_not match /WHERE "people"."name" \|\| "only_sort" \|\| "people"."name" = 'htimS cirA'/
+            s.result.to_sql.should_not match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_sort")} = 'htimS cirA'/
           end
 
           it 'allows sort by "only_admin" field, if auth_object: :admin' do
             s = Person.search({"s"=>{"0"=>{"dir"=>"asc", "name"=>"only_admin"}}}, {auth_object: :admin})
-            s.result.to_sql.should match /ORDER BY "people"."name" \|\| "only_admin" \|\| "people"."name" ASC/
+            s.result.to_sql.should match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
           end
 
           it "doesn't sort by 'only_admin' field, if auth_object: nil" do
             s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_admin"}})
-            s.result.to_sql.should_not match /ORDER BY "people"."name" \|\| "only_admin" \|\| "people"."name" ASC/
+            s.result.to_sql.should_not match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
           end
 
           it 'allows search by "only_admin" field, if auth_object: :admin' do
             s = Person.search({:only_admin_eq => 'htimS cirA'}, {auth_object: :admin})
-            s.result.to_sql.should match /WHERE "people"."name" \|\| "only_admin" \|\| "people"."name" = 'htimS cirA'/
+            s.result.to_sql.should match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
           end
 
-          it "can't be searched by 'only_admin'" do
+          it "can't be searched by 'only_admin', if auth_object: nil" do
             s = Person.search(:only_admin_eq => 'htimS cirA')
-            s.result.to_sql.should_not match /WHERE "people"."name" \|\| "only_admin" \|\| "people"."name" = 'htimS cirA'/
+            s.result.to_sql.should_not match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
           end
         end
 
