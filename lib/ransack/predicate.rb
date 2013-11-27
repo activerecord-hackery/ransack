@@ -18,11 +18,14 @@ module Ransack
       end
 
       def detect_and_strip_from_string!(str)
-        names_by_decreasing_length.detect { |p| str.sub!(/_#{p}$/, '') }
+        if p = detect_from_string(str)
+          str.sub! /_#{p}$/, ''
+          p
+        end
       end
 
       def detect_from_string(str)
-        names_by_decreasing_length.detect { |p| str.match(/_#{p}$/) }
+        names_by_decreasing_length.detect {|p| str.end_with?("_#{p}")}
       end
 
       def name_from_attribute_name(attribute_name)
