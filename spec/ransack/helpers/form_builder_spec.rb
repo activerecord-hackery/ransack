@@ -7,6 +7,7 @@ module Ransack
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people
+        resources :notes
         get ':controller(/:action(/:id(.:format)))'
       end
 
@@ -131,6 +132,15 @@ module Ransack
             html.should_not match /<option value="#{key}">/
           end
         end
+      end
+
+      it 'fails when adding input with name of polymorphic column' do
+        @s = Note.search
+        @controller.view_context.search_form_for @s do |f|
+          @f = f
+        end
+        lambda { @f.text_field :note_type_eq }.should raise_error(NameError)
+        lambda { @f.text_field :note_id_eq }.should raise_error(NameError)
       end
     end
   end
