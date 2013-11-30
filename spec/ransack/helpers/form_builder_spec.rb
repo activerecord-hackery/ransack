@@ -139,8 +139,8 @@ module Ransack
         @controller.view_context.search_form_for @s do |f|
           @f = f
         end
-        lambda { @f.text_field :note_type_eq }.should raise_error(NameError)
-        lambda { @f.text_field :note_id_eq }.should raise_error(NameError)
+        lambda{ @f.text_field(:notable_id_eq) }.should raise_error(NameError)
+        lambda{ @f.text_field(:notable_type_eq) }.should raise_error(NameError)
       end
     end
   end
