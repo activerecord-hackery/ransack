@@ -134,13 +134,20 @@ module Ransack
         end
       end
 
-      it 'fails when adding input with name of polymorphic column' do
-        @s = Note.search
-        @controller.view_context.search_form_for @s do |f|
-          @f = f
+      context 'fields used in polymorphic relations as search attributes in form' do
+        before do
+          @controller.view_context.search_form_for Note.search do |f|
+            @f = f
+          end
         end
-        lambda{ @f.text_field(:notable_id_eq) }.should raise_error(NameError)
-        lambda{ @f.text_field(:notable_type_eq) }.should raise_error(NameError)
+        it 'accepts poly_id field' do
+          html = @f.text_field(:notable_id_eq)
+          html.should match /id=\"q_notable_id_eq\"/
+        end
+        it 'accepts poly_type field' do
+          html = @f.text_field(:notable_type_eq)
+          html.should match /id=\"q_notable_type_eq\"/
+        end
       end
     end
   end
