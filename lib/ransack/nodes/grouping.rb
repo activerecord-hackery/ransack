@@ -127,7 +127,8 @@ module Ransack
         when /^(g|c|m|groupings|conditions|combinator)=?$/
           true
         else
-          name.split(/_and_|_or_/).select {|n| !@context.attribute_method?(n)}.empty?
+          @context.attribute_method?(name) ||
+          name.split(/_and_|_or_/).select { |n| !@context.attribute_method?(n) }.empty?
         end
       end
 

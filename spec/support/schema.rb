@@ -78,6 +78,7 @@ module Schema
         t.string   :email
         t.integer  :salary
         t.boolean  :awesome, :default => false
+        t.string   :foo_and_bar
         t.timestamps
       end
 
