@@ -70,9 +70,7 @@ module Ransack
             s.result.exists?.should be_true
           end
 
-          # Pending due to it failing on Travis, but not on my local machine
-          # Doesn't seem to be all that important anyway.
-          pending "should function correctly when using fields with backslashes in them" do
+          it "should function correctly when using fields with backslashes in them" do
             Person.create!(name: "\\WINNER\\")
             s = Person.search(name_cont: "\\WINNER\\")
             s.result.exists?.should be_true
