@@ -7,6 +7,7 @@ module Ransack
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people
+        resources :notes
         get ':controller(/:action(/:id(.:format)))'
       end
 
@@ -130,6 +131,22 @@ module Ransack
           Predicate.names.select {|k| k =~ /_(any|all)$/}.each do |key|
             html.should_not match /<option value="#{key}">/
           end
+        end
+      end
+
+      context 'fields used in polymorphic relations as search attributes in form' do
+        before do
+          @controller.view_context.search_form_for Note.search do |f|
+            @f = f
+          end
+        end
+        it 'accepts poly_id field' do
+          html = @f.text_field(:notable_id_eq)
+          html.should match /id=\"q_notable_id_eq\"/
+        end
+        it 'accepts poly_type field' do
+          html = @f.text_field(:notable_type_eq)
+          html.should match /id=\"q_notable_type_eq\"/
         end
       end
     end
