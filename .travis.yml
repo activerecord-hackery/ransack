@@ -17,5 +17,6 @@ env:
   - RAILS=3-0-stable DB=postgres
 
 before_script:
-  - mysql -e 'create database ransack;'
+  - mysql -e 'create database ransack collate utf8_general_ci;'
+  - mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";'
   - psql -c 'create database ransack;' -U postgres
