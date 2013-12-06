@@ -70,29 +70,99 @@ module Ransack
             s.result.exists?.should be_true
           end
 
-          # Pending due to it failing on Travis, but not on my local machine
-          # Doesn't seem to be all that important anyway.
-          pending "should function correctly when using fields with backslashes in them" do
+          it "should function correctly when using fields with backslashes in them" do
             Person.create!(name: "\\WINNER\\")
             s = Person.search(name_cont: "\\WINNER\\")
             s.result.exists?.should be_true
           end
+
+          it 'allows sort by "only_sort" field' do
+            s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_sort"}})
+            s.result.to_sql.should match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_sort")} ASC/
+          end
+
+          it "doesn't sort by 'only_search' field" do
+            s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_search"}})
+            s.result.to_sql.should_not match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_search")} ASC/
+          end
+
+          it 'allows search by "only_search" field' do
+            s = Person.search(:only_search_eq => 'htimS cirA')
+            s.result.to_sql.should match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_search")} = 'htimS cirA'/
+          end
+
+          it "can't be searched by 'only_sort'" do
+            s = Person.search(:only_sort_eq => 'htimS cirA')
+            s.result.to_sql.should_not match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_sort")} = 'htimS cirA'/
+          end
+
+          it 'allows sort by "only_admin" field, if auth_object: :admin' do
+            s = Person.search({"s"=>{"0"=>{"dir"=>"asc", "name"=>"only_admin"}}}, {auth_object: :admin})
+            s.result.to_sql.should match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
+          end
+
+          it "doesn't sort by 'only_admin' field, if auth_object: nil" do
+            s = Person.search("s"=>{"0"=>{"dir"=>"asc", "name"=>"only_admin"}})
+            s.result.to_sql.should_not match /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
+          end
+
+          it 'allows search by "only_admin" field, if auth_object: :admin' do
+            s = Person.search({:only_admin_eq => 'htimS cirA'}, {auth_object: :admin})
+            s.result.to_sql.should match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
+          end
+
+          it "can't be searched by 'only_admin', if auth_object: nil" do
+            s = Person.search(:only_admin_eq => 'htimS cirA')
+            s.result.to_sql.should_not match /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
+          end
         end
 
         describe '#ransackable_attributes' do
-          subject { Person.ransackable_attributes }
+          context 'when auth_object is nil' do
+            subject { Person.ransackable_attributes }
 
-          it { should include 'name' }
-          it { should include 'reversed_name' }
-          it { should include 'doubled_name' }
+            it { should include 'name' }
+            it { should include 'reversed_name' }
+            it { should include 'doubled_name' }
+            it { should include 'only_search' }
+            it { should_not include 'only_sort' }
+            it { should_not include 'only_admin' }
+          end
+
+          context 'with auth_object :admin' do
+            subject { Person.ransackable_attributes(:admin) }
+
+            it { should include 'name' }
+            it { should include 'reversed_name' }
+            it { should include 'doubled_name' }
+            it { should include 'only_search' }
+            it { should_not include 'only_sort' }
+            it { should include 'only_admin' }
+          end
         end
 
         describe '#ransortable_attributes' do
-          subject { Person.ransortable_attributes }
+          context 'when auth_object is nil' do
+            subject { Person.ransortable_attributes }
 
-          it { should include 'name' }
-          it { should include 'reversed_name' }
-          it { should include 'doubled_name' }
+            it { should include 'name' }
+            it { should include 'reversed_name' }
+            it { should include 'doubled_name' }
+            it { should include 'only_sort' }
+            it { should_not include 'only_search' }
+            it { should_not include 'only_admin' }
+          end
+
+          context 'with auth_object :admin' do
+            subject { Person.ransortable_attributes(:admin) }
+
+            it { should include 'name' }
+            it { should include 'reversed_name' }
+            it { should include 'doubled_name' }
+            it { should include 'only_sort' }
+            it { should_not include 'only_search' }
+            it { should include 'only_admin' }
+          end
         end
 
         describe '#ransackable_associations' do
