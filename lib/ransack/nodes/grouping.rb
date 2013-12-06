@@ -180,8 +180,13 @@ module Ransack
 
       def strip_predicate_and_index(str)
         string = str.split(/\(/).first
+        string = strip_before_type_cast(string)
         Predicate.detect_and_strip_from_string!(string)
         string
+      end
+
+      def strip_before_type_cast(str)
+        str.split("_before_type_cast").first
       end
 
     end

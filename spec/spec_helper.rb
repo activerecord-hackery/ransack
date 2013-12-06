@@ -20,6 +20,7 @@ Sham.define do
   only_admin  { Faker::Lorem.words(3).join(' ') }
   only_search { Faker::Lorem.words(3).join(' ') }
   only_sort   { Faker::Lorem.words(3).join(' ') }
+  notable_id  { |id| id }
 end
 
 RSpec.configure do |config|
