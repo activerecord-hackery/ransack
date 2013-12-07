@@ -89,7 +89,7 @@ module Ransack
         it 'returns ransackable attributes for associations with :associations' do
           attributes = Person.ransackable_attributes + Article.
             ransackable_attributes.map { |a| "articles_#{a}" }
-          html = @f.attribute_select associations: ['articles']
+          html = @f.attribute_select('search', associations: ['articles'])
           html.split(/\n/).should have(attributes.size).lines
           attributes.each do |attribute|
             html.should match /<option value="#{attribute}">/
@@ -97,7 +97,7 @@ module Ransack
         end
 
         it 'returns option groups for base and associations with :associations' do
-          html = @f.attribute_select associations: ['articles']
+          html = @f.attribute_select('search', associations: ['articles'])
           [Person, Article].each do |model|
             html.should match /<optgroup label="#{model}">/
           end
