@@ -32,8 +32,10 @@ module Ransack
       end
 
       it 'creates Conditions for multiple polymorphic belongs_to association attributes' do
-        search = Search.new(Note, notable_of_Person_type_name_or_notable_of_Article_type_title_eq: 'Ernie')
-        condition = search.base[:notable_of_Person_type_name_or_notable_of_Article_type_title_eq]
+        search = Search.new(Note,
+          notable_of_Person_type_name_or_notable_of_Article_type_title_eq: 'Ernie')
+        condition = search.
+          base[:notable_of_Person_type_name_or_notable_of_Article_type_title_eq]
         condition.should be_a Nodes::Condition
         condition.predicate.name.should eq 'eq'
         condition.attributes.first.name.should eq 'notable_of_Person_type_name'
@@ -112,25 +114,27 @@ module Ransack
     end
 
     describe '#result' do
+      let(:people_name_field) { "#{quote_table_name("people")}.#{quote_column_name("name")}" }
+      let(:children_people_name_field) { "#{quote_table_name("children_people")}.#{quote_column_name("name")}" }
       it 'evaluates conditions contextually' do
         search = Search.new(Person, children_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"\."name" = 'Ernie'/
+        where.to_sql.should match /#{children_people_name_field} = 'Ernie'/
       end
 
       it 'evaluates compound conditions contextually' do
         search = Search.new(Person, children_name_or_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"\."name" = 'Ernie' OR "people"\."name" = 'Ernie'/
+        where.to_sql.should match /#{children_people_name_field} = 'Ernie' OR #{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates polymorphic belongs_to association conditions contextually' do
         search = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"people"."name" = 'Ernie'/
+        where.to_sql.should match /#{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates nested conditions' do
@@ -141,9 +145,9 @@ module Ransack
         )
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"."name" = 'Ernie'/
-        where.to_sql.should match /"people"."name" = 'Ernie'/
-        where.to_sql.should match /"children_people_2"."name" = 'Ernie'/
+        where.to_sql.should match /#{children_people_name_field} = 'Ernie'/
+        where.to_sql.should match /#{people_name_field} = 'Ernie'/
+        where.to_sql.should match /#{quote_table_name("children_people_2")}.#{quote_column_name("name")} = 'Ernie'/
       end
 
       it 'evaluates arrays of groupings' do
@@ -157,10 +161,10 @@ module Ransack
         where = search.result.where_values.first
         sql = where.to_sql
         first, second = sql.split(/ AND /)
-        first.should match /"people"."name" = 'Ernie'/
-        first.should match /"children_people"."name" = 'Ernie'/
-        second.should match /"people"."name" = 'Bert'/
-        second.should match /"children_people"."name" = 'Bert'/
+        first.should match /#{people_name_field} = 'Ernie'/
+        first.should match /#{children_people_name_field} = 'Ernie'/
+        second.should match /#{people_name_field} = 'Bert'/
+        second.should match /#{children_people_name_field} = 'Bert'/
       end
 
       it 'returns distinct records when passed distinct: true' do

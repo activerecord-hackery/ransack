@@ -18,7 +18,7 @@ module Ransack
             result = subject.evaluate(search)
 
             result.should be_an ::ActiveRecord::Relation
-            result.to_sql.should match /"name" = 'Joe Blow'/
+            result.to_sql.should match /#{quote_column_name("name")} = 'Joe Blow'/
           end
 
           it 'SELECTs DISTINCT when distinct: true' do

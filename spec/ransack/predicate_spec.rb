@@ -22,12 +22,14 @@ module Ransack
     describe 'eq' do
       it 'generates an equality condition for boolean true' do
         @s.awesome_eq = true
-        @s.result.to_sql.should match /"people"."awesome" = 't'/
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        @s.result.to_sql.should match /#{field} = #{ActiveRecord::Base.connection.quoted_true}/
       end
 
       it 'generates an equality condition for boolean false' do
         @s.awesome_eq = false
-        @s.result.to_sql.should match /"people"."awesome" = 'f'/
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        @s.result.to_sql.should match /#{field} = #{ActiveRecord::Base.connection.quoted_false}/
       end
 
       it 'does not generate a condition for nil' do
@@ -42,8 +44,10 @@ module Ransack
         (
         if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\._\\\\%'/
+        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+          /`people`.`name` LIKE '%\\\\%\\\\._\\\\\\\\%'/
         else
-         /"people"."name" LIKE '%%._\\%'/
+          /"people"."name" LIKE '%%._\\%'/
         end
         ) do
         subject { @s }
@@ -51,7 +55,8 @@ module Ransack
 
       it 'generates a LIKE query with value surrounded by %' do
         @s.name_cont = 'ric'
-        @s.result.to_sql.should match /"people"."name" I?LIKE '%ric%'/
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} I?LIKE '%ric%'/
       end
     end
 
@@ -60,8 +65,10 @@ module Ransack
         (
         if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\._\\\\%'/
+        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+          /`people`.`name` NOT LIKE '%\\\\%\\\\._\\\\\\\\%'/
         else
-         /"people"."name" NOT LIKE '%%._\\%'/
+          /"people"."name" NOT LIKE '%%._\\%'/
         end
         ) do
         subject { @s }
@@ -76,14 +83,16 @@ module Ransack
     describe 'null' do
       it 'generates a value IS NULL query' do
         @s.name_null = true
-        @s.result.to_sql.should match /"people"."name" IS NULL/
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NULL/
       end
     end
 
     describe 'not_null' do
       it 'generates a value IS NOT NULL query' do
         @s.name_not_null = true
-        @s.result.to_sql.should match /"people"."name" IS NOT NULL/
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NOT NULL/
       end
     end
   end
