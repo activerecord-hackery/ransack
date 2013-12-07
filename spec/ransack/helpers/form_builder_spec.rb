@@ -33,7 +33,11 @@ module Ransack
 
       it 'selects previously-entered time values with datetime_select' do
         @s.created_at_eq = [2011, 1, 2, 3, 4, 5]
-        html = @f.datetime_select :created_at_eq, :use_month_numbers => true, :include_seconds => true
+        html = @f.datetime_select(
+          :created_at_eq,
+          :use_month_numbers => true,
+          :include_seconds => true
+          )
         %w(2011 1 2 03 04 05).each do |val|
           html.should match /<option selected="selected" value="#{val}">#{val}<\/option>/
         end
@@ -79,15 +83,17 @@ module Ransack
 
         it 'returns ransackable attributes' do
           html = @f.attribute_select
-          html.split(/\n/).should have(Person.ransackable_attributes.size + 1).lines
+          html.split(/\n/).should have(Person.ransackable_attributes.size + 1)
+          .lines
           Person.ransackable_attributes.each do |attribute|
             html.should match /<option value="#{attribute}">/
           end
         end
 
         it 'returns ransackable attributes for associations with :associations' do
-          attributes = Person.ransackable_attributes + Article.ransackable_attributes.map {|a| "articles_#{a}"}
-          html = @f.attribute_select :associations => ['articles']
+          attributes = Person.ransackable_attributes + Article.
+            ransackable_attributes.map { |a| "articles_#{a}" }
+          html = @f.attribute_select('search', :associations => ['articles'])
           html.split(/\n/).should have(attributes.size).lines
           attributes.each do |attribute|
             html.should match /<option value="#{attribute}">/
@@ -95,7 +101,7 @@ module Ransack
         end
 
         it 'returns option groups for base and associations with :associations' do
-          html = @f.attribute_select :associations => ['articles']
+          html = @f.attribute_select('search', :associations => ['articles'])
           [Person, Article].each do |model|
             html.should match /<optgroup label="#{model}">/
           end
@@ -114,21 +120,21 @@ module Ransack
 
         it 'filters predicates with single-value :only' do
           html = @f.predicate_select :only => 'eq'
-          Predicate.names.reject {|k| k =~ /^eq/}.each do |key|
+          Predicate.names.reject { |k| k =~ /^eq/ }.each do |key|
             html.should_not match /<option value="#{key}">/
           end
         end
 
         it 'filters predicates with multi-value :only' do
           html = @f.predicate_select :only => [:eq, :lt]
-          Predicate.names.reject {|k| k =~ /^(eq|lt)/}.each do |key|
+          Predicate.names.reject { |k| k =~ /^(eq|lt)/ }.each do |key|
             html.should_not match /<option value="#{key}">/
           end
         end
 
         it 'excludes compounds when :compounds => false' do
           html = @f.predicate_select :compounds => false
-          Predicate.names.select {|k| k =~ /_(any|all)$/}.each do |key|
+          Predicate.names.select { |k| k =~ /_(any|all)$/ }.each do |key|
             html.should_not match /<option value="#{key}">/
           end
         end

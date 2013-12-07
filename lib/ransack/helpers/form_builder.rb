@@ -3,76 +3,64 @@ require 'action_view'
 module Ransack
   module Helpers
     class FormBuilder < ::ActionView::Helpers::FormBuilder
+
       def label(method, *args, &block)
         options = args.extract_options!
         text = args.first
         i18n = options[:i18n] || {}
-        text ||= object.translate(method, i18n.reverse_merge(:include_associations => true)) if object.respond_to? :translate
+        text ||= object.translate(
+          method, i18n.reverse_merge(:include_associations => true)
+          ) if object.respond_to? :translate
         super(method, text, options, &block)
       end
 
-      def submit(value=nil, options={})
+      def submit(value = nil, options = {})
         value, options = nil, value if value.is_a?(Hash)
         value ||= Translate.word(:search).titleize
         super(value, options)
       end
 
-      def attribute_select(options = {}, html_options = {})
-        raise ArgumentError, "attribute_select must be called inside a search FormBuilder!" unless object.respond_to?(:context)
+      def attribute_select(action = 'search', options = {}, html_options = {})
+        raise ArgumentError, formbuilder_error_message(action) unless
+          object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           @template.grouped_collection_select(
-            @object_name, :name, searchable_attribute_collection_for_bases(bases), :last, :first, :first, :last,
+            @object_name, :name,
+            attribute_collection_for_bases(bases, action),
+            :last, :first, :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         else
-          collection = searchable_attribute_collection_for_base(bases.first)
+          collection = collection_for_base(action, bases.first)
           @template.collection_select(
-            @object_name, :name, collection, :first, :last,
+            @object_name, :name,
+            collection,
+            :first, :last,
             objectify_options(options), @default_options.merge(html_options)
           )
         end
       end
-      
+
       def sort_select(options = {}, html_options = {})
-        sort_attribute_select(options, html_options) +
+        attribute_select('sort', options, html_options) +
         sort_direction_select(options, html_options)
       end
 
-      def sort_attribute_select(options = {}, html_options = {})
-        raise ArgumentError, "sort_select must be called inside a search FormBuilder!" unless object.respond_to?(:context)
-        options[:include_blank] = true unless options.has_key?(:include_blank)
-        bases = [''] + association_array(options[:associations])
-        if bases.size > 1
-          @template.grouped_collection_select(
-            @object_name, :name, sortable_attribute_collection_for_bases(bases), :last, :first, :first, :last,
-            objectify_options(options), @default_options.merge(html_options)
-          )
-        else
-          collection = sortable_attribute_collection_for_base(bases.first)
-          @template.collection_select(
-            @object_name, :name, collection, :first, :last,
-            objectify_options(options), @default_options.merge(html_options)
-          )
-        end
-      end
-
       def sort_direction_select(options = {}, html_options = {})
-        raise ArgumentError, "sort_direction must be called inside a search FormBuilder!" unless object.respond_to?(:context)
-        bases = [''] + association_array(options[:associations])
-        if bases.size > 1
-          @template.collection_select(
-            @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
-            objectify_options(options), @default_options.merge(html_options)
+        raise ArgumentError,
+          "sort_direction must be called inside a search FormBuilder!" unless
+          object.respond_to?(:context)
+        @template.collection_select(
+          @object_name, :dir,
+          [
+            ['asc', object.translate('asc')],
+            ['desc', object.translate('desc')]
+          ],
+          :first, :last,
+          objectify_options(options), @default_options.merge(html_options)
           )
-        else
-          collection = sortable_attribute_collection_for_base(bases.first)
-          @template.collection_select(
-            @object_name, :dir, [['asc', object.translate('asc')], ['desc', object.translate('desc')]], :first, :last,
-            objectify_options(options), @default_options.merge(html_options)
-          )
-        end
       end
 
       def sort_fields(*args, &block)
@@ -114,32 +102,38 @@ module Ransack
         name = "#{options[:object_name] || object_name}[#{name}]"
         output = ActiveSupport::SafeBuffer.new
         objects.each do |child|
-          output << @template.fields_for("#{name}[#{options[:child_index] || nested_child_index(name)}]", child, options, &block)
+          output << @template.fields_for("#{name}[#{
+            options[:child_index] || nested_child_index(name)
+            }]", child, options, &block)
         end
         output
       end
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        keys = options[:compounds] ? Predicate.names : Predicate.names.reject {|k| k.match(/_(any|all)$/)}
+        keys = options[:compounds] ? Predicate.names : 
+          Predicate.names.reject { |k| k.match(/_(any|all)$/) }
         if only = options[:only]
           if only.respond_to? :call
-            keys = keys.select {|k| only.call(k)}
+            keys = keys.select { |k| only.call(k) }
           else
             only = Array.wrap(only).map(&:to_s)
-            keys = keys.select {|k| only.include? k.sub(/_(any|all)$/, '')}
+            keys = keys.select { |k| only.include? k.sub(/_(any|all)$/, '') }
           end
         end
-
         @template.collection_select(
-          @object_name, :p, keys.map {|k| [k, Translate.predicate(k)]}, :first, :last,
+          @object_name, :p,
+          keys.map { |k| [k, Translate.predicate(k)] },
+          :first, :last,
           objectify_options(options), @default_options.merge(html_options)
         )
       end
 
       def combinator_select(options = {}, html_options = {})
         @template.collection_select(
-          @object_name, :m, combinator_choices, :first, :last,
+          @object_name, :m,
+          combinator_choices,
+          :first, :last,
           objectify_options(options), @default_options.merge(html_options)
         )
       end
@@ -169,56 +163,56 @@ module Ransack
           end
         else
           [obj]
-        end).
-        compact.flatten.map { |v| [prefix, v].compact.join('_') }
+        end)
+        .compact
+        .flatten
+        .map { |v| [prefix, v].compact.join('_') }
       end
 
       def attr_from_base_and_column(base, column)
-        [base, column].reject {|v| v.blank?}.join('_')
+        [base, column]
+        .reject { |v| v.blank? }
+        .join('_')
       end
 
-      def attribute_collection_for_base(attributes, base=nil)
+      def collection_for_base(action, base)
+        attribute_collection_for_base(
+          object.context.send("#{action}able_attributes", base), base
+          )
+      end
+
+      def attribute_collection_for_base(attributes, base = nil)
         attributes.map do |c|
           [
             attr_from_base_and_column(base, c),
-            Translate.attribute(attr_from_base_and_column(base, c), :context => object.context)
+            Translate.attribute(
+              attr_from_base_and_column(base, c), :context => object.context
+              )
           ]
         end
       end
 
-      def sortable_attribute_collection_for_base(base=nil)
-        attribute_collection_for_base(object.context.sortable_attributes(base), base)
-      end
-
-      def searchable_attribute_collection_for_base(base=nil)
-        attribute_collection_for_base(object.context.searchable_attributes(base), base)
-      end
-
-      def sortable_attribute_collection_for_bases(bases)
-        bases.map do |base|
-          begin
-          [
-            Translate.association(base, :context => object.context),
-            sortable_attribute_collection_for_base(base)
-          ]
-          rescue UntraversableAssociationError => e
-            nil
+      def attribute_collection_for_bases(bases, action)
+        (
+          bases.map do |base|
+            begin 
+              [
+                Translate.association(base, :context => object.context),
+                collection_for_base(action, base)
+              ]
+            rescue UntraversableAssociationError => e
+              nil
+            end
           end
-        end.compact
+        )
+        .compact
       end
 
-      def searchable_attribute_collection_for_bases(bases)
-        bases.map do |base|
-          begin
-          [
-            Translate.association(base, :context => object.context),
-            searchable_attribute_collection_for_base(base)
-          ]
-          rescue UntraversableAssociationError => e
-            nil
-          end
-        end.compact
+      def formbuilder_error_message(action)
+        "#{action == 'search' ? 'attribute' : action
+          }_select must be called inside a search FormBuilder!"
       end
+
     end
   end
 end
