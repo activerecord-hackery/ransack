@@ -25,7 +25,7 @@ module Ransack
       end
 
       def detect_from_string(str)
-        names_by_decreasing_length.detect {|p| str.end_with?("_#{p}")}
+        names_by_decreasing_length.detect { |p| str.end_with?("_#{p}") }
       end
 
       def name_from_attribute_name(attribute_name)

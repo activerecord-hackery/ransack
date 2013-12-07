@@ -1,4 +1,4 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 gemspec
 
 gem 'rake'
@@ -26,5 +26,8 @@ else
     gem 'activemodel'
     gem 'activerecord'
     gem 'actionpack'
+  end
+  if rails == '3-0-stable'
+    gem 'mysql2', '< 0.3'
   end
 end

@@ -87,7 +87,14 @@ module Ransack
     module_function
     # replace % \ to \% \\
     def escape_wildcards(unescaped)
-      unescaped.to_s.gsub(/\\/){ "\\\\" }.gsub(/%/, "\\%")
+      case ActiveRecord::Base.connection.adapter_name
+      when "SQLite"
+        unescaped
+      else
+        # Necessary for PostgreSQL and MySQL
+        unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
+      end
     end
+
   end
 end

@@ -39,7 +39,25 @@ class Person < ActiveRecord::Base
   end
 
   ransacker :doubled_name do |parent|
-    Arel::Nodes::InfixOperation.new('||', parent.table[:name], parent.table[:name])
+    Arel::Nodes::InfixOperation.new(
+      '||', parent.table[:name], parent.table[:name]
+      )
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_sort']
+    else
+      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+    end
+  end
+
+  def self.ransortable_attributes(auth_object = nil)
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_search']
+    else
+      column_names + _ransackers.keys - ['only_search', 'only_admin']
+    end
   end
 end
 
@@ -72,6 +90,9 @@ module Schema
         t.integer  :parent_id
         t.string   :name
         t.string   :email
+        t.string   :only_search
+        t.string   :only_sort
+        t.string   :only_admin
         t.integer  :salary
         t.boolean  :awesome, default: false
         t.timestamps
@@ -120,7 +141,8 @@ module Schema
       end
     end
 
-    Comment.make(body: 'First post!',
-                 article: Article.make(title: 'Hello, world!'))
+    Comment.make(
+      body: 'First post!', article: Article.make(title: 'Hello, world!')
+      )
   end
 end

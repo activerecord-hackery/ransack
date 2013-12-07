@@ -135,11 +135,9 @@ module Ransack
 
       it 'evaluates nested conditions' do
         search = Search.new(Person, children_name_eq: 'Ernie',
-          g: [{
-            m: 'or',
-            name_eq: 'Ernie',
-            children_children_name_eq: 'Ernie'
-          }]
+          g: [
+            { m: 'or', name_eq: 'Ernie', children_children_name_eq: 'Ernie' }
+          ]
         )
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
@@ -245,27 +243,21 @@ module Ransack
 
       it 'creates sorts based on multiple attributes/directions in hash format' do
         @s.sorts = {
-          '0' => {
-            name: 'id',
-            dir: 'desc'
-          },
-          '1' => {
-            name: 'name',
-            dir: 'asc'
-          }
+          '0' => { name: 'id', dir: 'desc' },
+          '1' => { name: 'name', dir: 'asc' }
         }
         @s.sorts.should have(2).items
-        @s.sorts.should be_all {|s| Nodes::Sort === s}
-        id_sort = @s.sorts.detect {|s| s.name == 'id'}
-        name_sort = @s.sorts.detect {|s| s.name == 'name'}
+        @s.sorts.should be_all { |s| Nodes::Sort === s }
+        id_sort = @s.sorts.detect { |s| s.name == 'id' }
+        name_sort = @s.sorts.detect { |s| s.name == 'name' }
         id_sort.dir.should eq 'desc'
         name_sort.dir.should eq 'asc'
       end
 
       it 'creates sorts based on multiple attributes and uppercase directions in hash format' do
         @s.sorts = {
-            '0' => { :name => 'id', :dir => 'DESC' },
-            '1' => { :name => 'name', :dir => 'ASC' }
+            '0' => { name: 'id', dir: 'DESC' },
+            '1' => { name: 'name', dir: 'ASC' }
         }
         @s.sorts.should have(2).items
         @s.sorts.should be_all { |s| Nodes::Sort === s }
@@ -277,8 +269,8 @@ module Ransack
 
       it 'creates sorts based on multiple attributes and different directions in hash format' do
         @s.sorts = {
-            '0' => { :name => 'id', :dir => 'DESC' },
-            '1' => { :name => 'name', :dir => nil }
+            '0' => { name: 'id', dir: 'DESC' },
+            '1' => { name: 'name', dir: nil }
         }
         @s.sorts.should have(2).items
         @s.sorts.should be_all { |s| Nodes::Sort === s }

@@ -12,7 +12,7 @@ module Ransack
         subject.parent_id_cont = 1
         expect { subject.result }.to_not raise_error
       end
-      it "escapes % and \\ in value" do
+      it "escapes '%', '.' and '\\\\' in value" do
         subject.send(:"#{method}=", '%._\\')
         subject.result.to_sql.should match(regexp)
       end
@@ -36,7 +36,15 @@ module Ransack
     end
 
     describe 'cont' do
-      it_has_behavior 'wildcard escaping', :name_cont, /"people"."name" I?LIKE '%\\%._\\\\%'/ do
+
+      it_has_behavior 'wildcard escaping', :name_cont,
+        (
+        if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+          /"people"."name" ILIKE '%\\%\\._\\\\%'/
+        else
+         /"people"."name" LIKE '%%._\\%'/
+        end
+        ) do
         subject { @s }
       end
 
@@ -47,7 +55,14 @@ module Ransack
     end
 
     describe 'not_cont' do
-      it_has_behavior 'wildcard escaping', :name_not_cont, /"people"."name" NOT I?LIKE '%\\%._\\\\%'/ do
+      it_has_behavior 'wildcard escaping', :name_not_cont,
+        (
+        if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+          /"people"."name" NOT ILIKE '%\\%\\._\\\\%'/
+        else
+         /"people"."name" NOT LIKE '%%._\\%'/
+        end
+        ) do
         subject { @s }
       end
 
