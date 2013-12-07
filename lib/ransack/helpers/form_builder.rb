@@ -34,12 +34,7 @@ module Ransack
           )
         else
           collection = collection_for_base(action, bases.first)
-          @template.collection_select(
-            @object_name, :name,
-            collection,
-            :first, :last,
-            objectify_options(options), @default_options.merge(html_options)
-          )
+          template_collection(:name, collection, options, html_options)
         end
       end
 
@@ -52,15 +47,7 @@ module Ransack
         raise ArgumentError,
           "sort_direction must be called inside a search FormBuilder!" unless
           object.respond_to?(:context)
-        @template.collection_select(
-          @object_name, :dir,
-          [
-            ['asc', object.translate('asc')],
-            ['desc', object.translate('desc')]
-          ],
-          :first, :last,
-          objectify_options(options), @default_options.merge(html_options)
-          )
+        template_collection(:dir, sort_array, options, html_options)
       end
 
       def sort_fields(*args, &block)
@@ -121,24 +108,26 @@ module Ransack
             keys = keys.select { |k| only.include? k.sub(/_(any|all)$/, '') }
           end
         end
-        @template.collection_select(
-          @object_name, :p,
-          keys.map { |k| [k, Translate.predicate(k)] },
-          :first, :last,
-          objectify_options(options), @default_options.merge(html_options)
-        )
+        collection = keys.map { |k| [k, Translate.predicate(k)] }
+        template_collection(:p, collection, options, html_options)
       end
 
       def combinator_select(options = {}, html_options = {})
-        @template.collection_select(
-          @object_name, :m,
-          combinator_choices,
-          :first, :last,
-          objectify_options(options), @default_options.merge(html_options)
-        )
+        template_collection(:m, combinator_choices, options, html_options)
       end
 
       private
+
+      def template_collection(name, collection, options, html_options)
+        @template.collection_select(
+          @object_name, name, collection, :first, :last,
+          objectify_options(options), @default_options.merge(html_options)
+          )
+      end
+
+      def sort_array
+        [['asc', object.translate('asc')], ['desc', object.translate('desc')]]
+      end
 
       def combinator_choices
         if Nodes::Condition === object
@@ -149,36 +138,36 @@ module Ransack
       end
 
       def association_array(obj, prefix = nil)
-        ([prefix] + case obj
-        when Array
-          obj
-        when Hash
-          obj.map do |key, value|
-            case value
-            when Array, Hash
-              association_array(value, key.to_s)
-            else
-              [key.to_s, [key, value].join('_')]
-            end
-          end
-        else
-          [obj]
-        end)
+        ([prefix] + association_object(obj))
         .compact
         .flatten
         .map { |v| [prefix, v].compact.join('_') }
       end
 
-      def attr_from_base_and_column(base, column)
-        [base, column]
-        .reject { |v| v.blank? }
-        .join('_')
+      def association_object(obj)
+        case obj
+        when Array
+          obj
+        when Hash
+          association_hash(obj)
+        else
+          [obj]
+        end
       end
 
-      def collection_for_base(action, base)
-        attribute_collection_for_base(
-          object.context.send("#{action}able_attributes", base), base
-          )
+      def association_hash(obj)
+        obj.map do |key, value|
+          case value
+          when Array, Hash
+            association_array(value, key.to_s)
+          else
+            [key.to_s, [key, value].join('_')]
+          end
+        end
+      end
+
+      def attribute_collection_for_bases(bases, action)
+        bases.map { |base| get_attribute_element(action, base) }.compact
       end
 
       def attribute_collection_for_base(attributes, base = nil)
@@ -192,20 +181,27 @@ module Ransack
         end
       end
 
-      def attribute_collection_for_bases(bases, action)
-        (
-          bases.map do |base|
-            begin 
-              [
-                Translate.association(base, :context => object.context),
-                collection_for_base(action, base)
-              ]
-            rescue UntraversableAssociationError => e
-              nil
-            end
-          end
-        )
-        .compact
+      def collection_for_base(action, base)
+        attribute_collection_for_base(
+          object.context.send("#{action}able_attributes", base), base
+          )
+      end
+
+      def get_attribute_element(action, base)
+        begin 
+          [
+            Translate.association(base, :context => object.context),
+            collection_for_base(action, base)
+          ]
+        rescue UntraversableAssociationError => e
+          nil
+        end
+      end
+
+      def attr_from_base_and_column(base, column)
+        [base, column]
+        .reject { |v| v.blank? }
+        .join('_')
       end
 
       def formbuilder_error_message(action)
