@@ -27,7 +27,4 @@ else
     gem 'activerecord'
     gem 'actionpack'
   end
-  if rails == '3-0-stable'
-    gem 'mysql2', '< 0.3'
-  end
 end
