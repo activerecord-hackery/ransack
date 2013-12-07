@@ -76,7 +76,8 @@ module Ransack
 
       it 'generates a NOT LIKE query with value surrounded by %' do
         @s.name_not_cont = 'ric'
-        @s.result.to_sql.should match /"people"."name" NOT I?LIKE '%ric%'/
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} NOT I?LIKE '%ric%'/
       end
     end
 
