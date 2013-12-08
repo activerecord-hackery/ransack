@@ -23,7 +23,8 @@ module Ransack
   end
 
   class Name < String
-    attr_reader :singular, :plural, :element, :collection, :partial_path, :human, :param_key, :route_key, :i18n_key
+    attr_reader :singular, :plural, :element, :collection, :partial_path,
+                :human, :param_key, :route_key, :i18n_key
     alias_method :cache_key, :collection
 
     def initialize

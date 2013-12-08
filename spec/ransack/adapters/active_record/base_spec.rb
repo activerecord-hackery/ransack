@@ -23,12 +23,13 @@ module Ransack
           # For infix tests
           def self.sane_adapter?
             case ::ActiveRecord::Base.connection.adapter_name
-              when "SQLite3", "PostgreSQL"
-                true
-              else
-                false
+            when "SQLite3", "PostgreSQL"
+              true
+            else
+              false
             end
           end
+
           # in schema.rb, class Person:
           # ransacker :reversed_name, :formatter => proc {|v| v.reverse} do |parent|
           #   parent.table[:name]
@@ -37,6 +38,7 @@ module Ransack
           # ransacker :doubled_name do |parent|
           #   Arel::Nodes::InfixOperation.new('||', parent.table[:name], parent.table[:name])
           # end
+
           it 'creates ransack attributes' do
             s = Person.search(:reversed_name_eq => 'htimS cirA')
             s.result.should have(1).person
@@ -45,7 +47,6 @@ module Ransack
 
           it 'can be accessed through associations' do
             s = Person.search(:children_reversed_name_eq => 'htimS cirA')
-
             s.result.to_sql.should match /#{quote_table_name("children_people")}.#{quote_column_name("name")} = 'Aric Smith'/
           end
 
