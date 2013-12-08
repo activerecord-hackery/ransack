@@ -20,13 +20,16 @@ module Ransack
         super(value, options)
       end
 
-      def attribute_select(action = 'search', options = {}, html_options = {})
+      def attribute_select(options = nil, html_options = nil, action = nil)
+        options = options || {}
+        html_options = html_options || {}
+        action = action || 'search'
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
-          collection = attribute_collection_for_bases(bases, action)
+          collection = attribute_collection_for_bases(action, bases)
           template_grouped_collection_select(collection, options, html_options)
         else
           collection = collection_for_base(action, bases.first)
@@ -41,7 +44,7 @@ module Ransack
       end
 
       def sort_select(options = {}, html_options = {})
-        attribute_select('sort', options, html_options) +
+        attribute_select(options, html_options, 'sort') +
         sort_direction_select(options, html_options)
       end
 
@@ -168,23 +171,8 @@ module Ransack
         end
       end
 
-      def attribute_collection_for_bases(bases, action)
+      def attribute_collection_for_bases(action, bases)
         bases.map { |base| get_attribute_element(action, base) }.compact
-      end
-
-      def attribute_collection_for_base(attributes, base = nil)
-        attributes.map do |c|
-          [attr_from_base_and_column(base, c),
-            Translate.attribute(
-            attr_from_base_and_column(base, c), :context => object.context
-            )
-          ]
-        end
-      end
-
-      def collection_for_base(action, base)
-        attribute_collection_for_base(
-          object.context.send("#{action}able_attributes", base), base)
       end
 
       def get_attribute_element(action, base)
@@ -194,6 +182,22 @@ module Ransack
         rescue UntraversableAssociationError => e
           nil
         end
+      end
+
+      def attribute_collection_for_base(attributes, base = nil)
+        attributes.map do |c|
+          [attr_from_base_and_column(base, c),
+            Translate.attribute(
+              attr_from_base_and_column(base, c),
+              :context => object.context
+            )
+          ]
+        end
+      end
+
+      def collection_for_base(action, base)
+        attribute_collection_for_base(
+          object.context.send("#{action}able_attributes", base), base)
       end
 
       def attr_from_base_and_column(base, column)
