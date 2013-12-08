@@ -26,7 +26,7 @@ module Ransack
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
-          collection = attribute_collection_for_bases(bases, action)
+          collection = attribute_collection_for_bases(action, bases)
           template_grouped_collection_select(collection, options, html_options)
         else
           collection = collection_for_base(action, bases.first)
@@ -168,7 +168,7 @@ module Ransack
         end
       end
 
-      def attribute_collection_for_bases(bases, action)
+      def attribute_collection_for_bases(action, bases)
         bases.map { |base| get_attribute_element(action, base) }.compact
       end
 
@@ -176,7 +176,8 @@ module Ransack
         attributes.map do |c|
           [attr_from_base_and_column(base, c),
             Translate.attribute(
-            attr_from_base_and_column(base, c), context: object.context
+              attr_from_base_and_column(base, c),
+              context: object.context
             )
           ]
         end
