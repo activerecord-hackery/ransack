@@ -324,12 +324,5 @@ module Ransack
         @s.groupings.first.children_name_eq.should eq 'Ernie'
       end
     end
-
-    describe '#respond_to' do
-      it 'is aware of second argument' do
-        Search.new(Person).respond_to?(:name_eq, true).should be_true
-      end
-    end
-
   end
 end
