@@ -1,6 +1,7 @@
 module Ransack
   class Predicate
-    attr_reader :name, :arel_predicate, :type, :formatter, :validator, :compound, :wants_array
+    attr_reader :name, :arel_predicate, :type, :formatter, :validator,
+                :compound, :wants_array
 
     class << self
 
@@ -24,11 +25,11 @@ module Ransack
       end
 
       def detect_from_string(str)
-        names_by_decreasing_length.detect {|p| str.end_with?("_#{p}")}
+        names_by_decreasing_length.detect { |p| str.end_with?("_#{p}") }
       end
 
       def name_from_attribute_name(attribute_name)
-        names_by_decreasing_length.detect {|p| attribute_name.to_s.match(/_#{p}$/)}
+        names_by_decreasing_length.detect { |p| attribute_name.to_s.match(/_#{p}$/) }
       end
 
       def for_attribute_name(attribute_name)
@@ -42,9 +43,11 @@ module Ransack
       @arel_predicate = opts[:arel_predicate]
       @type = opts[:type]
       @formatter = opts[:formatter]
-      @validator = opts[:validator] || lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
+      @validator = opts[:validator] ||
+        lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
       @compound = opts[:compound]
-      @wants_array = opts[:wants_array] == true || @compound || ['in', 'not_in'].include?(@arel_predicate)
+      @wants_array = opts[:wants_array] == true || @compound ||
+        ['in', 'not_in'].include?(@arel_predicate)
     end
 
     def eql?(other)
@@ -66,7 +69,7 @@ module Ransack
     end
 
     def validate(vals, type = @type)
-      vals.select {|v| validator.call(type ? v.cast(type) : v.value)}.any?
+      vals.select { |v| validator.call(type ? v.cast(type) : v.value) }.any?
     end
 
   end

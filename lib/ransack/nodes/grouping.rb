@@ -21,7 +21,9 @@ module Ransack
       end
 
       def translate(key, options = {})
-        super or Translate.attribute(key.to_s, options.merge(:context => context))
+        super or Translate.attribute(
+          key.to_s, options.merge(:context => context)
+          )
       end
 
       def conditions
@@ -48,7 +50,7 @@ module Ransack
       alias :c= :conditions=
 
       def [](key)
-        if condition = conditions.detect {|c| c.key == key.to_s}
+        if condition = conditions.detect { |c| c.key == key.to_s }
           condition
         else
           nil
@@ -56,7 +58,7 @@ module Ransack
       end
 
       def []=(key, value)
-        conditions.reject! {|c| c.key == key.to_s}
+        conditions.reject! { |c| c.key == key.to_s }
         self.conditions << value
       end
 
@@ -127,7 +129,9 @@ module Ransack
         when /^(g|c|m|groupings|conditions|combinator)=?$/
           true
         else
-          name.split(/_and_|_or_/).select {|n| !@context.attribute_method?(n)}.empty?
+          name.split(/_and_|_or_/)
+          .select { |n| !@context.attribute_method?(n) }
+          .empty?
         end
       end
 
@@ -155,9 +159,10 @@ module Ransack
       end
 
       def inspect
-        data =[['conditions', conditions], ['combinator', combinator]].reject { |e|
-          e[1].blank?
-        }.map { |v| "#{v[0]}: #{v[1]}" }.join(', ')
+        data = [['conditions', conditions], ['combinator', combinator]]
+        .reject { |e| e[1].blank? }
+        .map { |v| "#{v[0]}: #{v[1]}" }
+        .join(', ')
         "Grouping <#{data}>"
       end
 
