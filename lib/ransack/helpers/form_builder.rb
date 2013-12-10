@@ -20,16 +20,26 @@ module Ransack
         super(value, options)
       end
 
-      def attribute_select(action = 'search', options = {}, html_options = {})
+      def attribute_select(options = nil, html_options = nil, action = nil)
+        options = options || {}
+        html_options = html_options || {}
+        action = action || 'search'
+        default = options.delete(:default)
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           collection = attribute_collection_for_bases(action, bases)
+          object.name ||= default if can_use_default?(
+            default, :name, mapped_values(collection.flatten(2))
+            )
           template_grouped_collection_select(collection, options, html_options)
         else
           collection = collection_for_base(action, bases.first)
+          object.name ||= default if can_use_default?(
+            default, :name, mapped_values(collection)
+            )
           template_collection_select(:name, collection, options, html_options)
         end
       end
@@ -41,7 +51,7 @@ module Ransack
       end
 
       def sort_select(options = {}, html_options = {})
-        attribute_select('sort', options, html_options) +
+        attribute_select(options, html_options, 'sort') +
         sort_direction_select(options, html_options)
       end
 
@@ -93,6 +103,7 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
+        default = options.delete(:default) || 'cont'
         keys = options[:compounds] ? Predicate.names : 
           Predicate.names.reject { |k| k.match(/_(any|all)$/) }
         if only = options[:only]
@@ -104,6 +115,9 @@ module Ransack
           end
         end
         collection = keys.map { |k| [k, Translate.predicate(k)] }
+        object.predicate ||= Predicate.named(default) if can_use_default?(
+          default, :predicate, keys
+          )
         template_collection_select(:p, collection, options, html_options)
       end
 
@@ -125,6 +139,15 @@ module Ransack
           @object_name, name, collection, :first, :last,
           objectify_options(options), @default_options.merge(html_options)
           )
+      end
+
+      def can_use_default?(default, attribute, values)
+        object.respond_to?("#{attribute}=") && default &&
+          values.include?(default.to_s)
+      end
+
+      def mapped_values(values)
+        values.map { |v| v.is_a?(Array) ? v.first : nil }.compact
       end
 
       def sort_array
@@ -172,6 +195,15 @@ module Ransack
         bases.map { |base| get_attribute_element(action, base) }.compact
       end
 
+      def get_attribute_element(action, base)
+        begin
+          [Translate.association(base, context: object.context),
+            collection_for_base(action, base)]
+        rescue UntraversableAssociationError => e
+          nil
+        end
+      end
+
       def attribute_collection_for_base(attributes, base = nil)
         attributes.map do |c|
           [attr_from_base_and_column(base, c),
@@ -186,15 +218,6 @@ module Ransack
       def collection_for_base(action, base)
         attribute_collection_for_base(
           object.context.send("#{action}able_attributes", base), base)
-      end
-
-      def get_attribute_element(action, base)
-        begin
-          [Translate.association(base, context: object.context),
-            collection_for_base(action, base)]
-        rescue UntraversableAssociationError => e
-          nil
-        end
       end
 
       def attr_from_base_and_column(base, column)
