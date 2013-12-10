@@ -31,13 +31,15 @@ module Ransack
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           collection = attribute_collection_for_bases(action, bases)
-          object.name ||= default if object.respond_to?(:name=) && default &&
-            collection.flatten(2).map{|a| a.is_a?(Array) ? a.first : nil}.compact.include?(default.to_s)
+          object.name ||= default if can_use_default?(
+            default, :name, mapped_values(collection.flatten(2))
+            )
           template_grouped_collection_select(collection, options, html_options)
         else
           collection = collection_for_base(action, bases.first)
-          object.name ||= default if object.respond_to?(:name=) && default &&
-            collection.map{|a| a.is_a?(Array) ? a.first : nil}.compact.include?(default.to_s)
+          object.name ||= default if can_use_default?(
+            default, :name, mapped_values(collection)
+            )
           template_collection_select(:name, collection, options, html_options)
         end
       end
@@ -113,8 +115,9 @@ module Ransack
           end
         end
         collection = keys.map { |k| [k, Translate.predicate(k)] }
-        object.predicate ||= Predicate.named(default) if object.respond_to?(:predicate=) &&
-          default && keys.include?(default.to_s)
+        object.predicate ||= Predicate.named(default) if can_use_default?(
+          default, :predicate, keys
+          )
         template_collection_select(:p, collection, options, html_options)
       end
 
@@ -136,6 +139,15 @@ module Ransack
           @object_name, name, collection, :first, :last,
           objectify_options(options), @default_options.merge(html_options)
           )
+      end
+
+      def can_use_default?(default, attribute, values)
+        object.respond_to?("#{attribute}=") && default &&
+          values.include?(default.to_s)
+      end
+
+      def mapped_values(values)
+        values.map { |v| v.is_a?(Array) ? v.first : nil }.compact
       end
 
       def sort_array
