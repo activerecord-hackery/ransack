@@ -70,6 +70,16 @@ module Ransack
       table_for(parent)[attr_name]
     end
 
+    def chain_scope(scope, args)
+      scope_method = @klass.method(scope)
+      return unless scope_method && args != false
+      @object = if scope_method.arity < 1 && args == true
+                  @object.send(scope)
+                else
+                  @object.send(scope, *args)
+                end
+    end
+
     def bind(object, str)
       object.parent, object.attr_name = @bind_pairs[str]
     end
@@ -134,6 +144,10 @@ module Ransack
 
     def ransackable_association?(str, klass)
       klass.ransackable_associations(auth_object).include? str
+    end
+
+    def ransackable_scope?(str, klass)
+      klass.ransackable_scopes(auth_object).any? { |scope| scope.to_s == str }
     end
 
     def searchable_attributes(str = '')

@@ -27,11 +27,12 @@ module Ransack
 
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
-        case key
-        when 's', 'sorts'
+        if key == 's' || key == 'sorts'
           send("#{key}=", value)
-        else
-          base.send("#{key}=", value) if base.attribute_method?(key)
+        elsif @base.attribute_method?(key)
+          base.send("#{key}=", value)
+        elsif @context.ransackable_scope?(key, @context.object)
+          @context.chain_scope(key, value)
         end
       end
       self
