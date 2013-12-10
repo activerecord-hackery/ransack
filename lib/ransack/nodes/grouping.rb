@@ -82,7 +82,6 @@ module Ransack
         attrs = opts[:attributes] || 1
         vals = opts[:values] || 1
         condition = Condition.new(@context)
-        condition.predicate = Predicate.named('eq')
         attrs.times { condition.build_attribute }
         vals.times { condition.build_value }
         condition
@@ -116,7 +115,9 @@ module Ransack
         method_name = method_id.to_s
         writer = method_name.sub!(/\=$/, '')
         if attribute_method?(method_name)
-          writer ? write_attribute(method_name, *args) : read_attribute(method_name)
+          writer ?
+            write_attribute(method_name, *args) :
+            read_attribute(method_name)
         else
           super
         end
@@ -160,12 +161,11 @@ module Ransack
 
       def inspect
         data = [
-                ['conditions', conditions],
-                ['combinator', combinator]
+                ['conditions', conditions], ['combinator', combinator]
                ].
-               reject { |e| e[1].blank? }.
-               map { |v| "#{v[0]}: #{v[1]}" }.
-               join(', ')
+               reject { |e| e[1].blank? }
+               .map { |v| "#{v[0]}: #{v[1]}" }
+               .join(', ')
         "Grouping <#{data}>"
       end
 
@@ -188,13 +188,8 @@ module Ransack
 
       def strip_predicate_and_index(str)
         string = str.split(/\(/).first
-        string = strip_before_type_cast(string)
         Predicate.detect_and_strip_from_string!(string)
         string
-      end
-
-      def strip_before_type_cast(str)
-        str.split("_before_type_cast").first
       end
 
     end
