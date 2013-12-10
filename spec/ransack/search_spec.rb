@@ -85,12 +85,16 @@ module Ransack
         search = Search.new(Person,
           c: {
             '0' => { a: ['name'], p: 'eq', v: ['Ernie'] },
-            '1' => { a: ['children_name', 'parent_name'], p: 'eq', v: ['Ernie'], m: 'or' }
+            '1' => {
+                     a: ['children_name', 'parent_name'],
+                     p: 'eq', v: ['Ernie'], m: 'or'
+                   }
           }
         )
         conditions = search.base.conditions
         conditions.should have(2).items
-        conditions.map {|c| c.class}.should eq [Nodes::Condition, Nodes::Condition]
+        conditions.map { |c| c.class }
+        .should eq [Nodes::Condition, Nodes::Condition]
       end
 
       it 'creates Conditions for custom predicates that take arrays' do
@@ -114,8 +118,12 @@ module Ransack
     end
 
     describe '#result' do
-      let(:people_name_field) { "#{quote_table_name("people")}.#{quote_column_name("name")}" }
-      let(:children_people_name_field) { "#{quote_table_name("children_people")}.#{quote_column_name("name")}" }
+      let(:people_name_field) {
+        "#{quote_table_name("people")}.#{quote_column_name("name")}"
+      }
+      let(:children_people_name_field) {
+        "#{quote_table_name("children_people")}.#{quote_column_name("name")}"
+      }
       it 'evaluates conditions contextually' do
         search = Search.new(Person, children_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
@@ -168,9 +176,14 @@ module Ransack
       end
 
       it 'returns distinct records when passed distinct: true' do
-        search = Search.new(Person, g: [
-          { m: 'or', comments_body_cont: 'e', articles_comments_body_cont: 'e' }
-        ])
+        search = Search.new(
+          Person, g: [
+            { m: 'or',
+              comments_body_cont: 'e',
+              articles_comments_body_cont: 'e'
+            }
+          ]
+        )
         search.result.load.should have(9000).items
         search.result(distinct: true).should have(10).items
         search.result.load.uniq.should eq search.result(distinct: true).load
@@ -285,9 +298,9 @@ module Ransack
       end
 
       it 'overrides existing sort' do
-         @s.sorts = 'id asc'
-         @s.result.first.id.should eq 1
-       end
+        @s.sorts = 'id asc'
+        @s.result.first.id.should eq 1
+      end
     end
 
     describe '#method_missing' do
@@ -306,16 +319,8 @@ module Ransack
 
       it 'allows chaining to access nested conditions' do
         @s.groupings = [{ m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' }]
-        @s.groupings.first.name_eq.should eq 'Ernie'
         @s.groupings.first.children_name_eq.should eq 'Ernie'
       end
     end
-
-    describe '#respond_to' do
-      it 'is aware of second argument' do
-        Search.new(Person).respond_to?(:name_eq, true).should be_true
-      end
-    end
-
   end
 end

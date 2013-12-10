@@ -22,8 +22,6 @@ else
   )
 end
 
-
-
 class Person < ActiveRecord::Base
   default_scope { order(id: :desc) }
   belongs_to :parent, class_name: 'Person', foreign_key: :parent_id
@@ -31,7 +29,7 @@ class Person < ActiveRecord::Base
   has_many   :articles
   has_many   :comments
   has_many   :authored_article_comments, through: :articles,
-             source: :comments, foreign_key: :person_id
+              source: :comments, foreign_key: :person_id
   has_many   :notes, as: :notable
 
   ransacker :reversed_name, formatter: proc { |v| v.reverse } do |parent|
@@ -65,7 +63,7 @@ class Article < ActiveRecord::Base
   belongs_to              :person
   has_many                :comments
   has_and_belongs_to_many :tags
-  has_many   :notes, as: :notable
+  has_many                :notes, as: :notable
 end
 
 class Comment < ActiveRecord::Base
@@ -107,7 +105,7 @@ module Schema
       create_table :comments, force: true do |t|
         t.integer :article_id
         t.integer :person_id
-        t.text    :body
+        t.text :body
       end
 
       create_table :tags, force: true do |t|
@@ -121,8 +119,8 @@ module Schema
 
       create_table :notes, force: true do |t|
         t.integer :notable_id
-        t.string  :notable_type
-        t.string  :note
+        t.string :notable_type
+        t.string :note
       end
     end
 
@@ -144,5 +142,6 @@ module Schema
     Comment.make(
       body: 'First post!', article: Article.make(title: 'Hello, world!')
       )
-  end
+
+    end
 end
