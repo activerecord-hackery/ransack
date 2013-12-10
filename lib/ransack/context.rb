@@ -8,8 +8,11 @@ module Ransack
     class << self
 
       def for(object, options = {})
-        context = Class === object ? for_class(object, options) : for_object(object, options)
-        context or raise ArgumentError, "Don't know what context to use for #{object}"
+        context = Class === object ?
+          for_class(object, options) :
+          for_object(object, options)
+        context or raise ArgumentError,
+          "Don't know what context to use for #{object}"
       end
 
       def for_class(klass, options = {})
@@ -35,7 +38,9 @@ module Ransack
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @base = @join_dependency.join_base
       @engine = @base.arel_engine
-      @default_table = Arel::Table.new(@base.table_name, :as => @base.aliased_table_name, :engine => @engine)
+      @default_table = Arel::Table.new(
+        @base.table_name, as: @base.aliased_table_name, engine: @engine
+        )
       @bind_pairs = Hash.new do |hash, key|
         parent, attr_name = get_parent_and_attribute_name(key.to_s)
         if parent && attr_name
@@ -49,9 +54,7 @@ module Ransack
         obj
       elsif obj.respond_to? :klass
         obj.klass
-      elsif obj.respond_to? :active_record # rails 3
-        obj.active_record
-      elsif obj.respond_to? :base_klass    # rails 4
+      elsif obj.respond_to? :base_klass
         obj.base_klass
       else
         raise ArgumentError, "Don't know how to klassify #{obj}"
@@ -85,7 +88,8 @@ module Ransack
 
           remainder.unshift segments.pop
         end
-        raise UntraversableAssociationError, "No association matches #{str}" unless found_assoc
+        raise UntraversableAssociationError,
+          "No association matches #{str}" unless found_assoc
       end
 
       klassify(base)
@@ -98,8 +102,10 @@ module Ransack
       segments = str.split(/_/)
       association_parts = []
       if (segments = str.split(/_/)).size > 0
-        while segments.size > 0 && !base.columns_hash[segments.join('_')] && association_parts << segments.shift do
-          assoc, klass = unpolymorphize_association(association_parts.join('_'))
+        while segments.size > 0 && !base.columns_hash[segments.join('_')] &&
+        association_parts << segments.shift do
+          assoc, klass = unpolymorphize_association(association_parts
+          .join('_'))
           if found_assoc = get_association(assoc, base)
             path += association_parts
             association_parts = []
@@ -121,7 +127,7 @@ module Ransack
 
     def ransackable_attribute?(str, klass)
       klass.ransackable_attributes(auth_object).include?(str) ||
-        klass.ransortable_attributes(auth_object).include?(str)
+      klass.ransortable_attributes(auth_object).include?(str)
     end
 
     def ransackable_association?(str, klass)
@@ -132,8 +138,8 @@ module Ransack
       traverse(str).ransackable_attributes(auth_object)
     end
 
-    def searchable_associations(str = '')
-      traverse(str).ransackable_associations(auth_object)
+    def sortable_attributes(str = '')
+      traverse(str).ransortable_attributes(auth_object)
     end
 
   end
