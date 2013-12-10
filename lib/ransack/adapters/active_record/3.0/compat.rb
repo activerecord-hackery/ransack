@@ -2,7 +2,7 @@
 if Arel::Nodes::And < Arel::Nodes::Binary
   class Ransack::Visitor
     def visit_Ransack_Nodes_And(object)
-      nodes = object.values.map {|o| accept(o)}.compact
+      nodes = object.values.map { |o| accept(o) }.compact
       return nil unless nodes.size > 0
 
       if nodes.size > 1

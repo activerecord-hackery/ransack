@@ -14,7 +14,7 @@ module Ransack
         end
 
         def i18n_alias(opts = {})
-          self.i18n_aliases.merge! Hash[opts.map {|k, v| [k.to_s, v.to_s]}]
+          self.i18n_aliases.merge! Hash[opts.map { |k, v| [k.to_s, v.to_s] }]
         end
       end
 

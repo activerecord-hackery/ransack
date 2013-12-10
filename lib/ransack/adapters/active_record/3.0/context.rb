@@ -84,7 +84,7 @@ module Ransack
         def get_association(str, parent = @base)
           klass = klassify parent
           ransackable_association?(str, klass) &&
-          klass.reflect_on_all_associations.detect {|a| a.name.to_s == str}
+          klass.reflect_on_all_associations.detect { |a| a.name.to_s == str }
         end
 
         def join_dependency(relation)

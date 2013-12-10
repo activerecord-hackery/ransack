@@ -10,7 +10,7 @@ module Ransack
       end
 
       def names_by_decreasing_length
-        names.sort {|a,b| b.length <=> a.length}
+        names.sort { |a,b| b.length <=> a.length }
       end
 
       def named(name)

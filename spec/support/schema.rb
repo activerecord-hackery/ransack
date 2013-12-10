@@ -38,7 +38,7 @@ class Person < ActiveRecord::Base
              :source => :comments, :foreign_key => :person_id
   has_many   :notes, :as => :notable
 
-  ransacker :reversed_name, :formatter => proc {|v| v.reverse} do |parent|
+  ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
   end
 

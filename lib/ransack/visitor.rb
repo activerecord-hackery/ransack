@@ -10,7 +10,7 @@ module Ransack
     end
 
     def visit_Array(object)
-      object.map {|o| accept(o)}.compact
+      object.map { |o| accept(o) }.compact
     end
 
     def visit_Ransack_Nodes_Condition(object)
@@ -22,7 +22,7 @@ module Ransack
     end
 
     def visit_and(object)
-      nodes = object.values.map {|o| accept(o)}.compact
+      nodes = object.values.map { |o| accept(o) }.compact
       return nil unless nodes.size > 0
 
       if nodes.size > 1
@@ -33,7 +33,7 @@ module Ransack
     end
 
     def visit_or(object)
-      nodes = object.values.map {|o| accept(o)}.compact
+      nodes = object.values.map { |o| accept(o) }.compact
       return nil unless nodes.size > 0
 
       if nodes.size > 1

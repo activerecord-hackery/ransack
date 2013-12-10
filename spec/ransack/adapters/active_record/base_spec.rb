@@ -31,7 +31,7 @@ module Ransack
           end
 
           # in schema.rb, class Person:
-          # ransacker :reversed_name, :formatter => proc {|v| v.reverse} do |parent|
+          # ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
           #   parent.table[:name]
           # end
           #
