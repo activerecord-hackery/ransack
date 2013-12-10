@@ -72,14 +72,6 @@ module Ransack
       Nodes::Sort.new(@context).build(opts)
     end
 
-    def respond_to?(method_id, include_private = false)
-      super or begin
-        method_name = method_id.to_s
-        writer = method_name.sub!(/\=$/, '')
-        base.attribute_method?(method_name) ? true : false
-      end
-    end
-
     def method_missing(method_id, *args)
       method_name = method_id.to_s
       writer = method_name.sub!(/\=$/, '')
