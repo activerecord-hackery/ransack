@@ -8,8 +8,8 @@ module Ransack
           options[:url] ||= polymorphic_path(search.klass)
         elsif record.is_a?(Array) &&
             (search = record.detect { |o| o.is_a?(Ransack::Search) })
-          options[:url] ||= polymorphic_path(record.
-            map { |o| o.is_a?(Ransack::Search) ? o.klass : o }
+          options[:url] ||= polymorphic_path(
+            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o }
             )
         else
           raise ArgumentError,

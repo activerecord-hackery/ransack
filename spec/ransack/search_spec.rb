@@ -90,7 +90,7 @@ module Ransack
         )
         conditions = search.base.conditions
         conditions.should have(2).items
-        conditions.map {|c| c.class}.should eq [Nodes::Condition, Nodes::Condition]
+        conditions.map { |c| c.class }.should eq [Nodes::Condition, Nodes::Condition]
       end
 
       it 'creates Conditions for custom predicates that take arrays' do

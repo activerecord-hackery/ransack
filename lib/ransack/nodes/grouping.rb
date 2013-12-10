@@ -107,7 +107,8 @@ module Ransack
             self.groupings << grouping_object if grouping_object.values.any?
           end
         else
-          raise ArgumentError, "Invalid argument (#{groupings.class}) supplied to groupings="
+          raise ArgumentError,
+            "Invalid argument (#{groupings.class}) supplied to groupings="
         end
       end
       alias :g= :groupings=
@@ -116,7 +117,9 @@ module Ransack
         method_name = method_id.to_s
         writer = method_name.sub!(/\=$/, '')
         if attribute_method?(method_name)
-          writer ? write_attribute(method_name, *args) : read_attribute(method_name)
+          writer ?
+            write_attribute(method_name, *args) :
+            read_attribute(method_name)
         else
           super
         end
