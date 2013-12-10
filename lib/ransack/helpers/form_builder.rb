@@ -24,15 +24,20 @@ module Ransack
         options = options || {}
         html_options = html_options || {}
         action = action || 'search'
+        default = options.delete(:default)
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
         bases = [''] + association_array(options[:associations])
         if bases.size > 1
           collection = attribute_collection_for_bases(action, bases)
+          object.name ||= default if object.respond_to?(:name=) && default &&
+            collection.flatten(2).map{|a| a.is_a?(Array) ? a.first : nil}.compact.include?(default.to_s)
           template_grouped_collection_select(collection, options, html_options)
         else
           collection = collection_for_base(action, bases.first)
+          object.name ||= default if object.respond_to?(:name=) && default &&
+            collection.map{|a| a.is_a?(Array) ? a.first : nil}.compact.include?(default.to_s)
           template_collection_select(:name, collection, options, html_options)
         end
       end
@@ -96,6 +101,7 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
+        default = options.delete(:default) || 'eq'
         keys = options[:compounds] ? Predicate.names : 
           Predicate.names.reject { |k| k.match(/_(any|all)$/) }
         if only = options[:only]
@@ -107,6 +113,8 @@ module Ransack
           end
         end
         collection = keys.map { |k| [k, Translate.predicate(k)] }
+        object.predicate ||= Predicate.named(default) if object.respond_to?(:predicate=) &&
+          default && keys.include?(default.to_s)
         template_collection_select(:p, collection, options, html_options)
       end
 
