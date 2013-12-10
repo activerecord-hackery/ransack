@@ -5,7 +5,7 @@ module Ransack
       i18n_alias :a => :attribute, :p => :predicate, :m => :combinator,
                  :v => :value
 
-      attr_reader :predicate
+      attr_accessor :predicate
 
       class << self
         def extract(context, key, values)
@@ -160,11 +160,6 @@ module Ransack
         self.predicate = Predicate.named(name)
       end
       alias :p= :predicate_name=
-
-      def predicate=(predicate)
-        @predicate = predicate
-        predicate
-      end
 
       def predicate_name
         predicate.name if predicate
