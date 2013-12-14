@@ -85,12 +85,16 @@ module Ransack
         search = Search.new(Person,
           :c => {
             '0' => { :a => ['name'], :p => 'eq', :v => ['Ernie'] },
-            '1' => { :a => ['children_name', 'parent_name'], :p => 'eq', :v => ['Ernie'], :m => 'or' }
-          }
+            '1' => {
+                     :a => ['children_name', 'parent_name'],
+                     :p => 'eq', :v => ['Ernie'], :m => 'or'
+                   }
+                 }
         )
         conditions = search.base.conditions
         conditions.should have(2).items
-        conditions.map { |c| c.class }.should eq [Nodes::Condition, Nodes::Condition]
+        conditions.map { |c| c.class }.
+        should eq [Nodes::Condition, Nodes::Condition]
       end
 
       it 'creates Conditions for custom predicates that take arrays' do
