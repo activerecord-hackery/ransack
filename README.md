@@ -47,7 +47,7 @@ If you're coming from MetaSearch, things to note:
      primarily to shorten query strings, though advanced queries (below) will still
      run afoul of URL length limits in most browsers and require a switch to HTTP
      POST requests. This key is
-[configurable](https://github.com/ernie/ransack/wiki/Configuration)
+[configurable](https://github.com/ernie/ransack/wiki/Configuration).
   2. `form_for` is now `search_form_for`, and validates that a Ransack::Search object
      is passed to it.
   3. Common ActiveRecord::Relation methods are no longer delegated by the search object.
