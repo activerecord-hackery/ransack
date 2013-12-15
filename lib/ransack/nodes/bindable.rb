@@ -5,7 +5,9 @@ module Ransack
       attr_accessor :parent, :attr_name
 
       def attr
-        @attr ||= ransacker ? ransacker.attr_from(self) : context.table_for(parent)[attr_name]
+        @attr ||= ransacker ?
+          ransacker.attr_from(self) :
+          context.table_for(parent)[attr_name]
       end
       alias :arel_attribute :attr
 
