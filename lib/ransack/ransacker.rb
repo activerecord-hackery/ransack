@@ -1,5 +1,3 @@
-require 'active_support/core_ext/module/delegation'
-
 module Ransack
   class Ransacker
 
