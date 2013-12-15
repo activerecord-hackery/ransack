@@ -91,8 +91,8 @@ module Ransack
         end
 
         it 'returns ransackable attributes for associations with :associations' do
-          attributes = Person.ransackable_attributes + Article.
-            ransackable_attributes.map { |a| "articles_#{a}" }
+          attributes = Person.ransackable_attributes +
+            Article.ransackable_attributes.map { |a| "articles_#{a}" }
           html = @f.attribute_select(:associations => ['articles'])
           html.split(/\n/).should have(attributes.size).lines
           attributes.each do |attribute|
