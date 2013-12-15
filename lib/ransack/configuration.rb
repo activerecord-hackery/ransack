@@ -1,5 +1,3 @@
-require 'active_support/core_ext/module/attribute_accessors'
-
 require 'ransack/constants'
 require 'ransack/predicate'
 

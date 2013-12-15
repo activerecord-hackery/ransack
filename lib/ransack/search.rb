@@ -1,5 +1,3 @@
-require 'active_support/core_ext/module/delegation'
-
 require 'ransack/nodes'
 require 'ransack/context'
 require 'ransack/naming'
