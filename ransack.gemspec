@@ -15,8 +15,10 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "ransack"
 
-  s.add_dependency 'activerecord', '>= 4.0.0'
-  s.add_dependency 'actionpack', '>= 4.0.0'
+  s.add_dependency 'actionpack', '>= 4.0'
+  s.add_dependency 'activerecord', '>= 4.0'
+  s.add_dependency 'activesupport', '>= 4.0'
+  s.add_dependency 'i18n'
   s.add_dependency 'polyamorous', '~> 0.6.0'
   s.add_development_dependency 'rspec', '~> 2.8.0'
   s.add_development_dependency 'machinist', '~> 1.0.6'
