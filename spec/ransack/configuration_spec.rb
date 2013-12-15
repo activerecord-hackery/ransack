@@ -20,12 +20,17 @@ module Ransack
 
     it 'avoids creating compound predicates if compounds: false' do
       Ransack.configure do |config|
-        config.add_predicate :test_predicate_without_compound, compounds: false
+        config.add_predicate(
+          :test_predicate_without_compound,
+          compounds: false
+          )
       end
-
-      Ransack.predicates.should have_key 'test_predicate_without_compound'
-      Ransack.predicates.should_not have_key 'test_predicate_without_compound_any'
-      Ransack.predicates.should_not have_key 'test_predicate_without_compound_all'
+      Ransack.predicates
+      .should have_key 'test_predicate_without_compound'
+      Ransack.predicates
+      .should_not have_key 'test_predicate_without_compound_any'
+      Ransack.predicates
+      .should_not have_key 'test_predicate_without_compound_all'
     end
 
     it 'should have default value for search key' do
@@ -48,7 +53,11 @@ module Ransack
 
     it 'adds predicates that take arrays, overriding compounds' do
       Ransack.configure do |config|
-        config.add_predicate :test_array_predicate, wants_array: true, compounds: true
+        config.add_predicate(
+          :test_array_predicate,
+          wants_array: true,
+          compounds: true
+          )
       end
 
       Ransack.predicates['test_array_predicate'].wants_array.should eq true

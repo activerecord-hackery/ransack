@@ -9,7 +9,7 @@ module Ransack
       class << self
         def extract(context, str)
           attr, direction = str.split(/\s+/,2)
-          self.new(context).build(:name => attr, :dir => direction)
+          self.new(context).build(name: attr, dir: direction)
         end
       end
 

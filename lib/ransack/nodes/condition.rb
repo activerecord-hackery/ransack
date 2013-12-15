@@ -2,7 +2,8 @@ module Ransack
   module Nodes
     class Condition < Node
       i18n_word :attribute, :predicate, :combinator, :value
-      i18n_alias :a => :attribute, :p => :predicate, :m => :combinator, :v => :value
+      i18n_alias :a => :attribute, :p => :predicate,
+                 :m => :combinator, :v => :value
 
       attr_accessor :predicate
 
@@ -20,7 +21,8 @@ module Ransack
             )
             # TODO: Figure out what to do with multiple types of attributes, if anything.
             # Tempted to go with "garbage in, garbage out" on this one
-            predicate.validate(condition.values, condition.default_type) ? condition : nil
+            predicate.validate(condition.values, condition.default_type) ?
+              condition : nil
           end
         end
 
@@ -37,8 +39,8 @@ module Ransack
       end
 
       def valid?
-        attributes.detect(&:valid?) && predicate && valid_arity? && predicate.
-          validate(values, default_type) && valid_combinator?
+        attributes.detect(&:valid?) && predicate && valid_arity? &&
+          predicate.validate(values, default_type) && valid_combinator?
       end
 
       def valid_arity?
@@ -116,8 +118,9 @@ module Ransack
       end
 
       def value
-        predicate.wants_array ? values.map {|v| v.cast(default_type)} : values.
-          first.cast(default_type)
+        predicate.wants_array ?
+          values.map { |v| v.cast(default_type) } :
+          values.first.cast(default_type)
       end
 
       def build(params)
@@ -135,7 +138,8 @@ module Ransack
       end
 
       def key
-        @key ||= attributes.map(&:name).join("_#{combinator}_") + "_#{predicate.name}"
+        @key ||= attributes.map(&:name).join("_#{combinator}_") +
+          "_#{predicate.name}"
       end
 
       def eql?(other)
@@ -163,7 +167,9 @@ module Ransack
 
       def arel_predicate
         predicates = attributes.map do |attr|
-          attr.attr.send(predicate.arel_predicate, formatted_values_for_attribute(attr))
+          attr.attr.send(
+            predicate.arel_predicate, formatted_values_for_attribute(attr)
+            )
         end
 
         if predicates.size > 1
@@ -179,16 +185,17 @@ module Ransack
       end
 
       def validated_values
-        values.select {|v| predicate.validator.call(v.value)}
+        values.select { |v| predicate.validator.call(v.value) }
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map {|v| v.cast(predicate.type || attr.type)}
+        validated_values.map { |v| v.cast(predicate.type || attr.type) }
       end
 
       def formatted_values_for_attribute(attr)
         formatted = casted_values_for_attribute(attr).map do |val|
-          val = attr.ransacker.formatter.call(val) if attr.ransacker && attr.ransacker.formatter
+          val = attr.ransacker.formatter.call(val) if
+            attr.ransacker && attr.ransacker.formatter
           val = predicate.format(val)
           val
         end
@@ -205,17 +212,18 @@ module Ransack
                 ['predicate', p],
                 ['combinator', m],
                 ['values', v.try(:map, &:value)]
-               ].
-               reject { |e| e[1].blank? }.
-               map { |v| "#{v[0]}: #{v[1]}" }.
-               join(', ')
+               ]
+               .reject { |e| e[1].blank? }
+               .map { |v| "#{v[0]}: #{v[1]}" }
+               .join(', ')
         "Condition <#{data}>"
       end
 
       private
 
       def valid_combinator?
-        attributes.size < 2 || ['and', 'or'].include?(combinator)
+        attributes.size < 2 ||
+        ['and', 'or'].include?(combinator)
       end
 
     end

@@ -2,7 +2,7 @@ module Ransack
   module Nodes
     class Node
       attr_reader :context
-      delegate :contextualize, :to => :context
+      delegate :contextualize, to: :context
       class_attribute :i18n_words
       class_attribute :i18n_aliases
       self.i18n_words = []
@@ -14,7 +14,7 @@ module Ransack
         end
 
         def i18n_alias(opts = {})
-          self.i18n_aliases.merge! Hash[opts.map {|k, v| [k.to_s, v.to_s]}]
+          self.i18n_aliases.merge! Hash[opts.map { |k, v| [k.to_s, v.to_s] }]
         end
       end
 

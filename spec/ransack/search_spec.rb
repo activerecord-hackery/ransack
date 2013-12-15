@@ -135,7 +135,8 @@ module Ransack
         search = Search.new(Person, children_name_or_name_eq: 'Ernie')
         search.result.should be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /#{children_people_name_field} = 'Ernie' OR #{people_name_field} = 'Ernie'/
+        where.to_sql.should match /#{children_people_name_field
+          } = 'Ernie' OR #{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates polymorphic belongs_to association conditions contextually' do
@@ -155,7 +156,8 @@ module Ransack
         where = search.result.where_values.first
         where.to_sql.should match /#{children_people_name_field} = 'Ernie'/
         where.to_sql.should match /#{people_name_field} = 'Ernie'/
-        where.to_sql.should match /#{quote_table_name("children_people_2")}.#{quote_column_name("name")} = 'Ernie'/
+        where.to_sql.should match /#{quote_table_name("children_people_2")
+          }.#{quote_column_name("name")} = 'Ernie'/
       end
 
       it 'evaluates arrays of groupings' do
@@ -309,7 +311,7 @@ module Ransack
       end
 
       it 'raises NoMethodError when sent an invalid attribute' do
-        expect {@s.blah}.to raise_error NoMethodError
+        expect { @s.blah }.to raise_error NoMethodError
       end
 
       it 'sets condition attributes when sent valid attributes' do
@@ -318,7 +320,9 @@ module Ransack
       end
 
       it 'allows chaining to access nested conditions' do
-        @s.groupings = [{ m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' }]
+        @s.groupings = [
+          { m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' }
+        ]
         @s.groupings.first.children_name_eq.should eq 'Ernie'
       end
     end

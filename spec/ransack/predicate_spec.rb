@@ -22,14 +22,17 @@ module Ransack
     describe 'eq' do
       it 'generates an equality condition for boolean true' do
         @s.awesome_eq = true
-        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
-        @s.result.to_sql.should match /#{field} = #{ActiveRecord::Base.connection.quoted_true}/
+        field = "#{quote_table_name("people")}.#{
+          quote_column_name("awesome")}"
+        @s.result.to_sql.should match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_true}/
       end
 
       it 'generates an equality condition for boolean false' do
         @s.awesome_eq = false
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
-        @s.result.to_sql.should match /#{field} = #{ActiveRecord::Base.connection.quoted_false}/
+        @s.result.to_sql.should match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_false}/
       end
 
       it 'does not generate a condition for nil' do
