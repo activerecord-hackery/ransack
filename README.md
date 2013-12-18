@@ -2,12 +2,12 @@
 
 [![Build Status](https://travis-ci.org/activerecord-hackery/ransack.png)](https://travis-ci.org/activerecord-hackery/ransack)
 
-Ransack is a rewrite of [MetaSearch](https://github.com/ernie/meta_search). While it
+Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
 greatly from MetaSearch, and _backwards compatibility is not a design goal._
 
 Ransack enables the creation of both simple and [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
-search forms against your application's models. If you're looking for something that
+search forms against your application's models (demo source code [here](https://github.com/activerecord-hackery/ransack_demo)). If you're looking for something that
 simplifies query generation at the model or controller layer, you're probably not looking
 for Ransack (or MetaSearch, for that matter). Try
 [Squeel](https://github.com/activerecord-hackery/squeel) instead.
@@ -50,8 +50,10 @@ If you're coming from MetaSearch, things to note:
      run afoul of URL length limits in most browsers and require a switch to HTTP
      POST requests. This key is
 [configurable](https://github.com/activerecord-hackery/ransack/wiki/Configuration).
+
   2. `form_for` is now `search_form_for`, and validates that a Ransack::Search object
      is passed to it.
+
   3. Common ActiveRecord::Relation methods are no longer delegated by the search object.
      Instead, you will get your search results (an ActiveRecord::Relation in the case of
      the ActiveRecord adapter) via a call to `Search#result`. If passed `distinct: true`,
@@ -124,7 +126,7 @@ end
 
 Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
 construct much more complex search forms, such as the one on the
-[demo page](http://ransack-demo.heroku.com).
+[demo page](http://ransack-demo.heroku.com) (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
 
 ### has_many and belongs_to associations
 

@@ -5,10 +5,6 @@ gem 'rake'
 
 rails = ENV['RAILS'] || '4-0-stable'
 
-# '3-2-stable' needs arel '~> 3.0.3'
-# '3-1-stable' needs arel '~> 2.2.3'
-# '3-0-stable' needs arel '~> 2.0.10' and i18n '~> 0.5.0'
-
 gem 'arel'
 
 case rails
