@@ -17,20 +17,22 @@ for Ransack (or MetaSearch, for that matter). Try
 In your Gemfile:
 
 ```ruby
-gem "ransack"  # Last officially released gem (Rails 3 and 4)
+gem "ransack"  # Last officially released gem (Rails 3.x and 4.0)
 ```
 
-Or if you want to use the bleeding edge (Rails 3 and 4):
+Or if you want to use the bleeding edge (Rails 3.x and 4.0):
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo 
 ```
 
-A lighter, faster, latest-commits version of Ransack dedicated to Rails 4 is available on the "rails-4" branch:
+A lighter, faster, latest-commits version of Ransack dedicated to Rails 4.0 is available on the "rails-4" branch:
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
 ```
+
+Ransack is not yet compatible with Rails 4.1.0.beta, due to refactoring between Rails 4.0 and 4.1 in ActiveRecord that breaks the [Polyamorous](https://github.com/activerecord-hackery/polyamorous) gem that Ransack depends upon. Feel free to contribute a PR to fix it!
 
 ## Usage
 
