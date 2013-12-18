@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/activerecord-hackery/ransack.png)](https://travis-ci.org/activerecord-hackery/ransack)
 
-Ransack is a rewrite of [MetaSearch](https://github.com/ernie/meta_search). While it
+Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
 greatly from MetaSearch, and _backwards compatibility is not a design goal._
 
@@ -10,7 +10,7 @@ Ransack enables the creation of both simple and [advanced](http://ransack-demo.h
 search forms against your application's models. If you're looking for something that
 simplifies query generation at the model or controller layer, you're probably not looking
 for Ransack (or MetaSearch, for that matter). Try
-[Squeel](https://github.com/ernie/squeel) instead.
+[Squeel](https://github.com/activerecord-hackery/squeel) instead.
 
 ## Getting started
 
@@ -32,7 +32,7 @@ A lighter, faster, latest-commits version of Ransack dedicated to Rails 4.0 is a
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
 ```
 
-Ransack is not yet compatible with Rails 4.1.0.beta, due to refactoring between Rails 4.0 and 4.1 in ActiveRecord that breaks the [Polyamorous](https://github.com/activerecord-hackery/polyamorous) gem that Ransack depends upon. Feel free to contribute a PR to fix it!
+Ransack is not yet compatible with Rails 4.1, due to refactoring in ActiveRecord that breaks the [Polyamorous](https://github.com/activerecord-hackery/polyamorous) gem that Ransack depends upon. Feel free to contribute a PR to Polyamorous to fix it!
 
 ## Usage
 
@@ -49,9 +49,11 @@ If you're coming from MetaSearch, things to note:
      primarily to shorten query strings, though advanced queries (below) will still
      run afoul of URL length limits in most browsers and require a switch to HTTP
      POST requests. This key is
-[configurable](https://github.com/ernie/ransack/wiki/Configuration).
+[configurable](https://github.com/activerecord-hackery/ransack/wiki/Configuration).
+
   2. `form_for` is now `search_form_for`, and validates that a Ransack::Search object
      is passed to it.
+
   3. Common ActiveRecord::Relation methods are no longer delegated by the search object.
      Instead, you will get your search results (an ActiveRecord::Relation in the case of
      the ActiveRecord adapter) via a call to `Search#result`. If passed `distinct: true`,
@@ -86,7 +88,7 @@ In your view:
 ```
 
 `cont` (contains) and `start` (starts with) are just two of the available search predicates.
-See [Constants](https://github.com/ernie/ransack/blob/master/lib/ransack/constants.rb) for a full list and the [wiki](https://github.com/ernie/ransack/wiki/Basic-Searching) for more description.
+See [Constants](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb) for a full list and the [wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching) for more description.
 
 ### Advanced Mode
 
