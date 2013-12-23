@@ -1,7 +1,7 @@
 rvm:
   - 1.9.3
   - 2.0.0
-#  - ruby-head
+  - 2.1.0-rc1
 
 env:
   - RAILS=4-0-stable DB=sqlite3
