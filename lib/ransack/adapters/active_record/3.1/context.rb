@@ -114,6 +114,8 @@ module Ransack
           end
         end
 
+        # TODO Checkout active_record/relation/query_methods.rb +build_joins+
+        # Lot of duplicated code maybe we can avoid it
         def build_join_dependency(relation)
           buckets = relation.joins_values.group_by do |join|
             case join
@@ -121,7 +123,7 @@ module Ransack
               'string_join'
             when Hash, Symbol, Array
               'association_join'
-            when ::ActiveRecord::Associations::JoinDependency::JoinAssociation
+            when ::ActiveRecord::Associations::JoinDependency
               'stashed_join'
             when Arel::Nodes::Join
               'join_node'
@@ -150,7 +152,7 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          join_dependency.graft(*stashed_association_joins)
+          join_dependency
         end
 
         def build_or_find_association(name, parent = @base, klass = nil)
@@ -171,7 +173,6 @@ module Ransack
 
           found_association
         end
-
       end
     end
   end
