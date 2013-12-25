@@ -32,7 +32,7 @@ A lighter, faster, latest-commits version of Ransack dedicated to Rails 4.0 is a
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
 ```
 
-Ransack is not yet compatible with Rails 4.1, due to changes and refactoring in ActiveRecord that breaks the [Polyamorous](https://github.com/activerecord-hackery/polyamorous) gem that Ransack depends upon. Feel free to contribute a PR to fix it!
+Ransack is not yet compatible with Rails 4.1, due to changes and refactoring in ActiveRecord that break it and the [Polyamorous](https://github.com/activerecord-hackery/polyamorous) gem that Ransack depends upon. Feel free to contribute a PR to fix it!
 
 ## Usage
 
