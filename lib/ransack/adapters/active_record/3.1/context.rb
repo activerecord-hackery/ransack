@@ -97,7 +97,7 @@ module Ransack
               end
             end
           end
-
+            
           [parent, attr_name]
         end
 
@@ -161,21 +161,25 @@ module Ransack
         # association from there. See active_record/associations/join_dependency
         # +initialize+ method for reference.
         def build_or_find_association(name, parent = @base, klass = nil)
-          found_association = @join_dependency.join_root.drop(1).detect do |assoc|
+          found_association = @join_dependency.join_root.children.detect do |assoc|
             assoc.reflection.name == name &&
-            assoc.parent == parent &&
+            # TODO not sure how to do this check for now, theres no longer a
+            # parent accessor for a JoinAssociation
+            # assoc.parent == parent &&
             (!klass || assoc.reflection.klass == klass)
           end
 
           unless found_association
             tree = @join_dependency.class.make_tree Polyamorous::Join.new(name, @join_type, klass)
 
-            join_root = JoinDependency::JoinBase.new base, @join_dependency.send(:build, tree, parent.base_klass)
-            join_root.children.each { |child| @join_dependency.send(:construct_tables!, join_root, child) }
-            found_association = join_root.children.last
+            @join_dependency.join_root.children.push @join_dependency.send(:build, tree, parent.base_klass).last
+            current_association = @join_dependency.join_root.children.last
+            @join_dependency.send(:construct_tables!, @join_dependency.join_root, current_association)
+
+            found_association = @join_dependency.join_root.children.last
 
             # Leverage the stashed association functionality in AR
-            @object = @object.joins(found_association)
+            @object = @object.joins(found_association.name)
           end
 
           found_association
