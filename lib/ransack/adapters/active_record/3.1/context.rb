@@ -86,6 +86,7 @@ module Ransack
             while remainder.unshift(segments.pop) && segments.size > 0 &&
               !found_assoc do
               assoc, klass = unpolymorphize_association(segments.join('_'))
+
               if found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(
                   found_assoc.name, parent, klass
@@ -155,18 +156,24 @@ module Ransack
           join_dependency
         end
 
+        # As of Rails 4.1.0.beta1 the associations are built when JoinDependency
+        # instance is created so here we need to create a new tree and grab the
+        # association from there. See active_record/associations/join_dependency
+        # +initialize+ method for reference.
         def build_or_find_association(name, parent = @base, klass = nil)
-          found_association = @join_dependency.join_associations
-          .detect do |assoc|
+          found_association = @join_dependency.join_root.drop(1).detect do |assoc|
             assoc.reflection.name == name &&
             assoc.parent == parent &&
             (!klass || assoc.reflection.klass == klass)
           end
+
           unless found_association
-            @join_dependency.send(
-              :build, Polyamorous::Join.new(name, @join_type, klass), parent
-              )
-            found_association = @join_dependency.join_associations.last
+            tree = @join_dependency.class.make_tree Polyamorous::Join.new(name, @join_type, klass)
+
+            join_root = JoinDependency::JoinBase.new base, @join_dependency.send(:build, tree, parent.base_klass)
+            join_root.children.each { |child| @join_dependency.send(:construct_tables!, join_root, child) }
+            found_association = join_root.children.last
+
             # Leverage the stashed association functionality in AR
             @object = @object.joins(found_association)
           end
