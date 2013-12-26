@@ -59,7 +59,7 @@ module Ransack
       elsif obj.respond_to? :base_klass     # Rails 4
         obj.base_klass
       else
-        raise ArgumentError, "Don't know how to klassify #{obj}"
+        raise ArgumentError, "Don't know how to klassify #{obj.inspect}"
       end
     end
 
