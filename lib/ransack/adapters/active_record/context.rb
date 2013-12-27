@@ -164,16 +164,12 @@ module Ransack
           end
 
           unless found_association
-            tree = @join_dependency.class.make_tree Polyamorous::Join.new(name, @join_type, klass)
-
-            @join_dependency.join_root.children.push @join_dependency.send(:build, tree, parent.base_klass).last
-            current_association = @join_dependency.join_root.children.last
-            @join_dependency.send(:construct_tables!, @join_dependency.join_root, current_association)
-
-            found_association = @join_dependency.join_root.children.last
+            jd = JoinDependency.new(parent.base_klass, Polyamorous::Join.new(name, @join_type, klass), [])
+            found_association = jd.join_root.children.last
 
             # Leverage the stashed association functionality in AR
-            @object = @object.joins(found_association.name)
+            @object = @object.joins(jd)
+
           end
 
           found_association
