@@ -167,9 +167,11 @@ module Ransack
             jd = JoinDependency.new(parent.base_klass, Polyamorous::Join.new(name, @join_type, klass), [])
             found_association = jd.join_root.children.last
 
+            # Builds the arel nodes properly for this association
+            @join_dependency.send(:construct_tables!, jd.join_root, found_association)
+
             # Leverage the stashed association functionality in AR
             @object = @object.joins(jd)
-
           end
 
           found_association
