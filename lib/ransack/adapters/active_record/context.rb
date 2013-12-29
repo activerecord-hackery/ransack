@@ -157,15 +157,18 @@ module Ransack
         def build_or_find_association(name, parent = @base, klass = nil)
           found_association = @join_dependency.join_root.children.detect do |assoc|
             assoc.reflection.name == name &&
-            # TODO not sure how to do this check for now, theres no longer a
-            # parent accessor for a JoinAssociation
-            # assoc.parent == parent &&
+            @associations_pot[assoc] == parent &&
             (!klass || assoc.reflection.klass == klass)
           end
 
           unless found_association
             jd = JoinDependency.new(parent.base_klass, Polyamorous::Join.new(name, @join_type, klass), [])
             found_association = jd.join_root.children.last
+            associations found_association, parent
+
+            # TODO maybe we dont need to push associations here, we could loop
+            # through the @associations_pot instead
+            @join_dependency.join_root.children.push found_association
 
             # Builds the arel nodes properly for this association
             @join_dependency.send(:construct_tables!, jd.join_root, found_association)
@@ -175,6 +178,11 @@ module Ransack
           end
 
           found_association
+        end
+
+        def associations(assoc, parent)
+          @associations_pot ||= {}
+          @associations_pot[assoc] = parent
         end
       end
     end
