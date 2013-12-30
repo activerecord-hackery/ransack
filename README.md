@@ -26,13 +26,20 @@ Or if you want to use the bleeding edge (Rails 3.x and 4.0):
 gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo 
 ```
 
-A lighter, faster, latest-commits version of Ransack dedicated to Rails 4.0 is available on the "rails-4" branch:
+If you are on Rails 4.0.x, you may prefer to use the streamlined, legacy code-free version of Ransack on the [Rails 4.0 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4):
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
 ```
 
-Ransack is not yet compatible with Rails 4.1, due to refactoring in ActiveRecord that breaks the [Polyamorous](https://github.com/activerecord-hackery/polyamorous) gem that Ransack depends upon. Feel free to contribute a PR to Polyamorous to fix it!
+Finally, if you are trying out Rails 4.1.0.beta1, use the [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1). In your Gemfile you'll need to include both Ransack and Polyamorous:
+
+```ruby
+gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
+```
+```ruby
+gem "polyamorous", github: "activerecord-hackery/polyamorous", branch: "rails-4.1"
+```
 
 ## Usage
 
