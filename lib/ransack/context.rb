@@ -36,8 +36,8 @@ module Ransack
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
-      @base = @join_dependency.join_base
-      @engine = @base.arel_engine
+      @base = @join_dependency.join_root
+      @engine = @base.base_klass.arel_engine
       @default_table = Arel::Table.new(
         @base.table_name, as: @base.aliased_table_name, engine: @engine
         )
@@ -57,7 +57,7 @@ module Ransack
       elsif obj.respond_to? :base_klass
         obj.base_klass
       else
-        raise ArgumentError, "Don't know how to klassify #{obj}"
+        raise ArgumentError, "Don't know how to klassify #{obj.inspect}"
       end
     end
 
