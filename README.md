@@ -20,13 +20,13 @@ In your Gemfile:
 gem "ransack"  # Last officially released gem (Rails 3.x and 4.0)
 ```
 
-Or if you want to use the bleeding edge (Rails 3.x and 4.0):
+Or if you want to use the latest updates (Rails 3.x and 4.0):
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo 
 ```
 
-If you are on Rails 4.0.x, you may prefer to use the streamlined, legacy code-free version of Ransack on the [Rails 4.0 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4):
+If you are on Rails 4.0, you may prefer to use the streamlined, legacy code-free, latest-updates version of Ransack on the [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4):
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
@@ -36,8 +36,6 @@ Finally, if you are trying out Rails 4.1.0.beta1, use the [Rails 4.1 branch](htt
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
-```
-```ruby
 gem "polyamorous", github: "activerecord-hackery/polyamorous", branch: "rails-4.1"
 ```
 
