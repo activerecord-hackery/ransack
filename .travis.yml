@@ -4,9 +4,9 @@ rvm:
   - 2.1.0
 
 env:
-  - RAILS=4-0-stable DB=sqlite3
-  - RAILS=4-0-stable DB=mysql
-  - RAILS=4-0-stable DB=postgres
+  - RAILS=v4.1.0.beta1 DB=sqlite3
+  - RAILS=v4.1.0.beta1 DB=mysql
+  - RAILS=v4.1.0.beta1 DB=postgres
 
 
 before_script:
