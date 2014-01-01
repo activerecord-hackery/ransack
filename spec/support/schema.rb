@@ -66,6 +66,12 @@ class Article < ActiveRecord::Base
   has_many                :notes, as: :notable
 end
 
+module Namespace
+  class Article < ::Article
+
+  end
+end
+
 class Comment < ActiveRecord::Base
   belongs_to :article
   belongs_to :person

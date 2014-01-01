@@ -5,3 +5,9 @@ en:
     attributes:
       person:
         name: Full Name
+  activerecord:
+    attributes:
+      namespace/article:
+        title: AR Namespaced Title
+      namespace_article:
+        title: Old Ransack Namespaced Title
