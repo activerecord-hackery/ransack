@@ -205,4 +205,4 @@ To support the project:
 
 ## Copyright
 
-Copyright &copy; 2011 [Ernie Miller](http://twitter.com/erniemiller)
+Copyright &copy; 2011-2014 [Ernie Miller](http://twitter.com/erniemiller)
