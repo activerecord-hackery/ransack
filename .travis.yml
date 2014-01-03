@@ -1,3 +1,5 @@
+language: ruby
+
 before_install:
   - travis_retry gem install bundler
 
@@ -10,10 +12,6 @@ env:
   - RAILS=master DB=sqlite3
   - RAILS=master DB=mysql
   - RAILS=master DB=postgres
-
-matrix:
-  allow_failures:
-    - rvm: 2.1.0
 
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'
