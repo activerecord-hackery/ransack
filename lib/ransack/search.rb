@@ -41,7 +41,11 @@ module Ransack
       case args
       when Array
         args.each do |sort|
-          sort = Nodes::Sort.extract(@context, sort)
+          if sort.kind_of? Hash
+            sort = Nodes::Sort.new(@context).build(sort)
+          else
+            sort = Nodes::Sort.extract(@context, sort)
+          end
           self.sorts << sort
         end
       when Hash

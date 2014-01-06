@@ -241,7 +241,7 @@ module Ransack
       end
 
       it 'creates sorts based on multiple attributes/directions in array format' do
-        @s.sorts = ['id desc', 'name asc']
+        @s.sorts = ['id desc', { :name => 'name', :dir => 'asc' }]
         @s.sorts.should have(2).items
         sort1, sort2 = @s.sorts
         sort1.should be_a Nodes::Sort
@@ -253,7 +253,7 @@ module Ransack
       end
 
       it 'creates sorts based on multiple attributes and uppercase directions in array format' do
-        @s.sorts = ['id DESC', 'name ASC']
+        @s.sorts = ['id DESC', { :name => 'name', :dir => 'ASC' }]
         @s.sorts.should have(2).items
         sort1, sort2 = @s.sorts
         sort1.should be_a Nodes::Sort
@@ -265,7 +265,7 @@ module Ransack
       end
 
       it 'creates sorts based on multiple attributes and different directions in array format' do
-        @s.sorts = ['id DESC', 'name']
+        @s.sorts = ['id DESC', { :name => 'name', :dir => nil }]
         @s.sorts.should have(2).items
         sort1, sort2 = @s.sorts
         sort1.should be_a Nodes::Sort
