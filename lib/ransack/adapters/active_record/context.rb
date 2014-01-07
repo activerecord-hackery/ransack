@@ -50,7 +50,9 @@ module Ransack
             found_assoc = nil
             while !found_assoc && remainder.unshift(
               segments.pop) && segments.size > 0 do
-              assoc, poly_class = unpolymorphize_association(segments.join('_'))
+              assoc, poly_class = unpolymorphize_association(
+                segments.join('_')
+                )
               if found_assoc = get_association(assoc, klass)
                 exists = attribute_method?(remainder.join('_'),
                   poly_class || found_assoc.klass
