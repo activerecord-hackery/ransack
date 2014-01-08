@@ -36,7 +36,7 @@ Finally, if you are trying out Rails 4.1.0.beta1, use the [Rails 4.1 branch](htt
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
-gem "polyamorous", github: "activerecord-hackery/polyamorous", branch: "rails-4.1"
+gem "polyamorous", github: "activerecord-hackery/polyamorous"
 ```
 
 ## Usage
