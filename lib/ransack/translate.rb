@@ -19,8 +19,9 @@ module Ransack
 
       original_name = key.to_s
       base_class = context.klass
-      base_ancestors = base_class.ancestors.
-        select { |x| x.respond_to?(:model_name) }
+      base_ancestors = base_class.ancestors.select {
+        |x| x.respond_to?(:model_name)
+      }
       predicate = Predicate.detect_from_string(original_name)
       attributes_str = original_name.sub(/_#{predicate}$/, '')
       attribute_names = attributes_str.split(/_and_|_or_/)
@@ -34,8 +35,9 @@ module Ransack
       end
 
       interpolations = {}
-      interpolations[:attributes] = translated_names.
-        join(" #{Translate.word(combinator)} ")
+      interpolations[:attributes] = translated_names.join(
+        " #{Translate.word(combinator)} "
+        )
 
       if predicate
         defaults << "%{attributes} %{predicate}"
@@ -74,9 +76,14 @@ module Ransack
           i18n_key(associated_class || context.klass)
           }.#{attr_name}",
         default: [
-          (associated_class ? 
-          :"#{associated_class.i18n_scope}.attributes.#{i18n_key(associated_class)}.#{attr_name}" :
-          :"#{context.klass.i18n_scope}.attributes.#{i18n_key(context.klass)}.#{attr_name}"
+          (
+            if associated_class
+              :"#{associated_class.i18n_scope}.attributes.#{
+                i18n_key(associated_class)}.#{attr_name}"
+            else
+              :"#{context.klass.i18n_scope}.attributes.#{
+                i18n_key(context.klass)}.#{attr_name}"
+            end
           ),
           :".attributes.#{attr_name}",
           attr_name.humanize
