@@ -3,6 +3,12 @@ require 'spec_helper'
 module Ransack
   describe Search do
 
+    describe '#initialize' do
+      it 'do not raise exception for string :params argument' do
+        lambda { Search.new(Person, '') }.should_not raise_error
+      end
+    end
+
     describe '#build' do
       it 'creates Conditions for top-level attributes' do
         search = Search.new(Person, name_eq: 'Ernie')
