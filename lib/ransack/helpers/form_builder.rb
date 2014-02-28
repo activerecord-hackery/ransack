@@ -1,5 +1,5 @@
 require 'action_view'
-require 'simple_form'
+require 'simple_form' unless (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm').nil?
 
 module Ransack
   module Helpers
