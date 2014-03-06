@@ -1,8 +1,11 @@
 require 'action_view'
+require 'simple_form' if
+  (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
 
 module Ransack
   module Helpers
-    class FormBuilder < ::ActionView::Helpers::FormBuilder
+    class FormBuilder < (ENV['RANSACK_FORM_BUILDER'].try(:constantize) ||
+      ActionView::Helpers::FormBuilder)
 
       def label(method, *args, &block)
         options = args.extract_options!
