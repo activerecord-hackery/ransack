@@ -1,9 +1,12 @@
 require 'action_view'
-require 'simple_form' if (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
+
+require 'simple_form' if
+  (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
 
 module Ransack
   module Helpers
-    class FormBuilder < (ENV['RANSACK_FORM_BUILDER'].try(:constantize) || ActionView::Helpers::FormBuilder)
+    class FormBuilder < (ENV['RANSACK_FORM_BUILDER'].try(:constantize) ||
+      ActionView::Helpers::FormBuilder)
 
       def label(method, *args, &block)
         options = args.extract_options!
@@ -123,7 +126,9 @@ module Ransack
       end
 
       def combinator_select(options = {}, html_options = {})
-        template_collection_select(:m, combinator_choices, options, html_options)
+        template_collection_select(
+          :m, combinator_choices, options, html_options
+          )
       end
 
       private
