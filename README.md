@@ -188,6 +188,17 @@ end
 <% end %>
 ```
 
+## Using SimpleForm
+
+If you want to combine form builders of ransack and SimpleForm, just set the RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in ``config/application.rb`` before ``require 'rails/all'`` and of course use ``gem 'simple_form'`` in your ``Gemfile``:
+```ruby
+require File.expand_path('../boot', __FILE__)
+
+ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
+
+require 'rails/all'
+```
+
 ## I18n
 
 Take a look at our locale file on ``lib/ransack/locale/en.yml`` to check all available messages. You may also be interested in one of the many translations that are available on:
