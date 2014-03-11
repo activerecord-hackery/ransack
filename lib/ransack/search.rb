@@ -106,7 +106,7 @@ module Ransack
 
     def add_scope(key, args)
       if @context.scope_arity(key) == 1
-        @scope_args[key] = args[0]
+        @scope_args[key] = args.is_a?(Array) ? args[0] : args
       else
         @scope_args[key] = args
       end
