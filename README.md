@@ -1,6 +1,6 @@
 # Ransack
 
-[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.png)](https://travis-ci.org/activerecord-hackery/ransack)
+[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
 
 Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search) created by [Ernie Miller](http://twitter.com/erniemiller) and maintained by [Ryan Bigg](http://twitter.com/ryanbigg), [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
