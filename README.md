@@ -133,6 +133,15 @@ Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBu
 construct much more complex search forms, such as the one on the
 [demo page](http://ransack-demo.heroku.com) (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
 
+### Ransack #search method
+
+Ransack will try to to make `#search` available in your models, but in the case that `#search` has already been defined, you can use `#ransack` instead. For example the following would be equivalent:
+
+```
+Article.search(params[:q])
+Article.ransack(params[:q])
+```
+
 ### has_many and belongs_to associations
 
 You can easily use Ransack to search in associated objects.
