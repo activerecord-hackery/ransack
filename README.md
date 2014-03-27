@@ -1,6 +1,6 @@
 # Ransack
 
-[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.png)](https://travis-ci.org/activerecord-hackery/ransack)
+[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
 
 Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search) created by [Ernie Miller](http://twitter.com/erniemiller) and maintained by [Ryan Bigg](http://twitter.com/ryanbigg), [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors). While it
 supports many of the same features as MetaSearch, its underlying implementation differs
@@ -17,10 +17,10 @@ for Ransack (or MetaSearch, for that matter). Try
 In your Gemfile:
 
 ```ruby
-gem "ransack"  # Last officially released gem (compatible Rails 3.x and 4.0)
+gem "ransack"  # Last officially released gem (compatible Rails 3.x and 4.0, but not 4.1)
 ```
 
-Or if you want to use the latest updates (Rails 3.x and 4.0):
+Or if you want to use the latest updates (Rails 3.x and 4.0, but not 4.1):
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo 
@@ -32,7 +32,7 @@ If you are on Rails 4.0, you may prefer to use the streamlined, legacy code-free
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
 ```
 
-Finally, if you are trying out Rails 4.1.0.beta1, use the [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1). In your Gemfile you'll need to include both Ransack and Polyamorous:
+Finally, if you are on Rails 4.1 (or 4.2.0.alpha), use the [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates also on master and rails-4. In your Gemfile you'll need to include (for the moment) both Ransack and Polyamorous as follows:
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
@@ -133,6 +133,15 @@ Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBu
 construct much more complex search forms, such as the one on the
 [demo page](http://ransack-demo.heroku.com) (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
 
+### Ransack #search method
+
+Ransack will try to to make `#search` available in your models, but in the case that `#search` has already been defined, you can use `#ransack` instead. For example the following would be equivalent:
+
+```
+Article.search(params[:q])
+Article.ransack(params[:q])
+```
+
 ### has_many and belongs_to associations
 
 You can easily use Ransack to search in associated objects.
@@ -186,6 +195,17 @@ end
 
   <%= f.submit "search" %>
 <% end %>
+```
+
+## Using SimpleForm
+
+If you want to combine form builders of ransack and SimpleForm, just set the RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in ``config/application.rb`` before ``require 'rails/all'`` and of course use ``gem 'simple_form'`` in your ``Gemfile``:
+```ruby
+require File.expand_path('../boot', __FILE__)
+
+ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
+
+require 'rails/all'
 ```
 
 ## I18n

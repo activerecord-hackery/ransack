@@ -36,8 +36,14 @@ module Ransack
 
     end
 
+    describe '#initialize' do
+      it 'does not raise exception for string :params argument' do
+        lambda { Search.new(Person, '') }.should_not raise_error
+      end
+    end
+
     describe '#build' do
-      it 'creates Conditions for top-level attributes' do
+      it 'creates conditions for top-level attributes' do
         search = Search.new(Person, :name_eq => 'Ernie')
         condition = search.base[:name_eq]
         condition.should be_a Nodes::Condition
@@ -46,7 +52,7 @@ module Ransack
         condition.value.should eq 'Ernie'
       end
 
-      it 'creates Conditions for association attributes' do
+      it 'creates conditions for association attributes' do
         search = Search.new(Person, :children_name_eq => 'Ernie')
         condition = search.base[:children_name_eq]
         condition.should be_a Nodes::Condition
@@ -55,7 +61,7 @@ module Ransack
         condition.value.should eq 'Ernie'
       end
 
-      it 'creates Conditions for polymorphic belongs_to association attributes' do
+      it 'creates conditions for polymorphic belongs_to association attributes' do
         search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
         condition = search.base[:notable_of_Person_type_name_eq]
         condition.should be_a Nodes::Condition
@@ -64,7 +70,7 @@ module Ransack
         condition.value.should eq 'Ernie'
       end
 
-      it 'creates Conditions for multiple polymorphic belongs_to association attributes' do
+      it 'creates conditions for multiple polymorphic belongs_to association attributes' do
         search = Search.new(Note,
           :notable_of_Person_type_name_or_notable_of_Article_type_title_eq => 'Ernie')
         condition = search
@@ -136,7 +142,7 @@ module Ransack
         .should eq [Nodes::Condition, Nodes::Condition]
       end
 
-      it 'creates Conditions for custom predicates that take arrays' do
+      it 'creates conditions for custom predicates that take arrays' do
         Ransack.configure do |config|
           config.add_predicate 'ary_pred', :wants_array => true
         end
