@@ -87,6 +87,10 @@ module Ransack
       end
     end
 
+    def respond_to_missing?(method_id, include_private)
+      base.attribute_method?(method_id.to_s) || super
+    end
+
     def inspect
       "Ransack::Search<class: #{klass.name}, base: #{base.inspect}>"
     end
