@@ -1,12 +1,12 @@
 zh:
   ransack:
     search: "搜索"
-    predicate: "predicate"
+    predicate: "基于(predicate)"
     and: "并且"
     or: "或者"
     any: "任意"
     all: "所有"
-    combinator: "combinator"
+    combinator: "条件组合(combinator)"
     attribute: "属性"
     value: "数值"
     condition: "条件"
