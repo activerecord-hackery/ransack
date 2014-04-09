@@ -127,7 +127,7 @@ module Ransack
               'string_join'
             when Hash, Symbol, Array
               'association_join'
-            when ::ActiveRecord::Associations::JoinDependency
+            when JoinDependency, JoinDependency::JoinAssociation
               'stashed_join'
             when Arel::Nodes::Join
               'join_node'
@@ -157,50 +157,76 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          join_dependency
+          if ::ActiveRecord::VERSION::STRING >= "4.1"
+            join_dependency
+          else
+            join_dependency.graft(*stashed_association_joins)
+          end
         end
 
-        def build_or_find_association(name, parent = @base, klass = nil)
-          list = if ActiveRecord::VERSION::STRING >= "4.1"
-                   @join_dependency.join_root.children.detect
-                 else
-                   @join_dependency.join_associations
-                 end
+        if ::ActiveRecord::VERSION::STRING >= "4.1"
 
-          found_association = list.detect do |assoc|
-            assoc.reflection.name == name &&
-            @associations_pot[assoc] == parent &&
-            (!klass || assoc.reflection.klass == klass)
-          end
+          def build_or_find_association(name, parent = @base, klass = nil)
+            list = if ::ActiveRecord::VERSION::STRING >= "4.1"
+                     @join_dependency.join_root.children.detect
+                   else
+                     @join_dependency.join_associations
+                   end
 
-          unless found_association
-            jd = JoinDependency.new(
-              parent.base_klass,
-              Polyamorous::Join.new(name, @join_type, klass),
-              []
-            )
-            found_association = jd.join_root.children.last
-            associations found_association, parent
+            found_association = list.detect do |assoc|
+              assoc.reflection.name == name &&
+              @associations_pot[assoc] == parent &&
+              (!klass || assoc.reflection.klass == klass)
+            end
 
-            # TODO maybe we dont need to push associations here, we could loop
-            # through the @associations_pot instead
-            @join_dependency.join_root.children.push found_association
-
-            # Builds the arel nodes properly for this association
-            @join_dependency.send(
-              :construct_tables!, jd.join_root, found_association
+            unless found_association
+              jd = JoinDependency.new(
+                parent.base_klass,
+                Polyamorous::Join.new(name, @join_type, klass),
+                []
               )
+              found_association = jd.join_root.children.last
+              associations found_association, parent
 
-            # Leverage the stashed association functionality in AR
-            @object = @object.joins(jd)
+              # TODO maybe we dont need to push associations here, we could loop
+              # through the @associations_pot instead
+              @join_dependency.join_root.children.push found_association
+
+              # Builds the arel nodes properly for this association
+              @join_dependency.send(
+                :construct_tables!, jd.join_root, found_association
+                )
+
+              # Leverage the stashed association functionality in AR
+              @object = @object.joins(jd)
+            end
+
+            found_association
           end
 
-          found_association
-        end
+          def associations(assoc, parent)
+            @associations_pot ||= {}
+            @associations_pot[assoc] = parent
+          end
+        else
 
-        def associations(assoc, parent)
-          @associations_pot ||= {}
-          @associations_pot[assoc] = parent
+          def build_or_find_association(name, parent = @base, klass = nil)
+            found_association = @join_dependency.join_associations
+            .detect do |assoc|
+              assoc.reflection.name == name &&
+              assoc.parent == parent &&
+              (!klass || assoc.reflection.klass == klass)
+            end
+            unless found_association
+              @join_dependency.send(:build, Polyamorous::Join.new(
+                name, @join_type, klass), parent)
+              found_association = @join_dependency.join_associations.last
+              # Leverage the stashed association functionality in AR
+              @object = @object.joins(found_association)
+            end
+
+            found_association
+          end
         end
       end
     end

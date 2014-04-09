@@ -5,11 +5,7 @@ gem 'rake'
 
 rails = ENV['RAILS'] || 'master'
 
-gem 'arel', '~> 5.0.0'
-
-gem 'polyamorous',
-  github: 'activerecord-hackery/polyamorous',
-  branch: 'rails-4.1'
+gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
 
 case rails
 when /\// # A path

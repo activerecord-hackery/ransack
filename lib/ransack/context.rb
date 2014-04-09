@@ -36,8 +36,15 @@ module Ransack
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
-      @base = @join_dependency.join_root
-      @engine = @base.base_klass.arel_engine
+
+      if ::ActiveRecord::VERSION::STRING >= "4.1"
+        @base = @join_dependency.join_root
+        @engine = @base.base_klass.arel_engine
+      else
+        @base = @join_dependency.join_base
+        @engine = @base.arel_engine
+      end
+
       @default_table = Arel::Table.new(
         @base.table_name, as: @base.aliased_table_name, engine: @engine
         )
@@ -141,6 +148,5 @@ module Ransack
     def sortable_attributes(str = '')
       traverse(str).ransortable_attributes(auth_object)
     end
-
   end
 end
