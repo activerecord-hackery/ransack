@@ -3,9 +3,13 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '4-0-stable'
+rails = ENV['RAILS'] || 'master'
 
-gem 'arel'
+gem 'arel', '~> 5.0.0'
+
+gem 'polyamorous',
+  github: 'activerecord-hackery/polyamorous',
+  branch: 'rails-4.1'
 
 case rails
 when /\// # A path

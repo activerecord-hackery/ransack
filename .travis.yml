@@ -12,6 +12,9 @@ env:
   - RAILS=4-0-stable DB=sqlite3
   - RAILS=4-0-stable DB=mysql
   - RAILS=4-0-stable DB=postgres
+  - RAILS=4-1-stable DB=sqlite3
+  - RAILS=4-1-stable DB=mysql
+  - RAILS=4-1-stable DB=postgres
 
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'

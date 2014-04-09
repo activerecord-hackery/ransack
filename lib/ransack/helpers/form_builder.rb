@@ -1,4 +1,6 @@
 require 'action_view'
+require 'simple_form' if
+  (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
 
 require 'simple_form' if
   (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')

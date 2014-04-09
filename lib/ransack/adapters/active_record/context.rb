@@ -93,9 +93,7 @@ module Ransack
               segments.pop) && segments.size > 0 && !found_assoc do
               assoc, klass = unpolymorphize_association(segments.join('_'))
               if found_assoc = get_association(assoc, parent)
-                join = build_or_find_association(
-                  found_assoc.name, parent, klass
-                  )
+                join = build_or_find_association(found_assoc.name, parent, klass)
                 parent, attr_name = get_parent_and_attribute_name(
                   remainder.join('_'), join
                   )
@@ -120,6 +118,8 @@ module Ransack
           end
         end
 
+        # Checkout active_record/relation/query_methods.rb +build_joins+ for
+        # reference. Lots of duplicated code maybe we can avoid it
         def build_join_dependency(relation)
           buckets = relation.joins_values.group_by do |join|
             case join
@@ -127,7 +127,7 @@ module Ransack
               'string_join'
             when Hash, Symbol, Array
               'association_join'
-            when ::ActiveRecord::Associations::JoinDependency::JoinAssociation
+            when ::ActiveRecord::Associations::JoinDependency
               'stashed_join'
             when Arel::Nodes::Join
               'join_node'
@@ -157,27 +157,51 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          join_dependency.graft(*stashed_association_joins)
+          join_dependency
         end
 
         def build_or_find_association(name, parent = @base, klass = nil)
-          found_association = @join_dependency.join_associations
-          .detect do |assoc|
+          list = if ActiveRecord::VERSION::STRING >= "4.1"
+                   @join_dependency.join_root.children.detect
+                 else
+                   @join_dependency.join_associations
+                 end
+
+          found_association = list.detect do |assoc|
             assoc.reflection.name == name &&
-            assoc.parent == parent &&
+            @associations_pot[assoc] == parent &&
             (!klass || assoc.reflection.klass == klass)
           end
+
           unless found_association
-            @join_dependency.send(:build, Polyamorous::Join.new(
-              name, @join_type, klass), parent)
-            found_association = @join_dependency.join_associations.last
+            jd = JoinDependency.new(
+              parent.base_klass,
+              Polyamorous::Join.new(name, @join_type, klass),
+              []
+            )
+            found_association = jd.join_root.children.last
+            associations found_association, parent
+
+            # TODO maybe we dont need to push associations here, we could loop
+            # through the @associations_pot instead
+            @join_dependency.join_root.children.push found_association
+
+            # Builds the arel nodes properly for this association
+            @join_dependency.send(
+              :construct_tables!, jd.join_root, found_association
+              )
+
             # Leverage the stashed association functionality in AR
-            @object = @object.joins(found_association)
+            @object = @object.joins(jd)
           end
 
           found_association
         end
 
+        def associations(assoc, parent)
+          @associations_pot ||= {}
+          @associations_pot[assoc] = parent
+        end
       end
     end
   end
