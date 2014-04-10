@@ -17,8 +17,8 @@ module Ransack
         end
 
         def ransacker(name, opts = {}, &block)
-          self._ransackers = _ransackers.merge name.to_s => Ransacker.new(
-            self, name, opts, &block)
+          self._ransackers = _ransackers.merge name.to_s => Ransacker
+            .new(self, name, opts, &block)
         end
 
         def ransackable_attributes(auth_object = nil)
@@ -26,7 +26,8 @@ module Ransack
         end
 
         def ransortable_attributes(auth_object = nil)
-          # Here so users can overwrite the attributes that show up in the sort_select
+          # Here so users can overwrite the attributes
+          # that show up in the sort_select
           ransackable_attributes(auth_object)
         end
 

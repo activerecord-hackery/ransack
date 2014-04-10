@@ -19,4 +19,3 @@ Sham.define do
 end
 
 Schema.create
-

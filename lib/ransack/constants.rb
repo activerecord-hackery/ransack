@@ -95,6 +95,5 @@ module Ransack
         unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
       end
     end
-
   end
 end

@@ -1,6 +1,4 @@
 require 'action_view'
-require 'simple_form' if
-  (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
 
 require 'simple_form' if
   (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
@@ -109,7 +107,12 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        default = options.delete(:default) || 'cont'
+        if ::ActiveRecord::VERSION::STRING >= "4"
+          default = options.delete(:default) || 'cont'
+        else
+          default = options.delete(:default) || 'eq'
+        end
+
         keys = options[:compounds] ? Predicate.names : 
           Predicate.names.reject { |k| k.match(/_(any|all)$/) }
         if only = options[:only]

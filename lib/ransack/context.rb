@@ -61,7 +61,9 @@ module Ransack
         obj
       elsif obj.respond_to? :klass
         obj.klass
-      elsif obj.respond_to? :base_klass
+      elsif obj.respond_to? :active_record  # Rails 3
+        obj.active_record
+      elsif obj.respond_to? :base_klass     # Rails 4
         obj.base_klass
       else
         raise ArgumentError, "Don't know how to klassify #{obj.inspect}"
@@ -147,6 +149,10 @@ module Ransack
 
     def sortable_attributes(str = '')
       traverse(str).ransortable_attributes(auth_object)
+    end
+
+    def searchable_associations(str = '')
+      traverse(str).ransackable_associations(auth_object)
     end
   end
 end

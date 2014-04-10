@@ -29,8 +29,9 @@ module Ransack
       end
 
       def name_from_attribute_name(attribute_name)
-        names_by_decreasing_length.
-        detect { |p| attribute_name.to_s.match(/_#{p}$/) }
+        names_by_decreasing_length.detect {
+          |p| attribute_name.to_s.match(/_#{p}$/)
+        }
       end
 
       def for_attribute_name(attribute_name)

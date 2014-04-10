@@ -104,7 +104,11 @@ module Ransack
     end
 
     def self.i18n_key(klass)
-      klass.model_name.i18n_key
+      if ActiveRecord::VERSION::MAJOR == 3 && ActiveRecord::VERSION::MINOR == 0
+        klass.model_name.i18n_key.to_s.tr('.', '/')
+      else
+        klass.model_name.i18n_key.to_s
+      end
     end
   end
 end

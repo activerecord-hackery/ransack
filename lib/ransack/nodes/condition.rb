@@ -19,7 +19,8 @@ module Ransack
               m: combinator,
               v: predicate.wants_array ? Array(values) : [values]
             )
-            # TODO: Figure out what to do with multiple types of attributes, if anything.
+            # TODO: Figure out what to do with multiple types of attributes,
+            # if anything.
             # Tempted to go with "garbage in, garbage out" on this one
             predicate.validate(condition.values, condition.default_type) ?
               condition : nil
@@ -208,14 +209,14 @@ module Ransack
 
       def inspect
         data = [
-                ['attributes', a.try(:map, &:name)],
-                ['predicate', p],
-                ['combinator', m],
-                ['values', v.try(:map, &:value)]
-               ]
-               .reject { |e| e[1].blank? }
-               .map { |v| "#{v[0]}: #{v[1]}" }
-               .join(', ')
+          ['attributes', a.try(:map, &:name)],
+          ['predicate', p],
+          ['combinator', m],
+          ['values', v.try(:map, &:value)]
+        ]
+        .reject { |e| e[1].blank? }
+        .map { |v| "#{v[0]}: #{v[1]}" }
+        .join(', ')
         "Condition <#{data}>"
       end
 

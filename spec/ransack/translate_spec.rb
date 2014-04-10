@@ -6,9 +6,7 @@ module Ransack
     describe '.attribute' do
       it 'translate namespaced attribute like AR does' do
         ar_translation = ::Namespace::Article.human_attribute_name(:title)
-        ransack_translation = Ransack::Translate.attribute(
-          :title, :context => ::Namespace::Article.search.context
-          )
+        ransack_translation = Ransack::Translate.attribute(:title, :context => ::Namespace::Article.search.context)
         ransack_translation.should eq ar_translation
       end
     end

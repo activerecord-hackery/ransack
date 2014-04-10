@@ -129,10 +129,9 @@ module Ransack
         when /^(g|c|m|groupings|conditions|combinator)=?$/
           true
         else
-          name.
-          split(/_and_|_or_/).
-          select { |n| !@context.attribute_method?(n) }.
-          empty?
+          name.split(/_and_|_or_/)
+          .select { |n| !@context.attribute_method?(n) }
+          .empty?
         end
       end
 
@@ -191,7 +190,6 @@ module Ransack
         Predicate.detect_and_strip_from_string!(string)
         string
       end
-
     end
   end
 end

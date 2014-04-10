@@ -8,7 +8,7 @@ module Ransack
     module ActiveRecord
       class Context < ::Ransack::Context
 
-        # Redefine a few things that have changed with 3.2.
+        # Redefine a few things for ActiveRecord 3.2.
 
         def initialize(object, options = {})
           super

@@ -89,13 +89,11 @@ module Ransack
 
       it 'accepts "attributes" hashes for conditions' do
         search = Search.new(Person,
-          c: {
-            '0' => { a: ['name'], p: 'eq', v: ['Ernie'] },
-            '1' => {
-                     a: ['children_name', 'parent_name'],
-                     p: 'eq', v: ['Ernie'], m: 'or'
-                   }
-          }
+          :c => {
+            '0' => { :a => ['name'], :p => 'eq', :v => ['Ernie'] },
+            '1' => { :a => ['children_name', 'parent_name'],
+                     :p => 'eq', :v => ['Ernie'], :m => 'or' }
+            }
         )
         conditions = search.base.conditions
         conditions.should have(2).items
@@ -105,8 +103,7 @@ module Ransack
 
       it 'creates conditions for custom predicates that take arrays' do
         Ransack.configure do |config|
-          config.add_predicate 'ary_pred',
-          wants_array: true
+          config.add_predicate 'ary_pred', :wants_array => true
         end
 
         search = Search.new(Person, name_ary_pred: ['Ernie', 'Bert'])
@@ -183,18 +180,42 @@ module Ransack
         second.should match /#{children_people_name_field} = 'Bert'/
       end
 
-      it 'returns distinct records when passed distinct: true' do
-        search = Search.new(
-          Person, g: [
-            { m: 'or',
-              comments_body_cont: 'e',
-              articles_comments_body_cont: 'e'
-            }
-          ]
-        )
-        search.result.load.should have(9000).items
-        search.result(distinct: true).should have(10).items
-        search.result.load.uniq.should eq search.result(distinct: true).load
+      if ::ActiveRecord::VERSION::STRING >= "4"
+        it 'returns distinct records when passed distinct: true' do
+          search = Search.new(
+            Person, g: [
+              { m: 'or',
+                comments_body_cont: 'e',
+                articles_comments_body_cont: 'e'
+              }
+            ]
+          )
+          search.result.load.should have(9000).items
+          search.result(distinct: true).should have(10).items
+          search.result.load.uniq.should eq search.result(distinct: true).load
+        end
+      else
+        it 'returns distinct records when passed :distinct => true' do
+          search = Search.new(
+            Person, :g => [
+              { :m => 'or',
+                :comments_body_cont => 'e',
+                :articles_comments_body_cont => 'e'
+              }
+            ]
+          )
+          if ActiveRecord::VERSION::MAJOR == 3
+            all_or_load, uniq_or_distinct = :all, :uniq
+          else
+            all_or_load, uniq_or_distinct = :load, :distinct
+          end
+          search.result.send(all_or_load).
+            should have(920).items
+          search.result(:distinct => true).
+            should have(330).items
+          search.result.send(all_or_load).send(uniq_or_distinct).
+            should eq search.result(:distinct => true).send(all_or_load)
+        end
       end
     end
 
