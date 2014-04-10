@@ -41,7 +41,12 @@ module Ransack
           it 'creates ransack attributes' do
             s = Person.search(reversed_name_eq: 'htimS cirA')
             s.result.should have(1).person
-            s.result.first.should eq Person.find_by(name: 'Aric Smith')
+
+            if ::ActiveRecord::VERSION::STRING >= "4"
+              s.result.first.should eq Person.find_by(name: 'Aric Smith')
+            else
+              s.result.first.should eq Person.find_by_name('Aric Smith')
+            end
           end
 
           it 'can be accessed through associations' do

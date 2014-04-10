@@ -210,9 +210,9 @@ module Ransack
             all_or_load, uniq_or_distinct = :load, :distinct
           end
           search.result.send(all_or_load).
-            should have(920).items
+            should have(9000).items
           search.result(:distinct => true).
-            should have(330).items
+            should have(10).items
           search.result.send(all_or_load).send(uniq_or_distinct).
             should eq search.result(:distinct => true).send(all_or_load)
         end
