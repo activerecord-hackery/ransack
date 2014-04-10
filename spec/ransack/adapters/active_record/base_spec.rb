@@ -58,7 +58,11 @@ module Ransack
 
           it 'allows an "attribute" to be an InfixOperation' do
             s = Person.search(doubled_name_eq: 'Aric SmithAric Smith')
-            s.result.first.should eq Person.find_by(name: 'Aric Smith')
+            if ::ActiveRecord::VERSION::STRING >= "4"
+              s.result.first.should eq Person.find_by(name: 'Aric Smith')
+            else
+              s.result.first.should eq Person.find_by_name('Aric Smith')
+            end
           end if defined?(Arel::Nodes::InfixOperation) && sane_adapter?
 
           it "doesn't break #count if using InfixOperations" do
