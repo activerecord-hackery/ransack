@@ -2,8 +2,8 @@ module Ransack
   module Nodes
     class Condition < Node
       i18n_word :attribute, :predicate, :combinator, :value
-      i18n_alias :a => :attribute, :p => :predicate, :m => :combinator,
-                 :v => :value
+      i18n_alias :a => :attribute, :p => :predicate,
+                 :m => :combinator, :v => :value
 
       attr_accessor :predicate
 
@@ -14,10 +14,10 @@ module Ransack
             combinator = key.match(/_(or|and)_/) ? $1 : nil
             condition = self.new(context)
             condition.build(
-              :a => attributes,
-              :p => predicate.name,
-              :m => combinator,
-              :v => predicate.wants_array ? Array(values) : [values]
+              a: attributes,
+              p: predicate.name,
+              m: combinator,
+              v: predicate.wants_array ? Array(values) : [values]
             )
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything.
@@ -195,8 +195,8 @@ module Ransack
 
       def formatted_values_for_attribute(attr)
         formatted = casted_values_for_attribute(attr).map do |val|
-          val = attr.ransacker.formatter.call(val) if attr.ransacker &&
-            attr.ransacker.formatter
+          val = attr.ransacker.formatter.call(val) if
+            attr.ransacker && attr.ransacker.formatter
           val = predicate.format(val)
           val
         end

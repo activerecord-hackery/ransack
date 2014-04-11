@@ -26,10 +26,11 @@ module Ransack
       end
 
       describe '#sort_link with default search_key' do
-        subject {
-          @controller.view_context.sort_link(
-            [:main_app, Person.search(:sorts => ['name desc'])],
-            :name, :controller => 'people'
+        subject { @controller.view_context.
+          sort_link(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people'
           )
         }
         it { should match(
@@ -74,7 +75,6 @@ module Ransack
           end)
         } 
       end
-
 
       context 'view has existing parameters' do
         before do
