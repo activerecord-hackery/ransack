@@ -17,26 +17,25 @@ for Ransack (or MetaSearch, for that matter). Try
 In your Gemfile:
 
 ```ruby
-gem "ransack"  # Last officially released gem (compatible Rails 3.x and 4.0, but not 4.1)
+gem "ransack"  # Last officially released gem (compatible with Rails 3 and 4!)
 ```
 
-Or if you want to use the latest updates (Rails 3.x and 4.0, but not 4.1):
+Or if you want to use the latest updates:
 
 ```ruby
-gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo 
+gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo
 ```
 
-If you are on Rails 4.0, you may prefer to use the streamlined, legacy code-free, latest-updates version of Ransack on the [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4):
-
-```ruby
-gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
-```
-
-Finally, if you are on Rails 4.1 (or 4.2.0.alpha), use the [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates also on master and rails-4. In your Gemfile you'll need to include (for the moment) both Ransack and Polyamorous as follows:
+If you are on Rails 4.1 (or 4.2.0.alpha or master), you may prefer to use the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1 and up, and is lighter and somewhat faster:
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
-gem "polyamorous", github: "activerecord-hackery/polyamorous"
+```
+
+Similarly, if you are on Rails 4.0, you may prefer to use the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the same reasons:
+
+```ruby
+gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
 ```
 
 ## Usage
