@@ -137,7 +137,7 @@ construct much more complex search forms, such as the one on the
 
 Ransack will try to to make `#search` available in your models, but in the case that `#search` has already been defined, you can use `#ransack` instead. For example the following would be equivalent:
 
-```
+```ruby
 Article.search(params[:q])
 Article.ransack(params[:q])
 ```
