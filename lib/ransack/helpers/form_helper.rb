@@ -5,11 +5,14 @@ module Ransack
       def search_form_for(record, options = {}, &proc)
         if record.is_a?(Ransack::Search)
           search = record
-          options[:url] ||= polymorphic_path(search.klass)
+          options[:url] ||= polymorphic_path(
+            search.klass, format: options.delete(:format)
+            )
         elsif record.is_a?(Array) &&
             (search = record.detect { |o| o.is_a?(Ransack::Search) })
           options[:url] ||= polymorphic_path(
-            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o }
+            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o },
+            format: options.delete(:format)
             )
         else
           raise ArgumentError,
