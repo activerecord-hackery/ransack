@@ -17,10 +17,10 @@ for Ransack (or MetaSearch, for that matter). Try
 In your Gemfile:
 
 ```ruby
-gem "ransack"  # Last officially released gem (compatible with Rails 3 and 4!)
+gem "ransack"  # Last officially released gem (compatible with Rails 3, 4.0 and 4.1!)
 ```
 
-Or if you want to use the latest updates:
+Or if you want to use the latest updates on the master branch:
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo
@@ -217,10 +217,8 @@ http://www.localeapp.com/projects/2999
 
 To support the project:
 
-* Use Ransack in your apps, and let us know if you encounter anything that's broken or missing.
-  A failing spec is awesome. A pull request is even better!
-* Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful to you. The more
-  people who are using the project, the quicker we can find and fix bugs!
+* Use Ransack in your apps, and let us know if you encounter anything that's broken or missing. A failing spec is awesome. A pull request with tests that pass is even better! Before filing an issue or pull request, be sure to read the [contributing guide](https://github.com/activerecord-hackery/ransack/blob/master/CONTRIBUTING.md).
+* Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful to you. The more people who are using the project, the quicker we can find and fix bugs!
 
 ## Copyright
 
