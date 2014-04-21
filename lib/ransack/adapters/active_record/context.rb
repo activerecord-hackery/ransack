@@ -166,7 +166,7 @@ module Ransack
           found_association = @join_dependency
           .join_root.children.detect do |assoc|
             assoc.reflection.name == name &&
-            @associations_pot[assoc] == parent &&
+            (@associations_pot.nil? || @associations_pot[assoc] == parent) &&
             (!klass || assoc.reflection.klass == klass)
           end
 
