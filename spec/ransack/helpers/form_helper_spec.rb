@@ -33,50 +33,99 @@ module Ransack
             controller: 'people'
           )
         }
-        it { should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/ }
-        it { should match /sort_link desc/ }
-        it { should match /Full Name &#9660;/ }
+        it {
+          should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/
+        }
+        it {
+          should match /sort_link desc/
+        }
+        it {
+          should match /Full Name &#9660;/
+        }
       end
 
       describe '#sort_link with default search_key defined as symbol' do
         subject { @controller.view_context.
           sort_link(
-            Person.search({ sorts: ['name desc'] }, search_key: :people_search),
+            Person.search(
+              { sorts: ['name desc'] }, search_key: :people_search
+            ),
             :name,
             controller: 'people'
           )
         }
-        it { should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/ }
+        it {
+          should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/
+        }
       end
 
       describe '#sort_link with default search_key defined as string' do
         subject { @controller.view_context.
           sort_link(
-            Person.search({ sorts: ['name desc'] }, search_key: 'people_search'),
+            Person.search(
+              { sorts: ['name desc'] }, search_key: 'people_search'
+            ),
             :name,
             controller: 'people'
           )
         }
-        it { should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/ }
+        it {
+          should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/
+        }
       end
 
       context 'view has existing parameters' do
         before do
-          @controller.view_context.
-            params.merge!({ exist: 'existing' })
+          @controller.view_context
+          .params.merge!({ exist: 'existing' })
         end
         describe '#sort_link should not remove existing params' do
           subject {
-            @controller.view_context.
-              sort_link(
-                Person.search({ sorts: ['name desc'] }, search_key: 'people_search'),
-                :name,
-                controller: 'people'
-              )
+            @controller.view_context
+            .sort_link(
+              Person.search(
+                { sorts: ['name desc'] }, search_key: 'people_search'
+                ),
+              :name,
+              controller: 'people'
+            )
           }
-          it { should match /exist\=existing/ }
+          it {
+            should match /exist\=existing/
+          }
         end
       end
+
+      describe '#search_form_for with default format' do
+        subject {
+          @controller.view_context
+          .search_form_for(Person.search) {}
+        }
+        it {
+          should match /action="\/people"/
+        }
+      end
+
+      describe '#search_form_for with pdf format' do
+        subject {
+          @controller.view_context
+          .search_form_for(Person.search, format: :pdf) {}
+        }
+        it {
+          should match /action="\/people.pdf"/
+        }
+      end
+
+      describe '#search_form_for with json format' do
+        subject {
+          @controller.view_context
+          .search_form_for(Person.search, format: :json) {}
+        }
+        it {
+          should match /action="\/people.json"/
+        }
+      end
+
     end
   end
 end
