@@ -94,6 +94,17 @@ In your view:
 `cont` (contains) and `start` (starts with) are just two of the available search predicates.
 See [Constants](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb) for a full list and the [wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching) for more description.
 
+You can also set the `search_form_for` answer format, like this:
+```erb
+<%= search_form_for(@q, format: :pdf) do |f| %>
+  ...
+<% end %>
+
+<%= search_form_for(@q, format: :json) do |f| %>
+  ...
+<% end %>
+```
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to generate
@@ -196,16 +207,6 @@ end
 <% end %>
 ```
 
-### Format option of resource-oriented style
-
-You can also set the answer format, like this:
-
-```erb
-<%= search_form_for @q, format: :pdf do |f| %>
-  ...
-<% end %>
-```
-
 ## Using SimpleForm
 
 If you want to combine form builders of ransack and SimpleForm, just set the RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in ``config/application.rb`` before ``require 'rails/all'`` and of course use ``gem 'simple_form'`` in your ``Gemfile``:
@@ -227,7 +228,7 @@ http://www.localeapp.com/projects/2999
 
 To support the project:
 
-* Use Ransack in your apps, and let us know if you encounter anything that's broken or missing. A failing spec is awesome. A pull request with tests that pass is even better! Before filing an issue or pull request, be sure to read the [contributing guide](https://github.com/activerecord-hackery/ransack/blob/master/CONTRIBUTING.md).
+* Use Ransack in your apps, and let us know if you encounter anything that's broken or missing. A failing spec is awesome. A pull request with tests that pass is even better! Before filing an issue or pull request, be sure to read the [Contributing Guide](CONTRIBUTING.md).
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful to you. The more people who are using the project, the quicker we can find and fix bugs!
 
 ## Copyright
