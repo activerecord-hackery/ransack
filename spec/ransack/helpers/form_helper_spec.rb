@@ -92,6 +92,24 @@ module Ransack
           }
         end
       end
+
+      describe '#search_form_for with default format' do
+        subject {
+          @controller.view_context.search_form_for(Person.search) {}
+        }
+        it {
+          should match /action="\/people"/
+        }
+      end
+
+      describe '#search_form_for with pdf format' do
+        subject {
+          @controller.view_context.search_form_for(Person.search, format: :pdf) {}
+        }
+        it {
+          should match /action="\/people.pdf"/
+        }
+      end
     end
   end
 end
