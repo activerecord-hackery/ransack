@@ -196,6 +196,16 @@ end
 <% end %>
 ```
 
+### Format option of resource-oriented style
+
+You can also set the answer format, like this:
+
+```erb
+<%= search_form_for @q, format: :pdf do |f| %>
+  ...
+<% end %>
+```
+
 ## Using SimpleForm
 
 If you want to combine form builders of ransack and SimpleForm, just set the RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in ``config/application.rb`` before ``require 'rails/all'`` and of course use ``gem 'simple_form'`` in your ``Gemfile``:
