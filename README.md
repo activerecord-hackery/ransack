@@ -1,16 +1,27 @@
 # Ransack
 
-[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
+[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)]
+(https://travis-ci.org/activerecord-hackery/ransack)
+[![Gem Version](https://badge.fury.io/rb/ransack.svg)]
+(http://badge.fury.io/rb/ransack)
 
-Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search) created by [Ernie Miller](http://twitter.com/erniemiller) and maintained by [Ryan Bigg](http://twitter.com/ryanbigg), [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors). While it
-supports many of the same features as MetaSearch, its underlying implementation differs
-greatly from MetaSearch, and _backwards compatibility is not a design goal._
+Ransack is a rewrite of [MetaSearch]
+(https://github.com/activerecord-hackery/meta_search)
+created by [Ernie Miller](http://twitter.com/erniemiller)
+and maintained by [Ryan Bigg](http://twitter.com/ryanbigg),
+[Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
+While it supports many of the same features as MetaSearch, its underlying
+implementation differs greatly from MetaSearch,
+and _backwards compatibility is not a design goal._
 
-Ransack enables the creation of both simple and [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
-search forms against your application's models (demo source code [here](https://github.com/activerecord-hackery/ransack_demo)). If you're looking for something that
-simplifies query generation at the model or controller layer, you're probably not looking
-for Ransack (or MetaSearch, for that matter). Try
-[Squeel](https://github.com/activerecord-hackery/squeel) instead.
+Ransack enables the creation of both simple and
+[advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
+search forms against your application's models (demo source code
+[here](https://github.com/activerecord-hackery/ransack_demo)).
+If you're looking for something that simplifies query generation at the model
+or controller layer, you're probably not looking for Ransack (or MetaSearch,
+for that matter). Try [Squeel](https://github.com/activerecord-hackery/squeel)
+instead.
 
 ## Getting started
 
