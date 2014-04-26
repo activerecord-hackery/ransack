@@ -18,11 +18,11 @@ module Ransack
       Ransack.predicates.should have_key 'test_predicate_all'
     end
 
-    it 'avoids creating compound predicates if :compounds => false' do
+    it 'avoids creating compound predicates if compounds: false' do
       Ransack.configure do |config|
         config.add_predicate(
           :test_predicate_without_compound,
-          :compounds => false
+          compounds: false
           )
       end
       Ransack.predicates
@@ -55,8 +55,8 @@ module Ransack
       Ransack.configure do |config|
         config.add_predicate(
           :test_array_predicate,
-          :wants_array => true,
-          :compounds => true
+          wants_array: true,
+          compounds: true
           )
       end
 

@@ -10,7 +10,7 @@ end
 
 Ransack.configure do |config|
   Ransack::Constants::AREL_PREDICATES.each do |name|
-    config.add_predicate name, :arel_predicate => name
+    config.add_predicate name, arel_predicate: name
   end
 
   Ransack::Constants::DERIVED_PREDICATES.each do |args|

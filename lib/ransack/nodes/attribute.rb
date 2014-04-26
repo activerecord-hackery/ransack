@@ -5,8 +5,8 @@ module Ransack
 
       attr_reader :name
 
-      delegate :blank?, :present?, :==, :to => :name
-      delegate :engine, :to => :context
+      delegate :blank?, :present?, :==, to: :name
+      delegate :engine, to: :context
 
       def initialize(context, name = nil)
         super(context)
@@ -19,8 +19,9 @@ module Ransack
       end
 
       def valid?
-        bound? && attr && context.klassify(parent)
-        .ransackable_attributes(context.auth_object).include?(attr_name)
+        bound? && attr &&
+        context.klassify(parent).ransackable_attributes(context.auth_object)
+        .include?(attr_name)
       end
 
       def type

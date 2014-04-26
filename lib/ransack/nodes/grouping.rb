@@ -9,7 +9,7 @@ module Ransack
       i18n_word :condition, :and, :or
       i18n_alias :c => :condition, :n => :and, :o => :or
 
-      delegate :each, :to => :values
+      delegate :each, to: :values
 
       def initialize(context, combinator = nil)
         super(context)
@@ -21,9 +21,7 @@ module Ransack
       end
 
       def translate(key, options = {})
-        super or Translate.attribute(
-          key.to_s, options.merge(:context => context)
-          )
+        super or Translate.attribute(key.to_s, options.merge(context: context))
       end
 
       def conditions
@@ -161,10 +159,12 @@ module Ransack
       end
 
       def inspect
-        data = [['conditions', conditions], ['combinator', combinator]]
-        .reject { |e| e[1].blank? }
-        .map { |v| "#{v[0]}: #{v[1]}" }
-        .join(', ')
+        data = [
+                ['conditions', conditions], ['combinator', combinator]
+               ].
+               reject { |e| e[1].blank? }
+               .map { |v| "#{v[0]}: #{v[1]}" }
+               .join(', ')
         "Grouping <#{data}>"
       end
 

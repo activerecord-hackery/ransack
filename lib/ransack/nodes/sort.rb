@@ -9,7 +9,7 @@ module Ransack
       class << self
         def extract(context, str)
           attr, direction = str.split(/\s+/,2)
-          self.new(context).build(:name => attr, :dir => direction)
+          self.new(context).build(name: attr, dir: direction)
         end
       end
 
@@ -24,8 +24,9 @@ module Ransack
       end
 
       def valid?
-        bound? && attr && context.klassify(parent)
-        .ransortable_attributes(context.auth_object).include?(attr_name)
+        bound? && attr &&
+          context.klassify(parent).ransortable_attributes(context.auth_object)
+          .include?(attr_name)
       end
 
       def name=(name)

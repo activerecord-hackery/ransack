@@ -5,11 +5,14 @@ module Ransack
       def search_form_for(record, options = {}, &proc)
         if record.is_a?(Ransack::Search)
           search = record
-          options[:url] ||= polymorphic_path(search.klass)
+          options[:url] ||= polymorphic_path(
+            search.klass, format: options.delete(:format)
+            )
         elsif record.is_a?(Array) &&
             (search = record.detect { |o| o.is_a?(Ransack::Search) })
           options[:url] ||= polymorphic_path(
-            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o }
+            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o },
+            format: options.delete(:format)
             )
         else
           raise ArgumentError,
@@ -17,13 +20,13 @@ module Ransack
         end
         options[:html] ||= {}
         html_options = {
-          :class  => options[:class].present? ?
+          class: options[:class].present? ?
             "#{options[:class]}" :
             "#{search.klass.to_s.underscore}_search",
-          :id => options[:id].present? ?
+          id: options[:id].present? ?
             "#{options[:id]}" :
             "#{search.klass.to_s.underscore}_search",
-          :method => :get
+          method: :get
         }
         options[:as] ||= 'q'
         options[:html].reverse_merge!(html_options)
@@ -51,7 +54,7 @@ module Ransack
           if args.size > 0 && !args.first.is_a?(Hash)
             args.shift.to_s
           else
-            Translate.attribute(attr_name, :context => search.context)
+            Translate.attribute(attr_name, context: search.context)
           end
           )
 
@@ -74,7 +77,7 @@ module Ransack
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
         query_hash = {}
         query_hash[search.context.search_key] = search_params
-          .merge(:s => "#{attr_name} #{new_dir}")
+          .merge(s: "#{attr_name} #{new_dir}")
         options.merge!(query_hash)
         options_for_url = params.merge options
 

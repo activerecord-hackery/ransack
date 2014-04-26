@@ -8,13 +8,17 @@ When filing an issue on the Ransack project, please provide these details:
 * The version of Ransack *and* the version of Rails.
 * Any relevant stack traces ("Full trace" preferred)
 
-In 99% of cases, this information is enough to determine the cause and solution to the problem that is being described.
+In 99% of cases, this information is enough to determine the cause and
+solution to the problem that is being described.
 
-Any issue that is open for 14 days without actionable information or activity will be marked as "stalled" and then closed. Stalled issues can be re-opened if the information requested is provided.
+Any issue that is open for 14 days without actionable information or activity
+will be marked as "stalled" and then closed. Stalled issues can be re-opened
+if the information requested is provided.
 
 ## Pull requests
 
-We gladly accept pull requests to fix bugs and, in some circumstances, add new features to Ransack.
+We gladly accept pull requests to fix bugs and, in some circumstances, add new
+features to Ransack.
 
 Here's a quick guide:
 
@@ -32,7 +36,9 @@ a test!
 
 4. Make the test pass.
 
-5. Push to your fork and submit a pull request. If the changes will apply cleanly to the latest stable branches and master branch, you will only need to submit one pull request.
+5. Push to your fork and submit a pull request. If the changes will apply
+cleanly to the latest stable branches and master branch, you will only need
+to submit one pull request.
 
 At this point you're waiting on us. We like to at least comment on, if not
 accept, pull requests within three business days (and, typically, one business
