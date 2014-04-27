@@ -213,42 +213,26 @@ module Ransack
         second.should match /#{children_people_name_field} = 'Bert'/
       end
 
-      if ::ActiveRecord::VERSION::STRING >= "4"
-        it 'returns distinct records when passed distinct: true' do
-          search = Search.new(
-            Person, g: [
-              { m: 'or',
-                comments_body_cont: 'e',
-                articles_comments_body_cont: 'e'
-              }
-            ]
-          )
-          search.result.load.should have(9000).items
-          search.result(distinct: true).should have(10).items
-          search.result.load.uniq.should eq search.result(distinct: true).load
+      it 'returns distinct records when passed :distinct => true' do
+        search = Search.new(
+          Person, :g => [
+            { :m => 'or',
+              :comments_body_cont => 'e',
+              :articles_comments_body_cont => 'e'
+            }
+          ]
+        )
+        if ActiveRecord::VERSION::MAJOR == 3
+          all_or_load, uniq_or_distinct = :all, :uniq
+        else
+          all_or_load, uniq_or_distinct = :load, :distinct
         end
-      else
-        it 'returns distinct records when passed :distinct => true' do
-          search = Search.new(
-            Person, :g => [
-              { :m => 'or',
-                :comments_body_cont => 'e',
-                :articles_comments_body_cont => 'e'
-              }
-            ]
-          )
-          if ActiveRecord::VERSION::MAJOR == 3
-            all_or_load, uniq_or_distinct = :all, :uniq
-          else
-            all_or_load, uniq_or_distinct = :load, :distinct
-          end
-          search.result.send(all_or_load).
-            should have(9000).items
-          search.result(:distinct => true).
-            should have(10).items
-          search.result.send(all_or_load).send(uniq_or_distinct).
-            should eq search.result(:distinct => true).send(all_or_load)
-        end
+        search.result.send(all_or_load).
+          should have(9000).items
+        search.result(:distinct => true).
+          should have(10).items
+        search.result.send(all_or_load).send(uniq_or_distinct).
+          should eq search.result(:distinct => true).send(all_or_load)
       end
     end
 

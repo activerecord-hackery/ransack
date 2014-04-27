@@ -35,34 +35,29 @@ module Ransack
           # end
           #
           # ransacker :doubled_name do |parent|
-          #   Arel::Nodes::InfixOperation.new('||', parent.table[:name], parent.table[:name])
+          #   Arel::Nodes::InfixOperation.new(
+          #     '||', parent.table[:name], parent.table[:name]
+          #   )
           # end
 
           it 'creates ransack attributes' do
             s = Person.search(reversed_name_eq: 'htimS cirA')
             s.result.should have(1).person
 
-            if ::ActiveRecord::VERSION::STRING >= "4"
-              s.result.first.should eq Person.find_by(name: 'Aric Smith')
-            else
-              s.result.first.should eq Person.find_by_name('Aric Smith')
-            end
+            s.result.first.should eq Person.where(name: 'Aric Smith').first
           end
 
           it 'can be accessed through associations' do
             s = Person.search(children_reversed_name_eq: 'htimS cirA')
             s.result.to_sql.should match(
-              /#{quote_table_name("children_people")}.#{quote_column_name("name")} = 'Aric Smith'/
+              /#{quote_table_name("children_people")}.#{
+                 quote_column_name("name")} = 'Aric Smith'/
             )
           end
 
           it 'allows an "attribute" to be an InfixOperation' do
             s = Person.search(doubled_name_eq: 'Aric SmithAric Smith')
-            if ::ActiveRecord::VERSION::STRING >= "4"
-              s.result.first.should eq Person.find_by(name: 'Aric Smith')
-            else
-              s.result.first.should eq Person.find_by_name('Aric Smith')
-            end
+            s.result.first.should eq Person.where(name: 'Aric Smith').first
           end if defined?(Arel::Nodes::InfixOperation) && sane_adapter?
 
           it "doesn't break #count if using InfixOperations" do
@@ -70,20 +65,18 @@ module Ransack
             s.result.count.should eq 1
           end if defined?(Arel::Nodes::InfixOperation) && sane_adapter?
 
-          if ::ActiveRecord::VERSION::STRING >= "4"
-            it "should remove empty key value pairs from the params hash" do
-              s = Person.search(children_reversed_name_eq: '')
-              s.result.to_sql.should_not match /LEFT OUTER JOIN/
-            end
+          it "should remove empty key value pairs from the params hash" do
+            s = Person.search(children_reversed_name_eq: '')
+            s.result.to_sql.should_not match /LEFT OUTER JOIN/
+          end
 
-            it "should keep proper key value pairs in the params hash" do
-              s = Person.search(children_reversed_name_eq: 'Testing')
-              s.result.to_sql.should match /LEFT OUTER JOIN/
-            end
+          it "should keep proper key value pairs in the params hash" do
+            s = Person.search(children_reversed_name_eq: 'Testing')
+            s.result.to_sql.should match /LEFT OUTER JOIN/
+          end
 
-            it "should function correctly when nil is passed in" do
-              s = Person.search(nil)
-            end
+          it "should function correctly when nil is passed in" do
+            s = Person.search(nil)
           end
 
           it "should function correctly when using fields with dots in them" do
@@ -108,7 +101,8 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_sort" } }
             )
             s.result.to_sql.should match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_sort")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+                quote_column_name("only_sort")} ASC/
             )
           end
 
@@ -117,21 +111,24 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_search" } }
             )
             s.result.to_sql.should_not match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_search")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+                quote_column_name("only_search")} ASC/
             )
           end
 
           it 'allows search by "only_search" field' do
             s = Person.search(only_search_eq: 'htimS cirA')
             s.result.to_sql.should match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_search")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+                quote_column_name("only_search")} = 'htimS cirA'/
             )
           end
 
           it "can't be searched by 'only_sort'" do
             s = Person.search(only_sort_eq: 'htimS cirA')
             s.result.to_sql.should_not match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_sort")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+                quote_column_name("only_sort")} = 'htimS cirA'/
             )
           end
 
@@ -141,7 +138,8 @@ module Ransack
               { auth_object: :admin }
             )
             s.result.to_sql.should match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+                quote_column_name("only_admin")} ASC/
             )
           end
 
@@ -150,7 +148,8 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_admin" } }
             )
             s.result.to_sql.should_not match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+                quote_column_name("only_admin")} ASC/
             )
           end
 
@@ -160,14 +159,16 @@ module Ransack
               { auth_object: :admin }
             )
             s.result.to_sql.should match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+                quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
 
           it "can't be searched by 'only_admin', if auth_object: nil" do
             s = Person.search(only_admin_eq: 'htimS cirA')
             s.result.to_sql.should_not match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+                quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
         end
