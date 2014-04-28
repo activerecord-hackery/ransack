@@ -150,7 +150,7 @@ end
                         html: { method: :post } do |f| %>
 ```
 
-Once you've done so, you can make use of the helpers in Ransack::Helpers::FormBuilder to
+Once you've done so, you can make use of the helpers in [Ransack::Helpers::FormBuilder](lib/ransack/helpers/form_builder.rb) to
 construct much more complex search forms, such as the one on the
 [demo page](http://ransack-demo.heroku.com) (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
 
@@ -231,9 +231,7 @@ require 'rails/all'
 
 ## I18n
 
-Take a look at our locale file on ``lib/ransack/locale/en.yml`` to check all available messages. You may also be interested in one of the many translations that are available on:
-
-http://www.localeapp.com/projects/2999
+Ransack translation files are available in [Ransack::Locale](lib/ransack/locale). You may also be interested in one of the many translations for Ransack available at http://www.localeapp.com/projects/2999.
 
 ## Contributions
 
