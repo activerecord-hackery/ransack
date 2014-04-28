@@ -67,4 +67,4 @@ zh:
       present: "有值"
       blank: "为空"
       'null': "是null"
-      not_null: "不是null"  
+      not_null: "不是null"
