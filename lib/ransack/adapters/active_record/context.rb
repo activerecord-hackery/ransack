@@ -156,23 +156,18 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          if ::ActiveRecord::VERSION::STRING >= "4.1"
+          if ::ActiveRecord::VERSION::STRING >= '4.1'
             join_dependency
           else
             join_dependency.graft(*stashed_association_joins)
           end
         end
 
-        if ::ActiveRecord::VERSION::STRING >= "4.1"
+        if ::ActiveRecord::VERSION::STRING >= '4.1'
 
           def build_or_find_association(name, parent = @base, klass = nil)
-            list = if ::ActiveRecord::VERSION::STRING >= "4.1"
-                     @join_dependency.join_root.children.detect
-                   else
-                     @join_dependency.join_associations
-                   end
-
-            found_association = list.detect do |assoc|
+            found_association = @join_dependency.join_root.children
+            .detect do |assoc|
               assoc.reflection.name == name &&
               (@associations_pot.nil? || @associations_pot[assoc] == parent) &&
               (!klass || assoc.reflection.klass == klass)
@@ -199,7 +194,6 @@ module Ransack
               # Leverage the stashed association functionality in AR
               @object = @object.joins(jd)
             end
-
             found_association
           end
 
@@ -207,6 +201,7 @@ module Ransack
             @associations_pot ||= {}
             @associations_pot[assoc] = parent
           end
+
         else
 
           def build_or_find_association(name, parent = @base, klass = nil)
@@ -217,16 +212,20 @@ module Ransack
               (!klass || assoc.reflection.klass == klass)
             end
             unless found_association
-              @join_dependency.send(:build, Polyamorous::Join.new(
-                name, @join_type, klass), parent)
+              @join_dependency.send(
+                :build,
+                Polyamorous::Join.new(name, @join_type, klass),
+                parent
+               )
               found_association = @join_dependency.join_associations.last
               # Leverage the stashed association functionality in AR
               @object = @object.joins(found_association)
             end
-
             found_association
           end
+
         end
+
       end
     end
   end
