@@ -35,8 +35,8 @@ module Ransack
         @s.created_at_eq = [2011, 1, 2, 3, 4, 5]
         html = @f.datetime_select(
           :created_at_eq,
-          use_month_numbers: true,
-          include_seconds: true
+          :use_month_numbers => true,
+          :include_seconds => true
           )
         %w(2011 1 2 03 04 05).each do |val|
           html.should match /<option selected="selected" value="#{val}">#{val}<\/option>/
@@ -54,8 +54,8 @@ module Ransack
 
       describe '#sort_link' do
         it 'sort_link for ransack attribute' do
-          sort_link = @f.sort_link :name, controller: 'people'
-          if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./ 
+          sort_link = @f.sort_link :name, :controller => 'people'
+          if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
             sort_link.should match /people\?q%5Bs%5D=name\+asc/
           else
             sort_link.should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/
@@ -65,7 +65,7 @@ module Ransack
         end
 
         it 'sort_link for common attribute' do
-          sort_link = @f.sort_link :id, controller: 'people'
+          sort_link = @f.sort_link :id, :controller => 'people'
           sort_link.should match /id<\/a>/
         end
       end
@@ -93,7 +93,7 @@ module Ransack
         it 'returns ransackable attributes for associations with :associations' do
           attributes = Person.ransackable_attributes + Article.
             ransackable_attributes.map { |a| "articles_#{a}" }
-          html = @f.attribute_select(associations: ['articles'])
+          html = @f.attribute_select(:associations => ['articles'])
           html.split(/\n/).should have(attributes.size).lines
           attributes.each do |attribute|
             html.should match /<option value="#{attribute}">/
@@ -101,7 +101,7 @@ module Ransack
         end
 
         it 'returns option groups for base and associations with :associations' do
-          html = @f.attribute_select(associations: ['articles'])
+          html = @f.attribute_select(:associations => ['articles'])
           [Person, Article].each do |model|
             html.should match /<optgroup label="#{model}">/
           end
@@ -119,7 +119,7 @@ module Ransack
         end
 
         it 'filters predicates with single-value :only' do
-          html = @f.predicate_select only: 'eq'
+          html = @f.predicate_select :only => 'eq'
           Predicate.names.reject { |k| k =~ /^eq/ }.each do |key|
             html.should_not match /<option value="#{key}">/
           end
@@ -133,7 +133,7 @@ module Ransack
         end
 
         it 'excludes compounds when compounds: false' do
-          html = @f.predicate_select compounds: false
+          html = @f.predicate_select :compounds => false
           Predicate.names.select { |k| k =~ /_(any|all)$/ }.each do |key|
             html.should_not match /<option value="#{key}">/
           end

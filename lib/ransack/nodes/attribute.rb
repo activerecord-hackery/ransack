@@ -5,8 +5,8 @@ module Ransack
 
       attr_reader :name
 
-      delegate :blank?, :present?, :==, to: :name
-      delegate :engine, to: :context
+      delegate :blank?, :present?, :==, :to => :name
+      delegate :engine, :to => :context
 
       def initialize(context, name = nil)
         super(context)

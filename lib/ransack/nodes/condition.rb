@@ -14,10 +14,10 @@ module Ransack
             combinator = key.match(/_(or|and)_/) ? $1 : nil
             condition = self.new(context)
             condition.build(
-              a: attributes,
-              p: predicate.name,
-              m: combinator,
-              v: predicate.wants_array ? Array(values) : [values]
+              :a => attributes,
+              :p => predicate.name,
+              :m => combinator,
+              :v => predicate.wants_array ? Array(values) : [values]
             )
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything.

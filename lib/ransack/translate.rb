@@ -5,11 +5,11 @@ I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'locale', '*.yml')]
 module Ransack
   module Translate
     def self.word(key, options = {})
-      I18n.translate(:"ransack.#{key}", default: key.to_s)
+      I18n.translate(:"ransack.#{key}", :default => key.to_s)
     end
 
     def self.predicate(key, options = {})
-      I18n.translate(:"ransack.predicates.#{key}", default: key.to_s)
+      I18n.translate(:"ransack.predicates.#{key}", :default => key.to_s)
     end
 
     def self.attribute(key, options = {})
@@ -47,7 +47,7 @@ module Ransack
       end
 
       defaults << options.delete(:default) if options[:default]
-      options.reverse_merge! count: 1, default: defaults
+      options.reverse_merge! :count => 1, :default => defaults
       I18n.translate(defaults.shift, options.merge(interpolations))
     end
 
@@ -60,7 +60,7 @@ module Ransack
         [:"#{context.klass.i18n_scope}.models.#{i18n_key(context.klass)}"] :
         [:"ransack.associations.#{i18n_key(context.klass)}.#{key}"]
       defaults << context.traverse(key).model_name.human
-      options = { count: 1, default: defaults }
+      options = { :count => 1, :default => defaults }
       I18n.translate(defaults.shift, options)
     end
 
@@ -75,7 +75,7 @@ module Ransack
         :"ransack.attributes.#{
           i18n_key(associated_class || context.klass)
           }.#{attr_name}",
-        default: [
+        :default => [
           (
             if associated_class
               :"#{associated_class.i18n_scope}.attributes.#{
@@ -93,13 +93,12 @@ module Ransack
       if include_associations && associated_class
         defaults << '%{association_name} %{attr_fallback_name}'
         interpolations[:association_name] = association(
-          assoc_path,
-          context: context
+          assoc_path, :context => context
           )
       else
         defaults << '%{attr_fallback_name}'
       end
-      options = { count: 1, default: defaults }
+      options = { :count => 1, :default => defaults }
       I18n.translate(defaults.shift, options.merge(interpolations))
     end
 

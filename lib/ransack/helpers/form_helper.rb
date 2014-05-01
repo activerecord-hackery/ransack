@@ -20,13 +20,13 @@ module Ransack
         end
         options[:html] ||= {}
         html_options = {
-          class: options[:class].present? ?
+          :class => options[:class].present? ?
             "#{options[:class]}" :
             "#{search.klass.to_s.underscore}_search",
-          id: options[:id].present? ?
+          :id => options[:id].present? ?
             "#{options[:id]}" :
             "#{search.klass.to_s.underscore}_search",
-          method: :get
+          :method => :get
         }
         options[:as] ||= 'q'
         options[:html].reverse_merge!(html_options)
@@ -54,7 +54,7 @@ module Ransack
           if args.size > 0 && !args.first.is_a?(Hash)
             args.shift.to_s
           else
-            Translate.attribute(attr_name, context: search.context)
+            Translate.attribute(attr_name, :context => search.context)
           end
           )
 
@@ -77,7 +77,7 @@ module Ransack
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
         query_hash = {}
         query_hash[search.context.search_key] = search_params
-          .merge(s: "#{attr_name} #{new_dir}")
+        .merge(:s => "#{attr_name} #{new_dir}")
         options.merge!(query_hash)
         options_for_url = params.merge options
 

@@ -14,7 +14,7 @@ module Ransack
 
         describe '#evaluate' do
           it 'evaluates search objects' do
-            search = Search.new(Person, name_eq: 'Joe Blow')
+            search = Search.new(Person, :name_eq => 'Joe Blow')
             result = subject.evaluate(search)
 
             result.should be_an ::ActiveRecord::Relation
@@ -22,8 +22,8 @@ module Ransack
           end
 
           it 'SELECTs DISTINCT when distinct: true' do
-            search = Search.new(Person, name_eq: 'Joe Blow')
-            result = subject.evaluate(search, distinct: true)
+            search = Search.new(Person, :name_eq => 'Joe Blow')
+            result = subject.evaluate(search, :distinct => true)
 
             result.should be_an ::ActiveRecord::Relation
             result.to_sql.should match /SELECT DISTINCT/
