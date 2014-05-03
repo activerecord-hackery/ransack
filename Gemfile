@@ -5,6 +5,8 @@ gem 'rake'
 
 rails = ENV['RAILS'] || '4-1-stable'
 
+gem 'arel', '~> 5.0.1'
+
 gem 'polyamorous', '~> 1.0.0'
 
 case rails
