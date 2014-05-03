@@ -37,7 +37,7 @@ Or if you want to use the latest updates on the master branch:
 gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo
 ```
 
-If you are on Rails 4.1 (or 4.2.0.alpha or master), you may prefer to use the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1 and up, and is lighter and somewhat faster:
+If you are on Rails 4.1, you may prefer to use the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
 
 ```ruby
 gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
