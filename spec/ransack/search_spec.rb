@@ -2,8 +2,37 @@ require 'spec_helper'
 
 module Ransack
   describe Search do
-
     describe '#initialize' do
+      it "removes empty conditions before building" do
+        Search.any_instance.should_receive(:build).with({})
+        Search.new(Person, :name_eq => '')
+      end
+
+      it "keeps conditions with a false value before building" do
+        Search.any_instance.should_receive(:build).with({"name_eq" => false})
+        Search.new(Person, :name_eq => false)
+      end
+
+      it "keeps conditions with a value before building" do
+        Search.any_instance.should_receive(:build).with({"name_eq" => 'foobar'})
+        Search.new(Person, :name_eq => 'foobar')
+      end
+
+      it "removes empty suffixed conditions before building" do
+        Search.any_instance.should_receive(:build).with({})
+        Search.new(Person, :name_eq_any => [''])
+      end
+
+      it "keeps suffixed conditions with a false value before building" do
+        Search.any_instance.should_receive(:build).with({"name_eq_any" => [false]})
+        Search.new(Person, :name_eq_any => [false])
+      end
+
+      it "keeps suffixed conditions with a value before building" do
+        Search.any_instance.should_receive(:build).with({"name_eq_any" => ['foobar']})
+        Search.new(Person, :name_eq_any => ['foobar'])
+      end
+
       it 'does not raise exception for string :params argument' do
         lambda { Search.new(Person, '') }.should_not raise_error
       end

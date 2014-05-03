@@ -15,7 +15,8 @@ module Ransack
 
     def initialize(object, params = {}, options = {})
       params = {} unless params.is_a?(Hash)
-      params.delete_if { |k, v| v.blank? && v != false }
+      (params ||= {})
+      .delete_if { |k, v| [*v].all? { |i| i.blank? && i != false } }
       @context = Context.for(object, options)
       @context.auth_object = options[:auth_object]
       @base = Nodes::Grouping.new(@context, 'and')
