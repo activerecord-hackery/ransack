@@ -33,10 +33,6 @@ module Ransack
         Search.new(Person, :name_eq_any => ['foobar'])
       end
 
-
-    end
-
-    describe '#initialize' do
       it 'does not raise exception for string :params argument' do
         lambda { Search.new(Person, '') }.should_not raise_error
       end
