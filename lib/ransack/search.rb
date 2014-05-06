@@ -79,13 +79,15 @@ module Ransack
     end
 
     def method_missing(method_id, *args)
-      method_name = method_id.to_s
-      writer = method_name.sub!(/\=$/, '')
-      if base.attribute_method?(method_name)
+      if base.attribute_method?(method_id.to_s)
         base.send(method_id, *args)
       else
         super
       end
+    end
+
+    def respond_to_missing?(method_id, include_private)
+      base.attribute_method?(method_id.to_s) || super
     end
 
     def inspect
