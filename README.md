@@ -12,7 +12,7 @@ and maintained by [Ryan Bigg](http://twitter.com/ryanbigg),
 [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
-and _backwards compatibility is not a design goal._
+and **_backwards compatibility is not a design goal._**
 
 Ransack enables the creation of both simple and
 [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
@@ -217,6 +217,13 @@ end
   <%= f.submit "search" %>
 <% end %>
 ```
+
+## Using Ransackers to add custom search functions with Arel
+
+The main premise behind Ransack is to provide access to
+**Arel predicate methods**. Ransack provides special methods, called _ransackers_, for creating additional search functions via Arel. More information about `ransacker` methods can be found [here in the wiki]
+(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
+Feel free to contribute working `ransacker` code examples to the wiki!
 
 ## Using SimpleForm
 
