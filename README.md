@@ -218,14 +218,14 @@ end
 <% end %>
 ```
 
-## Using Ransackers to add custom search functions with Arel
+### Using Ransackers to add custom search functions via Arel
 
 The main premise behind Ransack is to provide access to
 **Arel predicate methods**. Ransack provides special methods, called _ransackers_, for creating additional search functions via Arel. More information about `ransacker` methods can be found [here in the wiki]
 (https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
 Feel free to contribute working `ransacker` code examples to the wiki!
 
-## Using SimpleForm
+### Using SimpleForm
 
 If you want to combine form builders of ransack and SimpleForm, just set the RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in ``config/application.rb`` before ``require 'rails/all'`` and of course use ``gem 'simple_form'`` in your ``Gemfile``:
 ```ruby
@@ -236,7 +236,7 @@ ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
 require 'rails/all'
 ```
 
-## I18n
+### I18n
 
 Ransack translation files are available in [Ransack::Locale](lib/ransack/locale). You may also be interested in one of the many translations for Ransack available at http://www.localeapp.com/projects/2999.
 
