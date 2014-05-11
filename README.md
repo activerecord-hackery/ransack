@@ -83,7 +83,8 @@ If you're coming from MetaSearch, things to note:
   sufficient, though, as that's generally what's being displayed on your
   results page.
 
-In your controller:
+
+####In your controller:
 
 ```ruby
 def index
@@ -91,21 +92,23 @@ def index
   @people = @q.result(distinct: true)
 end
 ```
-or without `distinct:true` for sorting on an associated table's columns (and
+or without `distinct:true`, for sorting on an associated table's columns (and
 with preloading each Person's Articles plus pagination in this example:
 
 ```ruby
 def index
   @q = Person.search(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
-
 end
 ```
 
-In your view:
+
+####In your view:
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
+
+1. `search_form_for` replaces `form_for` for creating the view search form:
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -134,12 +137,17 @@ You can also set the `search_form_for` answer format, like this:
 <% end %>
 ```
 
-The second main view helper, `sort_link`, is useful for the view table headers:
+2. The `sort_link` helper is useful for creating table headers that are sortable
+links:
 
 ```erb
 <%= content_tag :th, sort_link(@q, :name) %>
-<%= content_tag :th, sort_link(@q, 'articles.title', 'Title', default_order: :desc) %>
-<%= content_tag :th, sort_link(@q, 'users.name'), 'User' %>
+```
+Additional options can be passed after the column attribute, like a different
+column title or a default sort order:
+
+```erb
+<%= content_tag :th, sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
 
 ### Advanced Mode
@@ -235,15 +243,21 @@ end
 ```erb
 <%= search_form_for @search do |f| %>
   <%= f.label :last_name_cont %>
-  <%= f.text_field :last_name_cont %>
+  <%= f.search_field :last_name_cont %>
 
   <%= f.label :department_title_cont %>
-  <%= f.text_field :department_title_cont %>
+  <%= f.search_field :department_title_cont %>
 
   <%= f.label :employees_last_name_cont %>
-  <%= f.text_field :employees_last_name_cont %>
+  <%= f.search_field :employees_last_name_cont %>
 
   <%= f.submit "search" %>
+<% end %>
+...
+<%= content_tag :table %>
+  <%= content_tag :th, sort_link(@q, :last_name) %>
+  <%= content_tag :th, sort_link(@q, 'departments.title') %>
+  <%= content_tag :th, sort_link(@q, 'employees.last_name') %>
 <% end %>
 ```
 
