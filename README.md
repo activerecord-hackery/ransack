@@ -83,8 +83,7 @@ If you're coming from MetaSearch, things to note:
   sufficient, though, as that's generally what's being displayed on your
   results page.
 
-
-####In your controller:
+####In your controller
 
 ```ruby
 def index
@@ -92,8 +91,8 @@ def index
   @people = @q.result(distinct: true)
 end
 ```
-or without `distinct:true`, for sorting on an associated table's columns (and
-with preloading each Person's Articles plus pagination in this example:
+or without `distinct:true`, for sorting on an associated table's columns (in
+this example, with preloading each Person's Articles and pagination):
 
 ```ruby
 def index
@@ -102,13 +101,12 @@ def index
 end
 ```
 
-
-####In your view:
+####In your view
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-1. `search_form_for` replaces `form_for` for creating the view search form:
+#####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -126,19 +124,14 @@ search predicates. See [Constants]
 (https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching) for more
 information.
 
-You can also set the `search_form_for` answer format, like this:
+The `search_form_for` answer format can be set like this:
 ```erb
 <%= search_form_for(@q, format: :pdf) do |f| %>
-  ...
-<% end %>
 
 <%= search_form_for(@q, format: :json) do |f| %>
-  ...
-<% end %>
 ```
 
-2. The `sort_link` helper is useful for creating table headers that are sortable
-links:
+#####Ransack's `sort_link` helper is useful for creating table headers that are sortable links:
 
 ```erb
 <%= content_tag :th, sort_link(@q, :name) %>
@@ -233,7 +226,7 @@ end
 class SupervisorsController < ApplicationController
   def index
     @search = Supervisor.search(params[:q])
-    @supervisors = @search.result(distinct: true)
+    @supervisors = @search.result.includes(:department, :employees)
   end
 end
 ```
