@@ -107,5 +107,33 @@ module Ransack
         @s.result.to_sql.should match /#{field} IS NULL/
       end
     end
+
+    describe 'present' do
+      it %q[generates a value IS NOT NULL AND value != '' query] do
+        @s.name_present = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NOT NULL AND #{field} != ''/
+      end
+
+      it %q[generates a value IS NULL OR value = '' query when assigned false] do
+        @s.name_present = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NULL OR #{field} = ''/
+      end
+    end
+
+    describe 'blank' do
+      it %q[generates a value IS NULL OR value = '' query] do
+        @s.name_blank = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NULL OR #{field} = ''/
+      end
+
+      it %q[generates a value IS NOT NULL AND value != '' query when assigned false] do
+        @s.name_blank = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NOT NULL AND #{field} != ''/
+      end
+    end
   end
 end

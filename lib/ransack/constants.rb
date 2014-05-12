@@ -53,18 +53,18 @@ module Ransack
         }
       ],
       ['present', {
-        :arel_predicate => 'not_eq_all',
+        :arel_predicate => proc { |v| v ? 'not_eq_all' : 'eq_any' },
         :compounds => false,
         :type => :boolean,
-        :validator => proc { |v| TRUE_VALUES.include?(v) },
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
         :formatter => proc { |v| [nil, ''] }
         }
       ],
       ['blank', {
-        :arel_predicate => 'eq_any',
+        :arel_predicate => proc { |v| v ? 'eq_any' : 'not_eq_all' },
         :compounds => false,
         :type => :boolean,
-        :validator => proc { |v| TRUE_VALUES.include?(v) },
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
         :formatter => proc { |v| [nil, ''] }
         }
       ],
