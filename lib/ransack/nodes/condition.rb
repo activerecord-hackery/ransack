@@ -169,7 +169,7 @@ module Ransack
       def arel_predicate
         predicates = attributes.map do |attr|
           attr.attr.send(
-            predicate.arel_predicate, formatted_values_for_attribute(attr)
+            arel_predicate_for_attribute(attr), formatted_values_for_attribute(attr)
             )
         end
 
@@ -202,6 +202,17 @@ module Ransack
         end
         predicate.wants_array ? formatted : formatted.first
       end
+
+      def arel_predicate_for_attribute attr
+        case predicate.arel_predicate
+        when Proc
+          values = casted_values_for_attribute(attr)
+          predicate.arel_predicate.call(predicate.wants_array ? values : values.first)
+        else
+          predicate.arel_predicate
+        end
+      end
+
 
       def default_type
         predicate.type || (attributes.first && attributes.first.type)
