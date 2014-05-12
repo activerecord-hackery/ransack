@@ -42,7 +42,7 @@ module Ransack
     end
 
     describe 'cont' do
-  
+
       it_has_behavior 'wildcard escaping', :name_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\._\\\\%'/
@@ -86,6 +86,12 @@ module Ransack
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         @s.result.to_sql.should match /#{field} IS NULL/
       end
+
+      it 'generates a value IS NOT NULL query when assigned false' do
+        @s.name_null = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NOT NULL/
+      end
     end
 
     describe 'not_null' do
@@ -93,6 +99,12 @@ module Ransack
         @s.name_not_null = true
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         @s.result.to_sql.should match /#{field} IS NOT NULL/
+      end
+
+      it 'generates a value IS NULL query when assigned false' do
+        @s.name_not_null = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        @s.result.to_sql.should match /#{field} IS NULL/
       end
     end
   end
