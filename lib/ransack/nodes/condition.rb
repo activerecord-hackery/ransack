@@ -20,10 +20,12 @@ module Ransack
               :v => predicate.wants_array ? Array(values) : [values]
             )
             # TODO: Figure out what to do with multiple types of attributes,
-            # if anything.
-            # Tempted to go with "garbage in, garbage out" on this one
-            predicate.validate(condition.values, condition.default_type) ?
-              condition : nil
+            # if anything. Tempted to go with "garbage in, garbage out" here.
+            if predicate.validate(condition.values, condition.default_type)
+              condition
+            else
+              nil
+            end
           end
         end
 
@@ -169,8 +171,9 @@ module Ransack
       def arel_predicate
         predicates = attributes.map do |attr|
           attr.attr.send(
-            arel_predicate_for_attribute(attr), formatted_values_for_attribute(attr)
-            )
+            arel_predicate_for_attribute(attr),
+            formatted_values_for_attribute(attr)
+          )
         end
 
         if predicates.size > 1
@@ -203,11 +206,12 @@ module Ransack
         predicate.wants_array ? formatted : formatted.first
       end
 
-      def arel_predicate_for_attribute attr
-        case predicate.arel_predicate
-        when Proc
+      def arel_predicate_for_attribute(attr)
+        if predicate.arel_predicate === Proc
           values = casted_values_for_attribute(attr)
-          predicate.arel_predicate.call(predicate.wants_array ? values : values.first)
+          predicate.arel_predicate.call(
+            predicate.wants_array ? values : values.first
+            )
         else
           predicate.arel_predicate
         end

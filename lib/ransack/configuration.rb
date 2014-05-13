@@ -6,9 +6,7 @@ module Ransack
 
     mattr_accessor :predicates, :options
     self.predicates = {}
-    self.options = {
-        :search_key => :q
-    }
+    self.options = { :search_key => :q }
 
     def configure
       yield self
@@ -24,10 +22,13 @@ module Ransack
       self.predicates[name] = Predicate.new(opts)
 
       ['_any', '_all'].each do |suffix|
-        self.predicates[name + suffix] = Predicate.new(
+        compound_name = name + suffix
+        self.predicates[compound_name] = Predicate.new(
           opts.merge(
-            :name => name + suffix,
-            :arel_predicate => arel_predicate_with_suffix(opts[:arel_predicate], suffix),
+            :name => compound_name,
+            :arel_predicate => arel_predicate_with_suffix(
+              opts[:arel_predicate], suffix
+              ),
             :compound => true
           )
         )
@@ -39,13 +40,13 @@ module Ransack
       self.options[:search_key] = name
     end
 
-    def arel_predicate_with_suffix arel_predicate, suffix
-      case arel_predicate
-      when Proc
-        proc { |v| arel_predicate.call(v).to_s + suffix }
+    def arel_predicate_with_suffix(arel_predicate, suffix)
+      if arel_predicate === Proc
+        proc { |v| "#{arel_predicate.call(v)}#{suffix}" }
       else
-        arel_predicate.to_s + suffix
+        "#{arel_predicate}#{suffix}"
       end
     end
+
   end
 end
