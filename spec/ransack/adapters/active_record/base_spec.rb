@@ -79,6 +79,10 @@ module Ransack
             s = Person.search(nil)
           end
 
+          it "should function correctly when a blank string is passed in" do
+            s = Person.search("")
+          end
+
           it "should function correctly when using fields with dots in them" do
             s = Person.search(:email_cont => "example.com")
             s.result.exists?.should be_true

@@ -45,7 +45,7 @@ module Ransack
         raise TypeError, "First argument must be a Ransack::Search!" unless
           Search === search
 
-        search_params = params[search.context.search_key] ||
+        search_params = params[search.context.search_key].presence ||
           {}.with_indifferent_access
 
         attr_name = attribute.to_s
