@@ -71,6 +71,19 @@ module Ransack
         }
       end
 
+      describe '#sort_link works even if search params are really blank string' do
+        before { @controller.view_context.params[:q] = "" }
+        specify {
+          expect {
+            @controller.view_context.sort_link(
+              Person.search(@controller.view_context.params[:q]),
+              :name,
+              :controller => 'people'
+            )
+          }.not_to raise_error
+        }
+      end
+
       describe '#sort_link with default search_key defined as string' do
         subject {
           @controller.view_context.sort_link(
