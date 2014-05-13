@@ -10,6 +10,10 @@ module Ransack
         specify { subject.values.should have(2).values }
       end
 
+      context 'with an invalid predicate' do
+        subject { Condition.extract(Context.for(Person), 'name_invalid', Person.first.name) }
+        specify { subject.should be_nil }
+      end
     end
   end
 end
