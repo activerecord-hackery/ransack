@@ -80,7 +80,7 @@ module Ransack
           end
 
           it "should function correctly when a blank string is passed in" do
-            s = Person.search("")
+            s = Person.search('')
           end
 
           it "should function correctly when using fields with dots in them" do

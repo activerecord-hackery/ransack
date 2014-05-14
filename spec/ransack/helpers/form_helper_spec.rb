@@ -71,8 +71,8 @@ module Ransack
         }
       end
 
-      describe '#sort_link works even if search params are really blank string' do
-        before { @controller.view_context.params[:q] = "" }
+      describe '#sort_link works even if search params are a blank string' do
+        before { @controller.view_context.params[:q] = '' }
         specify {
           expect {
             @controller.view_context.sort_link(
