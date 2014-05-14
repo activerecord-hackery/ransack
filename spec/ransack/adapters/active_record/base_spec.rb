@@ -46,7 +46,8 @@ module Ransack
           it 'can be accessed through associations' do
             s = Person.search(children_reversed_name_eq: 'htimS cirA')
             s.result.to_sql.should match(
-              /#{quote_table_name("children_people")}.#{quote_column_name("name")} = 'Aric Smith'/
+              /#{quote_table_name("children_people")}.#{
+              quote_column_name("name")} = 'Aric Smith'/
             )
           end
 
@@ -96,7 +97,8 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_sort" } }
             )
             s.result.to_sql.should match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_sort")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_sort")} ASC/
             )
           end
 
@@ -105,21 +107,24 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_search" } }
             )
             s.result.to_sql.should_not match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_search")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_search")} ASC/
             )
           end
 
           it 'allows search by "only_search" field' do
             s = Person.search(only_search_eq: 'htimS cirA')
             s.result.to_sql.should match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_search")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_search")} = 'htimS cirA'/
             )
           end
 
           it "can't be searched by 'only_sort'" do
             s = Person.search(only_sort_eq: 'htimS cirA')
             s.result.to_sql.should_not match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_sort")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_sort")} = 'htimS cirA'/
             )
           end
 
@@ -129,7 +134,8 @@ module Ransack
               { auth_object: :admin }
             )
             s.result.to_sql.should match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} ASC/
             )
           end
 
@@ -138,7 +144,8 @@ module Ransack
               "s" => { "0" => { "dir" => "asc", "name" => "only_admin" } }
             )
             s.result.to_sql.should_not match(
-              /ORDER BY #{quote_table_name("people")}.#{quote_column_name("only_admin")} ASC/
+              /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} ASC/
             )
           end
 
@@ -148,19 +155,22 @@ module Ransack
               { auth_object: :admin }
             )
             s.result.to_sql.should match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
 
           it "can't be searched by 'only_admin', if auth_object: nil" do
             s = Person.search(only_admin_eq: 'htimS cirA')
             s.result.to_sql.should_not match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
+              /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
 
           it "allows search on a relation with a merged String join" do
-            s = Person.joins(:articles).merge(Article.joins(
+            s = Person.joins(:articles).merge(
+              Article.joins(
               'INNER JOIN "comments" ON "comments"."article_id" = "articles"."id"'
               )
             ).search
