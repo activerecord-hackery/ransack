@@ -6,7 +6,10 @@ module Ransack
 
     mattr_accessor :predicates, :options
     self.predicates = {}
-    self.options = { :search_key => :q }
+    self.options = {
+      :search_key => :q,
+      :ignore_unknown_conditions => true
+    }
 
     def configure
       yield self
@@ -38,6 +41,11 @@ module Ransack
     # default search_key that, it can be overridden on sort_link level
     def search_key=(name)
       self.options[:search_key] = name
+    end
+
+    # raise an error if an unknown attribute is passed into a search
+    def ignore_unknown_conditions=(boolean)
+      self.options[:ignore_unknown_conditions] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

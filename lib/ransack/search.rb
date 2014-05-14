@@ -29,11 +29,12 @@ module Ransack
 
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
-        case key
-        when 's', 'sorts'
+        if ['s', 'sorts'].include?(key)
           send("#{key}=", value)
-        else
-          base.send("#{key}=", value) if base.attribute_method?(key)
+        elsif base.attribute_method?(key)
+          base.send("#{key}=", value)
+        elsif !Ransack.options[:ignore_unknown_conditions]
+          raise ArgumentError, "Invalid search term #{key}"
         end
       end
       self
