@@ -158,6 +158,12 @@ module Ransack
               /WHERE #{quote_table_name("people")}.#{quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
+
+          it "should work on relation with merged String join" do
+            s = Person.joins(:articles).merge(
+              Article.joins('INNER JOIN "comments" ON "comments"."article_id" = "artilces"."id"')
+            ).search()
+          end
         end
 
         describe '#ransackable_attributes' do
