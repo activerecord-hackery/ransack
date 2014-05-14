@@ -169,15 +169,16 @@ module Ransack
           end
 
           it "allows search on a relation with a merged String join" do
-            s = Person.joins(:articles).merge(
-              Article.joins(
-                "INNER JOIN #{quote_table_name('comments')
+            join_sql = "INNER JOIN #{quote_table_name('comments')
                 } ON #{
                 quote_table_name('comments')}.#{quote_column_name('article_id')
                 } = #{
                 quote_table_name('articles')}.#{quote_column_name('id')}"
-              )
+
+            s = Person.joins(:articles).merge(
+              Article.joins(join_sql)
             ).search
+
             s.result.to_sql.should match(
               /SELECT #{quote_table_name('people')}.* FROM #{
               quote_table_name('people')
@@ -186,12 +187,8 @@ module Ransack
               quote_table_name('articles')}.#{quote_column_name('person_id')
               } = #{
               quote_table_name('people')}.#{quote_column_name('id')
-              } INNER JOIN #{
-              quote_table_name('comments')
-              } ON #{
-              quote_table_name('comments')}.#{quote_column_name('article_id')
-              } = #{
-              quote_table_name('articles')}.#{quote_column_name('id')
+              } #{
+              join_sql
               }  ORDER BY #{
               quote_table_name('people')}.#{quote_column_name('id')
               } DESC/
