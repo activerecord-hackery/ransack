@@ -147,6 +147,26 @@ module Ransack
         search = Search.new(Person, :children_id_in => [1, 2, 3])
         expect(search.inspect).not_to match /ActiveRecord/
       end
+
+      context 'with an invalid condition' do
+        subject { Search.new(Person, :unknown_attr_eq => 'Ernie') }
+
+        context "when ignore_unknown_conditions is false" do
+          before do
+            Ransack.configure { |config| config.ignore_unknown_conditions = false }
+          end
+
+          specify { expect { subject }.to raise_error ArgumentError }
+        end
+
+        context "when ignore_unknown_conditions is true" do
+          before do
+            Ransack.configure { |config| config.ignore_unknown_conditions = true }
+          end
+
+          specify { expect { subject }.to_not raise_error ArgumentError }
+        end
+      end
     end
 
     describe '#result' do
