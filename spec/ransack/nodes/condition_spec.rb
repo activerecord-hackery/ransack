@@ -7,7 +7,7 @@ module Ransack
       context 'with multiple values and an _any predicate' do
         subject { Condition.extract(Context.for(Person), 'name_eq_any', Person.first(2).map(&:name)) }
 
-        specify { subject.values.should have(2).values }
+        specify { expect(subject.values.size).to eq(2) }
       end
 
     end

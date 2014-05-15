@@ -15,7 +15,7 @@ module Ransack
 
       it "escapes '%', '.' and '\\\\' in value" do
         subject.send(:"#{method}=", '%._\\')
-        subject.result.to_sql.should match(regexp)
+        expect(subject.result.to_sql).to match(regexp)
       end
     end
 
@@ -24,20 +24,20 @@ module Ransack
         @s.awesome_eq = true
         field = "#{quote_table_name("people")}.#{
           quote_column_name("awesome")}"
-        @s.result.to_sql.should match /#{field} = #{
+        expect(@s.result.to_sql).to match /#{field} = #{
           ActiveRecord::Base.connection.quoted_true}/
       end
 
       it 'generates an equality condition for boolean false' do
         @s.awesome_eq = false
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
-        @s.result.to_sql.should match /#{field} = #{
+        expect(@s.result.to_sql).to match /#{field} = #{
           ActiveRecord::Base.connection.quoted_false}/
       end
 
       it 'does not generate a condition for nil' do
         @s.awesome_eq = nil
-        @s.result.to_sql.should_not match /WHERE/
+        expect(@s.result.to_sql).not_to match /WHERE/
       end
     end
 
@@ -57,7 +57,7 @@ module Ransack
       it 'generates a LIKE query with value surrounded by %' do
         @s.name_cont = 'ric'
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} I?LIKE '%ric%'/
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%ric%'/
       end
     end
 
@@ -76,7 +76,7 @@ module Ransack
       it 'generates a NOT LIKE query with value surrounded by %' do
         @s.name_not_cont = 'ric'
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} NOT I?LIKE '%ric%'/
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%ric%'/
       end
     end
 
@@ -84,13 +84,13 @@ module Ransack
       it 'generates a value IS NULL query' do
         @s.name_null = true
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NULL/
+        expect(@s.result.to_sql).to match /#{field} IS NULL/
       end
 
       it 'generates a value IS NOT NULL query when assigned false' do
         @s.name_null = false
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NOT NULL/
+        expect(@s.result.to_sql).to match /#{field} IS NOT NULL/
       end
     end
 
@@ -98,13 +98,13 @@ module Ransack
       it 'generates a value IS NOT NULL query' do
         @s.name_not_null = true
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NOT NULL/
+        expect(@s.result.to_sql).to match /#{field} IS NOT NULL/
       end
 
       it 'generates a value IS NULL query when assigned false' do
         @s.name_not_null = false
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NULL/
+        expect(@s.result.to_sql).to match /#{field} IS NULL/
       end
     end
 
@@ -112,13 +112,13 @@ module Ransack
       it %q[generates a value IS NOT NULL AND value != '' query] do
         @s.name_present = true
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NOT NULL AND #{field} != ''/
+        expect(@s.result.to_sql).to match /#{field} IS NOT NULL AND #{field} != ''/
       end
 
       it %q[generates a value IS NULL OR value = '' query when assigned false] do
         @s.name_present = false
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NULL OR #{field} = ''/
+        expect(@s.result.to_sql).to match /#{field} IS NULL OR #{field} = ''/
       end
     end
 
@@ -126,13 +126,13 @@ module Ransack
       it %q[generates a value IS NULL OR value = '' query] do
         @s.name_blank = true
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NULL OR #{field} = ''/
+        expect(@s.result.to_sql).to match /#{field} IS NULL OR #{field} = ''/
       end
 
       it %q[generates a value IS NOT NULL AND value != '' query when assigned false] do
         @s.name_blank = false
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        @s.result.to_sql.should match /#{field} IS NOT NULL AND #{field} != ''/
+        expect(@s.result.to_sql).to match /#{field} IS NOT NULL AND #{field} != ''/
       end
     end
   end

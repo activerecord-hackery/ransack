@@ -39,7 +39,7 @@ module Ransack
           :include_seconds => true
           )
         %w(2011 1 2 03 04 05).each do |val|
-          html.should match /<option selected="selected" value="#{val}">#{val}<\/option>/
+          expect(html).to match /<option selected="selected" value="#{val}">#{val}<\/option>/
         end
       end
 
@@ -47,7 +47,7 @@ module Ransack
 
         it 'localizes attribute names' do
           html = @f.label :name_cont
-          html.should match /Full Name contains/
+          expect(html).to match /Full Name contains/
         end
 
       end
@@ -56,17 +56,17 @@ module Ransack
         it 'sort_link for ransack attribute' do
           sort_link = @f.sort_link :name, :controller => 'people'
           if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-            sort_link.should match /people\?q%5Bs%5D=name\+asc/
+            expect(sort_link).to match /people\?q%5Bs%5D=name\+asc/
           else
-            sort_link.should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/
+            expect(sort_link).to match /people\?q(%5B|\[)s(%5D|\])=name\+asc/
           end
-          sort_link.should match /sort_link/
-          sort_link.should match /Full Name<\/a>/
+          expect(sort_link).to match /sort_link/
+          expect(sort_link).to match /Full Name<\/a>/
         end
 
         it 'sort_link for common attribute' do
           sort_link = @f.sort_link :id, :controller => 'people'
-          sort_link.should match /id<\/a>/
+          expect(sort_link).to match /id<\/a>/
         end
       end
 
@@ -74,7 +74,7 @@ module Ransack
 
         it 'localizes :search when no default value given' do
           html = @f.submit
-          html.should match /"Search"/
+          expect(html).to match /"Search"/
         end
 
       end
@@ -83,10 +83,10 @@ module Ransack
 
         it 'returns ransackable attributes' do
           html = @f.attribute_select
-          html.split(/\n/).
-            should have(Person.ransackable_attributes.size + 1).lines
+          expect(html.split(/\n/).size).
+            to eq(Person.ransackable_attributes.size + 1)
           Person.ransackable_attributes.each do |attribute|
-            html.should match /<option value="#{attribute}">/
+            expect(html).to match /<option value="#{attribute}">/
           end
         end
 
@@ -94,16 +94,16 @@ module Ransack
           attributes = Person.ransackable_attributes + Article.
             ransackable_attributes.map { |a| "articles_#{a}" }
           html = @f.attribute_select(:associations => ['articles'])
-          html.split(/\n/).should have(attributes.size).lines
+          expect(html.split(/\n/).size).to eq(attributes.size)
           attributes.each do |attribute|
-            html.should match /<option value="#{attribute}">/
+            expect(html).to match /<option value="#{attribute}">/
           end
         end
 
         it 'returns option groups for base and associations with :associations' do
           html = @f.attribute_select(:associations => ['articles'])
           [Person, Article].each do |model|
-            html.should match /<optgroup label="#{model}">/
+            expect(html).to match /<optgroup label="#{model}">/
           end
         end
 
@@ -114,28 +114,28 @@ module Ransack
         it 'returns predicates with predicate_select' do
           html = @f.predicate_select
           Predicate.names.each do |key|
-            html.should match /<option value="#{key}">/
+            expect(html).to match /<option value="#{key}">/
           end
         end
 
         it 'filters predicates with single-value :only' do
           html = @f.predicate_select :only => 'eq'
           Predicate.names.reject { |k| k =~ /^eq/ }.each do |key|
-            html.should_not match /<option value="#{key}">/
+            expect(html).not_to match /<option value="#{key}">/
           end
         end
 
         it 'filters predicates with multi-value :only' do
           html = @f.predicate_select only: [:eq, :lt]
           Predicate.names.reject { |k| k =~ /^(eq|lt)/ }.each do |key|
-            html.should_not match /<option value="#{key}">/
+            expect(html).not_to match /<option value="#{key}">/
           end
         end
 
         it 'excludes compounds when compounds: false' do
           html = @f.predicate_select :compounds => false
           Predicate.names.select { |k| k =~ /_(any|all)$/ }.each do |key|
-            html.should_not match /<option value="#{key}">/
+            expect(html).not_to match /<option value="#{key}">/
           end
         end
       end
@@ -148,11 +148,11 @@ module Ransack
         end
         it 'accepts poly_id field' do
           html = @f.text_field(:notable_id_eq)
-          html.should match /id=\"q_notable_id_eq\"/
+          expect(html).to match /id=\"q_notable_id_eq\"/
         end
         it 'accepts poly_type field' do
           html = @f.text_field(:notable_type_eq)
-          html.should match /id=\"q_notable_type_eq\"/
+          expect(html).to match /id=\"q_notable_type_eq\"/
         end
       end
     end
