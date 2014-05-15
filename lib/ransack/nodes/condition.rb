@@ -35,7 +35,7 @@ module Ransack
           str = key.dup
           name = Predicate.detect_and_strip_from_string!(str)
           predicate = Predicate.named(name)
-          if predicate.nil? && !Ransack.options[:ignore_unknown_conditions]
+          unless predicate || Ransack.options[:ignore_unknown_conditions]
             raise ArgumentError, "No valid predicate for #{key}"
           end
           attributes = str.split(/_and_|_or_/)

@@ -43,7 +43,8 @@ module Ransack
       self.options[:search_key] = name
     end
 
-    # raise an error if an unknown attribute is passed into a search
+    # raise an error if an unknown predicate, condition or attribute is passed
+    # into a search
     def ignore_unknown_conditions=(boolean)
       self.options[:ignore_unknown_conditions] = boolean
     end

@@ -164,7 +164,7 @@ module Ransack
             Ransack.configure { |config| config.ignore_unknown_conditions = true }
           end
 
-          specify { expect { subject }.to_not raise_error ArgumentError }
+          specify { expect { subject }.not_to raise_error }
         end
       end
     end
