@@ -147,6 +147,12 @@ module Ransack
         search = Search.new(Person, :children_id_in => [1, 2, 3])
         search.inspect.should_not match /ActiveRecord/
       end
+
+      it 'does not modify the parameters' do
+        params = { :name_eq => '' }
+        expect { Search.new(Person, params)}.not_to change { params }
+      end
+
     end
 
     describe '#result' do

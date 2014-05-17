@@ -17,6 +17,15 @@ module Ransack
           it 'has a Relation as its object' do
             subject.object.should be_an ::ActiveRecord::Relation
           end
+
+          it 'does not raise exception for string :params argument' do
+            lambda { Person.search('') }.should_not raise_error
+          end
+
+          it 'does not modify the parameters' do
+            params = { :name_eq => '' }
+            expect { Person.search(params)}.not_to change { params }
+          end
         end
 
         describe '#ransacker' do
