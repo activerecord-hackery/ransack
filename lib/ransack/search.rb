@@ -20,6 +20,7 @@ module Ransack
       @context = Context.for(object, options)
       @context.auth_object = options[:auth_object]
       @base = Nodes::Grouping.new(@context, 'and')
+      @scope_args = {}
       build(params.with_indifferent_access)
     end
 
@@ -33,6 +34,8 @@ module Ransack
           send("#{key}=", value)
         elsif base.attribute_method?(key)
           base.send("#{key}=", value)
+        elsif @context.ransackable_scope?(key, @context.object)
+          add_scope(key, value)
         elsif !Ransack.options[:ignore_unknown_conditions]
           raise ArgumentError, "Invalid search term #{key}"
         end
@@ -80,21 +83,43 @@ module Ransack
       Nodes::Sort.new(@context).build(opts)
     end
 
+    def respond_to?(method_id, include_private = false)
+      super or begin
+        method_name = method_id.to_s
+        base.attribute_method?(method_name) || @context.ransackable_scope?(method_name, @context.object) ? true : false
+      end
+    end
+
     def method_missing(method_id, *args)
       method_name = method_id.to_s
-      writer = method_name.sub!(/\=$/, '')
+      getter_name = method_name.sub(/=$/, '')
       if base.attribute_method?(method_name)
         base.send(method_id, *args)
+      elsif @context.ransackable_scope?(getter_name, @context.object)
+        if method_name =~ /=$/
+          add_scope getter_name, args
+        else
+          @scope_args[method_name]
+        end
       else
         super
       end
     end
 
     def inspect
-      "Ransack::Search<class: #{klass.name}, base: #{base.inspect}>"
+      "Ransack::Search<class: #{klass.name}, #{"scope: #@scope_args, " if @scope_args.present?}base: #{base.inspect}>"
     end
 
     private
+
+    def add_scope(key, args)
+      if @context.scope_arity(key) == 1
+        @scope_args[key] = args.is_a?(Array) ? args[0] : args
+      else
+        @scope_args[key] = args
+      end
+      @context.chain_scope(key, args)
+    end
 
     def collapse_multiparameter_attributes!(attrs)
       attrs.keys.each do |k|

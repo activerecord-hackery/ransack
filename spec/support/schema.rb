@@ -36,6 +36,10 @@ class Person < ActiveRecord::Base
              :source => :comments, :foreign_key => :person_id
   has_many   :notes, :as => :notable
 
+  scope :restricted,  lambda { where("restricted = 1") }
+  scope :active,      lambda { where("active = 1") }
+  scope :over_age,    lambda { |y| where(["age > ?", y]) }
+
   ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
   end

@@ -254,6 +254,17 @@ end
 <% end %>
 ```
 
+### Scopes
+
+Searching by scope requires defining a whitelist of `ransackable_scopes` on the
+model class. By default all class methods (e.g. scopes) are ignored. Scopes
+will be applied for matching `true` values, or for given values if the scope
+accepts a value:
+
+```
+Employee.search({'active' => true, 'hired_since' => '2013-01-01'})
+```
+
 ### Using Ransackers to add custom search functions via Arel
 
 The main premise behind Ransack is to provide access to
