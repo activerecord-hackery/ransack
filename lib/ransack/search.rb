@@ -14,7 +14,9 @@ module Ransack
              :translate, :to => :base
 
     def initialize(object, params = {}, options = {})
-      (params ||= {}).delete_if { |k, v| v.blank? && v != false }
+      params = {} unless params.is_a?(Hash)
+      (params ||= {})
+      .delete_if { |k, v| [*v].all? { |i| i.blank? && i != false } }
       @context = Context.for(object, options)
       @context.auth_object = options[:auth_object]
       @base = Nodes::Grouping.new(@context, 'and')
@@ -28,12 +30,14 @@ module Ransack
 
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
-        if key == 's' || key == 'sorts'
+        if ['s', 'sorts'].include?(key)
           send("#{key}=", value)
-        elsif @base.attribute_method?(key)
+        elsif base.attribute_method?(key)
           base.send("#{key}=", value)
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
+        elsif !Ransack.options[:ignore_unknown_conditions]
+          raise ArgumentError, "Invalid search term #{key}"
         end
       end
       self
@@ -43,7 +47,11 @@ module Ransack
       case args
       when Array
         args.each do |sort|
-          sort = Nodes::Sort.extract(@context, sort)
+          if sort.kind_of? Hash
+            sort = Nodes::Sort.new(@context).build(sort)
+          else
+            sort = Nodes::Sort.extract(@context, sort)
+          end
           self.sorts << sort
         end
       when Hash
@@ -54,7 +62,8 @@ module Ransack
       when String
         self.sorts = [args]
       else
-        raise ArgumentError, "Invalid argument (#{args.class}) supplied to sorts="
+        raise ArgumentError,
+        "Invalid argument (#{args.class}) supplied to sorts="
       end
     end
     alias :s= :sorts=
@@ -76,7 +85,6 @@ module Ransack
 
     def respond_to?(method_id, include_private = false)
       super or begin
-        #require 'byebug'; byebug if method_id =~ /postal_code/
         method_name = method_id.to_s
         base.attribute_method?(method_name) || @context.ransackable_scope?(method_name, @context.object) ? true : false
       end

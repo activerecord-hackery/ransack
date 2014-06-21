@@ -3,20 +3,26 @@ require 'sham'
 require 'faker'
 require 'ransack'
 
+I18n.enforce_available_locales = false
 Time.zone = 'Eastern Time (US & Canada)'
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 
-Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)].each do |f|
+Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)]
+.each do |f|
   require f
 end
 
 Sham.define do
-  name     { Faker::Name.name }
-  title    { Faker::Lorem.sentence }
-  body     { Faker::Lorem.paragraph }
-  salary   {|index| 30000 + (index * 1000)}
-  tag_name { Faker::Lorem.words(3).join(' ') }
-  note     { Faker::Lorem.words(7).join(' ') }
+  name        { Faker::Name.name }
+  title       { Faker::Lorem.sentence }
+  body        { Faker::Lorem.paragraph }
+  salary      { |index| 30000 + (index * 1000) }
+  tag_name    { Faker::Lorem.words(3).join(' ') }
+  note        { Faker::Lorem.words(7).join(' ') }
+  only_admin  { Faker::Lorem.words(3).join(' ') }
+  only_search { Faker::Lorem.words(3).join(' ') }
+  only_sort   { Faker::Lorem.words(3).join(' ') }
+  notable_id  { |id| id }
 end
 
 RSpec.configure do |config|
@@ -24,7 +30,9 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     puts '=' * 80
-    puts "Running specs against ActiveRecord #{ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
+    connection_name = ActiveRecord::Base.connection.adapter_name
+    puts "Running specs against #{connection_name}, ActiveRecord #{
+      ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
     puts '=' * 80
     Schema.create
   end

@@ -1,17 +1,32 @@
 require 'active_record'
 
-ActiveRecord::Base.establish_connection(
-  :adapter  => 'sqlite3',
-  :database => ':memory:'
-)
+case ENV['DB']
+when "mysql"
+  ActiveRecord::Base.establish_connection(
+    adapter:  'mysql2',
+    database: 'ransack',
+    encoding: 'utf8'
+  )
+when "postgres"
+  ActiveRecord::Base.establish_connection(
+    adapter: 'postgresql',
+    database: 'ransack',
+    username: 'postgres',
+    min_messages: 'warning'
+  )
+else
+  # Assume SQLite3
+  ActiveRecord::Base.establish_connection(
+    adapter: 'sqlite3',
+    database: ':memory:'
+  )
+end
 
 class Person < ActiveRecord::Base
   if ActiveRecord::VERSION::MAJOR == 3
     default_scope order('id DESC')
   else
-    default_scope { order('id DESC') }
-    # The new activerecord syntax "{ order(id: :desc) }" does not work
-    # with Ruby 1.8.7 which we still need to support for Rails 3
+    default_scope { order(id: :desc) }
   end
   belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :children, :class_name => 'Person', :foreign_key => :parent_id
@@ -25,20 +40,66 @@ class Person < ActiveRecord::Base
   scope :active,      lambda { where("active = 1") }
   scope :over_age,    lambda { |y| where(["age > ?", y]) }
 
-  ransacker :reversed_name, :formatter => proc {|v| v.reverse} do |parent|
+  ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
   end
 
   ransacker :doubled_name do |parent|
-    Arel::Nodes::InfixOperation.new('||', parent.table[:name], parent.table[:name])
+    Arel::Nodes::InfixOperation.new(
+      '||', parent.table[:name], parent.table[:name]
+      )
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_sort']
+    else
+      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+    end
+  end
+
+  def self.ransortable_attributes(auth_object = nil)
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_search']
+    else
+      column_names + _ransackers.keys - ['only_search', 'only_admin']
+    end
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_sort']
+    else
+      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+    end
+  end
+
+  def self.ransortable_attributes(auth_object = nil)
+    if auth_object == :admin
+      column_names + _ransackers.keys - ['only_search']
+    else
+      column_names + _ransackers.keys - ['only_search', 'only_admin']
+    end
   end
 end
 
 class Article < ActiveRecord::Base
-  belongs_to              :person
-  has_many                :comments
+  belongs_to :person
+  has_many :comments
   has_and_belongs_to_many :tags
-  has_many   :notes, :as => :notable
+  has_many :notes, :as => :notable
+end
+
+module Namespace
+  class Article < ::Article
+
+  end
+end
+
+module Namespace
+  class Article < ::Article
+
+  end
 end
 
 class Comment < ActiveRecord::Base
@@ -62,8 +123,12 @@ module Schema
       create_table :people, :force => true do |t|
         t.integer  :parent_id
         t.string   :name
+        t.string   :email
+        t.string   :only_search
+        t.string   :only_sort
+        t.string   :only_admin
         t.integer  :salary
-        t.boolean  :awesome, :default => false
+        t.boolean  :awesome, default: false
         t.timestamps
       end
 
@@ -76,7 +141,7 @@ module Schema
       create_table :comments, :force => true do |t|
         t.integer :article_id
         t.integer :person_id
-        t.text    :body
+        t.text :body
       end
 
       create_table :tags, :force => true do |t|
@@ -90,8 +155,8 @@ module Schema
 
       create_table :notes, :force => true do |t|
         t.integer :notable_id
-        t.string  :notable_type
-        t.string  :note
+        t.string :notable_type
+        t.string :note
       end
 
     end
@@ -106,15 +171,14 @@ module Schema
         end
         Note.make(:notable => article)
         10.times do
-          Comment.make(:article => article)
+          Comment.make(:article => article, :person => person)
         end
-      end
-      2.times do
-        Comment.make(:person => person)
       end
     end
 
-    Comment.make(:body => 'First post!', :article => Article.make(:title => 'Hello, world!'))
-
+    Comment.make(
+      :body => 'First post!',
+      :article => Article.make(:title => 'Hello, world!')
+      )
   end
 end

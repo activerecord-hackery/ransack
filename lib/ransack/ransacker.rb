@@ -13,11 +13,11 @@ module Ransack
       @formatter = opts[:formatter]
       @callable = opts[:callable] || block ||
                   (@klass.method(name) if @klass.respond_to?(name)) ||
-                  proc {|parent| parent.table[name]}
+                  proc { |parent| parent.table[name] }
     end
 
     def attr_from(bindable)
-      call(*args.map {|arg| bindable.send(arg)})
+      call(*args.map { |arg| bindable.send(arg) })
     end
 
   end

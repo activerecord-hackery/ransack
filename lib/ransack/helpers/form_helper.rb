@@ -5,16 +5,27 @@ module Ransack
       def search_form_for(record, options = {}, &proc)
         if record.is_a?(Ransack::Search)
           search = record
-          options[:url] ||= polymorphic_path(search.klass)
-        elsif record.is_a?(Array) && (search = record.detect {|o| o.is_a?(Ransack::Search)})
-          options[:url] ||= polymorphic_path(record.map {|o| o.is_a?(Ransack::Search) ? o.klass : o})
+          options[:url] ||= polymorphic_path(
+            search.klass, format: options.delete(:format)
+            )
+        elsif record.is_a?(Array) &&
+            (search = record.detect { |o| o.is_a?(Ransack::Search) })
+          options[:url] ||= polymorphic_path(
+            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o },
+            format: options.delete(:format)
+            )
         else
-          raise ArgumentError, "No Ransack::Search object was provided to search_form_for!"
+          raise ArgumentError,
+            "No Ransack::Search object was provided to search_form_for!"
         end
         options[:html] ||= {}
         html_options = {
-          :class  => options[:class].present? ? "#{options[:class]}" : "#{search.klass.to_s.underscore}_search",
-          :id => options[:id].present? ? "#{options[:id]}" : "#{search.klass.to_s.underscore}_search",
+          :class => options[:class].present? ?
+            "#{options[:class]}" :
+            "#{search.klass.to_s.underscore}_search",
+          :id => options[:id].present? ?
+            "#{options[:id]}" :
+            "#{search.klass.to_s.underscore}_search",
           :method => :get
         }
         options[:as] ||= 'q'
@@ -31,15 +42,23 @@ module Ransack
           search = search.first
         end
 
-        raise TypeError, "First argument must be a Ransack::Search!" unless Search === search
+        raise TypeError, "First argument must be a Ransack::Search!" unless
+          Search === search
 
-        search_params = params[search.context.search_key] || {}.with_indifferent_access
+        search_params = params[search.context.search_key].presence ||
+          {}.with_indifferent_access
 
         attr_name = attribute.to_s
 
-        name = (args.size > 0 && !args.first.is_a?(Hash)) ? args.shift.to_s : Translate.attribute(attr_name, :context => search.context)
+        name = (
+          if args.size > 0 && !args.first.is_a?(Hash)
+            args.shift.to_s
+          else
+            Translate.attribute(attr_name, :context => search.context)
+          end
+          )
 
-        if existing_sort = search.sorts.detect {|s| s.name == attr_name}
+        if existing_sort = search.sorts.detect { |s| s.name == attr_name }
           prev_attr, prev_dir = existing_sort.name, existing_sort.dir
         end
 
@@ -57,7 +76,8 @@ module Ransack
         css = ['sort_link', current_dir].compact.join(' ')
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
         query_hash = {}
-        query_hash[search.context.search_key] = search_params.merge(:s => "#{attr_name} #{new_dir}")
+        query_hash[search.context.search_key] = search_params
+        .merge(:s => "#{attr_name} #{new_dir}")
         options.merge!(query_hash)
         options_for_url = params.merge options
 
@@ -67,9 +87,14 @@ module Ransack
           url_for(options_for_url)
         end
 
-        link_to [ERB::Util.h(name), order_indicator_for(current_dir)].compact.join(' ').html_safe,
+        link_to(
+          [ERB::Util.h(name), order_indicator_for(current_dir)]
+            .compact
+            .join(' ')
+            .html_safe,
           url,
           html_options
+          )
       end
 
       private

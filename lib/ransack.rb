@@ -1,3 +1,5 @@
+require 'active_support/core_ext'
+
 require 'ransack/configuration'
 
 module Ransack
@@ -19,7 +21,7 @@ end
 require 'ransack/translate'
 require 'ransack/search'
 require 'ransack/ransacker'
-require 'ransack/adapters/active_record'
+require 'ransack/adapters/active_record' if defined?(::ActiveRecord::Base)
 require 'ransack/helpers'
 require 'action_controller'
 

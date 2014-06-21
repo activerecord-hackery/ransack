@@ -26,9 +26,11 @@ module Ransack
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
           if search.sorts.any?
-            relation = relation.except(:order).reorder(viz.accept(search.sorts))
+            relation = relation.except(:order)
+            .reorder(viz.accept(search.sorts))
           end
-          opts[:distinct] ? relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
+          opts[:distinct] ?
+          relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
         end
 
         def attribute_method?(str, klass = @klass)
@@ -39,10 +41,15 @@ module Ransack
           elsif (segments = str.split(/_/)).size > 1
             remainder = []
             found_assoc = nil
-            while !found_assoc && remainder.unshift(segments.pop) && segments.size > 0 do
-              assoc, poly_class = unpolymorphize_association(segments.join('_'))
+            while !found_assoc && remainder.unshift(segments.pop) &&
+              segments.size > 0 do
+              assoc, poly_class = unpolymorphize_association(
+                segments.join('_')
+                )
               if found_assoc = get_association(assoc, klass)
-                exists = attribute_method?(remainder.join('_'), poly_class || found_assoc.klass)
+                exists = attribute_method?(
+                  remainder.join('_'), poly_class || found_assoc.klass
+                  )
               end
             end
           end
@@ -56,7 +63,9 @@ module Ransack
 
         def type_for(attr)
           return nil unless attr && attr.valid?
-          klassify(attr.parent).columns_hash[attr.arel_attribute.name.to_s].type
+          klassify(attr.parent)
+          .columns_hash[attr.arel_attribute.name.to_s]
+          .type
         end
 
         private
@@ -69,22 +78,26 @@ module Ransack
           elsif (segments = str.split(/_/)).size > 1
             remainder = []
             found_assoc = nil
-            while remainder.unshift(segments.pop) && segments.size > 0 && !found_assoc do
+            while remainder.unshift(segments.pop) && segments.size > 0 &&
+              !found_assoc do
               assoc, klass = unpolymorphize_association(segments.join('_'))
               if found_assoc = get_association(assoc, parent)
-                join = build_or_find_association(found_assoc.name, parent, klass)
-                parent, attr_name = get_parent_and_attribute_name(remainder.join('_'), join)
+                join = build_or_find_association(
+                  found_assoc.name, parent, klass
+                  )
+                parent, attr_name = get_parent_and_attribute_name(
+                  remainder.join('_'), join
+                  )
               end
             end
           end
-
           [parent, attr_name]
         end
 
         def get_association(str, parent = @base)
           klass = klassify parent
           ransackable_association?(str, klass) &&
-          klass.reflect_on_all_associations.detect {|a| a.name.to_s == str}
+          klass.reflect_on_all_associations.detect { |a| a.name.to_s == str }
         end
 
         def join_dependency(relation)
@@ -114,9 +127,9 @@ module Ransack
           association_joins         = buckets['association_join'] || []
           stashed_association_joins = buckets['stashed_join'] || []
           join_nodes                = buckets['join_node'] || []
-          string_joins              = (buckets['string_join'] || []).map { |x|
-            x.strip
-          }.uniq
+          string_joins              = (buckets['string_join'] || [])
+                                      .map { |x| x.strip }
+                                      .uniq
 
           join_list = relation.send :custom_join_sql, (string_joins + join_nodes)
 
@@ -134,13 +147,16 @@ module Ransack
         end
 
         def build_or_find_association(name, parent = @base, klass = nil)
-          found_association = @join_dependency.join_associations.detect do |assoc|
+          found_association = @join_dependency.join_associations
+          .detect do |assoc|
             assoc.reflection.name == name &&
             assoc.parent == parent &&
             (!klass || assoc.reflection.klass == klass)
           end
           unless found_association
-            @join_dependency.send(:build, Polyamorous::Join.new(name, @join_type, klass), parent)
+            @join_dependency.send(
+              :build, Polyamorous::Join.new(name, @join_type, klass), parent
+              )
             found_association = @join_dependency.join_associations.last
             # Leverage the stashed association functionality in AR
             @object = @object.joins(found_association)

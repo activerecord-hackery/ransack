@@ -2,14 +2,15 @@ module Ransack
   module Nodes
     class Condition < Node
       i18n_word :attribute, :predicate, :combinator, :value
-      i18n_alias :a => :attribute, :p => :predicate, :m => :combinator, :v => :value
+      i18n_alias :a => :attribute, :p => :predicate,
+                 :m => :combinator, :v => :value
 
-      attr_reader :predicate
+      attr_accessor :predicate
 
       class << self
         def extract(context, key, values)
           attributes, predicate = extract_attributes_and_predicate(key)
-          if attributes.size > 0
+          if attributes.size > 0 && predicate
             combinator = key.match(/_(or|and)_/) ? $1 : nil
             condition = self.new(context)
             condition.build(
@@ -18,9 +19,13 @@ module Ransack
               :m => combinator,
               :v => predicate.wants_array ? Array(values) : [values]
             )
-            # TODO: Figure out what to do with multiple types of attributes, if anything.
-            # Tempted to go with "garbage in, garbage out" on this one
-            predicate.validate(condition.values, condition.default_type) ? condition : nil
+            # TODO: Figure out what to do with multiple types of attributes,
+            # if anything. Tempted to go with "garbage in, garbage out" here.
+            if predicate.validate(condition.values, condition.default_type)
+              condition
+            else
+              nil
+            end
           end
         end
 
@@ -30,14 +35,17 @@ module Ransack
           str = key.dup
           name = Predicate.detect_and_strip_from_string!(str)
           predicate = Predicate.named(name)
-          raise ArgumentError, "No valid predicate for #{key}" unless predicate
+          unless predicate || Ransack.options[:ignore_unknown_conditions]
+            raise ArgumentError, "No valid predicate for #{key}"
+          end
           attributes = str.split(/_and_|_or_/)
           [attributes, predicate]
         end
       end
 
       def valid?
-        attributes.detect(&:valid?) && predicate && valid_arity? && predicate.validate(values, default_type) && valid_combinator?
+        attributes.detect(&:valid?) && predicate && valid_arity? &&
+          predicate.validate(values, default_type) && valid_combinator?
       end
 
       def valid_arity?
@@ -62,7 +70,8 @@ module Ransack
             self.attributes << attr if attr.valid?
           end
         else
-          raise ArgumentError, "Invalid argument (#{args.class}) supplied to attributes="
+          raise ArgumentError,
+            "Invalid argument (#{args.class}) supplied to attributes="
         end
       end
       alias :a= :attributes=
@@ -85,7 +94,8 @@ module Ransack
             self.values << val
           end
         else
-          raise ArgumentError, "Invalid argument (#{args.class}) supplied to values="
+          raise ArgumentError,
+            "Invalid argument (#{args.class}) supplied to values="
         end
       end
       alias :v= :values=
@@ -95,7 +105,7 @@ module Ransack
       end
 
       def combinator=(val)
-        @combinator = ['and', 'or'].detect {|v| v == val.to_s} || nil
+        @combinator = ['and', 'or'].detect { |v| v == val.to_s } || nil
       end
       alias :m= :combinator=
       alias :m :combinator
@@ -113,7 +123,9 @@ module Ransack
       end
 
       def value
-        predicate.wants_array ? values.map {|v| v.cast(default_type)} : values.first.cast(default_type)
+        predicate.wants_array ?
+          values.map { |v| v.cast(default_type) } :
+          values.first.cast(default_type)
       end
 
       def build(params)
@@ -131,7 +143,8 @@ module Ransack
       end
 
       def key
-        @key ||= attributes.map(&:name).join("_#{combinator}_") + "_#{predicate.name}"
+        @key ||= attributes.map(&:name).join("_#{combinator}_") +
+          "_#{predicate.name}"
       end
 
       def eql?(other)
@@ -152,11 +165,6 @@ module Ransack
       end
       alias :p= :predicate_name=
 
-      def predicate=(predicate)
-        @predicate = predicate
-        predicate
-      end
-
       def predicate_name
         predicate.name if predicate
       end
@@ -164,7 +172,10 @@ module Ransack
 
       def arel_predicate
         predicates = attributes.map do |attr|
-          attr.attr.send(predicate.arel_predicate, formatted_values_for_attribute(attr))
+          attr.attr.send(
+            arel_predicate_for_attribute(attr),
+            formatted_values_for_attribute(attr)
+          )
         end
 
         if predicates.size > 1
@@ -180,30 +191,49 @@ module Ransack
       end
 
       def validated_values
-        values.select {|v| predicate.validator.call(v.value)}
+        values.select { |v| predicate.validator.call(v.value) }
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map {|v| v.cast(predicate.type || attr.type)}
+        validated_values.map { |v| v.cast(predicate.type || attr.type) }
       end
 
       def formatted_values_for_attribute(attr)
         formatted = casted_values_for_attribute(attr).map do |val|
-          val = attr.ransacker.formatter.call(val) if attr.ransacker && attr.ransacker.formatter
+          val = attr.ransacker.formatter.call(val) if
+            attr.ransacker && attr.ransacker.formatter
           val = predicate.format(val)
           val
         end
         predicate.wants_array ? formatted : formatted.first
       end
 
+      def arel_predicate_for_attribute(attr)
+        if predicate.arel_predicate === Proc
+          values = casted_values_for_attribute(attr)
+          predicate.arel_predicate.call(
+            predicate.wants_array ? values : values.first
+            )
+        else
+          predicate.arel_predicate
+        end
+      end
+
+
       def default_type
         predicate.type || (attributes.first && attributes.first.type)
       end
 
       def inspect
-        data =[['attributes', a.try(:map, &:name)], ['predicate', p], ['combinator', m], ['values', v.try(:map, &:value)]].reject { |e|
-          e[1].blank?
-        }.map { |v| "#{v[0]}: #{v[1]}" }.join(', ')
+        data = [
+          ['attributes', a.try(:map, &:name)],
+          ['predicate', p],
+          ['combinator', m],
+          ['values', v.try(:map, &:value)]
+        ]
+        .reject { |e| e[1].blank? }
+        .map { |v| "#{v[0]}: #{v[1]}" }
+        .join(', ')
         "Condition <#{data}>"
       end
 

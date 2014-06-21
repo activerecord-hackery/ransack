@@ -2,7 +2,7 @@
 if Arel::Nodes::And < Arel::Nodes::Binary
   class Ransack::Visitor
     def visit_Ransack_Nodes_And(object)
-      nodes = object.values.map {|o| accept(o)}.compact
+      nodes = object.values.map { |o| accept(o) }.compact
       return nil unless nodes.size > 0
 
       if nodes.size > 1
@@ -132,9 +132,15 @@ module Arel
       end
 
       def visit_Arel_Nodes_NamedFunction o
-        "#{o.name}(#{o.distinct ? 'DISTINCT ' : ''}#{o.expressions.map { |x|
-          visit x
-        }.join(', ')})#{o.alias ? " AS #{visit o.alias}" : ''}"
+        "#{
+          o.name
+          }(#{
+          o.distinct ? 'DISTINCT ' : ''
+          }#{
+          o.expressions.map { |x| visit x }.join(', ')
+          })#{
+          o.alias ? " AS #{visit o.alias}" : ''
+          }"
       end
 
       def visit_Arel_Nodes_And o
@@ -146,13 +152,17 @@ module Arel
       end
 
       def visit_Arel_Nodes_Values o
-        "VALUES (#{o.expressions.zip(o.columns).map { |value, attr|
+        "VALUES (#{
+        o.expressions.zip(o.columns)
+        .map { |value, attr|
           if Nodes::SqlLiteral === value
             visit_Arel_Nodes_SqlLiteral value
           else
             quote(value, attr && column_for(attr))
           end
-        }.join ', '})"
+        }
+        .join ', '
+        })"
       end
     end
   end

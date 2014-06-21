@@ -1,16 +1,31 @@
+language: ruby
+
+before_install:
+  - travis_retry gem install bundler
+
 rvm:
-  - 1.8.7
-  - 1.9.2
-  - 1.9.3
+  - 2.1
   - 2.0.0
+  - 1.9.3
 
 env:
-  - RAILS=4-0-stable
-  - RAILS=3-2-stable
-  - RAILS=3-1-stable
-  - RAILS=3-0-stable
+  - RAILS=4-1-stable DB=sqlite3
+  - RAILS=4-1-stable DB=mysql
+  - RAILS=4-1-stable DB=postgres
+  - RAILS=4-0-stable DB=sqlite3
+  - RAILS=4-0-stable DB=mysql
+  - RAILS=4-0-stable DB=postgres
+  - RAILS=3-2-stable DB=sqlite
+  - RAILS=3-2-stable DB=mysql
+  - RAILS=3-2-stable DB=postgres
+  - RAILS=3-1-stable DB=sqlite
+  - RAILS=3-1-stable DB=mysql
+  - RAILS=3-1-stable DB=postgres
+  - RAILS=3-0-stable DB=sqlite
+  - RAILS=3-0-stable DB=mysql
+  - RAILS=3-0-stable DB=postgres
 
-matrix:
-  exclude:
-    - rvm: 1.8.7
-      env: RAILS=4-0-stable
+before_script:
+  - mysql -e 'create database ransack collate utf8_general_ci;'
+  - mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";'
+  - psql -c 'create database ransack;' -U postgres

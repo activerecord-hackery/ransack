@@ -2,136 +2,200 @@ require 'spec_helper'
 
 module Ransack
   describe Search do
+    describe '#initialize' do
+      it "removes empty conditions before building" do
+        expect_any_instance_of(Search).to receive(:build).with({})
+        Search.new(Person, :name_eq => '')
+      end
+
+      it "keeps conditions with a false value before building" do
+        expect_any_instance_of(Search).to receive(:build).with({"name_eq" => false})
+        Search.new(Person, :name_eq => false)
+      end
+
+      it "keeps conditions with a value before building" do
+        expect_any_instance_of(Search).to receive(:build).with({"name_eq" => 'foobar'})
+        Search.new(Person, :name_eq => 'foobar')
+      end
+
+      it "removes empty suffixed conditions before building" do
+        expect_any_instance_of(Search).to receive(:build).with({})
+        Search.new(Person, :name_eq_any => [''])
+      end
+
+      it "keeps suffixed conditions with a false value before building" do
+        expect_any_instance_of(Search).to receive(:build).with({"name_eq_any" => [false]})
+        Search.new(Person, :name_eq_any => [false])
+      end
+
+      it "keeps suffixed conditions with a value before building" do
+        expect_any_instance_of(Search).to receive(:build).with({"name_eq_any" => ['foobar']})
+        Search.new(Person, :name_eq_any => ['foobar'])
+      end
+
+      it 'does not raise exception for string :params argument' do
+        expect { Search.new(Person, '') }.not_to raise_error
+      end
+    end
 
     describe '#build' do
-      it 'creates Conditions for top-level attributes' do
+      it 'creates conditions for top-level attributes' do
         search = Search.new(Person, :name_eq => 'Ernie')
         condition = search.base[:name_eq]
-        condition.should be_a Nodes::Condition
-        condition.predicate.name.should eq 'eq'
-        condition.attributes.first.name.should eq 'name'
-        condition.value.should eq 'Ernie'
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name).to eq 'name'
+        expect(condition.value).to eq 'Ernie'
       end
 
-      it 'creates Conditions for association attributes' do
+      it 'creates conditions for association attributes' do
         search = Search.new(Person, :children_name_eq => 'Ernie')
         condition = search.base[:children_name_eq]
-        condition.should be_a Nodes::Condition
-        condition.predicate.name.should eq 'eq'
-        condition.attributes.first.name.should eq 'children_name'
-        condition.value.should eq 'Ernie'
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name).to eq 'children_name'
+        expect(condition.value).to eq 'Ernie'
       end
 
-      it 'creates Conditions for polymorphic belongs_to association attributes' do
+      it 'creates conditions for polymorphic belongs_to association attributes' do
         search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
         condition = search.base[:notable_of_Person_type_name_eq]
-        condition.should be_a Nodes::Condition
-        condition.predicate.name.should eq 'eq'
-        condition.attributes.first.name.should eq 'notable_of_Person_type_name'
-        condition.value.should eq 'Ernie'
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name).to eq 'notable_of_Person_type_name'
+        expect(condition.value).to eq 'Ernie'
       end
 
-      it 'creates Conditions for multiple polymorphic belongs_to association attributes' do
+      it 'creates conditions for multiple polymorphic belongs_to association attributes' do
         search = Search.new(Note,
           :notable_of_Person_type_name_or_notable_of_Article_type_title_eq => 'Ernie')
         condition = search.
           base[:notable_of_Person_type_name_or_notable_of_Article_type_title_eq]
-        condition.should be_a Nodes::Condition
-        condition.predicate.name.should eq 'eq'
-        condition.attributes.first.name.should eq 'notable_of_Person_type_name'
-        condition.attributes.last.name.should eq 'notable_of_Article_type_title'
-        condition.value.should eq 'Ernie'
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name).to eq 'notable_of_Person_type_name'
+        expect(condition.attributes.last.name).to eq 'notable_of_Article_type_title'
+        expect(condition.value).to eq 'Ernie'
       end
 
       it 'discards empty conditions' do
         search = Search.new(Person, :children_name_eq => '')
         condition = search.base[:children_name_eq]
-        condition.should be_nil
+        expect(condition).to be_nil
       end
 
       it 'accepts arrays of groupings' do
         search = Search.new(Person,
-          :g => [
+          g: [
             { :m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie' },
             { :m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert' },
           ]
         )
         ors = search.groupings
-        ors.should have(2).items
+        expect(ors.size).to eq(2)
         or1, or2 = ors
-        or1.should be_a Nodes::Grouping
-        or1.combinator.should eq 'or'
-        or2.should be_a Nodes::Grouping
-        or2.combinator.should eq 'or'
+        expect(or1).to be_a Nodes::Grouping
+        expect(or1.combinator).to eq 'or'
+        expect(or2).to be_a Nodes::Grouping
+        expect(or2.combinator).to eq 'or'
       end
 
       it 'accepts "attributes" hashes for groupings' do
         search = Search.new(Person,
-          :g => {
-            '0' => { :m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie' },
-            '1' => { :m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert' },
+          g: {
+            '0' => { m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' },
+            '1' => { m: 'or', name_eq: 'Bert',  children_name_eq: 'Bert' },
           }
         )
         ors = search.groupings
-        ors.should have(2).items
+        expect(ors.size).to eq(2)
         or1, or2 = ors
-        or1.should be_a Nodes::Grouping
-        or1.combinator.should eq 'or'
-        or2.should be_a Nodes::Grouping
-        or2.combinator.should eq 'or'
+        expect(or1).to be_a Nodes::Grouping
+        expect(or1.combinator).to eq 'or'
+        expect(or2).to be_a Nodes::Grouping
+        expect(or2.combinator).to eq 'or'
       end
 
       it 'accepts "attributes" hashes for conditions' do
         search = Search.new(Person,
           :c => {
             '0' => { :a => ['name'], :p => 'eq', :v => ['Ernie'] },
-            '1' => { :a => ['children_name', 'parent_name'], :p => 'eq', :v => ['Ernie'], :m => 'or' }
-          }
+            '1' => { :a => ['children_name', 'parent_name'],
+                     :p => 'eq', :v => ['Ernie'], :m => 'or' }
+            }
         )
         conditions = search.base.conditions
-        conditions.should have(2).items
-        conditions.map {|c| c.class}.should eq [Nodes::Condition, Nodes::Condition]
+        expect(conditions.size).to eq(2)
+        expect(conditions.map { |c| c.class })
+        .to eq [Nodes::Condition, Nodes::Condition]
       end
 
-      it 'creates Conditions for custom predicates that take arrays' do
+      it 'creates conditions for custom predicates that take arrays' do
         Ransack.configure do |config|
           config.add_predicate 'ary_pred', :wants_array => true
         end
 
         search = Search.new(Person, :name_ary_pred => ['Ernie', 'Bert'])
         condition = search.base[:name_ary_pred]
-        condition.should be_a Nodes::Condition
-        condition.predicate.name.should eq 'ary_pred'
-        condition.attributes.first.name.should eq 'name'
-        condition.value.should eq ['Ernie', 'Bert']
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'ary_pred'
+        expect(condition.attributes.first.name).to eq 'name'
+        expect(condition.value).to eq ['Ernie', 'Bert']
       end
 
       it 'does not evaluate the query on #inspect' do
         search = Search.new(Person, :children_id_in => [1, 2, 3])
-        search.inspect.should_not match /ActiveRecord/
+        expect(search.inspect).not_to match /ActiveRecord/
+      end
+
+      context 'with an invalid condition' do
+        subject { Search.new(Person, :unknown_attr_eq => 'Ernie') }
+
+        context "when ignore_unknown_conditions is false" do
+          before do
+            Ransack.configure { |config| config.ignore_unknown_conditions = false }
+          end
+
+          specify { expect { subject }.to raise_error ArgumentError }
+        end
+
+        context "when ignore_unknown_conditions is true" do
+          before do
+            Ransack.configure { |config| config.ignore_unknown_conditions = true }
+          end
+
+          specify { expect { subject }.not_to raise_error }
+        end
       end
     end
 
     describe '#result' do
+      let(:people_name_field) {
+        "#{quote_table_name("people")}.#{quote_column_name("name")}"
+      }
+      let(:children_people_name_field) {
+        "#{quote_table_name("children_people")}.#{quote_column_name("name")}"
+      }
       it 'evaluates conditions contextually' do
         search = Search.new(Person, :children_name_eq => 'Ernie')
-        search.result.should be_an ActiveRecord::Relation
+        expect(search.result).to be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"\."name" = 'Ernie'/
+        expect(where.to_sql).to match /#{children_people_name_field} = 'Ernie'/
       end
 
       it 'evaluates compound conditions contextually' do
         search = Search.new(Person, :children_name_or_name_eq => 'Ernie')
-        search.result.should be_an ActiveRecord::Relation
+        expect(search.result).to be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"\."name" = 'Ernie' OR "people"\."name" = 'Ernie'/
+        expect(where.to_sql).to match /#{children_people_name_field
+          } = 'Ernie' OR #{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates polymorphic belongs_to association conditions contextually' do
         search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
-        search.result.should be_an ActiveRecord::Relation
+        expect(search.result).to be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"people"."name" = 'Ernie'/
+        expect(where.to_sql).to match /#{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates nested conditions' do
@@ -143,28 +207,29 @@ module Ransack
             }
           ]
         )
-        search.result.should be_an ActiveRecord::Relation
+        expect(search.result).to be_an ActiveRecord::Relation
         where = search.result.where_values.first
-        where.to_sql.should match /"children_people"."name" = 'Ernie'/
-        where.to_sql.should match /"people"."name" = 'Ernie'/
-        where.to_sql.should match /"children_people_2"."name" = 'Ernie'/
+        expect(where.to_sql).to match /#{children_people_name_field} = 'Ernie'/
+        expect(where.to_sql).to match /#{people_name_field} = 'Ernie'/
+        expect(where.to_sql).to match /#{quote_table_name("children_people_2")
+          }.#{quote_column_name("name")} = 'Ernie'/
       end
 
       it 'evaluates arrays of groupings' do
         search = Search.new(Person,
           :g => [
             { :m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie' },
-            { :m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert' },
+            { :m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert' }
           ]
         )
-        search.result.should be_an ActiveRecord::Relation
+        expect(search.result).to be_an ActiveRecord::Relation
         where = search.result.where_values.first
         sql = where.to_sql
         first, second = sql.split(/ AND /)
-        first.should match /"people"."name" = 'Ernie'/
-        first.should match /"children_people"."name" = 'Ernie'/
-        second.should match /"people"."name" = 'Bert'/
-        second.should match /"children_people"."name" = 'Bert'/
+        expect(first).to match /#{people_name_field} = 'Ernie'/
+        expect(first).to match /#{children_people_name_field} = 'Ernie'/
+        expect(second).to match /#{people_name_field} = 'Bert'/
+        expect(second).to match /#{children_people_name_field} = 'Bert'/
       end
 
       it 'returns distinct records when passed :distinct => true' do
@@ -181,12 +246,12 @@ module Ransack
         else
           all_or_load, uniq_or_distinct = :load, :distinct
         end
-        search.result.send(all_or_load).
-          should have(920).items
-        search.result(:distinct => true).
-          should have(330).items
-        search.result.send(all_or_load).send(uniq_or_distinct).
-          should eq search.result(:distinct => true).send(all_or_load)
+        expect(search.result.send(all_or_load).size).
+          to eq(9000)
+        expect(search.result(:distinct => true).size).
+          to eq(10)
+        expect(search.result.send(all_or_load).send(uniq_or_distinct)).
+          to eq search.result(:distinct => true).send(all_or_load)
       end
     end
 
@@ -197,23 +262,65 @@ module Ransack
 
       it 'creates sorts based on a single attribute/direction' do
         @s.sorts = 'id desc'
-        @s.sorts.should have(1).item
+        expect(@s.sorts.size).to eq(1)
         sort = @s.sorts.first
-        sort.should be_a Nodes::Sort
-        sort.name.should eq 'id'
-        sort.dir.should eq 'desc'
+        expect(sort).to be_a Nodes::Sort
+        expect(sort.name).to eq 'id'
+        expect(sort.dir).to eq 'desc'
+      end
+
+      it 'creates sorts based on a single attribute and uppercase direction' do
+        @s.sorts = 'id DESC'
+        expect(@s.sorts.size).to eq(1)
+        sort = @s.sorts.first
+        expect(sort).to be_a Nodes::Sort
+        expect(sort.name).to eq 'id'
+        expect(sort.dir).to eq 'desc'
+      end
+
+      it 'creates sorts based on a single attribute and without direction' do
+        @s.sorts = 'id'
+        expect(@s.sorts.size).to eq(1)
+        sort = @s.sorts.first
+        expect(sort).to be_a Nodes::Sort
+        expect(sort.name).to eq 'id'
+        expect(sort.dir).to eq 'asc'
       end
 
       it 'creates sorts based on multiple attributes/directions in array format' do
-        @s.sorts = ['id desc', 'name asc']
-        @s.sorts.should have(2).items
+        @s.sorts = ['id desc', { :name => 'name', :dir => 'asc' }]
+        expect(@s.sorts.size).to eq(2)
         sort1, sort2 = @s.sorts
-        sort1.should be_a Nodes::Sort
-        sort1.name.should eq 'id'
-        sort1.dir.should eq 'desc'
-        sort2.should be_a Nodes::Sort
-        sort2.name.should eq 'name'
-        sort2.dir.should eq 'asc'
+        expect(sort1).to be_a Nodes::Sort
+        expect(sort1.name).to eq 'id'
+        expect(sort1.dir).to eq 'desc'
+        expect(sort2).to be_a Nodes::Sort
+        expect(sort2.name).to eq 'name'
+        expect(sort2.dir).to eq 'asc'
+      end
+
+      it 'creates sorts based on multiple attributes and uppercase directions in array format' do
+        @s.sorts = ['id DESC', { :name => 'name', :dir => 'ASC' }]
+        expect(@s.sorts.size).to eq(2)
+        sort1, sort2 = @s.sorts
+        expect(sort1).to be_a Nodes::Sort
+        expect(sort1.name).to eq 'id'
+        expect(sort1.dir).to eq 'desc'
+        expect(sort2).to be_a Nodes::Sort
+        expect(sort2.name).to eq 'name'
+        expect(sort2.dir).to eq 'asc'
+      end
+
+      it 'creates sorts based on multiple attributes and different directions in array format' do
+        @s.sorts = ['id DESC', { name: 'name', dir: nil }]
+        expect(@s.sorts.size).to eq(2)
+        sort1, sort2 = @s.sorts
+        expect(sort1).to be_a Nodes::Sort
+        expect(sort1.name).to eq 'id'
+        expect(sort1.dir).to eq 'desc'
+        expect(sort2).to be_a Nodes::Sort
+        expect(sort2.name).to eq 'name'
+        expect(sort2.dir).to eq 'asc'
       end
 
       it 'creates sorts based on multiple attributes/directions in hash format' do
@@ -221,17 +328,43 @@ module Ransack
           '0' => { :name => 'id', :dir => 'desc' },
           '1' => { :name => 'name', :dir => 'asc' }
         }
-        @s.sorts.should have(2).items
-        @s.sorts.should be_all { |s| Nodes::Sort === s }
+        expect(@s.sorts.size).to eq(2)
+        expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
         id_sort = @s.sorts.detect { |s| s.name == 'id' }
         name_sort = @s.sorts.detect { |s| s.name == 'name' }
-        id_sort.dir.should eq 'desc'
-        name_sort.dir.should eq 'asc'
+        expect(id_sort.dir).to eq 'desc'
+        expect(name_sort.dir).to eq 'asc'
+      end
+
+      it 'creates sorts based on multiple attributes and uppercase directions in hash format' do
+        @s.sorts = {
+            '0' => { :name => 'id', :dir => 'DESC' },
+            '1' => { :name => 'name', :dir => 'ASC' }
+        }
+        expect(@s.sorts.size).to eq(2)
+        expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
+        id_sort = @s.sorts.detect { |s| s.name == 'id' }
+        name_sort = @s.sorts.detect { |s| s.name == 'name' }
+        expect(id_sort.dir).to eq 'desc'
+        expect(name_sort.dir).to eq 'asc'
+      end
+
+      it 'creates sorts based on multiple attributes and different directions in hash format' do
+        @s.sorts = {
+            '0' => { :name => 'id', :dir => 'DESC' },
+            '1' => { :name => 'name', :dir => nil }
+        }
+        expect(@s.sorts.size).to eq(2)
+        expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
+        id_sort = @s.sorts.detect { |s| s.name == 'id' }
+        name_sort = @s.sorts.detect { |s| s.name == 'name' }
+        expect(id_sort.dir).to eq 'desc'
+        expect(name_sort.dir).to eq 'asc'
       end
 
       it 'overrides existing sort' do
         @s.sorts = 'id asc'
-        @s.result.first.id.should eq 1
+        expect(@s.result.first.id).to eq 1
       end
     end
 
@@ -246,20 +379,15 @@ module Ransack
 
       it 'sets condition attributes when sent valid attributes' do
         @s.name_eq = 'Ernie'
-        @s.name_eq.should eq 'Ernie'
+        expect(@s.name_eq).to eq 'Ernie'
       end
 
       it 'allows chaining to access nested conditions' do
-        @s.groupings = [{ :m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie' }]
-        @s.groupings.first.children_name_eq.should eq 'Ernie'
+        @s.groupings = [
+          { :m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie' }
+        ]
+        expect(@s.groupings.first.children_name_eq).to eq 'Ernie'
       end
     end
-
-    describe '#respond_to' do
-      it 'is aware of second argument' do
-        Search.new(Person).respond_to?(:name_eq, true).should be_true
-      end
-    end
-
   end
 end

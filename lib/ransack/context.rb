@@ -8,8 +8,11 @@ module Ransack
     class << self
 
       def for(object, options = {})
-        context = Class === object ? for_class(object, options) : for_object(object, options)
-        context or raise ArgumentError, "Don't know what context to use for #{object}"
+        context = Class === object ?
+          for_class(object, options) :
+          for_object(object, options)
+        context or raise ArgumentError,
+          "Don't know what context to use for #{object}"
       end
 
       def for_class(klass, options = {})
@@ -33,9 +36,18 @@ module Ransack
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
-      @base = @join_dependency.join_base
-      @engine = @base.arel_engine
-      @default_table = Arel::Table.new(@base.table_name, :as => @base.aliased_table_name, :engine => @engine)
+
+      if ::ActiveRecord::VERSION::STRING >= "4.1"
+        @base = @join_dependency.join_root
+        @engine = @base.base_klass.arel_engine
+      else
+        @base = @join_dependency.join_base
+        @engine = @base.arel_engine
+      end
+
+      @default_table = Arel::Table.new(
+        @base.table_name, :as => @base.aliased_table_name, :engine => @engine
+        )
       @bind_pairs = Hash.new do |hash, key|
         parent, attr_name = get_parent_and_attribute_name(key.to_s)
         if parent && attr_name
@@ -54,7 +66,7 @@ module Ransack
       elsif obj.respond_to? :base_klass     # Rails 4
         obj.base_klass
       else
-        raise ArgumentError, "Don't know how to klassify #{obj}"
+        raise ArgumentError, "Don't know how to klassify #{obj.inspect}"
       end
     end
 
@@ -98,7 +110,8 @@ module Ransack
 
           remainder.unshift segments.pop
         end
-        raise UntraversableAssociationError, "No association matches #{str}" unless found_assoc
+        raise UntraversableAssociationError,
+          "No association matches #{str}" unless found_assoc
       end
 
       klassify(base)
@@ -111,8 +124,10 @@ module Ransack
       segments = str.split(/_/)
       association_parts = []
       if (segments = str.split(/_/)).size > 0
-        while segments.size > 0 && !base.columns_hash[segments.join('_')] && association_parts << segments.shift do
-          assoc, klass = unpolymorphize_association(association_parts.join('_'))
+        while segments.size > 0 && !base.columns_hash[segments.join('_')] &&
+        association_parts << segments.shift do
+          assoc, klass = unpolymorphize_association(association_parts
+          .join('_'))
           if found_assoc = get_association(assoc, base)
             path += association_parts
             association_parts = []
@@ -133,7 +148,8 @@ module Ransack
     end
 
     def ransackable_attribute?(str, klass)
-      klass.ransackable_attributes(auth_object).include? str
+      klass.ransackable_attributes(auth_object).include?(str) ||
+      klass.ransortable_attributes(auth_object).include?(str)
     end
 
     def ransackable_association?(str, klass)
@@ -155,6 +171,5 @@ module Ransack
     def searchable_associations(str = '')
       traverse(str).ransackable_associations(auth_object)
     end
-
   end
 end
