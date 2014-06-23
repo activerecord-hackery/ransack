@@ -12,7 +12,7 @@ and maintained by [Ryan Bigg](http://twitter.com/ryanbigg),
 [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
-and **_backwards compatibility is not a design goal._**
+and _backwards compatibility is not a design goal._
 
 Ransack enables the creation of both simple and
 [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
@@ -28,7 +28,7 @@ instead.
 In your Gemfile:
 
 ```ruby
-gem "ransack"  # Last officially released gem (compatible with Rails 3, 4.0 and 4.1!)
+gem "ransack"  # Last officially released gem (compatible with Rails 3, 4.0 and 4.1)
 ```
 
 Or if you want to use the latest updates on the master branch:
@@ -280,9 +280,9 @@ require 'rails/all'
 
 ### Authorization
 
-By default Ransack exposes search for any model column, so take care to
+By default, Ransack exposes search for any model column, so take care to
 sanitize params and only pass allowed keys. Alternately, you can define these
-methods on your model classes for applying selective authorization based on a
+methods on your model classes to apply selective authorization based on a
 given auth object: 
 
 * `def ransackable_attributes(auth_object = nil)`
@@ -295,7 +295,7 @@ ignored.  The auth object should be optional when building the search, and is
 ignored by default:
 
 ```
-Employee.search({'salary_gt' => 100000}, {auth_object: current_user})
+Employee.search({ salary_gt: 100000 }, { auth_object: current_user })
 ```
 
 ### Scopes
@@ -306,7 +306,7 @@ will be applied for matching `true` values, or for given values if the scope
 accepts a value:
 
 ```
-Employee.search({'active' => true, 'hired_since' => '2013-01-01'})
+Employee.search({ active: true, hired_since: '2013-01-01' })
 ```
 
 ### I18n
