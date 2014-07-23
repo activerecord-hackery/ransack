@@ -12,6 +12,7 @@ module Ransack
         end
 
         def ransack(params = {}, options = {})
+          params = params.presence || {}
           Search.new(self, params ? params.delete_if {
             |k, v| v.blank? && v != false } : params, options)
         end
