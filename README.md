@@ -25,28 +25,37 @@ instead.
 
 ## Getting started
 
-In your Gemfile:
+Because ActiveRecord has been evolving quite a bit, your friendly Ransack is available in several lovely versions! Take your pick:
+
+In your Gemfile, for the last officially released gem for Rails 3, 4.0 and 4.1:
 
 ```ruby
-gem "ransack"  # Last officially released gem (compatible with Rails 3, 4.0 and 4.1)
+gem 'ransack'
 ```
 
-Or if you want to use the latest updates on the master branch:
+Or if you want to use the latest updates on the Ransack master branch:
 
 ```ruby
-gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo
+gem 'ransack', github: 'activerecord-hackery/ransack'  # Track git repo
 ```
 
-If you are on Rails 4.1, you may prefer to use the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
+If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
 
 ```ruby
-gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
+gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
-Similarly, if you are on Rails 4.0, you may prefer to use the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the same reasons:
+Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the same reasons:
 
 ```ruby
-gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
+gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
+```
+
+Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available. To use it, place the following two lines in your Gemfile:
+
+```ruby
+gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
+gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
 ```
 
 ## Usage
