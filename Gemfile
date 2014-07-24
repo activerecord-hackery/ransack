@@ -3,9 +3,22 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '4-1-stable'
+rails = ENV['RAILS'] || 'master'
+arel  = ENV['AREL']  || 'master'
 
-gem 'polyamorous', '~> 1.1.0'
+arel_opts =
+  case arel
+  when /\// # A path
+    { path: arel }
+  when /^v/ # A tagged version
+    { git: 'git://github.com/rails/arel.git', tag: arel }
+  else
+    { git: 'git://github.com/rails/arel.git', branch: arel }
+  end
+
+gem 'arel', arel_opts
+
+gem 'polyamorous', git: 'git://github.com/activerecord-hackery/polyamorous.git'
 
 case rails
 when /\// # A path
@@ -26,5 +39,7 @@ else
     gem 'activemodel'
     gem 'activerecord'
     gem 'actionpack'
+    gem 'rack', github: 'rack/rack'
+    gem 'i18n', github: 'svenfuchs/i18n'
   end
 end
