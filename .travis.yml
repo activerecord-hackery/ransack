@@ -4,14 +4,13 @@ before_install:
   - travis_retry gem install bundler
 
 rvm:
-  - 1.9.3
   - 2.0.0
   - 2.1
 
 env:
-  - RAILS=4-1-stable DB=sqlite3
-  - RAILS=4-1-stable DB=mysql
-  - RAILS=4-1-stable DB=postgres
+  - RAILS=master AREL=master DB=sqlite
+  - RAILS=master AREL=master DB=mysql
+  - RAILS=master AREL=master DB=postgres
 
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'
