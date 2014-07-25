@@ -80,19 +80,19 @@ module Ransack
 
           it "should function correctly when using fields with dots in them" do
             s = Person.search(email_cont: "example.com")
-            s.result.exists?.should be_true
+            s.result.exists?.should be true
           end
 
           it "should function correctly when using fields with % in them" do
             Person.create!(name: "110%-er")
             s = Person.search(name_cont: "10%")
-            s.result.exists?.should be_true
+            s.result.exists?.should be true
           end
 
           it "should function correctly when using fields with backslashes in them" do
             Person.create!(name: "\\WINNER\\")
             s = Person.search(name_cont: "\\WINNER\\")
-            s.result.exists?.should be_true
+            s.result.exists?.should be true
           end
 
           it 'allows sort by "only_sort" field' do
