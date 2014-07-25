@@ -25,7 +25,7 @@ instead.
 
 ## Getting started
 
-Because ActiveRecord has been evolving quite a bit, your friendly Ransack is available in several lovely versions! Take your pick:
+Because ActiveRecord has been evolving quite a bit, your friendly Ransack is available in several flavors! Take your pick:
 
 In your Gemfile, for the last officially released gem for Rails 3, 4.0 and 4.1:
 
@@ -36,7 +36,7 @@ gem 'ransack'
 Or if you want to use the latest updates on the Ransack master branch:
 
 ```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack'  # Track git repo
+gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
 If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
@@ -51,11 +51,10 @@ Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 bra
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
 ```
 
-Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available. To use it, place the following two lines in your Gemfile:
+Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available for those on the edge:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
-gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
 ```
 
 ## Usage
@@ -289,10 +288,10 @@ require 'rails/all'
 
 ### Authorization
 
-By default, Ransack exposes search for any model column, so take care to
-sanitize params and only pass allowed keys. Alternately, you can define these
-methods on your model classes to apply selective authorization based on a
-given auth object:
+By default, Ransack exposes search on any model column, so make sure you
+sanitize your params and only pass the allowed keys. Alternately, you can
+define these methods on your model classes to apply selective authorization
+based on a given auth object:
 
 * `def ransackable_attributes(auth_object = nil)`
 * `def ransackable_associations(auth_object = nil)`
@@ -300,7 +299,7 @@ given auth object:
 * `def ransortable_attributes(auth_object = nil)` (for sorting)
 
 Any values not included in the arrays returned from these methods will be
-ignored.  The auth object should be optional when building the search, and is
+ignored. The auth object should be optional when building the search, and is
 ignored by default:
 
 ```
