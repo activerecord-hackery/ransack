@@ -17,6 +17,39 @@ module Ransack
           it 'has a Relation as its object' do
             subject.object.should be_an ::ActiveRecord::Relation
           end
+
+          context 'with scopes' do
+            before do
+              Person.stub :ransackable_scopes => [:active, :over_age]
+            end
+
+            it "applies true scopes" do
+              search =  Person.search('active' => true)
+              search.result.to_sql.should include "active = 1"
+            end
+
+            it "ignores unlisted scopes" do
+              search =  Person.search('restricted' => true)
+              search.result.to_sql.should_not include "restricted"
+            end
+
+            it "ignores false scopes" do
+              search = Person.search('active' => false)
+              search.result.to_sql.should_not include "active"
+            end
+
+            it "passes values to scopes" do
+              search = Person.search('over_age' => 18)
+              search.result.to_sql.should include "age > 18"
+            end
+
+            it "chains scopes" do
+              search = Person.search('over_age' => 18, 'active' => true)
+              search.result.to_sql.should include "age > 18"
+              search.result.to_sql.should include "active = 1"
+            end
+          end
+
         end
 
         describe '#ransacker' do

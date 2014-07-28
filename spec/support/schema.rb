@@ -42,6 +42,11 @@ class Person < ActiveRecord::Base
       )
   end
 
+  scope :restricted,  lambda { where("restricted = 1") }
+  scope :active,      lambda { where("active = 1") }
+  scope :over_age,    lambda { |y| where(["age > ?", y]) }
+
+
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       column_names + _ransackers.keys - ['only_sort']

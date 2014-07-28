@@ -35,6 +35,11 @@ module Ransack
           reflect_on_all_associations.map { |a| a.name.to_s }
         end
 
+        # For overriding with a whitelist of symbols
+        def ransackable_scopes(auth_object = nil)
+          []
+        end
+
       end
     end
   end
