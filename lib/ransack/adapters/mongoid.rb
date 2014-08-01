@@ -1,7 +1,7 @@
 require 'ransack/adapters/mongoid/base'
 Mongoid::Document.extend Ransack::Adapters::Mongoid::Base
 
-case Mongoid::VERSION::STRING
+case Mongoid::VERSION
 when /^3\.2\./
   require 'ransack/adapters/mongoid/3.2/context'
 else

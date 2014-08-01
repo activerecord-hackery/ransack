@@ -7,8 +7,8 @@ module Ransack
       class Context < ::Ransack::Context
 
         # Because the AR::Associations namespace is insane
-        JoinDependency = ::Mongoid::Associations::JoinDependency
-        JoinPart = JoinDependency::JoinPart
+        # JoinDependency = ::Mongoid::Associations::JoinDependency
+        # JoinPart = JoinDependency::JoinPart
 
         def initialize(object, options = {})
           super
@@ -112,6 +112,7 @@ module Ransack
           if relation.respond_to?(:join_dependency) # Squeel will enable this
             relation.join_dependency
           else
+            binding.pry
             build_join_dependency(relation)
           end
         end
@@ -155,14 +156,14 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          if ::Mongoid::VERSION::STRING >= '4.1'
+          if ::Mongoid::VERSION >= '4.1'
             join_dependency
           else
             join_dependency.graft(*stashed_association_joins)
           end
         end
 
-        if ::Mongoid::VERSION::STRING >= '4.1'
+        if ::Mongoid::VERSION >= '4.1'
 
           def build_or_find_association(name, parent = @base, klass = nil)
             found_association = @join_dependency.join_root.children
