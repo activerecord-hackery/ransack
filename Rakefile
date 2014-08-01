@@ -4,6 +4,12 @@ require 'rspec/core/rake_task'
 Bundler::GemHelper.install_tasks
 
 RSpec::Core::RakeTask.new(:spec) do |rspec|
+  ENV['SPEC'] = 'spec/ransack/**/*_spec.rb'
+  rspec.rspec_opts = ['--backtrace']
+end
+
+RSpec::Core::RakeTask.new(:mongoid) do |rspec|
+  ENV['SPEC'] = 'spec/mongoid/**/*_spec.rb'
   rspec.rspec_opts = ['--backtrace']
 end
 
