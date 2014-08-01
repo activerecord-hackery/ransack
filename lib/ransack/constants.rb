@@ -12,10 +12,20 @@ module Ransack
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
+      ['icont', {
+        :arel_predicate => 'i_matches',
+        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
+      }
+      ],
       ['not_cont', {
         :arel_predicate => 'does_not_match',
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
+      ],
+      ['inot_cont', {
+        :arel_predicate => 'i_does_not_match',
+        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
+      }
       ],
       ['start', {
         :arel_predicate => 'matches',
