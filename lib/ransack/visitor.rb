@@ -22,14 +22,7 @@ module Ransack
     end
 
     def visit_and(object)
-      nodes = object.values.map { |o| accept(o) }.compact
-      return nil unless nodes.size > 0
-
-      if nodes.size > 1
-        Arel::Nodes::Grouping.new(Arel::Nodes::And.new(nodes))
-      else
-        nodes.first
-      end
+      raise "not implemented"
     end
 
     def visit_or(object)
@@ -48,12 +41,7 @@ module Ransack
     end
 
     def quoted?(object)
-      case object
-      when Arel::Nodes::SqlLiteral, Bignum, Fixnum
-        false
-      else
-        true
-      end
+      raise "not implemented"
     end
 
     def visit(object)

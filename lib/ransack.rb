@@ -19,6 +19,7 @@ Ransack.configure do |config|
 end
 
 require 'ransack/translate'
+require 'ransack/adapters/active_record/ransack/translate' if defined?(::ActiveRecord::Base)
 require 'ransack/search'
 require 'ransack/ransacker'
 require 'ransack/adapters/active_record' if defined?(::ActiveRecord::Base)
