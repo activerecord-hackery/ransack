@@ -7,6 +7,8 @@ rails = ENV['RAILS'] || '4-1-stable'
 
 gem 'polyamorous', '~> 1.1.0'
 
+gem 'pry'
+
 case rails
 when /\// # A path
   gem 'activesupport', path: "#{rails}/activesupport"
