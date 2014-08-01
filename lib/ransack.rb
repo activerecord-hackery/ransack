@@ -20,9 +20,11 @@ end
 
 require 'ransack/translate'
 require 'ransack/adapters/active_record/ransack/translate' if defined?(::ActiveRecord::Base)
+require 'ransack/adapters/mongoid/ransack/translate' if defined?(::Mongoid)
 require 'ransack/search'
 require 'ransack/ransacker'
 require 'ransack/adapters/active_record' if defined?(::ActiveRecord::Base)
+require 'ransack/adapters/mongoid' if defined?(::Mongoid)
 require 'ransack/helpers'
 require 'action_controller'
 

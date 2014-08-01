@@ -1,5 +1,6 @@
 require 'ransack/visitor'
 require 'ransack/adapters/active_record/ransack/visitor' if defined?(::ActiveRecord::Base)
+require 'ransack/adapters/mongoid/ransack/visitor' if defined?(::Mongoid)
 
 module Ransack
   class Context
