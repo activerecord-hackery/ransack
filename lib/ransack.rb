@@ -2,6 +2,12 @@ require 'active_support/core_ext'
 
 require 'ransack/configuration'
 
+if defined?(::Mongoid)
+  require 'ransack/adapters/mongoid/ransack/constants'
+else
+  require 'ransack/adapters/active_record/ransack/constants'
+end
+
 module Ransack
   extend Configuration
 
@@ -13,10 +19,8 @@ Ransack.configure do |config|
     config.add_predicate name, :arel_predicate => name
   end
 
-  if defined?(Ransack::Constants::DERIVED_PREDICATES)
-    Ransack::Constants::DERIVED_PREDICATES.each do |args|
-      config.add_predicate *args
-    end
+  Ransack::Constants::DERIVED_PREDICATES.each do |args|
+    config.add_predicate *args
   end
 end
 
