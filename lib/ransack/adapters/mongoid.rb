@@ -1,5 +1,8 @@
 require 'ransack/adapters/mongoid/base'
-Mongoid::Document.extend Ransack::Adapters::Mongoid::Base
+Mongoid::Document.send :include, Ransack::Adapters::Mongoid::Base
+
+require 'ransack/adapters/mongoid/attributes/attribute'
+require 'ransack/adapters/mongoid/table'
 
 case Mongoid::VERSION
 when /^3\.2\./

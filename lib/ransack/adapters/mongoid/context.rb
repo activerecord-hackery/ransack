@@ -12,7 +12,7 @@ module Ransack
 
         def initialize(object, options = {})
           super
-          @arel_visitor = @engine.connection.visitor
+          # @arel_visitor = @engine.connection.visitor
         end
 
         def relation_for(object)
@@ -22,11 +22,23 @@ module Ransack
         def type_for(attr)
           return nil unless attr && attr.valid?
           name    = attr.arel_attribute.name.to_s
-          table   = attr.arel_attribute.relation.table_name
+          # table   = attr.arel_attribute.relation.table_name
 
-          schema_cache = @engine.connection.schema_cache
-          raise "No table named #{table} exists" unless schema_cache.table_exists?(table)
-          schema_cache.columns_hash(table)[name].type
+          # schema_cache = @engine.connection.schema_cache
+          # raise "No table named #{table} exists" unless schema_cache.table_exists?(table)
+          # schema_cache.columns_hash(table)[name].type
+
+          # when :date
+          # when :datetime, :timestamp, :time
+          # when :boolean
+          # when :integer
+          # when :float
+          # when :decimal
+          # else # :string
+
+          t = object.klass.fields[name].type
+
+          t.to_s.demodulize.underscore.to_sym
         end
 
         def evaluate(search, opts = {})
@@ -62,11 +74,12 @@ module Ransack
         end
 
         def table_for(parent)
-          parent.table
+          # parent.table
+          Ransack::Adapters::Mongoid::Table.new(parent)
         end
 
         def klassify(obj)
-          if Class === obj && ::Mongoid::Base > obj
+          if Class === obj && obj.ancestors.include?(::Mongoid::Document)
             obj
           elsif obj.respond_to? :klass
             obj.klass
@@ -112,12 +125,11 @@ module Ransack
           if relation.respond_to?(:join_dependency) # Squeel will enable this
             relation.join_dependency
           else
-            binding.pry
             build_join_dependency(relation)
           end
         end
 
-        # Checkout mongoid/relation/query_methods.rb +build_joins+ for
+        # Checkout active_record/relation/query_methods.rb +build_joins+ for
         # reference. Lots of duplicated code maybe we can avoid it
         def build_join_dependency(relation)
           buckets = relation.joins_values.group_by do |join|

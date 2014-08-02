@@ -1,4 +1,6 @@
 require 'ransack/constants'
+require 'ransack/adapters/active_record/ransack/constants' if defined?(::ActiveRecord::Base)
+require 'ransack/adapters/mongoid/ransack/constants' if defined?(::Mongoid)
 require 'ransack/predicate'
 
 module Ransack
