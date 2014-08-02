@@ -83,6 +83,14 @@ module Ransack
             []
           end
 
+          def first(*args)
+            if args.size == 0
+              super
+            else
+              self.criteria.limit(args.first)
+            end
+          end
+
           # def group_by *args, &block
           #   criteria
           # end
