@@ -55,7 +55,7 @@ module Ransack
           end
 
           def ransackable_attributes(auth_object = nil)
-            column_names + _ransackers.keys
+            ['id'] + column_names.select { |c| c != '_id' } + _ransackers.keys
           end
 
           def ransortable_attributes(auth_object = nil)
@@ -65,7 +65,11 @@ module Ransack
           end
 
           def ransackable_associations(auth_object = nil)
-            reflect_on_all_associations.map { |a| a.name.to_s }
+            reflect_on_all_associations_all.map { |a| a.name.to_s }
+          end
+
+          def reflect_on_all_associations_all
+            reflect_on_all_associations(:belongs_to, :has_one, :has_many)
           end
 
           # For overriding with a whitelist of symbols
@@ -76,12 +80,12 @@ module Ransack
           # imitating active record
 
           def joins_values *args
-            criteria
+            []
           end
 
-          def group_by *args, &block
-            criteria
-          end
+          # def group_by *args, &block
+          #   criteria
+          # end
 
           def columns
             @columns ||= fields.map(&:second).map{ |c| ColumnWrapper.new(c) }
@@ -96,14 +100,6 @@ module Ransack
           end
 
         end
-
-
-          # base::ClassMethods.class_eval do
-
-          # end # base::ClassMethods.class_eval
-
-        # def self.extended(base)
-        # end
 
       end # Base
     end
