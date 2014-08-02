@@ -1,4 +1,4 @@
-# require 'machinist/active_record'
+require 'machinist/object'
 require 'sham'
 require 'faker'
 require 'pry'
@@ -9,7 +9,7 @@ I18n.enforce_available_locales = false
 Time.zone = 'Eastern Time (US & Canada)'
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 
-Dir[File.expand_path('../{mongoid/helpers,mongoid/support}/*.rb', __FILE__)]
+Dir[File.expand_path('../{mongoid/helpers,mongoid/support,blueprints}/*.rb', __FILE__)]
 .each do |f|
   require f
 end

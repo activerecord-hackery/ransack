@@ -121,16 +121,16 @@ end
 module Schema
   def self.create
     10.times do
-      person = Person.create!
-      Note.create!(:notable => person)
+      person = Person.make.save!
+      Note.make.save!(:notable => person)
       3.times do
         article = Article.create!(:person => person)
         3.times do
-          # article.tags = [Tag.create!, Tag.create!, Tag.create!]
+          # article.tags = [Tag.make.save!, Tag.make.save!, Tag.make.save!]
         end
-        Note.create!(:notable => article)
+        Note.create.save!(:notable => article)
         10.times do
-          Comment.create!(:article => article, :person => person)
+          Comment.create.save!(:article => article, :person => person)
         end
       end
     end
