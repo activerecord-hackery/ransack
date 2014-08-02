@@ -3,6 +3,7 @@ Mongoid::Document.send :include, Ransack::Adapters::Mongoid::Base
 
 require 'ransack/adapters/mongoid/attributes/attribute'
 require 'ransack/adapters/mongoid/table'
+require 'ransack/adapters/mongoid/inquiry_hash'
 
 case Mongoid::VERSION
 when /^3\.2\./

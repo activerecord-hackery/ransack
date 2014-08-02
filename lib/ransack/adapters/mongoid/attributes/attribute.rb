@@ -16,19 +16,19 @@ module Ransack
           end
 
           def eq(other)
-            { name => other }
+            { name => other }.to_inquiry
           end
 
           def not_eq(other)
-            { name.to_sym.ne => other }
+            { name.to_sym.ne => other }.to_inquiry
           end
 
           def matches(other)
-            { name => /#{Regexp.escape(other)}/i }
+            { name => /#{Regexp.escape(other)}/i }.to_inquiry
           end
 
           def does_not_match(other)
-            { "$not" => { name => /#{Regexp.escape(other)}/i } }
+            { "$not" => { name => /#{Regexp.escape(other)}/i } }.to_inquiry
           end
 
           def not_eq_all(other)
@@ -36,7 +36,7 @@ module Ransack
             other.each do |value|
               q << { name.to_sym.ne => value }
             end
-            { "$and" => q }
+            { "$and" => q }.to_inquiry
           end
 
           def eq_any(other)
@@ -44,7 +44,15 @@ module Ransack
             other.each do |value|
               q << { name => value }
             end
-            { "$or" => q }
+            { "$or" => q }.to_inquiry
+          end
+
+          def asc
+            { name => :asc }
+          end
+
+          def desc
+            { name => :desc }
           end
         end
 

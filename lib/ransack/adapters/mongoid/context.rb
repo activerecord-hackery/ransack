@@ -45,10 +45,18 @@ module Ransack
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
           if search.sorts.any?
-            relation = relation.except(:order)
-            .reorder(viz.accept(search.sorts))
+            ary_sorting = viz.accept(search.sorts)
+            sorting = {}
+            ary_sorting.each do |s|
+              sorting.merge! Hash[s.map { |k, d| [k.to_s == 'id' ? '_id' : k, d] }]
+            end
+            relation = relation.order_by(sorting)
+            # relation = relation.except(:order)
+            # .reorder(viz.accept(search.sorts))
           end
-          opts[:distinct] ? relation.distinct : relation
+          # -- mongoid has different distinct method
+          # opts[:distinct] ? relation.distinct : relation
+          relation
         end
 
         def attribute_method?(str, klass = @klass)
@@ -118,7 +126,7 @@ module Ransack
         def get_association(str, parent = @base)
           klass = klassify parent
           ransackable_association?(str, klass) &&
-            klass.reflect_on_all_associations.detect { |a| a.name.to_s == str }
+            klass.reflect_on_all_associations_all.detect { |a| a.name.to_s == str }
         end
 
         def join_dependency(relation)
@@ -168,74 +176,28 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          if ::Mongoid::VERSION >= '4.1'
-            join_dependency
-          else
-            join_dependency.graft(*stashed_association_joins)
-          end
+          join_dependency # ActiveRecord::Associations::JoinDependency
         end
 
-        if ::Mongoid::VERSION >= '4.1'
-
-          def build_or_find_association(name, parent = @base, klass = nil)
-            found_association = @join_dependency.join_root.children
-            .detect do |assoc|
-              assoc.reflection.name == name &&
-              (@associations_pot.nil? || @associations_pot[assoc] == parent) &&
-              (!klass || assoc.reflection.klass == klass)
-            end
-
-            unless found_association
-              jd = JoinDependency.new(
-                parent.base_klass,
-                Polyamorous::Join.new(name, @join_type, klass),
-                []
-              )
-              found_association = jd.join_root.children.last
-              associations found_association, parent
-
-              # TODO maybe we dont need to push associations here, we could loop
-              # through the @associations_pot instead
-              @join_dependency.join_root.children.push found_association
-
-              # Builds the arel nodes properly for this association
-              @join_dependency.send(
-                :construct_tables!, jd.join_root, found_association
-                )
-
-              # Leverage the stashed association functionality in AR
-              @object = @object.joins(jd)
-            end
-            found_association
+        # ActiveRecord method
+        def build_or_find_association(name, parent = @base, klass = nil)
+          found_association = @join_dependency.join_associations
+          .detect do |assoc|
+            assoc.reflection.name == name &&
+            assoc.parent == parent &&
+            (!klass || assoc.reflection.klass == klass)
           end
-
-          def associations(assoc, parent)
-            @associations_pot ||= {}
-            @associations_pot[assoc] = parent
+          unless found_association
+            @join_dependency.send(
+              :build,
+              Polyamorous::Join.new(name, @join_type, klass),
+              parent
+             )
+            found_association = @join_dependency.join_associations.last
+            # Leverage the stashed association functionality in AR
+            @object = @object.joins(found_association)
           end
-
-        else
-
-          def build_or_find_association(name, parent = @base, klass = nil)
-            found_association = @join_dependency.join_associations
-            .detect do |assoc|
-              assoc.reflection.name == name &&
-              assoc.parent == parent &&
-              (!klass || assoc.reflection.klass == klass)
-            end
-            unless found_association
-              @join_dependency.send(
-                :build,
-                Polyamorous::Join.new(name, @join_type, klass),
-                parent
-               )
-              found_association = @join_dependency.join_associations.last
-              # Leverage the stashed association functionality in AR
-              @object = @object.joins(found_association)
-            end
-            found_association
-          end
-
+          found_association
         end
 
       end

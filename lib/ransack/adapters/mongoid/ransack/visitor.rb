@@ -5,7 +5,7 @@ module Ransack
       return nil unless nodes.size > 0
 
       if nodes.size > 1
-        Arel::Nodes::Grouping.new(Arel::Nodes::And.new(nodes))
+        nodes.inject(&:and)
       else
         nodes.first
       end
