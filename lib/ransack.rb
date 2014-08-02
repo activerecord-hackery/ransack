@@ -13,8 +13,10 @@ Ransack.configure do |config|
     config.add_predicate name, :arel_predicate => name
   end
 
-  Ransack::Constants::DERIVED_PREDICATES.each do |args|
-    config.add_predicate *args
+  if defined?(Ransack::Constants::DERIVED_PREDICATES)
+    Ransack::Constants::DERIVED_PREDICATES.each do |args|
+      config.add_predicate *args
+    end
   end
 end
 
