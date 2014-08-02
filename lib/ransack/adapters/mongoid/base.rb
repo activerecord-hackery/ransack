@@ -54,8 +54,12 @@ module Ransack
               .new(self, name, opts, &block)
           end
 
-          def ransackable_attributes(auth_object = nil)
+          def all_ransackable_attributes
             ['id'] + column_names.select { |c| c != '_id' } + _ransackers.keys
+          end
+
+          def ransackable_attributes(auth_object = nil)
+            all_ransackable_attributes
           end
 
           def ransortable_attributes(auth_object = nil)
@@ -105,6 +109,13 @@ module Ransack
 
           def columns_hash
             columns.index_by(&:name)
+          end
+
+          def table
+            name = ::Ransack::Adapters::Mongoid::Attributes::Attribute.new(self.criteria, :name)
+            {
+              :name => name
+            }
           end
 
         end

@@ -27,49 +27,34 @@ class Person
 
   default_scope -> { order(id: :desc) }
 
-  scope :restricted,  lambda { where("restricted = 1") }
-  scope :active,      lambda { where("active = 1") }
-  scope :over_age,    lambda { |y| where(["age > ?", y]) }
+  scope :restricted,  lambda { where(restricted: 1) }
+  scope :active,      lambda { where(active: 1) }
+  scope :over_age,    lambda { |y| where(:age.gt => y) }
 
   ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
   end
 
-  # ransacker :doubled_name do |parent|
-  #   Arel::Nodes::InfixOperation.new(
-  #     '||', parent.table[:name], parent.table[:name]
-  #     )
-  # end
+  ransacker :doubled_name do |parent|
+    # Arel::Nodes::InfixOperation.new(
+    #   '||', parent.table[:name], parent.table[:name]
+    #   )
+    parent.table[:name]
+  end
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
-      super - ['only_sort']
+      all_ransackable_attributes - ['only_sort']
     else
-      super - ['only_sort', 'only_admin']
+      all_ransackable_attributes - ['only_sort', 'only_admin']
     end
   end
 
   def self.ransortable_attributes(auth_object = nil)
     if auth_object == :admin
-      super - ['only_search']
+      all_ransackable_attributes - ['only_search']
     else
-      super - ['only_search', 'only_admin']
-    end
-  end
-
-  def self.ransackable_attributes(auth_object = nil)
-    if auth_object == :admin
-      super - ['only_sort']
-    else
-      super - ['only_sort', 'only_admin']
-    end
-  end
-
-  def self.ransortable_attributes(auth_object = nil)
-    if auth_object == :admin
-      super - ['only_search']
-    else
-      super - ['only_search', 'only_admin']
+      all_ransackable_attributes - ['only_search', 'only_admin']
     end
   end
 end
