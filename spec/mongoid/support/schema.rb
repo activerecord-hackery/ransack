@@ -43,33 +43,33 @@ class Person
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
-      column_names + _ransackers.keys - ['only_sort']
+      super - ['only_sort']
     else
-      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+      super - ['only_sort', 'only_admin']
     end
   end
 
   def self.ransortable_attributes(auth_object = nil)
     if auth_object == :admin
-      column_names + _ransackers.keys - ['only_search']
+      super - ['only_search']
     else
-      column_names + _ransackers.keys - ['only_search', 'only_admin']
+      super - ['only_search', 'only_admin']
     end
   end
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
-      column_names + _ransackers.keys - ['only_sort']
+      super - ['only_sort']
     else
-      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+      super - ['only_sort', 'only_admin']
     end
   end
 
   def self.ransortable_attributes(auth_object = nil)
     if auth_object == :admin
-      column_names + _ransackers.keys - ['only_search']
+      super - ['only_search']
     else
-      column_names + _ransackers.keys - ['only_search', 'only_admin']
+      super - ['only_search', 'only_admin']
     end
   end
 end
@@ -77,7 +77,6 @@ end
 class Article
   include Mongoid::Document
 
-  field :person_id, type: Integer
   field :title, type: String
   field :body, type: String
 
@@ -96,8 +95,6 @@ end
 class Comment
   include Mongoid::Document
 
-  field :article_id, type: Integer
-  field :person_id, type: Integer
   field :body, type: String
 
 
@@ -116,8 +113,6 @@ end
 class Note
   include Mongoid::Document
 
-  field :notable_id, type: Integer
-  field :notable_type, type: String
   field :note, type: String
 
   belongs_to :notable, :polymorphic => true
