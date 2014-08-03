@@ -37,7 +37,6 @@ module Ransack
     end
 
     describe 'cont' do
-
       it_has_behavior 'wildcard escaping', :name_cont, { 'name' => /%\._\\/i } do
         subject { @s }
       end
@@ -104,6 +103,38 @@ module Ransack
       it %q[generates a value IS NOT NULL AND value != '' query when assigned false] do
         @s.name_blank = false
         expect(@s.result.selector).to eq({ '$and' => [ { 'name' => { '$ne' => nil}}, { 'name' => { '$ne' => '' }} ] })
+      end
+    end
+
+    describe 'gt' do
+      it 'generates an greater than for time' do
+        time = Time.now
+        @s.created_at_gt = time
+        expect(@s.result.selector).to eq({ "created_at" => { '$gt' => time } })
+      end
+    end
+
+    describe 'lt' do
+      it 'generates an greater than for time' do
+        time = Time.now
+        @s.created_at_lt = time
+        expect(@s.result.selector).to eq({ "created_at" => { '$lt' => time } })
+      end
+    end
+
+    describe 'gteq' do
+      it 'generates an greater than for time' do
+        time = Time.now
+        @s.created_at_gteq = time
+        expect(@s.result.selector).to eq({ "created_at" => { '$gte' => time } })
+      end
+    end
+
+    describe 'lteq' do
+      it 'generates an greater than for time' do
+        time = Time.now
+        @s.created_at_lteq = time
+        expect(@s.result.selector).to eq({ "created_at" => { '$lte' => time } })
       end
     end
   end
