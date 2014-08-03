@@ -3,37 +3,76 @@ module Ransack
     module Mongoid
       module Attributes
         module Predications
-
-          def eq(other)
-            { name => other }.to_inquiry
-          end
-
-          def not_eq(other)
+          def not_eq other
             { name => { '$ne' => other } }.to_inquiry
           end
 
-          def matches(other)
-            { name => /#{Regexp.escape(other)}/i }.to_inquiry
+          def not_eq_any others
+            grouping_any :not_eq, others
           end
 
-          def does_not_match(other)
-            { "$not" => { name => /#{Regexp.escape(other)}/i } }.to_inquiry
-          end
-
-          def eq_all(others)
-            grouping_all :eq, others
-          end
-
-          def not_eq_all(others)
+          def not_eq_all others
             grouping_all :not_eq, others
           end
 
-          def eq_any(others)
+          def eq other
+            { name => other }.to_inquiry
+          end
+
+          def eq_any others
             grouping_any :eq, others
           end
 
-          def not_eq_any(others)
-            grouping_any :not_eq, others
+          def eq_all others
+            grouping_all :eq, others
+          end
+
+          def in other
+            raise "not implemented"
+          end
+
+          def in_any others
+            grouping_any :in, others
+          end
+
+          def in_all others
+            grouping_all :in, others
+          end
+
+          def not_in other
+            raise "not implemented"
+          end
+
+          def not_in_any others
+            grouping_any :not_in, others
+          end
+
+          def not_in_all others
+            grouping_all :not_in, others
+          end
+
+          def matches other
+            { name => /#{Regexp.escape(other)}/i }.to_inquiry
+          end
+
+          def matches_any others
+            grouping_any :matches, others
+          end
+
+          def matches_all others
+            grouping_all :matches, others
+          end
+
+          def does_not_match other
+            { "$not" => { name => /#{Regexp.escape(other)}/i } }.to_inquiry
+          end
+
+          def does_not_match_any others
+            grouping_any :does_not_match, others
+          end
+
+          def does_not_match_all others
+            grouping_all :does_not_match, others
           end
 
           def gteq right
