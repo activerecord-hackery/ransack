@@ -28,7 +28,7 @@ module Ransack
           end
 
           def in other
-            raise "not implemented"
+            { name => { "$in" => other } }
           end
 
           def in_any others
@@ -40,7 +40,7 @@ module Ransack
           end
 
           def not_in other
-            raise "not implemented"
+            { "$not" => { name => { "$in" => other } } }
           end
 
           def not_in_any others
