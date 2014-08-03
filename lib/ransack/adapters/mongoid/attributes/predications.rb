@@ -52,7 +52,7 @@ module Ransack
           end
 
           def matches other
-            { name => /#{Regexp.escape(other)}/i }.to_inquiry
+            { name => /#{other}/i }.to_inquiry
           end
 
           def matches_any others
@@ -64,7 +64,7 @@ module Ransack
           end
 
           def does_not_match other
-            { "$not" => { name => /#{Regexp.escape(other)}/i } }.to_inquiry
+            { "$not" => { name => /#{other}/i } }.to_inquiry
           end
 
           def does_not_match_any others

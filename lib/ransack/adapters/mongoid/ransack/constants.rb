@@ -3,32 +3,32 @@ module Ransack
     DERIVED_PREDICATES = [
       ['cont', {
         :arel_predicate => 'matches',
-        :formatter => proc { |v| "#{escape_wildcards(v)}" }
+        :formatter => proc { |v| "#{escape_regex(v)}" }
         }
       ],
       ['not_cont', {
         :arel_predicate => 'does_not_match',
-        :formatter => proc { |v| "#{escape_wildcards(v)}" }
+        :formatter => proc { |v| "#{escape_regex(v)}" }
         }
       ],
       ['start', {
         :arel_predicate => 'matches',
-        :formatter => proc { |v| "#{escape_wildcards(v)}%" }
+        :formatter => proc { |v| "\\A#{escape_regex(v)}" }
         }
       ],
       ['not_start', {
         :arel_predicate => 'does_not_match',
-        :formatter => proc { |v| "#{escape_wildcards(v)}%" }
+        :formatter => proc { |v| "\\A#{escape_regex(v)}" }
         }
       ],
       ['end', {
         :arel_predicate => 'matches',
-        :formatter => proc { |v| "%#{escape_wildcards(v)}" }
+        :formatter => proc { |v| "#{escape_regex(v)}\\Z" }
         }
       ],
       ['not_end', {
         :arel_predicate => 'does_not_match',
-        :formatter => proc { |v| "%#{escape_wildcards(v)}" }
+        :formatter => proc { |v| "#{escape_regex(v)}\\Z" }
         }
       ],
       ['true', {
@@ -81,8 +81,8 @@ module Ransack
 
   module_function
     # does nothing
-    def escape_wildcards(unescaped)
-      unescaped
+    def escape_regex(unescaped)
+      Regexp.escape(unescaped)
     end
   end
 end

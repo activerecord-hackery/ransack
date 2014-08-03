@@ -137,5 +137,19 @@ module Ransack
         expect(@s.result.selector).to eq({ "created_at" => { '$lte' => time } })
       end
     end
+
+    describe 'starts_with' do
+      it 'generates an starts_with' do
+        @s.name_start = 'ric'
+        expect(@s.result.selector).to eq({ "name" => /\Aric/i })
+      end
+    end
+
+    describe 'ends_with' do
+      it 'generates an ends_with' do
+        @s.name_end = 'ric'
+        expect(@s.result.selector).to eq({ "name" => /ric\Z/i })
+      end
+    end
   end
 end
