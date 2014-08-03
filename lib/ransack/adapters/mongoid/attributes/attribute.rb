@@ -1,4 +1,5 @@
 require 'ransack/adapters/mongoid/attributes/predications'
+require 'ransack/adapters/mongoid/attributes/order_predications'
 
 module Ransack
   module Adapters
@@ -12,19 +13,12 @@ module Ransack
           # include Arel::Math
 
           include ::Ransack::Adapters::Mongoid::Attributes::Predications
+          include ::Ransack::Adapters::Mongoid::Attributes::OrderPredications
 
           ###
           # Create a node for lowering this attribute
           def lower
             relation.lower self
-          end
-
-          def asc
-            { name => :asc }
-          end
-
-          def desc
-            { name => :desc }
           end
         end
 
