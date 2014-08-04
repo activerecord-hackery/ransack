@@ -13,7 +13,13 @@ RSpec::Core::RakeTask.new(:mongoid) do |rspec|
   rspec.rspec_opts = ['--backtrace']
 end
 
-task :default => :spec
+task :default do
+  if ENV['DB'] =~ /mongodb/
+    Rake::Task["mongoid"].invoke
+  else
+    Rake::Task["spec"].invoke
+  end
+end
 
 desc "Open an irb session with Ransack and the sample data used in specs"
 task :console do

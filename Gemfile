@@ -33,6 +33,6 @@ else
   end
 end
 
-if ENV['DB'] == 'mongodb'
+if ENV['DB'] =~ /mongodb/
   gem 'mongoid', '~> 4.0.0', require: false
 end
