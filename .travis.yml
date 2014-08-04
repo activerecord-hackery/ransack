@@ -1,3 +1,5 @@
+services: mongodb
+
 language: ruby
 
 before_install:
@@ -9,6 +11,7 @@ rvm:
   - 1.9.3
 
 env:
+  - RAILS=4-1-stable DB=mongodb
   - RAILS=4-1-stable DB=sqlite3
   - RAILS=4-1-stable DB=mysql
   - RAILS=4-1-stable DB=postgres
