@@ -46,7 +46,7 @@ module Ransack
           should match /sort_link desc/
         }
         it {
-          should match /Full Name &#9660;/
+          should match /Full Name&nbsp;&#9660;/
         }
       end
 
