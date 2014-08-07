@@ -38,18 +38,19 @@ module Ransack
         }
       ],
       ['true', {
-        :arel_predicate => 'eq',
+        :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
         :compounds => false,
         :type => :boolean,
-        :validator => proc { |v| TRUE_VALUES.include?(v) }
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| true }
         }
       ],
       ['false', {
-        :arel_predicate => 'eq',
+        :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
         :compounds => false,
         :type => :boolean,
-        :validator => proc { |v| TRUE_VALUES.include?(v) },
-        :formatter => proc { |v| !v }
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| false }
         }
       ],
       ['present', {
