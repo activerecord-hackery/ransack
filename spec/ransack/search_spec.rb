@@ -36,6 +36,11 @@ module Ransack
       it 'does not raise exception for string :params argument' do
         expect { Search.new(Person, '') }.not_to raise_error
       end
+
+      it "accepts base grouping condition as an option" do
+        expect(Nodes::Grouping).to receive(:new).with(kind_of(Context), 'or')
+        Search.new(Person, {}, {grouping: 'or'})
+      end
     end
 
     describe '#build' do
