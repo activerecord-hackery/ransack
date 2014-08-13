@@ -2,7 +2,7 @@ require 'ransack/visitor'
 
 module Ransack
   class Context
-    attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
+    attr_reader :object, :klass, :base, :engine, :arel_visitor
     attr_accessor :auth_object, :search_key
 
     class << self
