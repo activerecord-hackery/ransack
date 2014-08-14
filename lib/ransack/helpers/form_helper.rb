@@ -90,7 +90,7 @@ module Ransack
         link_to(
           [ERB::Util.h(name), order_indicator_for(current_dir)]
             .compact
-            .join(' ')
+            .join('&nbsp;')
             .html_safe,
           url,
           html_options
