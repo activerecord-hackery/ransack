@@ -9,12 +9,14 @@ module Ransack
       end
 
       it "keeps conditions with a false value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq" => false})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq" => false })
         Search.new(Person, :name_eq => false)
       end
 
       it "keeps conditions with a value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq" => 'foobar'})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq" => 'foobar' })
         Search.new(Person, :name_eq => 'foobar')
       end
 
@@ -24,12 +26,14 @@ module Ransack
       end
 
       it "keeps suffixed conditions with a false value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq_any" => [false]})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq_any" => [false] })
         Search.new(Person, :name_eq_any => [false])
       end
 
       it "keeps suffixed conditions with a value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq_any" => ['foobar']})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq_any" => ['foobar'] })
         Search.new(Person, :name_eq_any => ['foobar'])
       end
 
@@ -82,6 +86,11 @@ module Ransack
         search = Search.new(Person, :children_name_eq => '')
         condition = search.base[:children_name_eq]
         expect(condition).to be_nil
+      end
+
+      it 'accepts base grouping condition as an option' do
+        expect(Nodes::Grouping).to receive(:new).with(kind_of(Context), 'or')
+        Search.new(Person, {}, { grouping: 'or' })
       end
 
       it 'accepts arrays of groupings' do
@@ -246,12 +255,12 @@ module Ransack
         else
           all_or_load, uniq_or_distinct = :load, :distinct
         end
-        expect(search.result.send(all_or_load).size).
-          to eq(9000)
-        expect(search.result(:distinct => true).size).
-          to eq(10)
-        expect(search.result.send(all_or_load).send(uniq_or_distinct)).
-          to eq search.result(:distinct => true).send(all_or_load)
+        expect(search.result.send(all_or_load).size)
+        .to eq(9000)
+        expect(search.result(:distinct => true).size)
+        .to eq(10)
+        expect(search.result.send(all_or_load).send(uniq_or_distinct))
+        .to eq search.result(:distinct => true).send(all_or_load)
       end
     end
 
@@ -338,8 +347,8 @@ module Ransack
 
       it 'creates sorts based on multiple attributes and uppercase directions in hash format' do
         @s.sorts = {
-            '0' => { :name => 'id', :dir => 'DESC' },
-            '1' => { :name => 'name', :dir => 'ASC' }
+          '0' => { :name => 'id', :dir => 'DESC' },
+          '1' => { :name => 'name', :dir => 'ASC' }
         }
         expect(@s.sorts.size).to eq(2)
         expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
@@ -351,8 +360,8 @@ module Ransack
 
       it 'creates sorts based on multiple attributes and different directions in hash format' do
         @s.sorts = {
-            '0' => { :name => 'id', :dir => 'DESC' },
-            '1' => { :name => 'name', :dir => nil }
+          '0' => { :name => 'id', :dir => 'DESC' },
+          '1' => { :name => 'name', :dir => nil }
         }
         expect(@s.sorts.size).to eq(2)
         expect(@s.sorts).to be_all { |s| Nodes::Sort === s }

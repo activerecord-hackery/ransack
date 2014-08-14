@@ -12,7 +12,7 @@ and maintained by [Ryan Bigg](http://twitter.com/ryanbigg),
 [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
-and **_backwards compatibility is not a design goal._**
+and _backwards compatibility is not a design goal._
 
 Ransack enables the creation of both simple and
 [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
@@ -25,28 +25,36 @@ instead.
 
 ## Getting started
 
-In your Gemfile:
+Because ActiveRecord has been evolving quite a bit, your friendly Ransack is available in several flavors! Take your pick:
+
+In your Gemfile, for the last officially released gem for Rails 3, 4.0 and 4.1:
 
 ```ruby
-gem "ransack"  # Last officially released gem (compatible with Rails 3, 4.0 and 4.1!)
+gem 'ransack'
 ```
 
-Or if you want to use the latest updates on the master branch:
+Or if you want to use the latest updates on the Ransack master branch:
 
 ```ruby
-gem "ransack", github: "activerecord-hackery/ransack"  # Track git repo
+gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
-If you are on Rails 4.1, you may prefer to use the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
+If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
 
 ```ruby
-gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4.1"
+gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
-Similarly, if you are on Rails 4.0, you may prefer to use the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the same reasons:
+Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the same reasons:
 
 ```ruby
-gem "ransack", github: "activerecord-hackery/ransack", branch: "rails-4"
+gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
+```
+
+Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available for those on the edge:
+
+```ruby
+gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
 ```
 
 ## Usage
@@ -276,6 +284,36 @@ require File.expand_path('../boot', __FILE__)
 ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
 
 require 'rails/all'
+```
+
+### Authorization
+
+By default, Ransack exposes search on any model column, so make sure you
+sanitize your params and only pass the allowed keys. Alternately, you can define these class methods on your models to apply selective authorization
+based on a given auth object:
+
+* `def self.ransackable_attributes(auth_object = nil)`
+* `def self.ransackable_associations(auth_object = nil)`
+* `def self.ransackable_scopes(auth_object = nil)`
+* `def self.ransortable_attributes(auth_object = nil)` (for sorting)
+
+Any values not included in the arrays returned from these methods will be
+ignored. The auth object should be optional when building the search, and is
+ignored by default:
+
+```
+Employee.search({ salary_gt: 100000 }, { auth_object: current_user })
+```
+
+### Scopes
+
+Searching by scope requires defining a whitelist of `ransackable_scopes` on the
+model class. By default all class methods (e.g. scopes) are ignored. Scopes
+will be applied for matching `true` values, or for given values if the scope
+accepts a value:
+
+```
+Employee.search({ active: true, hired_since: '2013-01-01' })
 ```
 
 ### I18n

@@ -2,7 +2,7 @@ require 'ransack/visitor'
 
 module Ransack
   class Context
-    attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
+    attr_reader :object, :klass, :base, :engine, :arel_visitor
     attr_accessor :auth_object, :search_key
 
     class << self
@@ -77,6 +77,19 @@ module Ransack
       table_for(parent)[attr_name]
     end
 
+    def chain_scope(scope, args)
+      return unless @klass.method(scope) && args != false
+      @object = if scope_arity(scope) < 1 && args == true
+                  @object.public_send(scope)
+                else
+                  @object.public_send(scope, *args)
+                end
+    end
+
+    def scope_arity(scope)
+      @klass.method(scope).arity
+    end
+
     def bind(object, str)
       object.parent, object.attr_name = @bind_pairs[str]
     end
@@ -141,6 +154,10 @@ module Ransack
 
     def ransackable_association?(str, klass)
       klass.ransackable_associations(auth_object).include? str
+    end
+
+    def ransackable_scope?(str, klass)
+      klass.ransackable_scopes(auth_object).any? { |s| s.to_s == str }
     end
 
     def searchable_attributes(str = '')
