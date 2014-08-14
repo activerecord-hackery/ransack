@@ -25,7 +25,8 @@ instead.
 
 ## Getting started
 
-Because ActiveRecord has been evolving quite a bit, your friendly Ransack is available in several flavors! Take your pick:
+Because ActiveRecord has been evolving quite a bit, your friendly Ransack is
+available in several flavors! Take your pick:
 
 In your Gemfile, for the last officially released gem for Rails 3, 4.0 and 4.1:
 
@@ -39,19 +40,23 @@ Or if you want to use the latest updates on the Ransack master branch:
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
-If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
+If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which
+contains the latest updates, supports only 4.1, and is lighter and somewhat
+faster:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
-Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the same reasons:
+Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4)
+for the same reasons:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
 ```
 
-Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available for those on the edge:
+Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2)
+is available for those on the edge:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
@@ -186,9 +191,11 @@ end
                         html: { method: :post } do |f| %>
 ```
 
-Once you've done so, you can make use of the helpers in [Ransack::Helpers::FormBuilder](lib/ransack/helpers/form_builder.rb) to
+Once you've done so, you can make use of the helpers in
+[Ransack::Helpers::FormBuilder](lib/ransack/helpers/form_builder.rb) to
 construct much more complex search forms, such as the one on the
-[demo page](http://ransack-demo.heroku.com) (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
+[demo page](http://ransack-demo.heroku.com) (source code
+[here](https://github.com/activerecord-hackery/ransack_demo)).
 
 ### Ransack #search method
 
