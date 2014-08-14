@@ -289,7 +289,8 @@ require 'rails/all'
 ### Authorization
 
 By default, Ransack exposes search on any model column, so make sure you
-sanitize your params and only pass the allowed keys. Alternately, you can define these methods on your model classes to apply selective authorization
+sanitize your params and only pass the allowed keys. Alternately, you can
+define these methods on your model classes to apply selective authorization
 based on a given auth object:
 
 * `def ransackable_attributes(auth_object = nil)`
