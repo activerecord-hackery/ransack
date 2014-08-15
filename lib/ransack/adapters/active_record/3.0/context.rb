@@ -68,6 +68,22 @@ module Ransack
           .type
         end
 
+        # All dependent JoinAssociation items used in the search query
+        #
+        def join_associations
+          @join_dependency.join_associations
+        end
+
+        def join_sources
+          raise NotImplementedError,
+          "ActiveRecord 3.0 does not use join_sources or support joining relations with Arel::Join nodes. Use join_associations."
+        end
+
+        def alias_tracker
+          raise NotImplementedError,
+          "ActiveRecord 3.0 does not have an alias tracker"
+        end
+
         private
 
         def get_parent_and_attribute_name(str, parent = @base)
