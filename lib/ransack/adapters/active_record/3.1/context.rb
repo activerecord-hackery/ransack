@@ -73,6 +73,30 @@ module Ransack
           @engine.connection_pool.columns_hash[table][name].type
         end
 
+        def join_associations
+          @join_dependency.join_associations
+        end
+
+        # All dependent Arel::Join nodes used in the search query
+        #
+        # This could otherwise be done as `@object.arel.join_sources`, except
+        # that ActiveRecord's build_joins sets up its own JoinDependency.
+        # This extracts what we need to access the joins using our existing
+        # JoinDependency to track table aliases.
+        #
+        def join_sources
+          base = Arel::SelectManager.new(@object.engine, @object.table)
+          joins = @object.joins_values
+          joins.each do |assoc|
+            assoc.join_to(base)
+          end
+          base.join_sources
+        end
+
+        def alias_tracker
+          @join_dependency.alias_tracker
+        end
+
         private
 
         def get_parent_and_attribute_name(str, parent = @base)

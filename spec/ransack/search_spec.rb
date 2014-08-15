@@ -40,6 +40,13 @@ module Ransack
       it 'does not raise exception for string :params argument' do
         expect { Search.new(Person, '') }.not_to raise_error
       end
+
+      it 'accepts a context option' do
+        shared_context = Context.for(Person)
+        search1 = Search.new(Person, {"name_eq" => "A"}, context: shared_context)
+        search2 = Search.new(Person, {"name_eq" => "B"}, context: shared_context)
+        expect(search1.context).to be search2.context
+      end
     end
 
     describe '#build' do
