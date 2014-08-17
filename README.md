@@ -12,7 +12,7 @@ and maintained by [Ryan Bigg](http://twitter.com/ryanbigg),
 [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
-and _backwards compatibility is not a design goal._
+and backwards compatibility is not a design goal.
 
 Ransack enables the creation of both simple and
 [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
@@ -25,9 +25,10 @@ instead.
 
 ## Getting started
 
-Because ActiveRecord has been evolving quite a bit, your friendly Ransack is available in several flavors! Take your pick:
+Because ActiveRecord has been evolving quite a bit, your friendly Ransack is
+available in several flavors! Take your pick:
 
-In your Gemfile, for the last officially released gem for Rails 3, 4.0 and 4.1:
+In your Gemfile, for the last officially released gem for Rails 3.x, 4.0 and 4.1:
 
 ```ruby
 gem 'ransack'
@@ -39,19 +40,24 @@ Or if you want to use the latest updates on the Ransack master branch:
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
-If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which contains the latest updates, supports only 4.1, and is lighter and somewhat faster:
+If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which
+contains the latest updates, supports only 4.1, and is lighter and somewhat
+faster:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
-Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the same reasons:
+Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the
+same reasons:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
 ```
 
-Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available for those on the edge:
+Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is
+available for those on the edge (please see the note below in the I18n
+section about an important change with Rails 4.2):
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
@@ -112,9 +118,10 @@ end
 ####In your view
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
-which are defined in [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
+which are defined in
+[Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-#####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
+#####1. Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -128,9 +135,10 @@ which are defined in [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_hel
 
 `cont` (contains) and `start` (starts with) are just two of the available
 search predicates. See [Constants]
-(https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb) for a full list and the [wiki]
-(https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching) for more
-information.
+(https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb)
+for a full list and the [wiki]
+(https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching)
+for more information.
 
 The `search_form_for` answer format can be set like this:
 ```erb
@@ -139,7 +147,7 @@ The `search_form_for` answer format can be set like this:
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
-#####Ransack's `sort_link` helper is useful for creating table headers that are sortable links:
+#####2. Ransack's `sort_link` helper creates table headers that are sortable links:
 
 ```erb
 <%= content_tag :th, sort_link(@q, :name) %>
@@ -290,13 +298,13 @@ require 'rails/all'
 
 By default, Ransack exposes search on any model column, so make sure you
 sanitize your params and only pass the allowed keys. Alternately, you can
-define these methods on your model classes to apply selective authorization
+define these class methods on your models to apply selective authorization
 based on a given auth object:
 
-* `def ransackable_attributes(auth_object = nil)`
-* `def ransackable_associations(auth_object = nil)`
-* `def ransackable_scopes(auth_object = nil)`
-* `def ransortable_attributes(auth_object = nil)` (for sorting)
+* `def self.ransackable_attributes(auth_object = nil)`
+* `def self.ransackable_associations(auth_object = nil)`
+* `def self.ransackable_scopes(auth_object = nil)`
+* `def self.ransortable_attributes(auth_object = nil)` (for sorting)
 
 Any values not included in the arrays returned from these methods will be
 ignored. The auth object should be optional when building the search, and is
@@ -323,6 +331,43 @@ Ransack translation files are available in
 [Ransack::Locale](lib/ransack/locale). You may also be interested in one of the
 many translations for Ransack available at
 http://www.localeapp.com/projects/2999.
+
+If you are using Ransack with Rails 4.2.0.alpha after August 14, 2014,
+[Rails commit dfc3f88](https://github.com/rails/rails/commit/dfc3f88) changed
+how `placeholder` options in `search_field` / `text_field` helpers in Ransack
+search forms are handled by Rails. The following no longer works with Rails 4.2.0:
+
+```erb
+<%= search_form_for @q do |f| %>
+  <%= f.search_field :name_cont, placeholder: t(:name) %>
+  <%= f.search_field :articles_title_start, placeholder: t('.title') %>
+  <%= f.submit %>
+<% end %>
+```
+
+Instead of the placeholders being displayed correctly, the supplied values are
+ignored and a `humanized` version of the search method is displayed instead
+(i.e. "Name cont" and "Articles title start").
+
+The solution I've found so far is to pass `placeholder: true` instead and
+update the I18n files with translations by search method, scoped by
+`'helpers.placeholder.q'`, as shown:
+
+```erb
+<%= search_form_for @q do |f| %>
+  <%= f.search_field :name_cont, placeholder: true %>
+  <%= f.search_field :articles_title_start, placeholder: true %>
+  <%= f.submit %>
+<% end %>
+```
+```
+  # en.yml
+  helpers:
+    placeholder:
+      q:
+        name_cont: "Name contains..."
+        articles_title_start: "Article title starts with..."
+```
 
 ## Contributions
 
