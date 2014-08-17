@@ -12,7 +12,7 @@ and maintained by [Ryan Bigg](http://twitter.com/ryanbigg),
 [Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
-and **_backwards compatibility is not a design goal._**
+and backwards compatibility is not a design goal.
 
 Ransack enables the creation of both simple and
 [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
@@ -28,7 +28,7 @@ instead.
 Because ActiveRecord has been evolving quite a bit, your friendly Ransack is
 available in several flavors! Take your pick:
 
-In your Gemfile, for the last officially released gem for Rails 3, 4.0 and 4.1:
+In your Gemfile, for the last officially released gem for Rails 3.x, 4.0 and 4.1:
 
 ```ruby
 gem 'ransack'
@@ -56,8 +56,8 @@ gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
 ```
 
 Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is
-available for those on the edge (please see the note below about I18n with
-Rails 4.2):
+available for those on the edge (please see the note below in the I18n
+section about an important change with Rails 4.2):
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
@@ -121,8 +121,7 @@ The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in
 [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-#####Ransack's `search_form_for` helper replaces `form_for` for creating the
-view search form:
+#####1. Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -148,7 +147,7 @@ The `search_form_for` answer format can be set like this:
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
-#####Ransack's `sort_link` helper creates table headers that are sortable links:
+#####2. Ransack's `sort_link` helper creates table headers that are sortable links:
 
 ```erb
 <%= content_tag :th, sort_link(@q, :name) %>
@@ -334,8 +333,8 @@ many translations for Ransack available at
 http://www.localeapp.com/projects/2999.
 
 If you are using Ransack with Rails 4.2.0.alpha after August 14, 2014,
-[Rails commit dfc3f88](https://github.com/rails/rails/commit/dfc3f88)changed how
-`placeholder` options in `search_field` / `text_field` helpers in Ransack
+[Rails commit dfc3f88](https://github.com/rails/rails/commit/dfc3f88) changed
+how `placeholder` options in `search_field` / `text_field` helpers in Ransack
 search forms are handled by Rails. The following no longer works with Rails 4.2.0:
 
 ```erb
