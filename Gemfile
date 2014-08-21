@@ -5,7 +5,7 @@ gem 'rake'
 
 rails = ENV['RAILS'] || '4-1-stable'
 
-gem 'polyamorous', '~> 1.1.0'
+gem 'polyamorous', '~> 1.1'
 
 case rails
 when /\// # A path
