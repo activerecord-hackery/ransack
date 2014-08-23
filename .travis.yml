@@ -1,10 +1,9 @@
 language: ruby
 
-before_install:
-  - travis_retry gem install bundler
+sudo: false
 
 rvm:
-  - 2.0.0
+  - 2.0
   - 2.1
 
 env:
