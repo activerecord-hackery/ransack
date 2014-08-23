@@ -28,7 +28,9 @@ instead.
 Because ActiveRecord has been evolving quite a bit, your friendly Ransack is
 available in several flavors! Take your pick:
 
-In your Gemfile, for the last officially released gem for Rails 3.x, 4.0 and 4.1:
+In your Gemfile, for the last officially released gem compatible with Rails
+3.x, 4.0 and 4.1 (for Rails 4.2, use the dedicated `rails-4.2` branch described
+below for now):
 
 ```ruby
 gem 'ransack'
@@ -56,8 +58,7 @@ gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
 ```
 
 Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is
-available for those on the edge (please see the note below in the I18n
-section about an important change with Rails 4.2):
+available:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
@@ -331,43 +332,6 @@ Ransack translation files are available in
 [Ransack::Locale](lib/ransack/locale). You may also be interested in one of the
 many translations for Ransack available at
 http://www.localeapp.com/projects/2999.
-
-If you are using Ransack with Rails 4.2.0.alpha after August 14, 2014,
-[Rails commit dfc3f88](https://github.com/rails/rails/commit/dfc3f88) changed
-how `placeholder` options in `search_field` / `text_field` helpers in Ransack
-search forms are handled by Rails. The following no longer works with Rails 4.2.0:
-
-```erb
-<%= search_form_for @q do |f| %>
-  <%= f.search_field :name_cont, placeholder: t(:name) %>
-  <%= f.search_field :articles_title_start, placeholder: t('.title') %>
-  <%= f.submit %>
-<% end %>
-```
-
-Instead of the placeholders being displayed correctly, the supplied values are
-ignored and a `humanized` version of the search method is displayed instead
-(i.e. "Name cont" and "Articles title start").
-
-The solution I've found so far is to pass `placeholder: true` instead and
-update the I18n files with translations by search method, scoped by
-`'helpers.placeholder.q'`, as shown:
-
-```erb
-<%= search_form_for @q do |f| %>
-  <%= f.search_field :name_cont, placeholder: true %>
-  <%= f.search_field :articles_title_start, placeholder: true %>
-  <%= f.submit %>
-<% end %>
-```
-```
-  # en.yml
-  helpers:
-    placeholder:
-      q:
-        name_cont: "Name contains..."
-        articles_title_start: "Article title starts with..."
-```
 
 ## Contributions
 
