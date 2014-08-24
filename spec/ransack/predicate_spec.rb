@@ -80,6 +80,38 @@ module Ransack
       end
     end
 
+    describe 'true' do
+      it 'generates an equality condition for boolean true' do
+        @s.awesome_true = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_true}/
+      end
+
+      it 'generates an inequality condition for boolean true' do
+        @s.awesome_true = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} != #{
+          ActiveRecord::Base.connection.quoted_true}/
+      end
+    end
+
+    describe 'false' do
+      it 'generates an equality condition for boolean false' do
+        @s.awesome_false = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_false}/
+      end
+
+      it 'generates an inequality condition for boolean false' do
+        @s.awesome_false = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} != #{
+          ActiveRecord::Base.connection.quoted_false}/
+      end
+    end
+
     describe 'null' do
       it 'generates a value IS NULL query' do
         @s.name_null = true
