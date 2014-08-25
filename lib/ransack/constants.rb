@@ -12,7 +12,7 @@ module Ransack
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
-      ['icont', {
+      ['i_cont', {
         :arel_predicate => 'i_matches',
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
       }
@@ -22,7 +22,7 @@ module Ransack
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
-      ['inot_cont', {
+      ['i_not_cont', {
         :arel_predicate => 'i_does_not_match',
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
       }
