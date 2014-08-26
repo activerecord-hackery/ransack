@@ -183,6 +183,12 @@ module Ransack
           specify { expect { subject }.not_to raise_error }
         end
       end
+
+      it 'does not modify the parameters' do
+        params = { :name_eq => '' }
+        expect { Search.new(Person, params)}.not_to change { params }
+      end
+
     end
 
     describe '#result' do
