@@ -55,8 +55,24 @@ module Ransack
         :formatter => proc { |v| true }
         }
       ],
+      ['not_true', {
+        :arel_predicate => proc { |v| v ? 'not_eq' : 'eq' },
+        :compounds => false,
+        :type => :boolean,
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| true }
+        }
+      ],
       ['false', {
         :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
+        :compounds => false,
+        :type => :boolean,
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| false }
+        }
+      ],
+      ['not_false', {
+        :arel_predicate => proc { |v| v ? 'not_eq' : 'eq' },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
