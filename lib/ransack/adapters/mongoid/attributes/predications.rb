@@ -28,7 +28,7 @@ module Ransack
           end
 
           def in other
-            { name => { "$in" => other } }
+            { name => { "$in" => other } }.to_inquiry
           end
 
           def in_any others
@@ -40,7 +40,7 @@ module Ransack
           end
 
           def not_in other
-            { "$not" => { name => { "$in" => other } } }
+            { "$not" => { name => { "$in" => other } } }.to_inquiry
           end
 
           def not_in_any others
@@ -88,7 +88,7 @@ module Ransack
           end
 
           def gt right
-            { name => { '$gt' => right } }
+            { name => { '$gt' => right } }.to_inquiry
           end
 
           def gt_any others
@@ -100,7 +100,7 @@ module Ransack
           end
 
           def lt right
-            { name => { '$lt' => right } }
+            { name => { '$lt' => right } }.to_inquiry
           end
 
           def lt_any others
