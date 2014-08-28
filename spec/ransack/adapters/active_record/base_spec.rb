@@ -56,7 +56,7 @@ module Ransack
 
           it 'does not modify the parameters' do
             params = { :name_eq => '' }
-            expect { Person.search(params)}.not_to change { params }
+            expect { Person.search(params) }.not_to change { params }
           end
         end
 

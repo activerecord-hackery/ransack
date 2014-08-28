@@ -16,7 +16,7 @@ module Ransack
     def initialize(object, params = {}, options = {})
       if params.is_a? Hash
         params = params.dup
-        params.delete_if { |k, v| [*v].all?{|i| i.blank? && i != false } }
+        params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false } }
       else
         params = {}
       end
