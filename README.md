@@ -297,29 +297,7 @@ require 'rails/all'
 
 ### Authorization
 
-        def ransackable_attributes(auth_object = nil)
-          column_names + _ransackers.keys
-        end
-
-        def ransortable_attributes(auth_object = nil)
-          # Here so users can overwrite the attributes
-          # that show up in the sort_select
-          ransackable_attributes(auth_object)
-        end
-
-        def ransackable_associations(auth_object = nil)
-          reflect_on_all_associations.map { |a| a.name.to_s }
-        end
-
-        # For overriding with a whitelist of symbols
-        def ransackable_scopes(auth_object = nil)
-          []
-        end
-
-
-### Authorization
-
-Ransack adds four methods that allow customizing authorization:
+Ransack add four methods to `ActiveRecord::Base`:
 
 * `def self.ransackable_attributes(auth_object = nil)`
 * `def self.ransackable_associations(auth_object = nil)`
@@ -328,10 +306,10 @@ Ransack adds four methods that allow customizing authorization:
 
 By default, Ransack exposes search on any model column, so it is a good idea to
 sanitize your params and only pass the allowed keys. However, you can
-define these four class methods on your models to apply selective authorization
-filters or search scopes.
+redefine these four class methods on your models to apply selective
+authorization or search scopes.
 
-Here is how they are implemented in Ransack:
+Here is how these four methods are implemented in Ransack:
 
 ```ruby
 def ransackable_attributes(auth_object = nil)
@@ -343,22 +321,21 @@ def ransackable_associations(auth_object = nil)
   # Returns the names of all associations.
   reflect_on_all_associations.map { |a| a.name.to_s }
   end
-```
-
-def ransortable_attributes(auth_object = nil)
-  # Here so users can overwrite the attributes that show up in the sort_select.
-  ransackable_attributes(auth_object)
-end
 
 def ransackable_scopes(auth_object = nil)
   # For overriding with a whitelist of symbols.
   []
 end
+
+def ransortable_attributes(auth_object = nil)
+  # Here so users can overwrite the attributes that show up in the sort_select.
+  ransackable_attributes(auth_object)
+end
 ```
 
-All four methods can receive an optional parameter, `auth_object`. When you
-call the search or ransack method on your model, you can provide a value for an
-`:auth_object` key in the options hash, which can be used in your own
+All four methods can receive a single optional parameter, `auth_object`. When
+you call the search or ransack method on your model, you can provide a value
+for an `:auth_object` key in the options hash, which can be used in your own
 overridden methods. Putting this all together, you get the following example:
 
 ```ruby
@@ -372,6 +349,7 @@ class Article
   end
 end
 ```
+In rails console:
 ```
 > Article
 => Article(id: integer, person_id: integer, title: string, body: text) 
