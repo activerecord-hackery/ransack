@@ -297,17 +297,18 @@ require 'rails/all'
 
 ### Authorization
 
-Ransack add four methods to `ActiveRecord::Base`:
+Ransack add four methods to `ActiveRecord::Base` for your application:
 
-* `def self.ransackable_attributes(auth_object = nil)`
-* `def self.ransackable_associations(auth_object = nil)`
-* `def self.ransackable_scopes(auth_object = nil)`
-* `def self.ransortable_attributes(auth_object = nil)` (for sorting)
+```ruby
+def self.ransackable_attributes(auth_object = nil)
+def self.ransackable_associations(auth_object = nil)
+def self.ransackable_scopes(auth_object = nil)
+def self.ransortable_attributes(auth_object = nil)
+```
 
-By default, Ransack exposes search on any model column, so it is a good idea to
-sanitize your params and only pass the allowed keys. However, you can
-redefine these four class methods on your models to apply selective
-authorization or search scopes.
+By default, Ransack exposes search on any model column. However, you can
+redefine these four class methods on models in your application to apply
+selective authorization on a per-model basis.
 
 Here is how these four methods are implemented in Ransack:
 
@@ -335,21 +336,25 @@ end
 
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
-for an `:auth_object` key in the options hash, which can be used in your own
-overridden methods. Putting this all together, you get the following example:
+for an `auth_object` key in the options hash which can be used by your own
+overridden methods.
+
+Here is an example that puts all this together:
 
 ```ruby
 class Article
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == 'admin'
+      # whiteliste all attributes for admin
       super
     else
-      super & ['title', 'body']
+      # whitelist only the title and body attributes for other users
+      super & %w(title body) 
     end
   end
 end
 ```
-In rails console:
+In `rails console`:
 ```
 > Article
 => Article(id: integer, person_id: integer, title: string, body: text) 
@@ -363,7 +368,7 @@ In rails console:
 > Article.search(id_eq: 1).result.to_sql
 => SELECT "articles".* FROM "articles"  # Note that search param was ignored!
 
-> Article.search({id_eq: 1}, auth_object: 'admin').result.to_sql
+> Article.search({ id_eq: 1 }, { auth_object: 'admin' }).result.to_sql
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
 
