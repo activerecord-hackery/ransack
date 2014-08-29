@@ -297,18 +297,11 @@ require 'rails/all'
 
 ### Authorization
 
-Ransack add four methods to `ActiveRecord::Base` for your application:
-
-```ruby
-def self.ransackable_attributes(auth_object = nil)
-def self.ransackable_associations(auth_object = nil)
-def self.ransackable_scopes(auth_object = nil)
-def self.ransortable_attributes(auth_object = nil)
-```
-
-By default, Ransack exposes search on any model column. However, you can
-redefine these four class methods on models in your application to apply
-selective authorization on a per-model basis.
+By default, search is authorized on any column of the model. Ransack implements
+four class methods to `ActiveRecord::Base` that you can redefine as class
+methods on models in your application to apply selective authorization:
+`ransackable_attributes`, `ransackable_associations`, `ransackable_scopes`,
+and `ransortable_attributes`.
 
 Here is how these four methods are implemented in Ransack:
 
@@ -336,16 +329,16 @@ end
 
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
-for an `auth_object` key in the options hash which can be used by your own
+for an `auth_object` key in the options hash, which can be used by your own
 overridden methods.
 
-Here is an example that puts all this together:
+Here is an example that puts all this together. In an `Article` model:
 
 ```ruby
 class Article
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == 'admin'
-      # whiteliste all attributes for admin
+      # whitelist all attributes for admin
       super
     else
       # whitelist only the title and body attributes for other users
