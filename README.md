@@ -61,8 +61,7 @@ gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
 ```
 
 Last but definitely not least, an experimental [Rails 4.2 branch]
-(https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available
-for those on the edge:
+(https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
@@ -299,12 +298,12 @@ ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
 require 'rails/all'
 ```
 
-### Authorization
+### Authorization (whitelisting/blacklisting)
 
-By default, search is authorized on any column of your model. Ransack adds four
-methods to `ActiveRecord::Base` that you can redefine as class methods in
-models in your application, to apply selective authorization:
-`ransackable_attributes`, `ransackable_associations`, `ransackable_scopes`, and
+By default, searching and sorting are authorized on any column of your model.
+Ransack adds four methods to `ActiveRecord::Base` that you can redefine as
+class methods in your models to apply selective authorization:
+`ransackable_attributes`, `ransackable_associations`, `ransackable_scopes` and
 `ransortable_attributes`.
 
 Here is how these four methods are implemented in Ransack:
@@ -335,13 +334,13 @@ Any values not returned from these methods will be ignored by Ransack.
 
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
-for an `auth_object` key in the options hash, which can be used by your own
+for an `auth_object` key in the options hash which can be used by your own
 overridden methods.
 
-Here is an example that puts all this together, from
-[http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/]
-(this blog post by Ernie Miller). In an `Article` model, add the following
-`ransackable_attributes` class method:
+Here is an example that puts all this together from
+[this blog post by Ernie Miller]
+(http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
+In an `Article` model, add the following `ransackable_attributes` class method:
 
 ```ruby
 class Article
@@ -356,7 +355,7 @@ class Article
   end
 end
 ```
-In `rails console`:
+Then, in `rails console`:
 ```
 > Article
 => Article(id: integer, person_id: integer, title: string, body: text) 
@@ -373,11 +372,12 @@ In `rails console`:
 > Article.search({ id_eq: 1 }, { auth_object: 'admin' }).result.to_sql
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
+That's it! Now you know how to whitelist/blacklist various elements in Ransack.
 
 ### Scopes
 
 Continuing on from the preceding section, searching by scope requires defining
-a whitelist of `ransackable_scopes` on the model class. By default all class
+a whitelist of `ransackable_scopes` on the model class. By default, all class
 methods (e.g. scopes) are ignored. Scopes will be applied for matching `true`
 values, or for given values if the scope accepts a value:
 
