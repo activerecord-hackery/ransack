@@ -9,7 +9,8 @@ Ransack is a rewrite of [MetaSearch]
 (https://github.com/activerecord-hackery/meta_search)
 created by [Ernie Miller](http://twitter.com/erniemiller)
 and maintained by [Ryan Bigg](http://twitter.com/ryanbigg),
-[Jon Atack](http://twitter.com/jonatack) and a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
+[Jon Atack](http://twitter.com/jonatack) and a great group of [contributors]
+(https://github.com/activerecord-hackery/ransack/graphs/contributors).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
 and backwards compatibility is not a design goal.
@@ -42,7 +43,8 @@ Or if you want to use the latest updates on the Ransack master branch:
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
-If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which
+If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch]
+(https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which
 contains the latest updates, supports only 4.1, and is lighter and somewhat
 faster:
 
@@ -50,15 +52,17 @@ faster:
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
-Similarly, if you are using Rails 4.0, you may prefer the dedicated [Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4) for the
-same reasons:
+Similarly, if you are using Rails 4.0, you may prefer the dedicated
+[Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4)
+for the same reasons:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
 ```
 
-Last but definitely not least, an experimental [Rails 4.2 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is
-available for those on the edge:
+Last but definitely not least, an experimental [Rails 4.2 branch]
+(https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available
+for those on the edge:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
@@ -297,11 +301,11 @@ require 'rails/all'
 
 ### Authorization
 
-By default, search is authorized on any column of the model. Ransack implements
-four class methods to `ActiveRecord::Base` that you can redefine as class
-methods on models in your application to apply selective authorization:
-`ransackable_attributes`, `ransackable_associations`, `ransackable_scopes`,
-and `ransortable_attributes`.
+By default, search is authorized on any column of your model. Ransack adds four
+methods to `ActiveRecord::Base` that you can redefine as class methods in
+models in your application, to apply selective authorization:
+`ransackable_attributes`, `ransackable_associations`, `ransackable_scopes`, and
+`ransortable_attributes`.
 
 Here is how these four methods are implemented in Ransack:
 
@@ -327,12 +331,17 @@ def ransortable_attributes(auth_object = nil)
 end
 ```
 
+Any values not returned from these methods will be ignored by Ransack.
+
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
 for an `auth_object` key in the options hash, which can be used by your own
 overridden methods.
 
-Here is an example that puts all this together. In an `Article` model:
+Here is an example that puts all this together, from
+[http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/]
+(this blog post by Ernie Miller). In an `Article` model, add the following
+`ransackable_attributes` class method:
 
 ```ruby
 class Article
@@ -365,23 +374,17 @@ In `rails console`:
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
 
-Any values not included in the arrays returned from these methods will be
-ignored. The auth object should be optional when building the search, and is
-ignored by default:
-
-```
-Employee.search({ salary_gt: 100000 }, { auth_object: current_user })
-```
-
 ### Scopes
 
-Searching by scope requires defining a whitelist of `ransackable_scopes` on the
-model class. By default all class methods (e.g. scopes) are ignored. Scopes
-will be applied for matching `true` values, or for given values if the scope
-accepts a value:
+Continuing on from the preceding section, searching by scope requires defining
+a whitelist of `ransackable_scopes` on the model class. By default all class
+methods (e.g. scopes) are ignored. Scopes will be applied for matching `true`
+values, or for given values if the scope accepts a value:
 
-```
+```ruby
 Employee.search({ active: true, hired_since: '2013-01-01' })
+
+Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
 ### I18n
