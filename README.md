@@ -297,15 +297,97 @@ require 'rails/all'
 
 ### Authorization
 
-By default, Ransack exposes search on any model column, so make sure you
-sanitize your params and only pass the allowed keys. Alternately, you can
-define these class methods on your models to apply selective authorization
-based on a given auth object:
+        def ransackable_attributes(auth_object = nil)
+          column_names + _ransackers.keys
+        end
+
+        def ransortable_attributes(auth_object = nil)
+          # Here so users can overwrite the attributes
+          # that show up in the sort_select
+          ransackable_attributes(auth_object)
+        end
+
+        def ransackable_associations(auth_object = nil)
+          reflect_on_all_associations.map { |a| a.name.to_s }
+        end
+
+        # For overriding with a whitelist of symbols
+        def ransackable_scopes(auth_object = nil)
+          []
+        end
+
+
+### Authorization
+
+Ransack adds four methods that allow customizing authorization:
 
 * `def self.ransackable_attributes(auth_object = nil)`
 * `def self.ransackable_associations(auth_object = nil)`
 * `def self.ransackable_scopes(auth_object = nil)`
 * `def self.ransortable_attributes(auth_object = nil)` (for sorting)
+
+By default, Ransack exposes search on any model column, so it is a good idea to
+sanitize your params and only pass the allowed keys. However, you can
+define these four class methods on your models to apply selective authorization
+filters or search scopes.
+
+Here is how they are implemented in Ransack:
+
+```ruby
+def ransackable_attributes(auth_object = nil)
+  # Returns the string names of all columns and any defined ransackers.
+  column_names + _ransackers.keys
+end
+
+def ransackable_associations(auth_object = nil)
+  # Returns the names of all associations.
+  reflect_on_all_associations.map { |a| a.name.to_s }
+  end
+```
+
+def ransortable_attributes(auth_object = nil)
+  # Here so users can overwrite the attributes that show up in the sort_select.
+  ransackable_attributes(auth_object)
+end
+
+def ransackable_scopes(auth_object = nil)
+  # For overriding with a whitelist of symbols.
+  []
+end
+```
+
+All four methods can receive an optional parameter, `auth_object`. When you
+call the search or ransack method on your model, you can provide a value for an
+`:auth_object` key in the options hash, which can be used in your own
+overridden methods. Putting this all together, you get the following example:
+
+```ruby
+class Article
+  def self.ransackable_attributes(auth_object = nil)
+    if auth_object == 'admin'
+      super
+    else
+      super & ['title', 'body']
+    end
+  end
+end
+```
+```
+> Article
+=> Article(id: integer, person_id: integer, title: string, body: text) 
+
+> Article.ransackable_attributes
+=> ["title", "body"] 
+
+> Article.ransackable_attributes('admin')
+=> ["id", "person_id", "title", "body"] 
+
+> Article.search(id_eq: 1).result.to_sql
+=> SELECT "articles".* FROM "articles"  # Note that search param was ignored!
+
+> Article.search({id_eq: 1}, auth_object: 'admin').result.to_sql
+=> SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
+```
 
 Any values not included in the arrays returned from these methods will be
 ignored. The auth object should be optional when building the search, and is
