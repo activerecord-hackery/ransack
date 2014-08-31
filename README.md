@@ -337,15 +337,19 @@ you call the search or ransack method on your model, you can provide a value
 for an `auth_object` key in the options hash which can be used by your own
 overridden methods.
 
-Here is an example that puts all this together from
+Here is an example that puts all this together, adapted from
 [this blog post by Ernie Miller]
 (http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
-In an `Article` model, add the following `ransackable_attributes` class method:
-
+In an `Article` model, add the following `ransackable_attributes` class method
+(preferably private):
 ```ruby
-class Article
+# article.rb
+class Article < ActiveRecord::Base
+
+  private
+
   def self.ransackable_attributes(auth_object = nil)
-    if auth_object == 'admin'
+    if auth_object == :admin
       # whitelist all attributes for admin
       super
     else
@@ -355,21 +359,38 @@ class Article
   end
 end
 ```
-Then, in `rails console`:
+Here is example code for the `articles_controller`:
+```ruby
+# articles_controller.rb
+class ArticlesController < ApplicationController
+
+  def index
+    @q = Article.search(params[:q], auth_object: set_ransack_auth_object)
+    @articles = @q.result
+  end
+  
+  private
+
+  def set_ransack_auth_object
+    current_user.admin? ? :admin : nil
+  end
+end
 ```
+Trying it out in `rails console`:
+```ruby
 > Article
 => Article(id: integer, person_id: integer, title: string, body: text) 
 
 > Article.ransackable_attributes
 => ["title", "body"] 
 
-> Article.ransackable_attributes('admin')
+> Article.ransackable_attributes(:admin)
 => ["id", "person_id", "title", "body"] 
 
 > Article.search(id_eq: 1).result.to_sql
 => SELECT "articles".* FROM "articles"  # Note that search param was ignored!
 
-> Article.search({ id_eq: 1 }, { auth_object: 'admin' }).result.to_sql
+> Article.search({ id_eq: 1 }, { auth_object: :admin }).result.to_sql
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
 That's it! Now you know how to whitelist/blacklist various elements in Ransack.
