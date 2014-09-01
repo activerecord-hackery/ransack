@@ -213,9 +213,10 @@ Article.search(params[:q])
 Article.ransack(params[:q])
 ```
 
-### has_many and belongs_to associations
+### Associations
 
-You can easily use Ransack to search in associated objects.
+You can easily use Ransack to search for objects in `has_many` and `belongs_to`
+associations.
 
 Given you have these associations ...
 
@@ -245,8 +246,8 @@ end
 ```ruby
 class SupervisorsController < ApplicationController
   def index
-    @search = Supervisor.search(params[:q])
-    @supervisors = @search.result.includes(:department, :employees)
+    @q = Supervisor.search(params[:q])
+    @supervisors = @q.result.includes(:department, :employees)
   end
 end
 ```
@@ -254,7 +255,7 @@ end
 ... you might set up your form like this ...
 
 ```erb
-<%= search_form_for @search do |f| %>
+<%= search_form_for @q do |f| %>
   <%= f.label :last_name_cont %>
   <%= f.search_field :last_name_cont %>
 
