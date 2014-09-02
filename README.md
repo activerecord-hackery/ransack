@@ -391,6 +391,9 @@ Trying it out in `rails console`:
 > Article.search(id_eq: 1).result.to_sql
 => SELECT "articles".* FROM "articles"  # Note that search param was ignored!
 
+> Article.search({ id_eq: 1 }, { auth_object: nil }).result.to_sql
+=> SELECT "articles".* FROM "articles"  # Search param still ignored!
+
 > Article.search({ id_eq: 1 }, { auth_object: :admin }).result.to_sql
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
