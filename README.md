@@ -306,7 +306,6 @@ based on a given auth object:
 
 * `def self.ransackable_attributes(auth_object = nil)`
 * `def self.ransackable_associations(auth_object = nil)`
-* `def self.ransackable_scopes(auth_object = nil)`
 * `def self.ransortable_attributes(auth_object = nil)` (for sorting)
 
 Any values not included in the arrays returned from these methods will be
@@ -315,17 +314,6 @@ ignored by default:
 
 ```
 Employee.search({ salary_gt: 100000 }, { auth_object: current_user })
-```
-
-### Scopes
-
-Searching by scope requires defining a whitelist of `ransackable_scopes` on the
-model class. By default all class methods (e.g. scopes) are ignored. Scopes
-will be applied for matching `true` values, or for given values if the scope
-accepts a value:
-
-```
-Employee.search({ active: true, hired_since: '2013-01-01' })
 ```
 
 ### I18n
