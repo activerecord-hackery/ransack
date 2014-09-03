@@ -189,11 +189,21 @@ module Ransack
               :build, Polyamorous::Join.new(name, @join_type, klass), parent
               )
             found_association = @join_dependency.join_associations.last
+            apply_default_conditions(found_association)
             # Leverage the stashed association functionality in AR
             @object = @object.joins(found_association)
           end
 
           found_association
+        end
+
+        def apply_default_conditions(join_association)
+          reflection = join_association.reflection
+          default_scope = join_association.active_record.scoped
+          default_conditions = default_scope.arel.where_clauses
+          if default_conditions.any?
+            reflection.options[:conditions] = default_conditions
+          end
         end
 
       end

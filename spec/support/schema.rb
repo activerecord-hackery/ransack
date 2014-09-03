@@ -88,6 +88,12 @@ class Article < ActiveRecord::Base
   has_many :comments
   has_and_belongs_to_many :tags
   has_many :notes, :as => :notable
+
+  if ActiveRecord::VERSION::STRING >= '3.1'
+    default_scope { where("'default_scope' = 'default_scope'") }
+  else # Rails 3.0 does not accept a block
+    default_scope where("'default_scope' = 'default_scope'")
+  end
 end
 
 module Namespace
