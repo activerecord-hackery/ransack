@@ -119,6 +119,15 @@ def index
 end
 ```
 
+The default `AND` grouping can be changed to `OR`:
+
+```ruby
+def index
+  @q = Person.search(name_cont: 'foo', email_cont: 'bar', m: 'OR')
+  @people = @q.result
+end
+```
+
 ####In your view
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
@@ -129,10 +138,15 @@ which are defined in
 
 ```erb
 <%= search_form_for @q do |f| %>
+  # Search if the name field contains...
   <%= f.label :name_cont %>
   <%= f.search_field :name_cont %>
+  # Search if an associated articles.title starts with...
   <%= f.label :articles_title_start %>
   <%= f.search_field :articles_title_start %>
+  # Attributes may be chained. Search multiple attributes for one value...
+  <%= f.label :name_or_description_or_email_cont %>
+  <%= f.search_field :name_or_description_or_email_cont %>
   <%= f.submit %>
 <% end %>
 ```
