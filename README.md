@@ -176,7 +176,7 @@ which are defined in
 
   # Attributes may be chained. Search multiple attributes for one value...
   <%= f.label :name_or_description_or_email_or_articles_title_cont %>
-  <%= f.search_field :name_or_description_or_email_cont %>
+  <%= f.search_field :name_or_description_or_email_or_articles_title_cont %>
 
   <%= f.submit %>
 <% end %>
