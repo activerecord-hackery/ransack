@@ -119,42 +119,6 @@ def index
 end
 ```
 
-The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
-query hash. In Rails console:
-
-```ruby
-artists = Artist.search(name_cont: 'foo', style_cont: 'bar', m: 'or')
-=> Ransack::Search<class: Artist, base: Grouping <conditions: [
-  Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
-  Condition <attributes: ["style"], predicate: cont, values: ["bar"]>
-  ], combinator: or>>
-
-artists.result.to_sql
-=> "SELECT \"artists\".* FROM \"artists\"
-    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
-    OR \"artists\".\"style\" ILIKE '%bar%'))"
-```
-
-This works with associations as well. Imagine an Artist model that has many
-Memberships, and many Musicians through Memberships:
-
-```ruby
-artists = Artist.search(name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
-=> Ransack::Search<class: Artist, base: Grouping <conditions: [
-  Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
-  Condition <attributes: ["musicians_email"], predicate: cont, values: ["bar"]>
-  ], combinator: or>>
-
-artists.result.to_sql
-=> "SELECT \"artists\".* FROM \"artists\"
-    LEFT OUTER JOIN \"memberships\"
-      ON \"memberships\".\"artist_id\" = \"artists\".\"id\"
-    LEFT OUTER JOIN \"musicians\"
-      ON \"musicians\".\"id\" = \"memberships\".\"musician_id\"
-    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
-    OR \"musicians\".\"email\" ILIKE '%bar%'))"
-```
-
 ####In your view
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
@@ -329,21 +293,6 @@ information about `ransacker` methods can be found [here in the wiki]
 (https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
 Feel free to contribute working `ransacker` code examples to the wiki!
 
-### Using SimpleForm
-
-If you want to combine form builders of ransack and SimpleForm, just set the
-RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in
-``config/application.rb`` before ``require 'rails/all'`` and of course use
-``gem 'simple_form'`` in your ``Gemfile``:
-
-```ruby
-require File.expand_path('../boot', __FILE__)
-
-ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
-
-require 'rails/all'
-```
-
 ### Authorization (whitelisting/blacklisting)
 
 By default, searching and sorting are authorized on any column of your model.
@@ -455,6 +404,61 @@ values, or for given values if the scope accepts a value:
 Employee.search({ active: true, hired_since: '2013-01-01' })
 
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
+```
+
+### Grouping queries by OR instead of AND
+
+The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
+query hash. In the Rails console:
+
+```ruby
+artists = Artist.search(name_cont: 'foo', style_cont: 'bar', m: 'or')
+=> Ransack::Search<class: Artist, base: Grouping <conditions: [
+  Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
+  Condition <attributes: ["style"], predicate: cont, values: ["bar"]>
+  ], combinator: or>>
+
+artists.result.to_sql
+=> "SELECT \"artists\".* FROM \"artists\"
+    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
+    OR \"artists\".\"style\" ILIKE '%bar%'))"
+```
+
+Try it with and without `m: 'or'` in the query hash. Notice that the combinator becomes `or` instead of the default `and`, and the SQL query becomes `WHERE...OR` instead of `WHERE...AND`.
+
+This works with associations as well. Imagine an Artist model that has many
+Memberships, and many Musicians through Memberships:
+
+```ruby
+artists = Artist.search(name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
+=> Ransack::Search<class: Artist, base: Grouping <conditions: [
+  Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
+  Condition <attributes: ["musicians_email"], predicate: cont, values: ["bar"]>
+  ], combinator: or>>
+
+artists.result.to_sql
+=> "SELECT \"artists\".* FROM \"artists\"
+    LEFT OUTER JOIN \"memberships\"
+      ON \"memberships\".\"artist_id\" = \"artists\".\"id\"
+    LEFT OUTER JOIN \"musicians\"
+      ON \"musicians\".\"id\" = \"memberships\".\"musician_id\"
+    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
+    OR \"musicians\".\"email\" ILIKE '%bar%'))"
+```
+
+### Using SimpleForm
+
+If you want to combine form builders of ransack and SimpleForm, just set the
+RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in
+``config/application.rb`` before ``require 'rails/all'`` and of course use
+``gem 'simple_form'`` in your ``Gemfile``:
+
+```ruby
+require File.expand_path('../boot', __FILE__)
+
+ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
+
+require 'rails/all'
 ```
 
 ### I18n
