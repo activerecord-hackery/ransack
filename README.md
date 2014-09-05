@@ -233,7 +233,7 @@ Given you have these associations ...
 class Employee < ActiveRecord::Base
   belongs_to :supervisor
 
-  # has attribute last_name:string
+  # has attributes first_name:string and last_name:string
 end
 
 class Department < ActiveRecord::Base
@@ -246,7 +246,7 @@ class Supervisor < ActiveRecord::Base
   belongs_to :department
   has_many :employees
 
-  # has attributes first_name:string and last_name:string
+  # has attribute last_name:string
 end
 ```
 
