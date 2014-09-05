@@ -43,8 +43,12 @@ module Ransack
 
       it 'accepts a context option' do
         shared_context = Context.for(Person)
-        search1 = Search.new(Person, {"name_eq" => "A"}, context: shared_context)
-        search2 = Search.new(Person, {"name_eq" => "B"}, context: shared_context)
+        search1 = Search.new(
+          Person, { "name_eq" => "A" }, context: shared_context
+          )
+        search2 = Search.new(
+          Person, { "name_eq" => "B" }, context: shared_context
+          )
         expect(search1.context).to be search2.context
       end
     end
@@ -174,7 +178,9 @@ module Ransack
 
         context "when ignore_unknown_conditions is false" do
           before do
-            Ransack.configure { |config| config.ignore_unknown_conditions = false }
+            Ransack.configure { |config|
+              config.ignore_unknown_conditions = false
+            }
           end
 
           specify { expect { subject }.to raise_error ArgumentError }
@@ -182,7 +188,9 @@ module Ransack
 
         context "when ignore_unknown_conditions is true" do
           before do
-            Ransack.configure { |config| config.ignore_unknown_conditions = true }
+            Ransack.configure { |config|
+              config.ignore_unknown_conditions = true
+            }
           end
 
           specify { expect { subject }.not_to raise_error }
