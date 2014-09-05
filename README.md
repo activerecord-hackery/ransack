@@ -45,8 +45,8 @@ gem 'ransack', github: 'activerecord-hackery/ransack'
 
 If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch]
 (https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which
-contains the latest updates, supports only 4.1, and is lighter and somewhat
-faster:
+usually contains the latest updates on master (albeit sometimes with some
+delay), supports only 4.1, and is lighter and somewhat faster:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
@@ -119,13 +119,38 @@ def index
 end
 ```
 
-The default `AND` grouping can be changed to `OR`:
+The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
+query hash:
 
 ```ruby
 def index
-  @q = Person.search(name_cont: 'foo', email_cont: 'bar', m: 'OR')
+  @q = Artist.search(artist_name_cont: 'foo', music_style_cont: 'bar', m: 'or')
   @people = @q.result
 end
+
+=> "SELECT \"artists\".* FROM \"artists\"
+  WHERE ((\"artists\".\"artist_name\" ILIKE '%foo%'
+  OR \"artists\".\"music_style\" ILIKE '%bar%'))"
+```
+
+This works with associations as well. Imagine an Artist that has many
+Memberships, and many Musicians through Memberships. In Rails console:
+```ruby
+Artist.search(artist_name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
+=> Ransack::Search<class: Artist, base: Grouping <conditions: [
+  Condition <attributes: ["artist_name"], predicate: cont, values: ["foo"]>,
+  Condition <attributes: ["musicians_email"], predicate: cont, values: ["bar"]>
+  ], combinator: or>>
+
+Artist.search(artist_name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
+.result.to_sql
+=> "SELECT \"artists\".* FROM \"artists\"
+  LEFT OUTER JOIN \"memberships\"
+    ON \"memberships\".\"artist_id\" = \"artists\".\"id\"
+  LEFT OUTER JOIN \"musicians\"
+    ON \"musicians\".\"id\" = \"memberships\".\"musician_id\"
+  WHERE ((\"artists\".\"artist_name\" ILIKE '%foo%'
+  OR \"musicians\".\"email\" ILIKE '%bar%'))"
 ```
 
 ####In your view
@@ -138,15 +163,19 @@ which are defined in
 
 ```erb
 <%= search_form_for @q do |f| %>
+
   # Search if the name field contains...
   <%= f.label :name_cont %>
   <%= f.search_field :name_cont %>
+
   # Search if an associated articles.title starts with...
   <%= f.label :articles_title_start %>
   <%= f.search_field :articles_title_start %>
+
   # Attributes may be chained. Search multiple attributes for one value...
   <%= f.label :name_or_description_or_email_cont %>
   <%= f.search_field :name_or_description_or_email_cont %>
+
   <%= f.submit %>
 <% end %>
 ```
