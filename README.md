@@ -120,37 +120,39 @@ end
 ```
 
 The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
-query hash:
+query hash. In Rails console:
 
 ```ruby
-def index
-  @q = Artist.search(artist_name_cont: 'foo', music_style_cont: 'bar', m: 'or')
-  @people = @q.result
-end
+artists = Artist.search(name_cont: 'foo', style_cont: 'bar', m: 'or')
+=> Ransack::Search<class: Artist, base: Grouping <conditions: [
+  Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
+  Condition <attributes: ["style"], predicate: cont, values: ["bar"]>
+  ], combinator: or>>
 
+artists.result.to_sql
 => "SELECT \"artists\".* FROM \"artists\"
-  WHERE ((\"artists\".\"artist_name\" ILIKE '%foo%'
-  OR \"artists\".\"music_style\" ILIKE '%bar%'))"
+    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
+    OR \"artists\".\"style\" ILIKE '%bar%'))"
 ```
 
-This works with associations as well. Imagine an Artist that has many
-Memberships, and many Musicians through Memberships. In Rails console:
+This works with associations as well. Imagine an Artist model that has many
+Memberships, and many Musicians through Memberships:
+
 ```ruby
-Artist.search(artist_name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
+artists = Artist.search(name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
 => Ransack::Search<class: Artist, base: Grouping <conditions: [
-  Condition <attributes: ["artist_name"], predicate: cont, values: ["foo"]>,
+  Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
   Condition <attributes: ["musicians_email"], predicate: cont, values: ["bar"]>
   ], combinator: or>>
 
-Artist.search(artist_name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
-.result.to_sql
+artists.result.to_sql
 => "SELECT \"artists\".* FROM \"artists\"
-  LEFT OUTER JOIN \"memberships\"
-    ON \"memberships\".\"artist_id\" = \"artists\".\"id\"
-  LEFT OUTER JOIN \"musicians\"
-    ON \"musicians\".\"id\" = \"memberships\".\"musician_id\"
-  WHERE ((\"artists\".\"artist_name\" ILIKE '%foo%'
-  OR \"musicians\".\"email\" ILIKE '%bar%'))"
+    LEFT OUTER JOIN \"memberships\"
+      ON \"memberships\".\"artist_id\" = \"artists\".\"id\"
+    LEFT OUTER JOIN \"musicians\"
+      ON \"musicians\".\"id\" = \"memberships\".\"musician_id\"
+    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
+    OR \"musicians\".\"email\" ILIKE '%bar%'))"
 ```
 
 ####In your view
@@ -173,7 +175,7 @@ which are defined in
   <%= f.search_field :articles_title_start %>
 
   # Attributes may be chained. Search multiple attributes for one value...
-  <%= f.label :name_or_description_or_email_cont %>
+  <%= f.label :name_or_description_or_email_or_articles_title_cont %>
   <%= f.search_field :name_or_description_or_email_cont %>
 
   <%= f.submit %>
