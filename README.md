@@ -246,7 +246,7 @@ class Supervisor < ActiveRecord::Base
   belongs_to :department
   has_many :employees
 
-  # has attribute last_name:string
+  # has attributes first_name:string and last_name:string
 end
 ```
 
@@ -271,8 +271,8 @@ end
   <%= f.label :department_title_cont %>
   <%= f.search_field :department_title_cont %>
 
-  <%= f.label :employees_last_name_cont %>
-  <%= f.search_field :employees_last_name_cont %>
+  <%= f.label :employees_first_name_or_employees_last_name_cont %>
+  <%= f.search_field :employees_first_name_or_employees_last_name_cont %>
 
   <%= f.submit "search" %>
 <% end %>
@@ -409,7 +409,9 @@ Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ### Grouping queries by OR instead of AND
 
 The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
-query hash. In the Rails console:
+query hash.
+
+For example, in the Rails console:
 
 ```ruby
 artists = Artist.search(name_cont: 'foo', style_cont: 'bar', m: 'or')
@@ -424,7 +426,7 @@ artists.result.to_sql
     OR \"artists\".\"style\" ILIKE '%bar%'))"
 ```
 
-Try it with and without `m: 'or'` in the query hash. Notice that the combinator becomes `or` instead of the default `and`, and the SQL query becomes `WHERE...OR` instead of `WHERE...AND`.
+The combinator becomes `or` instead of the default `and`, and the SQL query becomes `WHERE...OR` instead of `WHERE...AND`.
 
 This works with associations as well. Imagine an Artist model that has many
 Memberships, and many Musicians through Memberships:
