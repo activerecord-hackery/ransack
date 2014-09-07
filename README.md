@@ -426,19 +426,20 @@ artists.result.to_sql
     OR \"artists\".\"style\" ILIKE '%bar%'))"
 ```
 
-Or in your controller (normally you would set up your params hash so that `m`
-is already present in the URL, but here we assign it manually just to try it):
+The combinator becomes `or` instead of the default `and`, and the SQL query
+becomes `WHERE...OR` instead of `WHERE...AND`.
+
+You can easily try it in your controller as follows. Normally, if you wanted the
+user to be able to toggle between `AND` and `OR`, you would set up your form so
+that `m` is already present in the URL params hash, but here we assign `m`
+manually just to try it out quickly:
 
 ```ruby
 def index
-  params[:q]['m'] = 'or' if params[:q]
-  # or: params[:q].merge!(m: 'or') if params[:q]
-  @q = Artist.search(params[:q])
+  @q = Artist.search(params[:q].try(:merge, m: 'or'))
   @artists = @q.result
 end
 ```
-
-The combinator becomes `or` instead of the default `and`, and the SQL query becomes `WHERE...OR` instead of `WHERE...AND`.
 
 This works with associations as well. Imagine an Artist model that has many
 Memberships, and many Musicians through Memberships:
