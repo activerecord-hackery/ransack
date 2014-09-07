@@ -411,7 +411,19 @@ Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
 query hash.
 
-Trying it out in the Rails console:
+You can easily try it in your controller code by changing `params[:q]` to
+`params[:q].try(:merge, m: 'or')`. Normally, if you wanted users to be able to
+toggle between `AND` and `OR`, you would set up your form so that `m` is in the
+URL params hash, but here we assign `m` manually just to try it out quickly:
+
+```ruby
+def index
+  @q = Artist.search(params[:q].try(:merge, m: 'or'))
+  @artists = @q.result
+end
+```
+
+Alternatively, trying it in the Rails console:
 
 ```ruby
 artists = Artist.search(name_cont: 'foo', style_cont: 'bar', m: 'or')
@@ -428,18 +440,6 @@ artists.result.to_sql
 
 The combinator becomes `or` instead of the default `and`, and the SQL query
 becomes `WHERE...OR` instead of `WHERE...AND`.
-
-You can easily try it in your controller as follows. Normally, if you wanted the
-user to be able to toggle between `AND` and `OR`, you would set up your form so
-that `m` is already present in the URL params hash, but here we assign `m`
-manually just to try it out quickly:
-
-```ruby
-def index
-  @q = Artist.search(params[:q].try(:merge, m: 'or'))
-  @artists = @q.result
-end
-```
 
 This works with associations as well. Imagine an Artist model that has many
 Memberships, and many Musicians through Memberships:
