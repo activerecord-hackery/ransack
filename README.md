@@ -411,10 +411,8 @@ Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
 query hash.
 
-You can easily try it in your controller code by changing `params[:q]` to
-`params[:q].try(:merge, m: 'or')`. Normally, if you wanted users to be able to
-toggle between `AND` and `OR`, you would set up your form so that `m` is in the
-URL params hash, but here we assign `m` manually just to try it out quickly:
+You can easily try it in your controller code by changing `params[:q]` in the
+`index` action to `params[:q].try(:merge, m: 'or')` as follows:
 
 ```ruby
 def index
@@ -422,6 +420,10 @@ def index
   @artists = @q.result
 end
 ```
+Normally, if you wanted users to be able to toggle between `AND` and `OR`
+query grouping, you would probably set up your search form so that `m` was in
+the URL params hash, but here we assigned `m` manually just to try it out
+quickly.
 
 Alternatively, trying it in the Rails console:
 
