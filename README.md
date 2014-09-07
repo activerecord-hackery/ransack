@@ -411,7 +411,7 @@ Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
 query hash.
 
-For example, in the Rails console:
+Trying it out in the Rails console:
 
 ```ruby
 artists = Artist.search(name_cont: 'foo', style_cont: 'bar', m: 'or')
@@ -424,6 +424,18 @@ artists.result.to_sql
 => "SELECT \"artists\".* FROM \"artists\"
     WHERE ((\"artists\".\"name\" ILIKE '%foo%'
     OR \"artists\".\"style\" ILIKE '%bar%'))"
+```
+
+Or in your controller (normally you would set up your params hash so that `m`
+is already present in the URL, but here we assign it manually just to try it):
+
+```ruby
+def index
+  params[:q]['m'] = 'or' if params[:q]
+  # or: params[:q].merge!(m: 'or') if params[:q]
+  @q = Artist.search(params[:q])
+  @artists = @q.result
+end
 ```
 
 The combinator becomes `or` instead of the default `and`, and the SQL query becomes `WHERE...OR` instead of `WHERE...AND`.
