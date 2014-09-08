@@ -11,18 +11,23 @@ All notable changes to this project from August 2014 on will be documented here.
 
     *Pedro Chambino*
 
-*   README documentation explaining how to group queries by `OR` instead of the
-    default `AND`.
+*   Start a CHANGELOG.
+*   Add new documentation in the README explaining how to group queries by `OR`
+    instead of the default `AND` using the `m: 'or'` combinator.
 
     *Jon Atack*
-    
-*   README documentation explaining how to do Authorization (whitelisting).
 
+### Changed
+
+*   Rewrite/improve much of the README doc, including the Associations section
+    code examples and the Authorizations section showing how to whitelist
+    attributes, associations, sorts and scopes.
+    
     *Jon Atack*
 
 ### Fixed
 
-*   Fixed the params hash being modified by `Search.new` and the Ransack scope.
+*   Fix the params hash being modified by `Search.new` and the Ransack scope.
 
     *Daniel Rikowski*
 
@@ -34,30 +39,34 @@ All notable changes to this project from August 2014 on will be documented here.
 
     *Andrew Vit*
 
-*   Fixed incoherent code examples in the README Associations section that
-    mixed `q#` and `search#`.
+*   Fix incoherent code examples in the README Associations section that mixed
+    up `@q` and `@search`.
 
     *Jon Atack*
-
 
 ## Version 1.3.0 - 2014-08-23
 ### Added
 
-*   Search scopes by popular demand.
+*   Add search scopes by popular demand. Using `ransackable_scopes`, users can
+    define whitelists for allowed model scopes on a parent table. Not yet
+    implemented for associated models' scopes; scopes must be defined on the
+    parent table.
 
-*   `JOINS` merging.
+    *Gleb Mazovetskiy*, *Andrew Vit*, *Sven Schwyn*
 
-*   `OR` grouping on base search.
+*   Add `JOINS` merging.
 
-*   Authorizations for attributes, associations, sorts and scopes.
+*   Add `OR` grouping on base search.
 
-*   Improved boolean predicates’ handling of `false` values.
+*   Allow authorizing/whitelisting attributes, associations, sorts and scopes.
+
+*   Improve boolean predicates’ handling of `false` values.
 
 *   Allow configuring Ransack to raise on instead of ignore unknown search
     conditions.
 
 *   Allow passing blank values to search without crashing.
 
-*   Wildcard escaping compatibility for SQL Server databases.
+*   Add wildcard escaping compatibility for SQL Server databases.
 
-*   Various I18n translations.
+*   Add various I18n translations.
