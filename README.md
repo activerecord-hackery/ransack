@@ -402,14 +402,13 @@ values, or for given values if the scope accepts a value:
 
 ```ruby
 class Employee < ActiveRecord::Base
-  scope :active, -> { where(active: true) }
+  scope :active, ->{ where(active: true) }
+  scope :salary_gt, ->(amount) { where('salary > ?', amount) }
 
-  def self.hired_since(input_string)
-    where('start_date >= ?', input_string.to_date)
-  end
+  # Scopes are just syntactical sugar for class methods, which may also be used:
 
-  def self.salary_gt(amount)
-    where('salary > ?', amount)
+  def self.hired_since(date)
+    where('start_date >= ?', date)
   end
 
   private
