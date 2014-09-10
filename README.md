@@ -401,6 +401,22 @@ methods (e.g. scopes) are ignored. Scopes will be applied for matching `true`
 values, or for given values if the scope accepts a value:
 
 ```ruby
+class Employee < ActiveRecord::Base
+  scope :active, -> { where(active: true) }
+
+  def self.hired_since(date = Date.current)
+    where('start_date >= ?', date)
+  end
+
+  def self.salary_gt(amount)
+    where('salary > ?', amount)
+  end
+
+  private
+    def self.ransackable_scopes(auth_object = nil)
+      %i(active hired_since salary_gt)
+    end
+
 Employee.search({ active: true, hired_since: '2013-01-01' })
 
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
