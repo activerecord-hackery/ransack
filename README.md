@@ -393,9 +393,9 @@ Trying it out in `rails console`:
 ```
 That's it! Now you know how to whitelist/blacklist various elements in Ransack.
 
-### Scopes
+### Using Scopes/Class Methods
 
-Continuing on from the preceding section, searching by scope requires defining
+Continuing on from the preceding section, searching by scopes requires defining
 a whitelist of `ransackable_scopes` on the model class. By default, all class
 methods (e.g. scopes) are ignored. Scopes will be applied for matching `true`
 values, or for given values if the scope accepts a value:
@@ -404,8 +404,8 @@ values, or for given values if the scope accepts a value:
 class Employee < ActiveRecord::Base
   scope :active, -> { where(active: true) }
 
-  def self.hired_since(date = Date.current)
-    where('start_date >= ?', date)
+  def self.hired_since(input_string)
+    where('start_date >= ?', input_string.to_date)
   end
 
   def self.salary_gt(amount)
@@ -413,9 +413,16 @@ class Employee < ActiveRecord::Base
   end
 
   private
-    def self.ransackable_scopes(auth_object = nil)
+
+  def self.ransackable_scopes(auth_object = nil)
+    if auth_object.try(:admin?)
+      # admins may search on all three methods
       %i(active hired_since salary_gt)
+    else
+      # in this example, non-admin users may not search by salary
+      %i(active hired_since)
     end
+  end
 
 Employee.search({ active: true, hired_since: '2013-01-01' })
 
