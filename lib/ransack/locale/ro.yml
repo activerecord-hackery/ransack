@@ -64,7 +64,7 @@ ro:
       not_end_all: "nu se termină cu toate"
       'true': "este adevărat"
       'false': "este fals"
-      present: "este present"
+      present: "este prezent"
       blank: "este gol"
       'null': "este nul"
       not_null: "nu este nul"
