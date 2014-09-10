@@ -402,7 +402,7 @@ values, or for given values if the scope accepts a value:
 
 ```ruby
 class Employee < ActiveRecord::Base
-  scope :active, ->{ where(active: true) }
+  scope :active, ->(boolean = true) { (where active: boolean) }
   scope :salary_gt, ->(amount) { where('salary > ?', amount) }
 
   # Scopes are just syntactical sugar for class methods, which may also be used:
