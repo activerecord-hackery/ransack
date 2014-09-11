@@ -415,13 +415,14 @@ class Employee < ActiveRecord::Base
 
   def self.ransackable_scopes(auth_object = nil)
     if auth_object.try(:admin?)
-      # admins may search on all three methods
+      # allow admin users access to all three methods
       %i(active hired_since salary_gt)
     else
-      # in this example, non-admin users may not search by salary
+      # allow other users to search on active and hired_since only
       %i(active hired_since)
     end
   end
+end
 
 Employee.search({ active: true, hired_since: '2013-01-01' })
 
