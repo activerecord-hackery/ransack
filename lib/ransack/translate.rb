@@ -81,13 +81,16 @@ module Ransack
               :"#{associated_class.i18n_scope}.attributes.#{
                 i18n_key(associated_class)}.#{attr_name}"
             else
-              :"#{context.klass.i18n_scope}.attributes.#{
-                i18n_key(context.klass)}.#{attr_name}"
+              context.klass.ancestors.select do |k|
+                k.respond_to?(:model_name)
+              end.collect do |k|
+                :"#{k.i18n_scope}.attributes.#{i18n_key(k)}.#{attr_name}"
+              end
             end
           ),
           :".attributes.#{attr_name}",
           attr_name.humanize
-        ]
+        ].flatten
       )
       defaults = [:"ransack.attributes.#{i18n_key(context.klass)}.#{name}"]
       if include_associations && associated_class
