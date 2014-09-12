@@ -99,7 +99,7 @@ module Ransack
         :attr_fallback_name => attr_fallback_name(associated_class),
         :association_name   => association_name 
       }
-      .compact
+      .reject! { |_, value| value.nil? }
     end
 
     def self.attr_fallback_name(associated_class)
