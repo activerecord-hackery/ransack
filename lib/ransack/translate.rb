@@ -69,7 +69,7 @@ module Ransack
   private
 
     def self.attribute_name(context, name, include_associations = nil)
-      @context, @name, @include_associations = context, name
+      @context, @name = context, name
       @assoc_path = context.association_path(name)
       @attr_name = @name.sub(/^#{@assoc_path}_/, '')
       associated_class = @context.traverse(@assoc_path) if @assoc_path.present?
