@@ -296,7 +296,9 @@ Feel free to contribute working `ransacker` code examples to the wiki!
 
 ### Authorization (whitelisting/blacklisting)
 
-By default, searching and sorting are authorized on any column of your model.
+By default, searching and sorting are authorized on any column of your model
+and no class methods/scopes are whitelisted.
+
 Ransack adds four methods to `ActiveRecord::Base` that you can redefine as
 class methods in your models to apply selective authorization:
 `ransackable_attributes`, `ransackable_associations`, `ransackable_scopes` and
@@ -306,27 +308,32 @@ Here is how these four methods are implemented in Ransack:
 
 ```ruby
 def ransackable_attributes(auth_object = nil)
-  # Returns the string names of all columns and any defined ransackers.
+  # By default returns all column names and any defined ransackers as strings.
+  # For overriding with a whitelist of strings.
   column_names + _ransackers.keys
 end
 
 def ransackable_associations(auth_object = nil)
-  # Returns the names of all associations.
+  # By default returns the names of all associations as strings.
+  # For overriding with a whitelist of strings.
   reflect_on_all_associations.map { |a| a.name.to_s }
-  end
-
-def ransackable_scopes(auth_object = nil)
-  # For overriding with a whitelist of symbols.
-  []
 end
 
 def ransortable_attributes(auth_object = nil)
-  # Here so users can overwrite the attributes that show up in the sort_select.
+  # By default returns the names of all attributes for sorting.
+  # For overriding with a whitelist of strings.
   ransackable_attributes(auth_object)
+end
+
+def ransackable_scopes(auth_object = nil)
+  # By default returns an empty array, i.e. no class methods/scopes
+  # are authorized. For overriding with a whitelist of *symbols*.
+  []
 end
 ```
 
-Any values not returned from these methods will be ignored by Ransack.
+Any values not returned from these methods will be ignored by Ransack, i.e.
+they are not authorized.
 
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
