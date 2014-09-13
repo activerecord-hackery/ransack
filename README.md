@@ -95,7 +95,7 @@ If you're coming from MetaSearch, things to note:
   would otherwise result in some.
 
   Please note that for many databases, a sort on an associated table's columns
-  will result in invalid SQL with `distinct: true` -- in those cases, you're on
+  may result in invalid SQL with `distinct: true` -- in those cases, you're on
   your own, and will need to modify the result as needed to allow these queries
   to work. One good workaround if `distinct: true` is causing problems, can be to
   not use it and call `#to_a.uniq` on your final collection instead.
@@ -115,6 +115,8 @@ this example, with preloading each Person's Articles and pagination):
 def index
   @q = Person.search(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
+  # or use `to_a.uniq` to remove duplicates (can also be done in the view):
+  @people = @q.result.includes(:articles).page(params[:page]).to_a.uniq
 end
 ```
 
