@@ -97,9 +97,8 @@ If you're coming from MetaSearch, things to note:
   Please note that for many databases, a sort on an associated table's columns
   will result in invalid SQL with `distinct: true` -- in those cases, you're on
   your own, and will need to modify the result as needed to allow these queries
-  to work. Thankfully, 9 times out of 10, sort against the search's base is
-  sufficient, though, as that's generally what's being displayed on your
-  results page.
+  to work. One good workaround if `distinct: true` is causing problems, can be to
+  not use it and call `#to_a.uniq` on your final collection instead.
 
 ####In your controller
 
