@@ -4,10 +4,12 @@ All notable changes to this project from August 2014 on will be documented here.
 ## Unreleased
 ### Added
 
-*   Add `not_true` and `not_false` predicates and update the "Basic Searching"
-    wiki.
+*   Add `ro.yml` Romanian translation file.
 
-    Fixes #123, #353.
+    *Andreas Philippi*
+
+*   Add `not_true` and `not_false` predicates and update the "Basic Searching"
+    wiki. Fixes #123, #353.
 
     *Pedro Chambino*
 
@@ -17,15 +19,11 @@ All notable changes to this project from August 2014 on will be documented here.
 
     *Jon Atack*
 
-### Changed
-
-*   Rewrite/improve much of the README doc, including the Associations section
-    code examples and the Authorizations section showing how to whitelist
-    attributes, associations, sorts and scopes.
-    
-    *Jon Atack*
-
 ### Fixed
+
+*   Fix attribute translations when using ActiveRecord with STI.
+
+    *Andreas Philippi*
 
 *   Fix the params hash being modified by `Search.new` and the Ransack scope.
 
@@ -42,6 +40,16 @@ All notable changes to this project from August 2014 on will be documented here.
 *   Fix incoherent code examples in the README Associations section that mixed
     up `@q` and `@search`.
 
+    *Jon Atack*
+
+### Changed
+
+*   Refactor Ransack::Translate.
+
+*   Rewrite much of the README doc, including the Associations section
+    code examples and the Authorizations section showing how to whitelist
+    attributes, associations, sorts and scopes.
+    
     *Jon Atack*
 
 ## Version 1.3.0 - 2014-08-23
