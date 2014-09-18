@@ -2,6 +2,26 @@ module Ransack
   module Helpers
     module FormHelper
 
+      def asc
+        'asc'.freeze
+      end
+
+      def desc
+        'desc'.freeze
+      end
+
+      def asc_arrow
+        '&#9650;'.freeze
+      end
+
+      def desc_arrow
+        '&#9660;'.freeze
+      end
+
+      def non_breaking_space
+        '&nbsp;'.freeze
+      end
+
       def search_form_for(record, options = {}, &proc)
         if record.is_a?(Ransack::Search)
           search = record
@@ -28,7 +48,7 @@ module Ransack
             "#{search.klass.to_s.underscore}_search",
           :method => :get
         }
-        options[:as] ||= 'q'
+        options[:as] ||= 'q'.freeze
         options[:html].reverse_merge!(html_options)
         options[:builder] ||= FormBuilder
 
@@ -67,9 +87,9 @@ module Ransack
         current_dir = prev_attr == attr_name ? prev_dir : nil
 
         if current_dir
-          new_dir = current_dir == 'desc' ? 'asc' : 'desc'
+          new_dir = current_dir == desc ? asc : desc
         else
-          new_dir = default_order || 'asc'
+          new_dir = default_order || asc
         end
 
         html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
@@ -90,7 +110,7 @@ module Ransack
         link_to(
           [ERB::Util.h(name), order_indicator_for(current_dir)]
             .compact
-            .join(' ')
+            .join(non_breaking_space)
             .html_safe,
           url,
           html_options
@@ -100,10 +120,10 @@ module Ransack
       private
 
       def order_indicator_for(order)
-        if order == 'asc'
-          '&#9650;'
-        elsif order == 'desc'
-          '&#9660;'
+        if order == asc
+          asc_arrow
+        elsif order == desc
+          desc_arrow
         else
           nil
         end

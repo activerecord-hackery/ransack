@@ -6,10 +6,20 @@ module Ransack
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
+      ['i_cont', {
+        :arel_predicate => 'i_matches',
+        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
+      }
+      ],
       ['not_cont', {
         :arel_predicate => 'does_not_match',
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
+      ],
+      ['i_not_cont', {
+        :arel_predicate => 'i_does_not_match',
+        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
+      }
       ],
       ['start', {
         :arel_predicate => 'matches',
@@ -32,18 +42,35 @@ module Ransack
         }
       ],
       ['true', {
-        :arel_predicate => 'eq',
+        :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
         :compounds => false,
         :type => :boolean,
-        :validator => proc { |v| TRUE_VALUES.include?(v) }
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| true }
+        }
+      ],
+      ['not_true', {
+        :arel_predicate => proc { |v| v ? 'not_eq' : 'eq' },
+        :compounds => false,
+        :type => :boolean,
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| true }
         }
       ],
       ['false', {
-        :arel_predicate => 'eq',
+        :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
         :compounds => false,
         :type => :boolean,
-        :validator => proc { |v| TRUE_VALUES.include?(v) },
-        :formatter => proc { |v| !v }
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| false }
+        }
+      ],
+      ['not_false', {
+        :arel_predicate => proc { |v| v ? 'not_eq' : 'eq' },
+        :compounds => false,
+        :type => :boolean,
+        :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
+        :formatter => proc { |v| false }
         }
       ],
       ['present', {

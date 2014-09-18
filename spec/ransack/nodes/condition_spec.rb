@@ -5,13 +5,21 @@ module Ransack
     describe Condition do
 
       context 'with multiple values and an _any predicate' do
-        subject { Condition.extract(Context.for(Person), 'name_eq_any', Person.first(2).map(&:name)) }
+        subject {
+          Condition.extract(
+            Context.for(Person), 'name_eq_any', Person.first(2).map(&:name)
+          )
+        }
 
         specify { expect(subject.values.size).to eq(2) }
       end
 
       context 'with an invalid predicate' do
-        subject { Condition.extract(Context.for(Person), 'name_invalid', Person.first.name) }
+        subject {
+          Condition.extract(
+            Context.for(Person), 'name_invalid', Person.first.name
+          )
+        }
 
         context "when ignore_unknown_conditions is false" do
           before do

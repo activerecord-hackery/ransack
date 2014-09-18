@@ -9,12 +9,14 @@ module Ransack
       end
 
       it "keeps conditions with a false value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq" => false})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq" => false })
         Search.new(Person, :name_eq => false)
       end
 
       it "keeps conditions with a value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq" => 'foobar'})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq" => 'foobar' })
         Search.new(Person, :name_eq => 'foobar')
       end
 
@@ -24,17 +26,30 @@ module Ransack
       end
 
       it "keeps suffixed conditions with a false value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq_any" => [false]})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq_any" => [false] })
         Search.new(Person, :name_eq_any => [false])
       end
 
       it "keeps suffixed conditions with a value before building" do
-        expect_any_instance_of(Search).to receive(:build).with({"name_eq_any" => ['foobar']})
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ "name_eq_any" => ['foobar'] })
         Search.new(Person, :name_eq_any => ['foobar'])
       end
 
       it 'does not raise exception for string :params argument' do
         expect { Search.new(Person, '') }.not_to raise_error
+      end
+
+      it 'accepts a context option' do
+        shared_context = Context.for(Person)
+        search1 = Search.new(
+          Person, { "name_eq" => "A" }, context: shared_context
+          )
+        search2 = Search.new(
+          Person, { "name_eq" => "B" }, context: shared_context
+          )
+        expect(search1.context).to be search2.context
       end
     end
 
@@ -78,10 +93,20 @@ module Ransack
         expect(condition.value).to eq 'Ernie'
       end
 
+      it 'preserves default scope conditions for associations' do
+        search = Search.new(Person, :articles_title_eq => 'Test')
+        expect(search.result.to_sql).to include "default_scope"
+      end
+
       it 'discards empty conditions' do
         search = Search.new(Person, :children_name_eq => '')
         condition = search.base[:children_name_eq]
         expect(condition).to be_nil
+      end
+
+      it 'accepts base grouping condition as an option' do
+        expect(Nodes::Grouping).to receive(:new).with(kind_of(Context), 'or')
+        Search.new(Person, {}, { grouping: 'or' })
       end
 
       it 'accepts arrays of groupings' do
@@ -153,7 +178,9 @@ module Ransack
 
         context "when ignore_unknown_conditions is false" do
           before do
-            Ransack.configure { |config| config.ignore_unknown_conditions = false }
+            Ransack.configure { |config|
+              config.ignore_unknown_conditions = false
+            }
           end
 
           specify { expect { subject }.to raise_error ArgumentError }
@@ -161,12 +188,20 @@ module Ransack
 
         context "when ignore_unknown_conditions is true" do
           before do
-            Ransack.configure { |config| config.ignore_unknown_conditions = true }
+            Ransack.configure { |config|
+              config.ignore_unknown_conditions = true
+            }
           end
 
           specify { expect { subject }.not_to raise_error }
         end
       end
+
+      it 'does not modify the parameters' do
+        params = { :name_eq => '' }
+        expect { Search.new(Person, params) }.not_to change { params }
+      end
+
     end
 
     describe '#result' do
@@ -246,12 +281,12 @@ module Ransack
         else
           all_or_load, uniq_or_distinct = :load, :distinct
         end
-        expect(search.result.send(all_or_load).size).
-          to eq(9000)
-        expect(search.result(:distinct => true).size).
-          to eq(10)
-        expect(search.result.send(all_or_load).send(uniq_or_distinct)).
-          to eq search.result(:distinct => true).send(all_or_load)
+        expect(search.result.send(all_or_load).size)
+        .to eq(9000)
+        expect(search.result(:distinct => true).size)
+        .to eq(10)
+        expect(search.result.send(all_or_load).send(uniq_or_distinct))
+        .to eq search.result(:distinct => true).send(all_or_load)
       end
     end
 
@@ -338,8 +373,8 @@ module Ransack
 
       it 'creates sorts based on multiple attributes and uppercase directions in hash format' do
         @s.sorts = {
-            '0' => { :name => 'id', :dir => 'DESC' },
-            '1' => { :name => 'name', :dir => 'ASC' }
+          '0' => { :name => 'id', :dir => 'DESC' },
+          '1' => { :name => 'name', :dir => 'ASC' }
         }
         expect(@s.sorts.size).to eq(2)
         expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
@@ -351,8 +386,8 @@ module Ransack
 
       it 'creates sorts based on multiple attributes and different directions in hash format' do
         @s.sorts = {
-            '0' => { :name => 'id', :dir => 'DESC' },
-            '1' => { :name => 'name', :dir => nil }
+          '0' => { :name => 'id', :dir => 'DESC' },
+          '1' => { :name => 'name', :dir => nil }
         }
         expect(@s.sorts.size).to eq(2)
         expect(@s.sorts).to be_all { |s| Nodes::Sort === s }

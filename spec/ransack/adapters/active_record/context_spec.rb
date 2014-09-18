@@ -6,6 +6,10 @@ module Ransack
       describe Context do
         subject { Context.new(Person) }
 
+        if ::ActiveRecord::VERSION::STRING >= "3.1"
+          its(:alias_tracker) { should be_a ::ActiveRecord::Associations::AliasTracker }
+        end
+
         describe '#relation_for' do
           it 'returns relation for given object' do
             expect(subject.object).to be_an ::ActiveRecord::Relation
@@ -27,6 +31,45 @@ module Ransack
 
             expect(result).to be_an ::ActiveRecord::Relation
             expect(result.to_sql).to match /SELECT DISTINCT/
+          end
+        end
+
+        describe "sharing context across searches" do
+          let(:shared_context) { Context.for(Person) }
+
+          before do
+            Search.new(Person, {:parent_name_eq => 'A'}, context: shared_context)
+            Search.new(Person, {:children_name_eq => 'B'}, context: shared_context)
+          end
+
+          describe '#join_associations', :if => ::ActiveRecord::VERSION::STRING <= '4.0' do
+            it 'returns dependent join associations for all searches run against the context' do
+              parents, children = shared_context.join_associations
+
+              expect(children.aliased_table_name).to eq "children_people"
+              expect(parents.aliased_table_name).to eq "parents_people"
+            end
+
+            it 'can be rejoined to execute a valid query' do
+              parents, children = shared_context.join_associations
+
+              expect { Person.joins(parents).joins(children).to_a }.to_not raise_error
+            end
+          end
+
+          describe '#join_sources', :if => ::ActiveRecord::VERSION::STRING >= '3.1' do
+            it 'returns dependent arel join nodes for all searches run against the context' do
+              parents, children = shared_context.join_sources
+
+              expect(children.left.name).to eq "children_people"
+              expect(parents.left.name).to eq "parents_people"
+            end
+
+            it 'can be rejoined to execute a valid query' do
+              parents, children = shared_context.join_sources
+
+              expect { Person.joins(parents).joins(children).to_a }.to_not raise_error
+            end
           end
         end
 
