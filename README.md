@@ -90,15 +90,18 @@ If you're coming from MetaSearch, things to note:
   3. Common ActiveRecord::Relation methods are no longer delegated by the
   search object. Instead, you will get your search results (an
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
-  `Search#result`. If passed `distinct: true`, `result` will generate a `SELECT
-  DISTINCT` to avoid returning duplicate rows, even if conditions on a join
-  would otherwise result in some.
+  `Search#result`.
+  
+  4. If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
+  avoid returning duplicate rows, even if conditions on a join would otherwise
+  result in some.
 
   Please note that for many databases, a sort on an associated table's columns
   may result in invalid SQL with `distinct: true` -- in those cases, you're on
   your own, and will need to modify the result as needed to allow these queries
-  to work. One good workaround if `distinct: true` is causing problems, can be to
-  not use it and call `#to_a.uniq` on your final collection instead.
+  to work. If `distinct: true` is causing you problems, another way to remove
+  duplicates is to call `#to_a.uniq` on your collection instead (see the next
+  section below).
 
 ####In your controller
 
@@ -308,26 +311,26 @@ Here is how these four methods are implemented in Ransack:
 
 ```ruby
 def ransackable_attributes(auth_object = nil)
-  # By default returns all column names and any defined ransackers as strings.
-  # For overriding with a whitelist of strings.
+  # By default returns all column names and any defined ransackers as an array
+  # of strings. For overriding with a whitelist array of strings.
   column_names + _ransackers.keys
 end
 
 def ransackable_associations(auth_object = nil)
-  # By default returns the names of all associations as strings.
-  # For overriding with a whitelist of strings.
+  # By default returns the names of all associations as an array of strings.
+  # For overriding with a whitelist array of strings.
   reflect_on_all_associations.map { |a| a.name.to_s }
 end
 
 def ransortable_attributes(auth_object = nil)
-  # By default returns the names of all attributes for sorting.
-  # For overriding with a whitelist of strings.
+  # By default returns the names of all attributes for sorting as an array of
+  # strings. For overriding with a whitelist array of strings.
   ransackable_attributes(auth_object)
 end
 
 def ransackable_scopes(auth_object = nil)
   # By default returns an empty array, i.e. no class methods/scopes
-  # are authorized. For overriding with a whitelist of *symbols*.
+  # are authorized. For overriding with a whitelist array of *symbols*.
   []
 end
 ```
