@@ -407,9 +407,10 @@ That's it! Now you know how to whitelist/blacklist various elements in Ransack.
 ### Using Scopes/Class Methods
 
 Continuing on from the preceding section, searching by scopes requires defining
-a whitelist of `ransackable_scopes` on the model class. By default, all class
-methods (e.g. scopes) are ignored. Scopes will be applied for matching `true`
-values, or for given values if the scope accepts a value:
+a whitelist of `ransackable_scopes` on the model class. The whitelist should be
+an array of *symbols*. By default, all class methods (e.g. scopes) are ignored.
+Scopes will be applied for matching `true` values, or for given values if the
+scope accepts a value:
 
 ```ruby
 class Employee < ActiveRecord::Base
