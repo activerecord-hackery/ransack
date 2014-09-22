@@ -3,7 +3,8 @@ require 'spec_helper'
 module Ransack
   module Adapters
     module ActiveRecord
-      AR_version = ::ActiveRecord::VERSION::STRING
+      version = ::ActiveRecord::VERSION
+      AR_version = "#{version::MAJOR}.#{version::MINOR}"
 
       describe Context do
         subject { Context.new(Person) }
@@ -70,7 +71,7 @@ module Ransack
             # FIXME: fix this test for Rails 4.2.
             it 'returns dependent arel join nodes for all searches run against
             the context',
-            :if => %w(3.1 3.2 4.0 4.1 4.2).include?(AR_version) do
+            :if => %w(3.1 3.2 4.0 4.1).include?(AR_version) do
               parents, children = shared_context.join_sources
 
               expect(children.left.name).to eq "children_people"
