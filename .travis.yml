@@ -8,6 +8,9 @@ rvm:
   - 1.9
 
 env:
+  - RAILS=master DB=sqlite3
+  - RAILS=master DB=mysql
+  - RAILS=master DB=postgres
   - RAILS=4-1-stable DB=sqlite3
   - RAILS=4-1-stable DB=mysql
   - RAILS=4-1-stable DB=postgres
