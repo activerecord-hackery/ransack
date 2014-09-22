@@ -66,18 +66,19 @@ module Ransack
             end
           end
 
-          describe '#join_sources', :if => AR_version >= '3.1' do
-
-          # FIXME fix this test for Rails 4.2 and remove the AR conditional.
+          describe '#join_sources' do
+            # FIXME: fix this test for Rails 4.2.
             it 'returns dependent arel join nodes for all searches run against
-                the context', :if => AR_version < '4.2' do
+            the context',
+            :if => %w(3.1 3.2 4.0 4.1 4.2).include?(AR_version) do
               parents, children = shared_context.join_sources
 
               expect(children.left.name).to eq "children_people"
               expect(parents.left.name).to eq "parents_people"
             end
 
-            it 'can be rejoined to execute a valid query' do
+            it 'can be rejoined to execute a valid query',
+            :if => AR_version >= '3.1' do
               parents, children = shared_context.join_sources
 
               expect { Person.joins(parents).joins(children).to_a }
