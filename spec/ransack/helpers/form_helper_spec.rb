@@ -1,4 +1,3 @@
-=begin
 require 'spec_helper'
 
 module Ransack
@@ -142,4 +141,3 @@ module Ransack
     end
   end
 end
-=end
