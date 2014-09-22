@@ -34,7 +34,7 @@ module Ransack
       @object = relation_for(object)
       @klass = @object.klass
       @join_dependency = join_dependency(@object)
-      @join_type = options[:join_type] || Arel::OuterJoin
+      @join_type = options[:join_type] || Polyamorous::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
 
       if ::ActiveRecord::VERSION::STRING >= "4.1"
