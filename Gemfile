@@ -39,7 +39,5 @@ else
     gem 'activemodel'
     gem 'activerecord'
     gem 'actionpack'
-    gem 'rack', github: 'rack/rack'
-    gem 'i18n', github: 'svenfuchs/i18n'
   end
 end
