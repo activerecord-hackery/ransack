@@ -90,16 +90,18 @@ If you're coming from MetaSearch, things to note:
   3. Common ActiveRecord::Relation methods are no longer delegated by the
   search object. Instead, you will get your search results (an
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
-  `Search#result`. If passed `distinct: true`, `result` will generate a `SELECT
-  DISTINCT` to avoid returning duplicate rows, even if conditions on a join
-  would otherwise result in some.
+  `Search#result`.
+  
+  4. If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
+  avoid returning duplicate rows, even if conditions on a join would otherwise
+  result in some.
 
   Please note that for many databases, a sort on an associated table's columns
-  will result in invalid SQL with `distinct: true` -- in those cases, you're on
+  may result in invalid SQL with `distinct: true` -- in those cases, you're on
   your own, and will need to modify the result as needed to allow these queries
-  to work. Thankfully, 9 times out of 10, sort against the search's base is
-  sufficient, though, as that's generally what's being displayed on your
-  results page.
+  to work. If `distinct: true` is causing you problems, another way to remove
+  duplicates is to call `#to_a.uniq` on your collection instead (see the next
+  section below).
 
 ####In your controller
 
@@ -116,6 +118,8 @@ this example, with preloading each Person's Articles and pagination):
 def index
   @q = Person.search(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
+  # or use `to_a.uniq` to remove duplicates (can also be done in the view):
+  @people = @q.result.includes(:articles).page(params[:page]).to_a.uniq
 end
 ```
 
@@ -295,7 +299,9 @@ Feel free to contribute working `ransacker` code examples to the wiki!
 
 ### Authorization (whitelisting/blacklisting)
 
-By default, searching and sorting are authorized on any column of your model.
+By default, searching and sorting are authorized on any column of your model
+and no class methods/scopes are whitelisted.
+
 Ransack adds four methods to `ActiveRecord::Base` that you can redefine as
 class methods in your models to apply selective authorization:
 `ransackable_attributes`, `ransackable_associations`, `ransackable_scopes` and
@@ -305,27 +311,32 @@ Here is how these four methods are implemented in Ransack:
 
 ```ruby
 def ransackable_attributes(auth_object = nil)
-  # Returns the string names of all columns and any defined ransackers.
+  # By default returns all column names and any defined ransackers as an array
+  # of strings. For overriding with a whitelist array of strings.
   column_names + _ransackers.keys
 end
 
 def ransackable_associations(auth_object = nil)
-  # Returns the names of all associations.
+  # By default returns the names of all associations as an array of strings.
+  # For overriding with a whitelist array of strings.
   reflect_on_all_associations.map { |a| a.name.to_s }
-  end
-
-def ransackable_scopes(auth_object = nil)
-  # For overriding with a whitelist of symbols.
-  []
 end
 
 def ransortable_attributes(auth_object = nil)
-  # Here so users can overwrite the attributes that show up in the sort_select.
+  # By default returns the names of all attributes for sorting as an array of
+  # strings. For overriding with a whitelist array of strings.
   ransackable_attributes(auth_object)
+end
+
+def ransackable_scopes(auth_object = nil)
+  # By default returns an empty array, i.e. no class methods/scopes
+  # are authorized. For overriding with a whitelist array of *symbols*.
+  []
 end
 ```
 
-Any values not returned from these methods will be ignored by Ransack.
+Any values not returned from these methods will be ignored by Ransack, i.e.
+they are not authorized.
 
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
@@ -393,14 +404,38 @@ Trying it out in `rails console`:
 ```
 That's it! Now you know how to whitelist/blacklist various elements in Ransack.
 
-### Scopes
+### Using Scopes/Class Methods
 
-Continuing on from the preceding section, searching by scope requires defining
-a whitelist of `ransackable_scopes` on the model class. By default, all class
-methods (e.g. scopes) are ignored. Scopes will be applied for matching `true`
-values, or for given values if the scope accepts a value:
+Continuing on from the preceding section, searching by scopes requires defining
+a whitelist of `ransackable_scopes` on the model class. The whitelist should be
+an array of *symbols*. By default, all class methods (e.g. scopes) are ignored.
+Scopes will be applied for matching `true` values, or for given values if the
+scope accepts a value:
 
 ```ruby
+class Employee < ActiveRecord::Base
+  scope :active, ->(boolean = true) { (where active: boolean) }
+  scope :salary_gt, ->(amount) { where('salary > ?', amount) }
+
+  # Scopes are just syntactical sugar for class methods, which may also be used:
+
+  def self.hired_since(date)
+    where('start_date >= ?', date)
+  end
+
+  private
+
+  def self.ransackable_scopes(auth_object = nil)
+    if auth_object.try(:admin?)
+      # allow admin users access to all three methods
+      %i(active hired_since salary_gt)
+    else
+      # allow other users to search on active and hired_since only
+      %i(active hired_since)
+    end
+  end
+end
+
 Employee.search({ active: true, hired_since: '2013-01-01' })
 
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
