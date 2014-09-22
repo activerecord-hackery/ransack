@@ -99,7 +99,7 @@ module Schema
         t.string   :only_admin
         t.integer  :salary
         t.boolean  :awesome, default: false
-        t.timestamps
+        t.timestamps null: false
       end
 
       create_table :articles, force: true do |t|
