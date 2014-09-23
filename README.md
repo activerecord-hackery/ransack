@@ -26,46 +26,25 @@ instead.
 
 ## Getting started
 
-Because ActiveRecord has been evolving quite a bit, your friendly Ransack is
-available in several flavors! Take your pick:
-
-In your Gemfile, for the last officially released gem compatible with Rails
-3.x, 4.0 and 4.1 (for Rails 4.2, use the dedicated `rails-4.2` branch described
-below for now):
+In your Gemfile, for the last officially released gem for Rails 3 and 4:
 
 ```ruby
 gem 'ransack'
 ```
 
-Or if you want to use the latest updates on the Ransack master branch:
+Or if you want to use the latest updates (including Rails 4.2 compatibility):
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
-If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch]
-(https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which
-usually contains the latest updates on master (albeit sometimes with some
-delay), supports only 4.1, and is lighter and somewhat faster:
-
-```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
-```
-
-Similarly, if you are using Rails 4.0, you may prefer the dedicated
-[Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4)
-for the same reasons:
-
-```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
-```
-
-Last but definitely not least, an experimental [Rails 4.2 branch]
-(https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available:
-
-```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
-```
+The other branches (`rails-4`, `rails-4.1`, and `rails-4.2`) were each used for
+running Ransack with the latest upcoming version of Rails at the time. They are
+lighter and somewhat faster-running because they do not have to support previous
+versions of Rails and Active Record. However, once support for that version of
+Rails is merged into Ransack master, the branches are no longer actively
+maintained with the latest fixes and additions to Ransack -- unless the
+community submits pull requests to maintain them, and you are welcome to do so!
 
 ## Usage
 
