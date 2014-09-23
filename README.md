@@ -26,25 +26,27 @@ instead.
 
 ## Getting started
 
-In your Gemfile, for the last officially released gem for Rails 3 and 4:
+Ransack is currently compatible with Rails 3.x, 4.0, 4.1 and 4.2.
+
+In your Gemfile, for the last officially released Ransack gem:
 
 ```ruby
 gem 'ransack'
 ```
 
-Or if you want to use the latest updates (including Rails 4.2 compatibility):
+Or, if you would like to use the latest updates:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
 The other branches (`rails-4`, `rails-4.1`, and `rails-4.2`) were each used for
-running Ransack with the latest upcoming version of Rails at the time. They are
-lighter and somewhat faster-running because they do not have to support previous
-versions of Rails and Active Record. However, once support for that version of
-Rails is merged into Ransack master, the branches are no longer actively
-maintained with the latest fixes and additions to Ransack -- unless the
-community submits pull requests to maintain them, and you are welcome to do so!
+developing and running Ransack with the latest upcoming version of Rails at the
+time. They are lighter and somewhat faster-running because they do not have to
+support previous versions of Rails and Active Record. Once support for that
+Rails version is merged from the branch into Ransack master, the branch is no
+longer actively maintained -- unless the open source community submits pull
+requests to maintain them. You are welcome to do so!
 
 ## Usage
 
@@ -328,7 +330,6 @@ Here is an example that puts all this together, adapted from
 In an `Article` model, add the following `ransackable_attributes` class method
 (preferably private):
 ```ruby
-# article.rb
 class Article < ActiveRecord::Base
 
   private
@@ -346,7 +347,6 @@ end
 ```
 Here is example code for the `articles_controller`:
 ```ruby
-# articles_controller.rb
 class ArticlesController < ApplicationController
 
   def index
