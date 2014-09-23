@@ -2,6 +2,20 @@
 This change log was started in August 2014. All notable changes to this project
 henceforth should be documented here.
 
+## Unreleased
+### Added
+
+### Fixed
+
+### Changed
+
+## Version 1.4.1 - 2014-09-23
+### Fixed
+
+*   Fix README markdown so RubyGems documentation picks up the formatting correctly.
+
+    *Jon Atack*
+
 ## Version 1.4.0 - 2014-09-23
 ### Added
 
