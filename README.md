@@ -110,7 +110,7 @@ The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in
 [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-#####1. Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
+#####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -145,7 +145,7 @@ The `search_form_for` answer format can be set like this:
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
-#####2. Ransack's `sort_link` helper creates table headers that are sortable links:
+#####Ransack's `sort_link` helper creates table headers that are sortable links:
 
 ```erb
 <%= content_tag :th, sort_link(@q, :name) %>
@@ -291,29 +291,37 @@ class methods in your models to apply selective authorization:
 Here is how these four methods are implemented in Ransack:
 
 ```ruby
-def ransackable_attributes(auth_object = nil)
-  # By default returns all column names and any defined ransackers as an array
-  # of strings. For overriding with a whitelist array of strings.
-  column_names + _ransackers.keys
-end
-
-def ransackable_associations(auth_object = nil)
-  # By default returns the names of all associations as an array of strings.
+  # Ransackable_attributes, by default, returns all column names
+  # and any defined ransackers as an array of strings.
   # For overriding with a whitelist array of strings.
-  reflect_on_all_associations.map { |a| a.name.to_s }
-end
+  #
+  def ransackable_attributes(auth_object = nil)
+    column_names + _ransackers.keys
+  end
 
-def ransortable_attributes(auth_object = nil)
-  # By default returns the names of all attributes for sorting as an array of
-  # strings. For overriding with a whitelist array of strings.
-  ransackable_attributes(auth_object)
-end
+  # Ransackable_associations, by default, returns the names
+  # of all associations as an array of strings.
+  # For overriding with a whitelist array of strings.
+  #
+  def ransackable_associations(auth_object = nil)
+    reflect_on_all_associations.map { |a| a.name.to_s }
+  end
 
-def ransackable_scopes(auth_object = nil)
-  # By default returns an empty array, i.e. no class methods/scopes
-  # are authorized. For overriding with a whitelist array of *symbols*.
-  []
-end
+  # Ransortable_attributes, by default, returns the names
+  # of all attributes available for sorting as an array of strings.
+  # For overriding with a whitelist array of strings.
+  #
+  def ransortable_attributes(auth_object = nil)
+    ransackable_attributes(auth_object)
+  end
+
+  # Ransackable_scopes, by default, returns an empty array
+  # i.e. no class methods/scopes are authorized.
+  # For overriding with a whitelist array of *symbols*.
+  #
+  def ransackable_scopes(auth_object = nil)
+    []
+  end
 ```
 
 Any values not returned from these methods will be ignored by Ransack, i.e.
@@ -329,6 +337,7 @@ Here is an example that puts all this together, adapted from
 (http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
 In an `Article` model, add the following `ransackable_attributes` class method
 (preferably private):
+
 ```ruby
 class Article < ActiveRecord::Base
 
@@ -345,7 +354,9 @@ class Article < ActiveRecord::Base
   end
 end
 ```
+
 Here is example code for the `articles_controller`:
+
 ```ruby
 class ArticlesController < ApplicationController
 
@@ -361,7 +372,9 @@ class ArticlesController < ApplicationController
   end
 end
 ```
+
 Trying it out in `rails console`:
+
 ```ruby
 > Article
 => Article(id: integer, person_id: integer, title: string, body: text) 
@@ -381,6 +394,7 @@ Trying it out in `rails console`:
 > Article.search({ id_eq: 1 }, { auth_object: :admin }).result.to_sql
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
+
 That's it! Now you know how to whitelist/blacklist various elements in Ransack.
 
 ### Using Scopes/Class Methods
