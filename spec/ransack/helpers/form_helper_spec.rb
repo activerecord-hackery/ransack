@@ -51,8 +51,8 @@ module Ransack
       end
 
       describe '#sort_link with default search_key defined as symbol' do
-        subject { @controller.
-          view_context.sort_link(
+        subject { @controller.view_context
+          .sort_link(
             Person.search(
               { :sorts => ['name desc'] }, :search_key => :people_search
               ),
@@ -69,6 +69,46 @@ module Ransack
             end
           )
         }
+      end
+
+      describe '#sort_link desc through association table defined as a symbol' do
+        subject { @controller.view_context
+          .sort_link(
+            Person.search({ :sorts => ['comments_body asc'] }),
+            :comments_body, :controller => 'people'
+            )
+          }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D=comments.body\+desc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])=comments.body\+desc/
+            end
+            )
+          }
+        it { should match /sort_link asc/ }
+        it { should match /Body&nbsp;&#9650;/ }
+      end
+
+      describe '#sort_link through association table defined as a string' do
+        subject { @controller.view_context
+          .sort_link(
+            Person.search({ :sorts => ['comments.body desc'] }),
+            'comments.body', :controller => 'people'
+            )
+          }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D=comments.body\+asc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])=comments.body\+asc/
+            end
+            )
+          }
+        it { should match /sort_link desc/ }
+        it { should match /Comments.body&nbsp;&#9660;/ }
       end
 
       describe '#sort_link works even if search params are a blank string' do
