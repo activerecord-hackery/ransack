@@ -55,6 +55,7 @@ module Ransack
         form_for(record, options, &proc)
       end
 
+      # sort_link @q, :name, [:name, 'kind ASC'], 'Player Name'
       def sort_link(search, attribute, *args)
         # Extract out a routing proxy for url_for scoping later
         if search.is_a?(Array)
@@ -65,39 +66,75 @@ module Ransack
         raise TypeError, "First argument must be a Ransack::Search!" unless
           Search === search
 
-        search_params = params[search.context.search_key].presence ||
-          {}.with_indifferent_access
+        # This is the field that this link represents. The direction of the sort icon (up/down arrow) will
+        # depend on the sort status of this field
+        field_name = attribute.to_s
 
-        attr_name = attribute.to_s
+        # Determine the fields we want to sort on
+        sort_fields = if Array === args.first
+          args.shift
+        else
+          Array(field_name)
+        end
 
-        name = (
-          if args.size > 0 && !args.first.is_a?(Hash)
-            args.shift.to_s
-          else
-            Translate.attribute(attr_name, :context => search.context)
-          end
-          )
-
-        if existing_sort = search.sorts.detect { |s| s.name == attr_name }
-          prev_attr, prev_dir = existing_sort.name, existing_sort.dir
+        label = if ! args.first.try(:is_a?, Hash)
+          args.shift.to_s
+        else
+          Translate.attribute(field_name, :context => search.context)
         end
 
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
         default_order = options.delete :default_order
-        current_dir = prev_attr == attr_name ? prev_dir : nil
+        # If the default order is a hash of fields, duplicate it and let us access it with strings or symbols
+        default_order = default_order.dup.with_indifferent_access if Hash === default_order
 
-        if current_dir
-          new_dir = current_dir == desc ? asc : desc
-        else
-          new_dir = default_order || asc
+        search_params = params[search.context.search_key].presence ||
+          {}.with_indifferent_access
+
+        # Find the current direction (if there is one) of the primary sort field
+        if existing_sort = search.sorts.detect { |s| s.name == field_name }
+          field_current_dir = existing_sort.dir
+        end
+
+        sort_params = []
+
+        Array(sort_fields).each do |sort_field|
+          attr_name, new_dir = sort_field.to_s.downcase.split(/\s+/)
+          current_dir = nil
+
+          # if the user didn't specify the sort direction, detect the previous
+          # sort direction on this field and reverse it
+          if %w{ asc desc }.none? { |d| d == new_dir }
+            if existing_sort = search.sorts.detect { |s| s.name == attr_name }
+              current_dir = existing_sort.dir
+            end
+
+            new_dir = if current_dir
+              current_dir == desc ? asc : desc
+            else
+              if Hash === default_order
+                default_order[attr_name] || asc
+              else
+                default_order || asc
+              end
+            end
+          end
+
+          sort_params << "#{attr_name} #{new_dir}"
+        end
+
+        # if there is only one sort parameter, remove it from the array and just
+        # use the string as the parameter
+        if sort_params.size == 1
+          sort_params = sort_params.first
         end
 
         html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
-        css = ['sort_link', current_dir].compact.join(' ')
+        css = ['sort_link', field_current_dir].compact.join(' ')
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
         query_hash = {}
         query_hash[search.context.search_key] = search_params
-        .merge(:s => "#{attr_name} #{new_dir}")
+          .merge(:s => sort_params)
         options.merge!(query_hash)
         options_for_url = params.merge options
 
@@ -108,7 +145,7 @@ module Ransack
         end
 
         link_to(
-          [ERB::Util.h(name), order_indicator_for(current_dir)]
+          [ERB::Util.h(label), order_indicator_for(field_current_dir)]
             .compact
             .join(non_breaking_space)
             .html_safe,
