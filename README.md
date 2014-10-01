@@ -42,11 +42,17 @@ gem 'ransack', github: 'activerecord-hackery/ransack'
 
 The other branches (`rails-4`, `rails-4.1`, and `rails-4.2`) were each used for
 developing and running Ransack with the latest upcoming version of Rails at the
-time. They are lighter and somewhat faster-running because they do not have to
+time. They are smaller and possibly slightly faster because they do not have to
 support previous versions of Rails and Active Record. Once support for that
 Rails version is merged from the branch into Ransack master, the branch is no
 longer actively maintained -- unless the open source community submits pull
 requests to maintain them. You are welcome to do so!
+
+To use one of the branches, for example the `rails-4.1` branch:
+
+```ruby
+gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
+```
 
 ## Usage
 
@@ -407,7 +413,7 @@ scope accepts a value:
 
 ```ruby
 class Employee < ActiveRecord::Base
-  scope :active, ->(boolean = true) { (where active: boolean) }
+  scope :active, ->(boolean = true) { where(active: boolean) }
   scope :salary_gt, ->(amount) { where('salary > ?', amount) }
 
   # Scopes are just syntactical sugar for class methods, which may also be used:
@@ -433,6 +439,13 @@ Employee.search({ active: true, hired_since: '2013-01-01' })
 
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
+
+Scopes are a recent addition to Ransack and currently have 2 caveats: First, if
+you are using a scope with associations, for now you'll need to define the
+scope in the parent table model, not in the child model. Second, scopes on
+arrays of values are not yet working correctly; in this case, it may be 
+advisable to use [_ransackers_]
+(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead.
 
 ### Grouping queries by OR instead of AND
 
