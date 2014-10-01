@@ -71,10 +71,10 @@ module Ransack
         }
       end
 
-      describe '#sort_link through association table defined as a symbol' do
+      describe '#sort_link desc through association table defined as a symbol' do
         subject { @controller.view_context
           .sort_link(
-            Person.search({ :sorts => 'comments_body' }),
+            Person.search({ :sorts => ['comments_body asc'] }),
             :comments_body, :controller => 'people'
             )
           }
@@ -94,8 +94,8 @@ module Ransack
       describe '#sort_link through association table defined as a string' do
         subject { @controller.view_context
           .sort_link(
-            Person.search({ :sorts => 'comments.body desc' }),
-            :comments_body, :controller => 'people'
+            Person.search({ :sorts => ['comments.body desc'] }),
+            'comments.body', :controller => 'people'
             )
           }
         it {
@@ -108,7 +108,7 @@ module Ransack
             )
           }
         it { should match /sort_link desc/ }
-        it { should match /Body&nbsp;&#9660;/ }
+        it { should match /Comments.body&nbsp;&#9660;/ }
       end
 
       describe '#sort_link works even if search params are a blank string' do

@@ -96,9 +96,8 @@ module Ransack
         css = ['sort_link', current_dir].compact.join(' ')
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
         query_hash = {}
-        query_hash[search.context.search_key] = search_params.merge(
-          :s => "#{attr_name} #{new_dir}"
-          )
+        query_hash[search.context.search_key] = search_params
+        .merge(:s => "#{attr_name} #{new_dir}")
         options.merge!(query_hash)
         options_for_url = params.merge options
 
