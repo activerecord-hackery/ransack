@@ -170,7 +170,21 @@ module Ransack
         }
       end
 
-      describe '#sort_link with multiple search_keys defined as an array should flip multiple fields specified without a direction' do
+      describe '#sort_link with multiple search_keys should allow a label to be specified' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
+            :name, [:name, 'email DESC'],
+            'Property Name',
+            :controller => 'people'
+          )
+        }
+        it {
+          should match /Property Name&nbsp;&#9660;/
+        }
+      end
+
+      describe '#sort_link with multiple search_keys should flip multiple fields specified without a direction' do
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
@@ -195,7 +209,7 @@ module Ransack
         }
       end
 
-      describe '#sort_link with multiple search_keys defined as an array should allow a default_order to be specified' do
+      describe '#sort_link with multiple search_keys should allow a default_order to be specified' do
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search()],
@@ -221,7 +235,7 @@ module Ransack
         }
       end
 
-      describe '#sort_link with multiple search_keys defined as an array should allow multiple default_orders to be specified' do
+      describe '#sort_link with multiple search_keys should allow multiple default_orders to be specified' do
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search()],
