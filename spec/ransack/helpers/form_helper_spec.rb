@@ -145,6 +145,145 @@ module Ransack
         }
       end
 
+      describe '#sort_link with multiple search_keys defined as an array' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
+            :name, [:name, 'email DESC'],
+            :controller => 'people'
+          )
+        }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D%5B%5D=name\+asc&amp;q%5Bs%5D%5B%5D=email+desc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+            end
+          )
+        }
+        it {
+          should match /sort_link desc/
+        }
+        it {
+          should match /Full Name&nbsp;&#9660;/
+        }
+      end
+
+      describe '#sort_link with multiple search_keys should allow a label to be specified' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
+            :name, [:name, 'email DESC'],
+            'Property Name',
+            :controller => 'people'
+          )
+        }
+        it {
+          should match /Property Name&nbsp;&#9660;/
+        }
+      end
+
+      describe '#sort_link with multiple search_keys should flip multiple fields specified without a direction' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
+            :name, [:name, :email],
+            :controller => 'people'
+          )
+        }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D%5B%5D=name\+asc&amp;q%5Bs%5D%5B%5D=email+desc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+            end
+          )
+        }
+        it {
+          should match /sort_link desc/
+        }
+        it {
+          should match /Full Name&nbsp;&#9660;/
+        }
+      end
+
+      describe '#sort_link with multiple search_keys should allow a default_order to be specified' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search()],
+            :name, [:name, :email],
+            :controller => 'people',
+            :default_order => 'desc'
+          )
+        }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D%5B%5D=name\+desc&amp;q%5Bs%5D%5B%5D=email+desc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+            end
+          )
+        }
+        it {
+          should match /sort_link/
+        }
+        it {
+          should match /Full Name/
+        }
+      end
+
+      describe '#sort_link with multiple search_keys should allow multiple default_orders to be specified' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search()],
+            :name, [:name, :email],
+            :controller => 'people',
+            :default_order => { 'name' => 'desc', :email => 'asc' }
+          )
+        }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D%5B%5D=name\+desc&amp;q%5Bs%5D%5B%5D=email+asc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
+            end)
+        }
+        it {
+          should match /sort_link/
+        }
+        it {
+          should match /Full Name/
+        }
+      end
+
+      describe '#sort_link with multiple search_keys with multiple default_orders should not override a specified order' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search()],
+            :name, [:name, 'email desc'],
+            :controller => 'people',
+            :default_order => { 'name' => 'desc', :email => 'asc' }
+          )
+        }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D%5B%5D=name\+desc&amp;q%5Bs%5D%5B%5D=email+desc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+            end)
+        }
+        it {
+          should match /sort_link/
+        }
+        it {
+          should match /Full Name/
+        }
+      end
       context 'view has existing parameters' do
         before do
           @controller.view_context.params.merge!({ :exist => 'existing' })
