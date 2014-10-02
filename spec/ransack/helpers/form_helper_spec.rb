@@ -155,11 +155,7 @@ module Ransack
         }
         it {
           should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D%5B%5D=name\+asc&amp;q%5Bs%5D%5B%5D=email+desc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-            end
+            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it {
@@ -194,11 +190,7 @@ module Ransack
         }
         it {
           should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D%5B%5D=name\+asc&amp;q%5Bs%5D%5B%5D=email+desc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-            end
+            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it {
@@ -220,11 +212,7 @@ module Ransack
         }
         it {
           should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D%5B%5D=name\+desc&amp;q%5Bs%5D%5B%5D=email+desc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-            end
+            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it {
@@ -246,11 +234,8 @@ module Ransack
         }
         it {
           should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D%5B%5D=name\+desc&amp;q%5Bs%5D%5B%5D=email+asc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
-            end)
+            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
+          )
         }
         it {
           should match /sort_link/
@@ -271,11 +256,8 @@ module Ransack
         }
         it {
           should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D%5B%5D=name\+desc&amp;q%5Bs%5D%5B%5D=email+desc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-            end)
+            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          )
         }
         it {
           should match /sort_link/
