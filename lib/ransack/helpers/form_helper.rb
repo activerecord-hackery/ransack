@@ -77,7 +77,8 @@ module Ransack
           Array(field_name)
         end
 
-        label = if ! args.first.try(:is_a?, Hash)
+        label_text =
+        if !args.first.try(:is_a?, Hash)
           args.shift.to_s
         else
           Translate.attribute(field_name, :context => search.context)
@@ -85,8 +86,10 @@ module Ransack
 
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
         default_order = options.delete :default_order
+
         # If the default order is a hash of fields, duplicate it and let us access it with strings or symbols
-        default_order = default_order.dup.with_indifferent_access if Hash === default_order
+        default_order = default_order.dup.with_indifferent_access if
+          Hash === default_order
 
         search_params = params[search.context.search_key].presence ||
           {}.with_indifferent_access
@@ -104,19 +107,18 @@ module Ransack
 
           # if the user didn't specify the sort direction, detect the previous
           # sort direction on this field and reverse it
-          if %w{ asc desc }.none? { |d| d == new_dir }
+          if %w(asc desc).none? { |d| d == new_dir }
             if existing_sort = search.sorts.detect { |s| s.name == attr_name }
               current_dir = existing_sort.dir
             end
 
-            new_dir = if current_dir
+            new_dir =
+            if current_dir
               current_dir == desc ? asc : desc
+            elsif Hash === default_order
+              default_order[attr_name] || asc
             else
-              if Hash === default_order
-                default_order[attr_name] || asc
-              else
-                default_order || asc
-              end
+              default_order || asc
             end
           end
 
@@ -125,41 +127,43 @@ module Ransack
 
         # if there is only one sort parameter, remove it from the array and just
         # use the string as the parameter
-        if sort_params.size == 1
-          sort_params = sort_params.first
-        end
+        sort_params = sort_params.first if sort_params.size == 1
 
         html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
         css = ['sort_link', field_current_dir].compact.join(' ')
         html_options[:class] = [css, html_options[:class]].compact.join(' ')
+
         query_hash = {}
         query_hash[search.context.search_key] = search_params
           .merge(:s => sort_params)
         options.merge!(query_hash)
         options_for_url = params.merge options
 
-        url = if routing_proxy && respond_to?(routing_proxy)
+        url =
+        if routing_proxy && respond_to?(routing_proxy)
           send(routing_proxy).url_for(options_for_url)
         else
           url_for(options_for_url)
         end
 
-        link_to(
-          [ERB::Util.h(label), order_indicator_for(field_current_dir)]
-            .compact
-            .join(non_breaking_space)
-            .html_safe,
-          url,
-          html_options
-          )
+        name = link_name(label_text, field_current_dir)
+
+        link_to(name, url, html_options)
       end
 
       private
 
-      def order_indicator_for(order)
-        if order == asc
+      def link_name(label_text, dir)
+        [ERB::Util.h(label_text), order_indicator_for(dir)]
+        .compact
+        .join(non_breaking_space)
+        .html_safe
+      end
+
+      def order_indicator_for(dir)
+        if dir == asc
           asc_arrow
-        elsif order == desc
+        elsif dir == desc
           desc_arrow
         else
           nil
