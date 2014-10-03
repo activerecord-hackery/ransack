@@ -6,9 +6,7 @@ henceforth should be documented here.
 ### Added
 
 *   `sort_link` helper: Add support for multiple sort fields and default orders.
-    Please see the
-    [pull request](https://github.com/activerecord-hackery/ransack/pull/438)
-    #438 for more information.
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/438)).
 
     *Caleb Land*, *James u007*
 
@@ -16,12 +14,14 @@ henceforth should be documented here.
 
 ### Changed
 
+
 ## Version 1.4.1 - 2014-09-23
 ### Fixed
 
 *   Fix README markdown so RubyGems documentation picks up the formatting correctly.
 
     *Jon Atack*
+
 
 ## Version 1.4.0 - 2014-09-23
 ### Added
