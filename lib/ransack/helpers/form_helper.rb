@@ -86,10 +86,11 @@ module Ransack
 
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
         default_order = options.delete :default_order
+        default_order_is_a_hash = Hash === default_order
 
         # If the default order is a hash of fields, duplicate it and let us access it with strings or symbols
         default_order = default_order.dup.with_indifferent_access if
-          Hash === default_order
+          default_order_is_a_hash
 
         search_params = params[search.context.search_key].presence ||
           {}.with_indifferent_access
@@ -115,7 +116,7 @@ module Ransack
             new_dir =
             if current_dir
               current_dir == desc ? asc : desc
-            elsif Hash === default_order
+            elsif default_order_is_a_hash
               default_order[attr_name] || asc
             else
               default_order || asc
