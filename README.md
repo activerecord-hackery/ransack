@@ -440,12 +440,18 @@ Employee.search({ active: true, hired_since: '2013-01-01' })
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
-Scopes are a recent addition to Ransack and currently have 2 caveats: First, if
-you are using a scope with associations, for now you'll need to define the
-scope in the parent table model, not in the child model. Second, scopes on
-arrays of values are not yet working correctly; in this case, it may be 
-advisable to use [_ransackers_]
-(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead.
+Scopes are a recent addition to Ransack and currently have a few caveats:
+First, a scope involving child associations needs to be defined in the parent
+table model, not in the child model. Second, scopes with an array as an
+argument are not easily usable yet, because the array currently needs to be
+wrapped in an array to function (see
+[this issue](https://github.com/activerecord-hackery/ransack/issues/404)),
+which is not compatible with Ransack form helpers. For this use case, it may be
+better for now to use [ransackers]
+(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead
+where feasible. Finally, there is also
+[this issue](https://github.com/activerecord-hackery/ransack/issues/403)
+to be aware of. Pull requests with solutions and tests are welcome!
 
 ### Grouping queries by OR instead of AND
 
