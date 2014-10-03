@@ -27,7 +27,7 @@ module Ransack
       def attribute_select(options = nil, html_options = nil, action = nil)
         options = options || {}
         html_options = html_options || {}
-        action = action || 'search'
+        action = action || SEARCH
         default = options.delete(:default)
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)
@@ -55,7 +55,7 @@ module Ransack
       end
 
       def sort_select(options = {}, html_options = {})
-        attribute_select(options, html_options, 'sort') +
+        attribute_select(options, html_options, SORT) +
         sort_direction_select(options, html_options)
       end
 
@@ -157,14 +157,14 @@ module Ransack
       end
 
       def sort_array
-        [['asc', object.translate('asc')], ['desc', object.translate('desc')]]
+        [[ASC, object.translate(ASC)], [DESC, object.translate(DESC)]]
       end
 
       def combinator_choices
         if Nodes::Condition === object
-          [['or', Translate.word(:any)], ['and', Translate.word(:all)]]
+          [[OR, Translate.word(:any)], [AND, Translate.word(:all)]]
         else
-          [['and', Translate.word(:all)], ['or', Translate.word(:any)]]
+          [[AND, Translate.word(:all)], [OR, Translate.word(:any)]]
         end
       end
 
@@ -231,7 +231,7 @@ module Ransack
       end
 
       def formbuilder_error_message(action)
-        "#{action.sub('search', 'attribute')
+        "#{action.sub(SEARCH, ATTRIBUTE)
           } must be called inside a search FormBuilder!"
       end
 

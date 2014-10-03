@@ -2,26 +2,6 @@ module Ransack
   module Helpers
     module FormHelper
 
-      def asc
-        'asc'.freeze
-      end
-
-      def desc
-        'desc'.freeze
-      end
-
-      def asc_arrow
-        '&#9650;'.freeze
-      end
-
-      def desc_arrow
-        '&#9660;'.freeze
-      end
-
-      def non_breaking_space
-        '&nbsp;'.freeze
-      end
-
       def search_form_for(record, options = {}, &proc)
         if record.is_a?(Ransack::Search)
           search = record
@@ -48,7 +28,7 @@ module Ransack
             "#{search.klass.to_s.underscore}_search",
           :method => :get
         }
-        options[:as] ||= 'q'.freeze
+        options[:as] ||= DEFAULT_SEARCH_KEY
         options[:html].reverse_merge!(html_options)
         options[:builder] ||= FormBuilder
 
@@ -108,18 +88,18 @@ module Ransack
 
           # if the user didn't specify the sort direction, detect the previous
           # sort direction on this field and reverse it
-          if %w(asc desc).none? { |d| d == new_dir }
+          if ASC_DESC.none? { |d| d == new_dir }
             if existing_sort = search.sorts.detect { |s| s.name == attr_name }
               current_dir = existing_sort.dir
             end
 
             new_dir =
             if current_dir
-              current_dir == desc ? asc : desc
+              current_dir == DESC ? ASC : DESC
             elsif default_order_is_a_hash
-              default_order[attr_name] || asc
+              default_order[attr_name] || ASC
             else
-              default_order || asc
+              default_order || ASC
             end
           end
 
@@ -131,14 +111,14 @@ module Ransack
         sort_params = sort_params.first if sort_params.size == 1
 
         html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
-        css = ['sort_link', field_current_dir].compact.join(' ')
-        html_options[:class] = [css, html_options[:class]].compact.join(' ')
+        css = [SORT_LINK, field_current_dir].compact.join(SPACE)
+        html_options[:class] = [css, html_options[:class]].compact.join(SPACE)
 
         query_hash = {}
         query_hash[search.context.search_key] = search_params
           .merge(:s => sort_params)
         options.merge!(query_hash)
-        options_for_url = params.merge options
+        options_for_url = params.merge(options)
 
         url =
         if routing_proxy && respond_to?(routing_proxy)
@@ -157,15 +137,15 @@ module Ransack
       def link_name(label_text, dir)
         [ERB::Util.h(label_text), order_indicator_for(dir)]
         .compact
-        .join(non_breaking_space)
+        .join(NON_BREAKING_SPACE)
         .html_safe
       end
 
       def order_indicator_for(dir)
-        if dir == asc
-          asc_arrow
-        elsif dir == desc
-          desc_arrow
+        if dir == ASC
+          ASC_ARROW
+        elsif dir == DESC
+          DESC_ARROW
         else
           nil
         end
