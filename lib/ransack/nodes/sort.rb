@@ -35,7 +35,7 @@ module Ransack
       end
 
       def dir=(dir)
-        dir = dir.try(:downcase)
+        dir = dir.downcase if dir
         @dir = ASC_DESC.include?(dir) ? dir : ASC
       end
 
