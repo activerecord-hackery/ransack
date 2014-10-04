@@ -5,7 +5,7 @@ henceforth should be documented here.
 ## Unreleased
 ### Added
 
-*   `sort_link` helper: Add support for multiple sort fields and default orders.
+*   `sort_link` helper: Add support for multiple sort fields and default orders
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/438)).
 
     *Caleb Land*, *James u007*
@@ -13,6 +13,12 @@ henceforth should be documented here.
 ### Fixed
 
 ### Changed
+
+*   Reduce object allocations and memory footprint (with a slight speed gain as
+    well) by extracting commonly used strings into top level constants and
+    replacing calls to `#try` methods with simple nil checking.
+
+    *Jon Atack*
 
 
 ## Version 1.4.1 - 2014-09-23
