@@ -163,6 +163,18 @@ column title or a default sort order:
 <%= content_tag :th, sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
 
+You can also sort on multiple fields at the same time with `sort_link`:
+
+```erb
+<%= content_tag :th, sort_link(@q, :last_name,
+                               [:last_name, 'first_name asc'], 'Last Name') %>
+```
+
+If the third argument to `sort_link` is an array, clicking the link will make
+Ransack sort on multiple columns. In the example above, clicking the link
+will sort by `last_name` and then `first_name`. Including the sorting direction
+with the `first_name` column tells Ransack to always sort in the specified direction.
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to
