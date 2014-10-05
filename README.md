@@ -154,7 +154,7 @@ The `search_form_for` answer format can be set like this:
 #####Ransack's `sort_link` helper creates table headers that are sortable links:
 
 ```erb
-<%= content_tag :th, sort_link(@q, :name) %>
+<%= sort_link(@q, :name) %>
 ```
 Additional options can be passed after the column attribute, like a different
 column title or a default sort order:
@@ -163,17 +163,29 @@ column title or a default sort order:
 <%= content_tag :th, sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
 
-You can also sort on multiple fields at the same time with `sort_link`:
+You can also sort on multiple fields by specifying an ordered array:
 
 ```erb
-<%= content_tag :th, sort_link(@q, :last_name,
-                               [:last_name, 'first_name asc'], 'Last Name') %>
+<%= content_tag :th, sort_link(
+  @q, :last_name, [:last_name, 'first_name asc'], 'Last Name'
+  ) %>
 ```
 
-If the third argument to `sort_link` is an array, clicking the link will make
-Ransack sort on multiple columns. In the example above, clicking the link
-will sort by `last_name` and then `first_name`. Including the sorting direction
-with the `first_name` column tells Ransack to always sort in the specified direction.
+In the example above, clicking the link will sort by `last_name` and then
+`first_name`. Specifying the sort direction on a field in the array tells
+Ransack to _always_ sort that particular field in the specified direction.
+
+Multiple `default_order` fields may also be specified with a hash:
+
+```erb
+<%= sort_link(
+  @q, :last_name, [:last_name, :first_name], default_order: { last_name: 'asc', first_name: 'desc' }
+  ) %>
+```
+
+This example toggles the sort directions of both fields, by default
+initially sorting the `last_name` field by ascending order, and the
+`first_name` field by descending order.
 
 ### Advanced Mode
 
