@@ -160,15 +160,13 @@ Additional options can be passed after the column attribute, like a different
 column title or a default sort order:
 
 ```erb
-<%= content_tag :th, sort_link(@q, :name, 'Last Name', default_order: :desc) %>
+<%= sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
 
 You can also sort on multiple fields by specifying an ordered array:
 
 ```erb
-<%= content_tag :th, sort_link(
-  @q, :last_name, [:last_name, 'first_name asc'], 'Last Name'
-  ) %>
+<%= sort_link(@q, :last_name, [:last_name, 'first_name asc'], 'Last Name') %>
 ```
 
 In the example above, clicking the link will sort by `last_name` and then
@@ -178,9 +176,8 @@ Ransack to _always_ sort that particular field in the specified direction.
 Multiple `default_order` fields may also be specified with a hash:
 
 ```erb
-<%= sort_link(
-  @q, :last_name, [:last_name, :first_name], default_order: { last_name: 'asc', first_name: 'desc' }
-  ) %>
+<%= sort_link(@q, :last_name, [:last_name, :first_name],
+  default_order: { last_name: 'asc', first_name: 'desc' }) %>
 ```
 
 This example toggles the sort directions of both fields, by default
