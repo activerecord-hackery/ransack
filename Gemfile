@@ -7,6 +7,9 @@ rails = ENV['RAILS'] || 'master'
 
 gem 'polyamorous', '~> 1.1'
 
+# Provide timezone information on Windows
+gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
+
 case rails
 when /\// # A path
   gem 'activesupport', path: "#{rails}/activesupport"
