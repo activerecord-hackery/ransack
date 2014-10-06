@@ -1,11 +1,13 @@
 require 'action_view'
 
+RANSACK_FORM_BUILDER = 'RANSACK_FORM_BUILDER'.freeze
+
 require 'simple_form' if
-  (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
+  (ENV[RANSACK_FORM_BUILDER] || EMPTY_STRING).match('SimpleForm'.freeze)
 
 module Ransack
   module Helpers
-    class FormBuilder < (ENV['RANSACK_FORM_BUILDER'].try(:constantize) ||
+    class FormBuilder < (ENV[RANSACK_FORM_BUILDER].try(:constantize) ||
       ActionView::Helpers::FormBuilder)
 
       def label(method, *args, &block)
@@ -32,7 +34,7 @@ module Ransack
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
-        bases = [''] + association_array(options[:associations])
+        bases = [EMPTY_STRING] + association_array(options[:associations])
         if bases.size > 1
           collection = attribute_collection_for_bases(action, bases)
           object.name ||= default if can_use_default?(
@@ -50,7 +52,7 @@ module Ransack
 
       def sort_direction_select(options = {}, html_options = {})
         raise ArgumentError, formbuilder_error_message(
-          'sort_direction') unless object.respond_to?(:context)
+          'sort_direction'.freeze) unless object.respond_to?(:context)
         template_collection_select(:dir, sort_array, options, html_options)
       end
 
@@ -107,7 +109,7 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        default = options.delete(:default) || 'cont'
+        default = options.delete(:default) || 'cont'.freeze
 
         keys = options[:compounds] ? Predicate.names :
           Predicate.names.reject { |k| k.match(/_(any|all)$/) }
@@ -116,7 +118,9 @@ module Ransack
             keys = keys.select { |k| only.call(k) }
           else
             only = Array.wrap(only).map(&:to_s)
-            keys = keys.select { |k| only.include? k.sub(/_(any|all)$/, '') }
+            keys = keys.select {
+              |k| only.include? k.sub(/_(any|all)$/, EMPTY_STRING)
+            }
           end
         end
         collection = keys.map { |k| [k, Translate.predicate(k)] }
@@ -172,7 +176,7 @@ module Ransack
         ([prefix] + association_object(obj))
         .compact
         .flatten
-        .map { |v| [prefix, v].compact.join('_') }
+        .map { |v| [prefix, v].compact.join(UNDERSCORE) }
       end
 
       def association_object(obj)
@@ -192,7 +196,7 @@ module Ransack
           when Array, Hash
             association_array(value, key.to_s)
           else
-            [key.to_s, [key, value].join('_')]
+            [key.to_s, [key, value].join(UNDERSCORE)]
           end
         end
       end
@@ -227,7 +231,7 @@ module Ransack
       end
 
       def attr_from_base_and_column(base, column)
-        [base, column].reject { |v| v.blank? }.join('_')
+        [base, column].reject { |v| v.blank? }.join(UNDERSCORE)
       end
 
       def formbuilder_error_message(action)

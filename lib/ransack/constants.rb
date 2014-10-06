@@ -4,119 +4,126 @@ module Ransack
     FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
     BOOLEAN_VALUES = TRUE_VALUES + FALSE_VALUES
 
-    AREL_PREDICATES = %w(eq not_eq matches does_not_match lt lteq gt gteq in not_in)
+    AREL_PREDICATES = %w(
+      eq not_eq matches does_not_match lt lteq gt gteq in not_in
+    ).freeze
+
+    EQ         = 'eq'.freeze
+    NOT_EQ     = 'not_eq'.freeze
+    EQ_ANY     = 'eq_any'.freeze
+    NOT_EQ_ALL = 'not_eq_all'.freeze
 
     DERIVED_PREDICATES = [
-      ['cont', {
-        :arel_predicate => 'matches',
+      ['cont'.freeze, {
+        :arel_predicate => 'matches'.freeze,
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
-      ['i_cont', {
-        :arel_predicate => 'i_matches',
-        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
-      }
-      ],
-      ['not_cont', {
-        :arel_predicate => 'does_not_match',
-        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
-        }
-      ],
-      ['i_not_cont', {
-        :arel_predicate => 'i_does_not_match',
+      ['i_cont'.freeze, {
+        :arel_predicate => 'i_matches'.freeze,
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
       }
       ],
-      ['start', {
-        :arel_predicate => 'matches',
+      ['not_cont'.freeze, {
+        :arel_predicate => 'does_not_match'.freeze,
+        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
+        }
+      ],
+      ['i_not_cont'.freeze, {
+        :arel_predicate => 'i_does_not_match'.freeze,
+        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
+      }
+      ],
+      ['start'.freeze, {
+        :arel_predicate => 'matches'.freeze,
         :formatter => proc { |v| "#{escape_wildcards(v)}%" }
         }
       ],
-      ['not_start', {
-        :arel_predicate => 'does_not_match',
+      ['not_start'.freeze, {
+        :arel_predicate => 'does_not_match'.freeze,
         :formatter => proc { |v| "#{escape_wildcards(v)}%" }
         }
       ],
-      ['end', {
-        :arel_predicate => 'matches',
+      ['end'.freeze, {
+        :arel_predicate => 'matches'.freeze,
         :formatter => proc { |v| "%#{escape_wildcards(v)}" }
         }
       ],
-      ['not_end', {
-        :arel_predicate => 'does_not_match',
+      ['not_end'.freeze, {
+        :arel_predicate => 'does_not_match'.freeze,
         :formatter => proc { |v| "%#{escape_wildcards(v)}" }
         }
       ],
-      ['true', {
-        :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
+      ['true'.freeze, {
+        :arel_predicate => proc { |v| v ? EQ : NOT_EQ },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
         :formatter => proc { |v| true }
         }
       ],
-      ['not_true', {
-        :arel_predicate => proc { |v| v ? 'not_eq' : 'eq' },
+      ['not_true'.freeze, {
+        :arel_predicate => proc { |v| v ? NOT_EQ : EQ },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
         :formatter => proc { |v| true }
         }
       ],
-      ['false', {
-        :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
+      ['false'.freeze, {
+        :arel_predicate => proc { |v| v ? EQ : NOT_EQ },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
         :formatter => proc { |v| false }
         }
       ],
-      ['not_false', {
-        :arel_predicate => proc { |v| v ? 'not_eq' : 'eq' },
+      ['not_false'.freeze, {
+        :arel_predicate => proc { |v| v ? NOT_EQ : EQ },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
         :formatter => proc { |v| false }
         }
       ],
-      ['present', {
-        :arel_predicate => proc { |v| v ? 'not_eq_all' : 'eq_any' },
+      ['present'.freeze, {
+        :arel_predicate => proc { |v| v ? NOT_EQ_ALL : EQ_ANY },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
-        :formatter => proc { |v| [nil, ''] }
+        :formatter => proc { |v| [nil, EMPTY_STRING] }
         }
       ],
-      ['blank', {
-        :arel_predicate => proc { |v| v ? 'eq_any' : 'not_eq_all' },
+      ['blank'.freeze, {
+        :arel_predicate => proc { |v| v ? EQ_ANY : NOT_EQ_ALL },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
-        :formatter => proc { |v| [nil, ''] }
+        :formatter => proc { |v| [nil, EMPTY_STRING] }
         }
       ],
-      ['null', {
-        :arel_predicate => proc { |v| v ? 'eq' : 'not_eq' },
+      ['null'.freeze, {
+        :arel_predicate => proc { |v| v ? EQ : NOT_EQ },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v)},
         :formatter => proc { |v| nil }
         }
       ],
-      ['not_null', {
-        :arel_predicate => proc { |v| v ? 'not_eq' : 'eq' },
+      ['not_null'.freeze, {
+        :arel_predicate => proc { |v| v ? NOT_EQ : EQ },
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
         :formatter => proc { |v| nil } }
       ]
-    ]
+    ].freeze
 
   module_function
     # replace % \ to \% \\
     def escape_wildcards(unescaped)
       case ActiveRecord::Base.connection.adapter_name
-      when "Mysql2", "PostgreSQL"
+      when "Mysql2".freeze, "PostgreSQL".freeze
         # Necessary for PostgreSQL and MySQL
         unescaped.to_s.gsub(/([\\|\%|.])/, '\\\\\\1')
       else

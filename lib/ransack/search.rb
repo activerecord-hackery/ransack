@@ -88,7 +88,7 @@ module Ransack
 
     def method_missing(method_id, *args)
       method_name = method_id.to_s
-      getter_name = method_name.sub(/=$/, '')
+      getter_name = method_name.sub(/=$/, EMPTY_STRING)
       if base.attribute_method?(getter_name)
         base.send(method_id, *args)
       elsif @context.ransackable_scope?(getter_name, @context.object)
@@ -107,7 +107,10 @@ module Ransack
         [:class, klass.name],
         ([:scope, @scope_args] if @scope_args.present?),
         [:base, base.inspect]
-      ].compact.map { |d| d.join(': ') }.join(', ')
+      ]
+      .compact.map { |d| d.join(': '.freeze) }
+      .join(COMMA_SPACE)
+
       "Ransack::Search<#{details}>"
     end
 

@@ -135,11 +135,11 @@ module Arel
         "#{
           o.name
           }(#{
-          o.distinct ? 'DISTINCT ' : ''
+          o.distinct ? DISTINCT : EMPTY_STRING
           }#{
-          o.expressions.map { |x| visit x }.join(', ')
+          o.expressions.map { |x| visit x }.join(COMMA_SPACE)
           })#{
-          o.alias ? " AS #{visit o.alias}" : ''
+          o.alias ? " AS #{visit o.alias}" : EMPTY_STRING
           }"
       end
 
@@ -161,7 +161,7 @@ module Arel
             quote(value, attr && column_for(attr))
           end
         }
-        .join ', '
+        .join(COMMA_SPACE)
         })"
       end
     end

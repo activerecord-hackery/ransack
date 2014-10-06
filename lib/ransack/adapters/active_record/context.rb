@@ -50,10 +50,10 @@ module Ransack
             while !found_assoc && remainder.unshift(
               segments.pop) && segments.size > 0 do
               assoc, poly_class = unpolymorphize_association(
-                segments.join('_')
+                segments.join(UNDERSCORE)
                 )
               if found_assoc = get_association(assoc, klass)
-                exists = attribute_method?(remainder.join('_'),
+                exists = attribute_method?(remainder.join(UNDERSCORE),
                   poly_class || found_assoc.klass
                 )
               end
@@ -138,11 +138,15 @@ module Ransack
             found_assoc = nil
             while remainder.unshift(
               segments.pop) && segments.size > 0 && !found_assoc do
-              assoc, klass = unpolymorphize_association(segments.join('_'))
+              assoc, klass = unpolymorphize_association(
+                segments.join(UNDERSCORE)
+                )
               if found_assoc = get_association(assoc, parent)
-                join = build_or_find_association(found_assoc.name, parent, klass)
+                join = build_or_find_association(
+                  found_assoc.name, parent, klass
+                  )
                 parent, attr_name = get_parent_and_attribute_name(
-                  remainder.join('_'), join
+                  remainder.join(UNDERSCORE), join
                   )
               end
             end
@@ -171,25 +175,25 @@ module Ransack
           buckets = relation.joins_values.group_by do |join|
             case join
             when String
-              'string_join'
+              'string_join'.freeze
             when Hash, Symbol, Array
-              'association_join'
+              'association_join'.freeze
             when JoinDependency, JoinDependency::JoinAssociation
-              'stashed_join'
+              'stashed_join'.freeze
             when Arel::Nodes::Join
-              'join_node'
+              'join_node'.freeze
             else
               raise 'unknown class: %s' % join.class.name
             end
           end
 
-          association_joins         = buckets['association_join'] || []
+          association_joins         = buckets['association_join'.freeze] || []
 
-          stashed_association_joins = buckets['stashed_join'] || []
+          stashed_association_joins = buckets['stashed_join'.freeze] || []
 
-          join_nodes                = buckets['join_node'] || []
+          join_nodes                = buckets['join_node'.freeze] || []
 
-          string_joins              = (buckets['string_join'] || [])
+          string_joins              = (buckets['string_join'.freeze] || [])
                                       .map { |x| x.strip }
                                       .uniq
 
@@ -204,14 +208,14 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          if ::ActiveRecord::VERSION::STRING >= '4.1'
+          if ::ActiveRecord::VERSION::STRING >= '4.1'.freeze
             join_dependency
           else
             join_dependency.graft(*stashed_association_joins)
           end
         end
 
-        if ::ActiveRecord::VERSION::STRING >= '4.1'
+        if ::ActiveRecord::VERSION::STRING >= '4.1'.freeze
 
           def build_or_find_association(name, parent = @base, klass = nil)
             found_association = @join_dependency.join_root.children
