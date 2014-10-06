@@ -58,7 +58,7 @@ module Ransack
         end
 
         label_text =
-        if !args.first.try(:is_a?, Hash)
+        if !args.first.is_a?(Hash)
           args.shift.to_s
         else
           Translate.attribute(field_name, :context => search.context)
