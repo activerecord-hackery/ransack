@@ -26,45 +26,32 @@ instead.
 
 ## Getting started
 
-Because ActiveRecord has been evolving quite a bit, your friendly Ransack is
-available in several flavors! Take your pick:
+Ransack is currently compatible with Rails 3.x, 4.0, 4.1 and 4.2.
 
-In your Gemfile, for the last officially released gem compatible with Rails
-3.x, 4.0 and 4.1 (for Rails 4.2, use the dedicated `rails-4.2` branch described
-below for now):
+In your Gemfile, for the last officially released Ransack gem:
 
 ```ruby
 gem 'ransack'
 ```
 
-Or if you want to use the latest updates on the Ransack master branch:
+Or, if you would like to use the latest updates:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
-If you are using Rails 4.1, you may prefer the dedicated [Rails 4.1 branch]
-(https://github.com/activerecord-hackery/ransack/tree/rails-4.1) which
-usually contains the latest updates on master (albeit sometimes with some
-delay), supports only 4.1, and is lighter and somewhat faster:
+The other branches (`rails-4`, `rails-4.1`, and `rails-4.2`) were each used for
+developing and running Ransack with the latest upcoming version of Rails at the
+time. They are smaller and possibly slightly faster because they do not have to
+support previous versions of Rails and Active Record. Once support for that
+Rails version is merged from the branch into Ransack master, the branch is no
+longer actively maintained -- unless the open source community submits pull
+requests to maintain them. You are welcome to do so!
+
+To use one of the branches, for example the `rails-4.1` branch:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
-```
-
-Similarly, if you are using Rails 4.0, you may prefer the dedicated
-[Rails 4 branch](https://github.com/activerecord-hackery/ransack/tree/rails-4)
-for the same reasons:
-
-```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4'
-```
-
-Last but definitely not least, an experimental [Rails 4.2 branch]
-(https://github.com/activerecord-hackery/ransack/tree/rails-4.2) is available:
-
-```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.2'
 ```
 
 ## Usage
@@ -90,15 +77,18 @@ If you're coming from MetaSearch, things to note:
   3. Common ActiveRecord::Relation methods are no longer delegated by the
   search object. Instead, you will get your search results (an
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
-  `Search#result`. If passed `distinct: true`, `result` will generate a `SELECT
-  DISTINCT` to avoid returning duplicate rows, even if conditions on a join
-  would otherwise result in some.
+  `Search#result`.
+  
+  4. If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
+  avoid returning duplicate rows, even if conditions on a join would otherwise
+  result in some.
 
   Please note that for many databases, a sort on an associated table's columns
   may result in invalid SQL with `distinct: true` -- in those cases, you're on
   your own, and will need to modify the result as needed to allow these queries
-  to work. One good workaround if `distinct: true` is causing problems, can be to
-  not use it and call `#to_a.uniq` on your final collection instead.
+  to work. If `distinct: true` is causing you problems, another way to remove
+  duplicates is to call `#to_a.uniq` on your collection instead (see the next
+  section below).
 
 ####In your controller
 
@@ -126,7 +116,7 @@ The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in
 [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-#####1. Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
+#####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -161,17 +151,38 @@ The `search_form_for` answer format can be set like this:
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
-#####2. Ransack's `sort_link` helper creates table headers that are sortable links:
+#####Ransack's `sort_link` helper creates table headers that are sortable links:
 
 ```erb
-<%= content_tag :th, sort_link(@q, :name) %>
+<%= sort_link(@q, :name) %>
 ```
 Additional options can be passed after the column attribute, like a different
 column title or a default sort order:
 
 ```erb
-<%= content_tag :th, sort_link(@q, :name, 'Last Name', default_order: :desc) %>
+<%= sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
+
+You can also sort on multiple fields by specifying an ordered array:
+
+```erb
+<%= sort_link(@q, :last_name, [:last_name, 'first_name asc'], 'Last Name') %>
+```
+
+In the example above, clicking the link will sort by `last_name` and then
+`first_name`. Specifying the sort direction on a field in the array tells
+Ransack to _always_ sort that particular field in the specified direction.
+
+Multiple `default_order` fields may also be specified with a hash:
+
+```erb
+<%= sort_link(@q, :last_name, [:last_name, :first_name],
+  default_order: { last_name: 'asc', first_name: 'desc' }) %>
+```
+
+This example toggles the sort directions of both fields, by default
+initially sorting the `last_name` field by ascending order, and the
+`first_name` field by descending order.
 
 ### Advanced Mode
 
@@ -307,29 +318,37 @@ class methods in your models to apply selective authorization:
 Here is how these four methods are implemented in Ransack:
 
 ```ruby
-def ransackable_attributes(auth_object = nil)
-  # By default returns all column names and any defined ransackers as strings.
-  # For overriding with a whitelist of strings.
-  column_names + _ransackers.keys
-end
+  # Ransackable_attributes, by default, returns all column names
+  # and any defined ransackers as an array of strings.
+  # For overriding with a whitelist array of strings.
+  #
+  def ransackable_attributes(auth_object = nil)
+    column_names + _ransackers.keys
+  end
 
-def ransackable_associations(auth_object = nil)
-  # By default returns the names of all associations as strings.
-  # For overriding with a whitelist of strings.
-  reflect_on_all_associations.map { |a| a.name.to_s }
-end
+  # Ransackable_associations, by default, returns the names
+  # of all associations as an array of strings.
+  # For overriding with a whitelist array of strings.
+  #
+  def ransackable_associations(auth_object = nil)
+    reflect_on_all_associations.map { |a| a.name.to_s }
+  end
 
-def ransortable_attributes(auth_object = nil)
-  # By default returns the names of all attributes for sorting.
-  # For overriding with a whitelist of strings.
-  ransackable_attributes(auth_object)
-end
+  # Ransortable_attributes, by default, returns the names
+  # of all attributes available for sorting as an array of strings.
+  # For overriding with a whitelist array of strings.
+  #
+  def ransortable_attributes(auth_object = nil)
+    ransackable_attributes(auth_object)
+  end
 
-def ransackable_scopes(auth_object = nil)
-  # By default returns an empty array, i.e. no class methods/scopes
-  # are authorized. For overriding with a whitelist of *symbols*.
-  []
-end
+  # Ransackable_scopes, by default, returns an empty array
+  # i.e. no class methods/scopes are authorized.
+  # For overriding with a whitelist array of *symbols*.
+  #
+  def ransackable_scopes(auth_object = nil)
+    []
+  end
 ```
 
 Any values not returned from these methods will be ignored by Ransack, i.e.
@@ -345,8 +364,8 @@ Here is an example that puts all this together, adapted from
 (http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
 In an `Article` model, add the following `ransackable_attributes` class method
 (preferably private):
+
 ```ruby
-# article.rb
 class Article < ActiveRecord::Base
 
   private
@@ -362,9 +381,10 @@ class Article < ActiveRecord::Base
   end
 end
 ```
+
 Here is example code for the `articles_controller`:
+
 ```ruby
-# articles_controller.rb
 class ArticlesController < ApplicationController
 
   def index
@@ -379,7 +399,9 @@ class ArticlesController < ApplicationController
   end
 end
 ```
+
 Trying it out in `rails console`:
+
 ```ruby
 > Article
 => Article(id: integer, person_id: integer, title: string, body: text) 
@@ -399,18 +421,20 @@ Trying it out in `rails console`:
 > Article.search({ id_eq: 1 }, { auth_object: :admin }).result.to_sql
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
+
 That's it! Now you know how to whitelist/blacklist various elements in Ransack.
 
 ### Using Scopes/Class Methods
 
 Continuing on from the preceding section, searching by scopes requires defining
-a whitelist of `ransackable_scopes` on the model class. By default, all class
-methods (e.g. scopes) are ignored. Scopes will be applied for matching `true`
-values, or for given values if the scope accepts a value:
+a whitelist of `ransackable_scopes` on the model class. The whitelist should be
+an array of *symbols*. By default, all class methods (e.g. scopes) are ignored.
+Scopes will be applied for matching `true` values, or for given values if the
+scope accepts a value:
 
 ```ruby
 class Employee < ActiveRecord::Base
-  scope :active, ->(boolean = true) { (where active: boolean) }
+  scope :active, ->(boolean = true) { where(active: boolean) }
   scope :salary_gt, ->(amount) { where('salary > ?', amount) }
 
   # Scopes are just syntactical sugar for class methods, which may also be used:
@@ -436,6 +460,19 @@ Employee.search({ active: true, hired_since: '2013-01-01' })
 
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
+
+Scopes are a recent addition to Ransack and currently have a few caveats:
+First, a scope involving child associations needs to be defined in the parent
+table model, not in the child model. Second, scopes with an array as an
+argument are not easily usable yet, because the array currently needs to be
+wrapped in an array to function (see
+[this issue](https://github.com/activerecord-hackery/ransack/issues/404)),
+which is not compatible with Ransack form helpers. For this use case, it may be
+better for now to use [ransackers]
+(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead
+where feasible. Finally, there is also
+[this issue](https://github.com/activerecord-hackery/ransack/issues/403)
+to be aware of. Pull requests with solutions and tests are welcome!
 
 ### Grouping queries by OR instead of AND
 

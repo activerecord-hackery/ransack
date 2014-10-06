@@ -3,11 +3,14 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '4-1-stable'
+rails = ENV['RAILS'] || 'master'
 
 gem 'polyamorous', '~> 1.1'
 
 gem 'pry'
+
+# Provide timezone information on Windows
+gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
 
 case rails
 when /\// # A path

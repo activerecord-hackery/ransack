@@ -135,8 +135,9 @@ module Ransack
     end
 
     def self.translated_attribute(associated_class)
-      "#{associated_class.i18n_scope}.attributes.#{
-        i18n_key(associated_class)}.#{@attr_name}".to_sym
+      key = "#{associated_class.i18n_scope}.attributes.#{
+        i18n_key(associated_class)}.#{@attr_name}"
+      ["#{key}.one".to_sym, key.to_sym]
     end
 
     def self.translated_ancestor_attributes

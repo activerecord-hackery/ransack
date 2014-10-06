@@ -1,27 +1,67 @@
 # Change Log
-All notable changes to this project from August 2014 on will be documented here.
+This change log was started in August 2014. All notable changes to this project
+henceforth should be documented here.
 
 ## Unreleased
 ### Added
 
-*   Add `ro.yml` Romanian translation file.
+*   `sort_link` helper: Add support for multiple sort fields and default orders
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/438)).
 
-    *Andreas Philippi*
+    *Caleb Land*, *James u007*
+
+### Fixed
+
+### Changed
+
+*   Reduce object allocations and memory footprint (with a slight speed gain as
+    well) by extracting commonly used strings into top level constants and
+    replacing calls to `#try` methods with simple nil checking.
+
+    *Jon Atack*
+
+
+## Version 1.4.1 - 2014-09-23
+### Fixed
+
+*   Fix README markdown so RubyGems documentation picks up the formatting correctly.
+
+    *Jon Atack*
+
+
+## Version 1.4.0 - 2014-09-23
+### Added
+
+*   Add support for Rails 4.2.0! Let us know if you encounter any issues.
+
+    *Xiang Li*
 
 *   Add `not_true` and `not_false` predicates and update the "Basic Searching"
     wiki. Fixes #123, #353.
 
     *Pedro Chambino*
 
-*   Start a CHANGELOG.
+*   Add `ro.yml` Romanian translation file.
+
+    *Andreas Philippi*
+
 *   Add new documentation in the README explaining how to group queries by `OR`
     instead of the default `AND` using the `m: 'or'` combinator.
+
+*   Add new documentation in the README and in the source code comments
+    explaining in detail how to handle whitelisting/authorization of
+    attributes, associations, sorts and scopes.
+
+*   Add new documentation in the README explaining in more detail how to use
+    scopes for searching with Ransack.
+
+*   Begin a CHANGELOG.
 
     *Jon Atack*
 
 ### Fixed
 
-*   Fix attribute translations when using ActiveRecord with STI.
+*   Fix singular/plural Active Record attribute translations.
 
     *Andreas Philippi*
 
@@ -29,7 +69,7 @@ All notable changes to this project from August 2014 on will be documented here.
 
     *Daniel Rikowski*
 
-*   Apply default scope conditions for association joins (Rails 3).
+*   Apply default scope conditions for association joins (fix for Rails 3).
 
     Avoid selecting records from joins that would normally be filtered out
     if they were selected from the base table. Only applies to Rails 3, as
@@ -37,8 +77,8 @@ All notable changes to this project from August 2014 on will be documented here.
 
     *Andrew Vit*
 
-*   Fix incoherent code examples in the README Associations section that mixed
-    up `@q` and `@search`.
+*   Fix incoherent code examples in the README Associations section that
+    sometimes used `@q` and other times `@search`.
 
     *Jon Atack*
 
@@ -46,9 +86,9 @@ All notable changes to this project from August 2014 on will be documented here.
 
 *   Refactor Ransack::Translate.
 
-*   Rewrite much of the README doc, including the Associations section
-    code examples and the Authorizations section showing how to whitelist
-    attributes, associations, sorts and scopes.
+*   Rewrite much of the Ransack README documentation, including the
+    Associations section code examples and the Authorizations section detailing
+    how to whitelist attributes, associations, sorts and scopes.
     
     *Jon Atack*
 
