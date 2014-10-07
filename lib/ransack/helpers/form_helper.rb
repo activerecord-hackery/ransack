@@ -58,11 +58,11 @@ module Ransack
         end
 
         label_text =
-        if !args.first.is_a?(Hash)
-          args.shift.to_s
-        else
-          Translate.attribute(field_name, :context => search.context)
-        end
+          if String === args.first
+            args.shift.to_s
+          else
+            Translate.attribute(field_name, :context => search.context)
+          end
 
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
         default_order = options.delete :default_order
