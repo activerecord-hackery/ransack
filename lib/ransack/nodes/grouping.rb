@@ -161,7 +161,7 @@ module Ransack
       end
 
       def inspect
-        data = [[CONDITIONS, conditions], [COMBINATOR, combinator]]
+        data = [['conditions'.freeze, conditions], [COMBINATOR, combinator]]
                .reject { |e| e[1].blank? }
                .map { |v| "#{v[0]}: #{v[1]}" }
                .join(COMMA_SPACE)
