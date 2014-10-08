@@ -175,25 +175,25 @@ module Ransack
           buckets = relation.joins_values.group_by do |join|
             case join
             when String
-              'string_join'.freeze
+              STRING_JOIN
             when Hash, Symbol, Array
-              'association_join'.freeze
+              ASSOCIATION_JOIN
             when JoinDependency, JoinDependency::JoinAssociation
-              'stashed_join'.freeze
+              STASHED_JOIN
             when Arel::Nodes::Join
-              'join_node'.freeze
+              JOIN_NODE
             else
               raise 'unknown class: %s' % join.class.name
             end
           end
 
-          association_joins         = buckets['association_join'.freeze] || []
+          association_joins         = buckets[ASSOCIATION_JOIN] || []
 
-          stashed_association_joins = buckets['stashed_join'.freeze] || []
+          stashed_association_joins = buckets[STASHED_JOIN] || []
 
-          join_nodes                = buckets['join_node'.freeze] || []
+          join_nodes                = buckets[JOIN_NODE] || []
 
-          string_joins              = (buckets['string_join'.freeze] || [])
+          string_joins              = (buckets[STRING_JOIN] || [])
                                       .map { |x| x.strip }
                                       .uniq
 

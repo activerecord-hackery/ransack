@@ -14,7 +14,6 @@ DEFAULT_SEARCH_KEY  = 'q'.freeze
 ATTRIBUTE           = 'attribute'.freeze
 DISTINCT            = 'DISTINCT '.freeze
 COMBINATOR          = 'combinator'.freeze
-CONDITIONS          = 'conditions'.freeze
 SPACE               = ' '.freeze
 COMMA_SPACE         = ', '.freeze
 UNDERSCORE          = '_'.freeze
@@ -25,6 +24,11 @@ ASC_DESC            = %w(asc desc).freeze
 AND_OR              = %w(and or).freeze
 IN_NOT_IN           = %w(in not_in).freeze
 SUFFIXES            = %w(_any _all).freeze
+
+STRING_JOIN         = 'string_join'.freeze
+ASSOCIATION_JOIN    = 'association_join'.freeze
+STASHED_JOIN        = 'stashed_join'.freeze
+JOIN_NODE           = 'join_node'.freeze
 
 module Ransack
   module Configuration
