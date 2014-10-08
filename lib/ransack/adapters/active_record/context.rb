@@ -78,7 +78,7 @@ module Ransack
           end
         end
 
-        if ::ActiveRecord::VERSION::STRING >= '4.1'
+        if ::ActiveRecord::VERSION::STRING >= '4.1'.freeze
 
           def join_associations
             raise NotImplementedError,
