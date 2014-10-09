@@ -95,7 +95,7 @@ module Ransack
     end
 
     def traverse(str, base = @base)
-      str ||= EMPTY_STRING
+      str ||= Ransack::Constants::EMPTY
 
       if (segments = str.split(/_/)).size > 0
         remainder = []
@@ -103,11 +103,13 @@ module Ransack
         while !found_assoc && segments.size > 0 do
           # Strip the _of_Model_type text from the association name, but hold
           # onto it in klass, for use as the next base
-          assoc, klass = unpolymorphize_association(segments.join(UNDERSCORE))
+          assoc, klass = unpolymorphize_association(segments
+                         .join(Ransack::Constants::UNDERSCORE))
           if found_assoc = get_association(assoc, base)
             base = traverse(
-              remainder.join(UNDERSCORE), klass || found_assoc.klass
-              )
+              remainder.join(
+                Ransack::Constants::UNDERSCORE), klass || found_assoc.klass
+                )
           end
 
           remainder.unshift segments.pop
@@ -121,15 +123,16 @@ module Ransack
 
     def association_path(str, base = @base)
       base = klassify(base)
-      str ||= EMPTY_STRING
+      str ||= Ransack::Constants::EMPTY
       path = []
       segments = str.split(/_/)
       association_parts = []
       if (segments = str.split(/_/)).size > 0
-        while segments.size > 0 && !base.columns_hash[segments.join(UNDERSCORE)] &&
+        while segments.size > 0 &&
+        !base.columns_hash[segments.join(Ransack::Constants::UNDERSCORE)] &&
         association_parts << segments.shift do
           assoc, klass = unpolymorphize_association(
-            association_parts.join(UNDERSCORE)
+            association_parts.join(Ransack::Constants::UNDERSCORE)
             )
           if found_assoc = get_association(assoc, base)
             path += association_parts
@@ -139,7 +142,7 @@ module Ransack
         end
       end
 
-      path.join(UNDERSCORE)
+      path.join(Ransack::Constants::UNDERSCORE)
     end
 
     def unpolymorphize_association(str)
@@ -163,15 +166,15 @@ module Ransack
       klass.ransackable_scopes(auth_object).any? { |s| s.to_s == str }
     end
 
-    def searchable_attributes(str = EMPTY_STRING)
+    def searchable_attributes(str = Ransack::Constants::EMPTY)
       traverse(str).ransackable_attributes(auth_object)
     end
 
-    def sortable_attributes(str = EMPTY_STRING)
+    def sortable_attributes(str = Ransack::Constants::EMPTY)
       traverse(str).ransortable_attributes(auth_object)
     end
 
-    def searchable_associations(str = EMPTY_STRING)
+    def searchable_associations(str = Ransack::Constants::EMPTY)
       traverse(str).ransackable_associations(auth_object)
     end
   end

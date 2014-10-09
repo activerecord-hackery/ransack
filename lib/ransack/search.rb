@@ -88,7 +88,7 @@ module Ransack
 
     def method_missing(method_id, *args)
       method_name = method_id.to_s
-      getter_name = method_name.sub(/=$/, EMPTY_STRING)
+      getter_name = method_name.sub(/=$/, Ransack::Constants::EMPTY)
       if base.attribute_method?(getter_name)
         base.send(method_id, *args)
       elsif @context.ransackable_scope?(getter_name, @context.object)
@@ -109,7 +109,7 @@ module Ransack
         [:base, base.inspect]
       ]
       .compact.map { |d| d.join(': '.freeze) }
-      .join(COMMA_SPACE)
+      .join(Ransack::Constants::COMMA_SPACE)
 
       "Ransack::Search<#{details}>"
     end
@@ -127,14 +127,15 @@ module Ransack
 
     def collapse_multiparameter_attributes!(attrs)
       attrs.keys.each do |k|
-        if k.include?("(")
+        if k.include?('('.freeze)
           real_attribute, position = k.split(/\(|\)/)
-          cast = %w(a s i).include?(position.last) ? position.last : nil
+          cast = %w(a s i).freeze.include?(position.last) ? position.last : nil
           position = position.to_i - 1
           value = attrs.delete(k)
           attrs[real_attribute] ||= []
-          attrs[real_attribute][position] = if cast
-            (value.blank? && cast == 'i') ? nil : value.send("to_#{cast}")
+          attrs[real_attribute][position] =
+          if cast
+            value.blank? && cast == 'i'.freeze ? nil : value.send("to_#{cast}")
           else
             value
           end

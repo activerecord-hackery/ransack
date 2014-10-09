@@ -105,7 +105,7 @@ module Ransack
       end
 
       def combinator=(val)
-        @combinator = AND_OR.detect { |v| v == val.to_s } || nil
+        @combinator = Ransack::Constants::AND_OR.detect { |v| v == val.to_s } || nil
       end
       alias :m= :combinator=
       alias :m :combinator
@@ -180,9 +180,9 @@ module Ransack
 
         if predicates.size > 1
           case combinator
-          when AND
+          when Ransack::Constants::AND
             Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
-          when OR
+          when Ransack::Constants::OR
             predicates.inject(&:or)
           end
         else
@@ -228,12 +228,12 @@ module Ransack
         data = [
           ['attributes'.freeze, a.try(:map, &:name)],
           ['predicate'.freeze, p],
-          [COMBINATOR, m],
+          [Ransack::Constants::COMBINATOR, m],
           ['values'.freeze, v.try(:map, &:value)]
         ]
         .reject { |e| e[1].blank? }
         .map { |v| "#{v[0]}: #{v[1]}" }
-        .join(COMMA_SPACE)
+        .join(Ransack::Constants::COMMA_SPACE)
         "Condition <#{data}>"
       end
 
@@ -241,7 +241,7 @@ module Ransack
 
       def valid_combinator?
         attributes.size < 2 ||
-        AND_OR.include?(combinator)
+        Ransack::Constants::AND_OR.include?(combinator)
       end
 
     end

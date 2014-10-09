@@ -25,8 +25,8 @@ module Ransack
 
       def valid?
         bound? && attr &&
-          context.klassify(parent).ransortable_attributes(context.auth_object)
-          .include?(attr_name)
+        context.klassify(parent).ransortable_attributes(context.auth_object)
+        .include?(attr_name)
       end
 
       def name=(name)
@@ -36,7 +36,12 @@ module Ransack
 
       def dir=(dir)
         dir = dir.downcase if dir
-        @dir = ASC_DESC.include?(dir) ? dir : ASC
+        @dir =
+          if Ransack::Constants::ASC_DESC.include?(dir)
+            dir
+          else
+            Ransack::Constants::ASC
+          end
       end
 
     end

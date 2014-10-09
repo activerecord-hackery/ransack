@@ -69,7 +69,7 @@ module Ransack
       def respond_to?(method_id)
         super or begin
           method_name = method_id.to_s
-          writer = method_name.sub!(/\=$/, EMPTY_STRING)
+          writer = method_name.sub!(/\=$/, Ransack::Constants::EMPTY)
           attribute_method?(method_name) ? true : false
         end
       end
@@ -115,7 +115,7 @@ module Ransack
 
       def method_missing(method_id, *args)
         method_name = method_id.to_s
-        writer = method_name.sub!(/\=$/, EMPTY_STRING)
+        writer = method_name.sub!(/\=$/, Ransack::Constants::EMPTY)
         if attribute_method?(method_name)
           writer ?
             write_attribute(method_name, *args) :
@@ -161,10 +161,13 @@ module Ransack
       end
 
       def inspect
-        data = [['conditions'.freeze, conditions], [COMBINATOR, combinator]]
-               .reject { |e| e[1].blank? }
-               .map { |v| "#{v[0]}: #{v[1]}" }
-               .join(COMMA_SPACE)
+        data = [
+          ['conditions'.freeze, conditions],
+          [Ransack::Constants::COMBINATOR, combinator]
+        ]
+        .reject { |e| e[1].blank? }
+        .map { |v| "#{v[0]}: #{v[1]}" }
+        .join(Ransack::Constants::COMMA_SPACE)
         "Grouping <#{data}>"
       end
 

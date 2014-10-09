@@ -19,7 +19,7 @@ module Ransack
 
       def detect_and_strip_from_string!(str)
         if p = detect_from_string(str)
-          str.sub! /_#{p}$/, EMPTY_STRING
+          str.sub! /_#{p}$/, Ransack::Constants::EMPTY
           p
         end
       end
@@ -49,7 +49,7 @@ module Ransack
         lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
       @compound = opts[:compound]
       @wants_array = opts[:wants_array] == true || @compound ||
-        IN_NOT_IN.include?(@arel_predicate)
+        Ransack::Constants::IN_NOT_IN.include?(@arel_predicate)
     end
 
     def eql?(other)

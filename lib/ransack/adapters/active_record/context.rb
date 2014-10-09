@@ -34,8 +34,7 @@ module Ransack
           viz = Visitor.new
           relation = @object.where(viz.accept(search.base))
           if search.sorts.any?
-            relation = relation.except(:order)
-            .reorder(viz.accept(search.sorts))
+            relation = relation.except(:order).reorder(viz.accept(search.sorts))
           end
           opts[:distinct] ? relation.distinct : relation
         end
@@ -50,12 +49,13 @@ module Ransack
             while !found_assoc && remainder.unshift(
               segments.pop) && segments.size > 0 do
               assoc, poly_class = unpolymorphize_association(
-                segments.join(UNDERSCORE)
+                segments.join(Ransack::Constants::UNDERSCORE)
                 )
               if found_assoc = get_association(assoc, klass)
-                exists = attribute_method?(remainder.join(UNDERSCORE),
+                exists = attribute_method?(
+                  remainder.join(Ransack::Constants::UNDERSCORE),
                   poly_class || found_assoc.klass
-                )
+                  )
               end
             end
           end
@@ -139,14 +139,14 @@ module Ransack
             while remainder.unshift(
               segments.pop) && segments.size > 0 && !found_assoc do
               assoc, klass = unpolymorphize_association(
-                segments.join(UNDERSCORE)
+                segments.join(Ransack::Constants::UNDERSCORE)
                 )
               if found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(
                   found_assoc.name, parent, klass
                   )
                 parent, attr_name = get_parent_and_attribute_name(
-                  remainder.join(UNDERSCORE), join
+                  remainder.join(Ransack::Constants::UNDERSCORE), join
                   )
               end
             end
@@ -187,15 +187,19 @@ module Ransack
             end
           end
 
-          association_joins         = buckets[ASSOCIATION_JOIN] || []
+          association_joins =
+            buckets[Ransack::Constants::ASSOCIATION_JOIN] || []
 
-          stashed_association_joins = buckets[STASHED_JOIN] || []
+          stashed_association_joins =
+            buckets[Ransack::Constants::STASHED_JOIN] || []
 
-          join_nodes                = buckets[JOIN_NODE] || []
+          join_nodes =
+            buckets[Ransack::Constants::JOIN_NODE] || []
 
-          string_joins              = (buckets[STRING_JOIN] || [])
-                                      .map { |x| x.strip }
-                                      .uniq
+          string_joins =
+            (buckets[Ransack::Constants::STRING_JOIN] || [])
+            .map { |x| x.strip }
+            .uniq
 
           join_list = relation.send :custom_join_ast,
             relation.table.from(relation.table), string_joins

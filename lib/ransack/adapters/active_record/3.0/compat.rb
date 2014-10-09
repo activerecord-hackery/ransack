@@ -135,16 +135,16 @@ module Arel
         "#{
           o.name
           }(#{
-          o.distinct ? DISTINCT : EMPTY_STRING
+          o.distinct ? Ransack::Constants::DISTINCT : Ransack::Constants::EMPTY
           }#{
-          o.expressions.map { |x| visit x }.join(COMMA_SPACE)
+          o.expressions.map { |x| visit x }.join(Ransack::Constants::COMMA_SPACE)
           })#{
-          o.alias ? " AS #{visit o.alias}" : EMPTY_STRING
+          o.alias ? " AS #{visit o.alias}" : Ransack::Constants::EMPTY
           }"
       end
 
       def visit_Arel_Nodes_And o
-        o.children.map { |x| visit x }.join ' AND '
+        o.children.map { |x| visit x }.join(Ransack::Constants::SPACED_AND)
       end
 
       def visit_Arel_Nodes_Not o
@@ -161,7 +161,7 @@ module Arel
             quote(value, attr && column_for(attr))
           end
         }
-        .join(COMMA_SPACE)
+        .join(Ransack::Constants::COMMA_SPACE)
         })"
       end
     end
