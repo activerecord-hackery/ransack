@@ -6,7 +6,6 @@ module Ransack
     DESC_ARROW          = '&#9660;'.freeze
     OR                  = 'or'.freeze
     AND                 = 'and'.freeze
-    SPACED_AND          = ' AND '.freeze
     SORT                = 'sort'.freeze
     SORT_LINK           = 'sort_link'.freeze
     SEARCH              = 'search'.freeze
