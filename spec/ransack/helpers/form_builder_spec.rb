@@ -31,21 +31,13 @@ module Ransack
         end
       end
 
-      # TODO: fix this test after the following Rails 4.2 PR and commit which
-      # broke it: https://github.com/rails/rails/pull/17203 and
-      # https://github.com/schneems/rails/commit/03d30ce7
-      if ::ActiveRecord::VERSION::STRING < '4.2'.freeze
-        it 'selects previously-entered time values with datetime_select' do
-          @s.created_at_eq = [2011, 1, 2, 3, 4, 5]
-          html = @f.datetime_select(
-            :created_at_eq,
-            :use_month_numbers => true,
-            :include_seconds => true
-            )
-          %w(2011 1 2 03 04 05).each do |val|
-            expect(html).to match /<option selected="selected" value="#{val}">#{val}<\/option>/
-          end
-        end
+      it 'selects previously-entered time values with datetime_select' do
+        date_values = %w(2011 1 2 03 04 05).freeze
+        @s.created_at_eq = date_values
+        html = @f.datetime_select(
+          :created_at_eq, :use_month_numbers => true, :include_seconds => true
+          )
+        date_values.each { |val| expect(html).to include date_select_html(val) }
       end
 
       describe '#label' do
@@ -160,6 +152,20 @@ module Ransack
           expect(html).to match /id=\"q_notable_type_eq\"/
         end
       end
+
+      private
+
+      # Starting from Rails 4.2, the date_select html attributes no longer have
+      # `sort` applied (for a speed gain), so the tests have to be different:
+
+      def date_select_html(val)
+        if ::ActiveRecord::VERSION::STRING >= '4.2'.freeze
+          "<option value=\"#{val}\" selected=\"selected\">#{val}</option>"
+        else
+          "<option selected=\"selected\" value=\"#{val}\">#{val}<\/option>"
+        end
+      end
+
     end
   end
 end
