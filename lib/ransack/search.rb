@@ -22,7 +22,10 @@ module Ransack
       end
       @context = options[:context] || Context.for(object, options)
       @context.auth_object = options[:auth_object]
-      @base = Nodes::Grouping.new(@context, options[:grouping] || 'and')
+      @base = Nodes::Grouping.new(
+        @context,
+        options[:grouping] || Ransack::Constants::AND
+        )
       @scope_args = {}
       build(params.with_indifferent_access)
     end
