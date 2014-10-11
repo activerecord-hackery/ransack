@@ -33,7 +33,8 @@ module Ransack
 
       it 'selects previously-entered time values with datetime_select' do
         date_values = %w(2011 1 2 03 04 05).freeze
-        @s.created_at_eq = date_values
+      # @s.created_at_eq = date_values # This works in Rails 4.x but not 3.x
+        @s.created_at_eq = [2011, 1, 2, 3, 4, 5] # so we have to do this
         html = @f.datetime_select(
           :created_at_eq, :use_month_numbers => true, :include_seconds => true
           )
