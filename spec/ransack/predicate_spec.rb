@@ -48,19 +48,11 @@ module Ransack
         expect(@s.result.to_sql).to match /#{field} <= #{val}/
       end
 
-      if ::ActiveRecord::VERSION::STRING < '4.2'.freeze
-        it 'generates a <= condition with a string column' do
-          val = 'jane@doe.com'
-          @s.email_lteq = val
-          field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
-          expect(@s.result.to_sql).to match /#{field} <= '#{val}'/
-        end
-      else
-      # FIXME Rails 4.2 should be able to handle strings like Rails < 4.2 does.
-        it 'raises an error with a string column' do
-          @s.email_lteq = 'jane@doe.com'
-          expect { @s.result.to_sql }.to raise_error
-        end
+      it 'generates a <= condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_lteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} <= '#{val}'/
       end
 
       it 'does not generate a condition for nil' do
@@ -77,19 +69,11 @@ module Ransack
         expect(@s.result.to_sql).to match /#{field} < #{val}/
       end
 
-      if ::ActiveRecord::VERSION::STRING < '4.2'.freeze
-        it 'generates a < condition with a string column' do
-          val = 'jane@doe.com'
-          @s.email_lt = val
-          field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
-          expect(@s.result.to_sql).to match /#{field} < '#{val}'/
-        end
-      else
-      # FIXME Rails 4.2 should be able to handle strings like Rails < 4.2 does.
-        it 'raises an error with a string column' do
-          @s.email_lteq = 'jane@doe.com'
-          expect { @s.result.to_sql }.to raise_error
-        end
+      it 'generates a < condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_lt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} < '#{val}'/
       end
 
       it 'does not generate a condition for nil' do
