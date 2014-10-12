@@ -22,8 +22,7 @@ module Ransack
     describe 'eq' do
       it 'generates an equality condition for boolean true' do
         @s.awesome_eq = true
-        field = "#{quote_table_name("people")}.#{
-          quote_column_name("awesome")}"
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} = #{
           ActiveRecord::Base.connection.quoted_true}/
       end
@@ -41,8 +40,107 @@ module Ransack
       end
     end
 
-    describe 'cont' do
+    describe 'lteq' do
+      it 'generates a <= condition with an integer column' do
+        val = 1000
+        @s.salary_lteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} <= #{val}/
+      end
 
+      if ::ActiveRecord::VERSION::STRING < '4.2'.freeze
+        it 'generates a <= condition with a string column' do
+          val = 'jane@doe.com'
+          @s.email_lteq = val
+          field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+          expect(@s.result.to_sql).to match /#{field} <= '#{val}'/
+        end
+      else
+      # FIXME Rails 4.2 should be able to handle strings like Rails < 4.2 does.
+        it 'raises an error with a string column' do
+          @s.email_lteq = 'jane@doe.com'
+          expect { @s.result.to_sql }.to raise_error
+        end
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_lteq = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'lt' do
+      it 'generates a < condition with an integer column' do
+        val = 2000
+        @s.salary_lt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} < #{val}/
+      end
+
+      if ::ActiveRecord::VERSION::STRING < '4.2'.freeze
+        it 'generates a < condition with a string column' do
+          val = 'jane@doe.com'
+          @s.email_lt = val
+          field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+          expect(@s.result.to_sql).to match /#{field} < '#{val}'/
+        end
+      else
+      # FIXME Rails 4.2 should be able to handle strings like Rails < 4.2 does.
+        it 'raises an error with a string column' do
+          @s.email_lteq = 'jane@doe.com'
+          expect { @s.result.to_sql }.to raise_error
+        end
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_lt = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'gteq' do
+      it 'generates a >= condition with an integer column' do
+        val = 300
+        @s.salary_gteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} >= #{val}/
+      end
+
+      it 'generates a >= condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_gteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} >= '#{val}'/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_gteq = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'gt' do
+      it 'generates a > condition with an integer column' do
+        val = 400
+        @s.salary_gt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} > #{val}/
+      end
+
+      it 'generates a > condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_gt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} > '#{val}'/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_gt = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\._\\\\%'/
