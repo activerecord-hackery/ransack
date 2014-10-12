@@ -24,12 +24,12 @@ module Ransack
             end
 
             it "applies true scopes" do
-              search =  Person.search('active' => true)
+              search = Person.search('active' => true)
               search.result.to_sql.should include "active = 1"
             end
 
             it "ignores unlisted scopes" do
-              search =  Person.search('restricted' => true)
+              search = Person.search('restricted' => true)
               search.result.to_sql.should_not include "restricted"
             end
 
