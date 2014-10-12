@@ -12,6 +12,10 @@ henceforth should be documented here.
 
 ### Fixed
 
+*   Fix `form_helper date_select` spec that was failing with Rails 4.2/master.
+
+    *Jon Atack*
+
 ### Changed
 
 *   Reduce object allocations and memory footprint (with a slight speed gain as
