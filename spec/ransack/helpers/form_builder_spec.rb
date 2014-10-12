@@ -161,9 +161,9 @@ module Ransack
 
       def date_select_html(val)
         if ::ActiveRecord::VERSION::STRING >= '4.2'.freeze
-          "<option value=\"#{val}\" selected=\"selected\">#{val}</option>"
+          %(<option value="#{val}" selected="selected">#{val}</option>)
         else
-          "<option selected=\"selected\" value=\"#{val}\">#{val}<\/option>"
+          %(<option selected="selected" value="#{val}">#{val}</option>)
         end
       end
 
