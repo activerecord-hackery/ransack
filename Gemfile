@@ -5,6 +5,10 @@ gem 'rake'
 
 rails = ENV['RAILS'] || 'master'
 
+if rails[0,3] == '4.2' || rails == 'master'
+  gem 'arel', github: 'rails/arel', branch: 'master'
+end
+
 gem 'polyamorous', '~> 1.1'
 
 # Provide timezone information on Windows
