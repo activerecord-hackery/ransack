@@ -36,7 +36,7 @@ module Ransack
 
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
-        if ['s', 'sorts'].include?(key)
+        if Ransack::Constants::S_SORTS.include?(key)
           send("#{key}=", value)
         elsif base.attribute_method?(key)
           base.send("#{key}=", value)

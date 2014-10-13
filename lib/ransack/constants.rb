@@ -27,6 +27,7 @@ module Ransack
     FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
     BOOLEAN_VALUES = TRUE_VALUES + FALSE_VALUES
 
+    S_SORTS             = %w(s sorts).freeze
     ASC_DESC            = %w(asc desc).freeze
     AND_OR              = %w(and or).freeze
     IN_NOT_IN           = %w(in not_in).freeze
