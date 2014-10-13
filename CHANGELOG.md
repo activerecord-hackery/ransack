@@ -10,9 +10,14 @@ henceforth should be documented here.
 
     *Caleb Land*, *James u007*
 
+*   Add test specs for the `lteq`, `lt`, `gteq`, and `gt` predicates.
+
+    *Jon Atack*
+
 ### Fixed
 
-*   Fix `form_helper date_select` spec that was failing with Rails 4.2/master.
+*   Fix the `form_helper date_select` spec that was failing with Rails 4.2/
+    master.
 
     *Jon Atack*
 
