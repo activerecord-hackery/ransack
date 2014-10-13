@@ -43,9 +43,30 @@ module Ransack
 
       describe '#label' do
 
-        it 'localizes attribute names' do
-          html = @f.label :name_cont
-          expect(html).to match /Full Name contains/
+        context 'with direct model attributes' do
+          it 'localizes attribute names' do
+            html = @f.label :name_cont
+            expect(html).to match /Full Name contains/
+          end
+
+          it 'falls back to column name when no translation' do
+            html = @f.label :email_cont
+            expect(html).to match /Email contains/
+          end
+        end
+
+        context 'with has_many association attributes' do
+          it 'falls back to associated model + column name when no translation' do
+            html = @f.label :article_title_cont
+            expect(html).to match /Article title contains/
+          end
+        end
+
+        context 'with belongs_to association attributes' do
+          it 'falls back to associated model + column name when no translation' do
+            html = @f.label :group_name_cont
+            expect(html).to match /Group name contains/
+          end
         end
 
       end

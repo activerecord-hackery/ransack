@@ -100,9 +100,9 @@ module Ransack
     def self.build_interpolations(associated_class)
       {
         :attr_fallback_name => attr_fallback_name(associated_class),
-        :association_name   => association_name 
+        :association_name   => association_name
       }
-      .reject! { |_, value| value.nil? }
+      .reject { |_, value| value.nil? }
     end
 
     def self.attr_fallback_name(associated_class)
