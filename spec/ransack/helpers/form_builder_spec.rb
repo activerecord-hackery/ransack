@@ -65,7 +65,7 @@ module Ransack
         context 'with belongs_to association attributes' do
           it 'falls back to associated model + column name when no translation' do
             html = @f.label :group_name_cont
-            expect(html).to match /Group name contains/
+            expect(html).to match /Group Name contains/i
           end
         end
 
