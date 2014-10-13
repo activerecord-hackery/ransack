@@ -133,11 +133,11 @@ module Ransack
 
           if ransackable_attribute?(str, klassify(parent))
             attr_name = str
-          elsif (segments = str.split(/_/)).size > 1
+          elsif (segments = str.split(Ransack::Constants::UNDERSCORE)).size > 1
             remainder = []
             found_assoc = nil
-            while remainder.unshift(
-              segments.pop) && segments.size > 0 && !found_assoc do
+            while remainder.unshift(segments.pop) && segments.size > 0 &&
+            !found_assoc do
               assoc, klass = unpolymorphize_association(
                 segments.join(Ransack::Constants::UNDERSCORE)
                 )
