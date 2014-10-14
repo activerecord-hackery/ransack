@@ -176,7 +176,7 @@ Ransack to _always_ sort that particular field in the specified direction.
 Multiple `default_order` fields may also be specified with a hash:
 
 ```erb
-<%= sort_link(@q, :last_name, [:last_name, :first_name],
+<%= sort_link(@q, :last_name, %i(last_name first_name),
   default_order: { last_name: 'asc', first_name: 'desc' }) %>
 ```
 
@@ -558,9 +558,12 @@ http://www.localeapp.com/projects/2999.
 To support the project:
 
 * Use Ransack in your apps, and let us know if you encounter anything that's
-broken or missing. A failing spec is awesome. A pull request with tests that
-pass is even better! Before filing an issue or pull request, be sure to read
-the [Contributing Guide](CONTRIBUTING.md).
+broken or missing. A failing spec to demonstrate the issue is awesome. A pull
+request with passing tests is even better!
+* Before filing an issue or pull request, be sure to read and follow the
+[Contributing Guide](CONTRIBUTING.md).
+* Please use Stack Overflow or other sites for questions or discussion not
+directly related to bug reports, pull requests, or documentation improvements.
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!
