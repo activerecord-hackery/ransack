@@ -22,6 +22,10 @@ else
   )
 end
 
+class Group < ActiveRecord::Base
+  has_many :people
+end
+
 class Person < ActiveRecord::Base
   if ActiveRecord::VERSION::MAJOR == 3
     default_scope order('id DESC')
@@ -29,6 +33,7 @@ class Person < ActiveRecord::Base
     default_scope { order(id: :desc) }
   end
   belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
+  belongs_to :group
   has_many   :children, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :articles
   has_many   :comments
@@ -126,8 +131,14 @@ module Schema
     ActiveRecord::Migration.verbose = false
 
     ActiveRecord::Schema.define do
+      create_table :groups, :force => true do |t|
+        t.string   :name
+        t.timestamps null: false
+      end
+
       create_table :people, :force => true do |t|
         t.integer  :parent_id
+        t.integer  :group_id
         t.string   :name
         t.string   :email
         t.string   :only_search
