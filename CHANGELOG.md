@@ -5,18 +5,28 @@ henceforth should be documented here.
 ## Unreleased
 ### Added
 
-*   `sort_link` helper: Add support for multiple sort fields and default orders
+*   Add support for multiple sort fields and default orders in Ransack
+    `sort_link` helpers
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/438)).
-
+   
     *Caleb Land*, *James u007*
 
-*   Add test specs for the `lteq`, `lt`, `gteq`, and `gt` predicates.
+*   Add test specs for the `lteq`, `lt`, `gteq`, and `gt` predicates. These are
+    also tested in Arel, but testing them in Ransack has proven useful to
+    detect issues.
 
     *Jon Atack*
 
 ### Fixed
 
-*   Fix the `form_helper date_select` spec that was failing with Rails 4.2/
+*   Fix a regression where form labels for attributes through a `belongs_to`
+    association without a translation for the attribute in the locales file
+    would cause a "no implicit conversion of nil into Hash" crash instead of
+    falling back on the attribute name. Added test coverage.
+
+    *John Dell*, *Jon Atack*, *jasdeepgosal*
+
+*   Fix the `form_helper date_select` spec that was failing with Rails 4.2 and
     master.
 
     *Jon Atack*
