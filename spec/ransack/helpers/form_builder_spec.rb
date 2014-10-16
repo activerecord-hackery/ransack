@@ -6,8 +6,7 @@ module Ransack
 
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
-        resources :people
-        resources :notes
+        resources :people, :comments, :notes
         get ':controller(/:action(/:id(.:format)))'
       end
 
@@ -64,8 +63,10 @@ module Ransack
 
         context 'with belongs_to association attributes' do
           it 'falls back to associated model + column name when no translation' do
-            html = @f.label :group_name_cont
-            expect(html).to match /Group Name contains/i
+            @controller.view_context.search_form_for Comment.search do |f|
+              html = f.label :article_title_cont
+              expect(html).to match /Article Title contains/
+            end
           end
         end
 
