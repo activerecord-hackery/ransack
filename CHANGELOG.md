@@ -31,6 +31,12 @@ henceforth should be documented here.
 
     *Jon Atack*
 
+*   Fix checks for `attribute_method?` for method names containing
+    `_and_` and `_or_`. Now, a `terms_and_conditions` attribute will be
+    recognized instead of running (failing) checks for `terms` and `conditions`.
+
+    *joeyates*
+
 ### Changed
 
 *   Reduce object allocations and memory footprint (with a slight speed gain as
