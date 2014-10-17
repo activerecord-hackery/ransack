@@ -127,6 +127,7 @@ module Ransack
 
       def attribute_method?(name)
         name = strip_predicate_and_index(name)
+        return true if @context.attribute_method?(name)
         case name
         when /^(g|c|m|groupings|conditions|combinator)=?$/
           true
