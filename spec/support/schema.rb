@@ -142,6 +142,7 @@ module Schema
       create_table :articles, :force => true do |t|
         t.integer :person_id
         t.string  :title
+        t.text    :subject_header
         t.text    :body
       end
 

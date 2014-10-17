@@ -43,31 +43,63 @@ module Ransack
       describe '#label' do
 
         context 'with direct model attributes' do
+
           it 'localizes attribute names' do
             html = @f.label :name_cont
             expect(html).to match /Full Name contains/
+            html = @f.label :only_admin_start
+            expect(html).to match /admin uSer Only starts with/
+            html = @f.label :salary_gt
+            expect(html).to match /wages greater than/
+            html = @f.label :awesome_true
+            expect(html).to match /ransack is really awesome is true/
           end
 
-          it 'falls back to column name when no translation' do
+          it 'falls back to `attribute_name.capitalize` when no translation' do
             html = @f.label :email_cont
             expect(html).to match /Email contains/
+            html = @f.label :only_sort_start
+            expect(html).to match /Only sort starts with/
+            html = @f.label :only_search_eq
+            expect(html).to match /Only search equals/
           end
+
         end
 
-        context 'with has_many association attributes' do
-          it 'falls back to associated model + column name when no translation' do
-            html = @f.label :article_title_cont
-            expect(html).to match /Article title contains/
+        context 'with `has_many` association attributes' do
+
+          it 'localizes "#{pluralized model}_#{attribute name}_#{predicate}"' do
+            html = @f.label :articles_body_start
+            expect(html).to match /Article maiN BoDy starts with/
           end
+
+          it 'falls back to `model_name.capitalize + attribute_name.capitalize` when no translation' do
+            html = @f.label :articles_title_cont
+            expect(html).to match /Article Title contains/
+            html = @f.label :articles_subject_header_start
+            expect(html).to match /Article Subject header starts with/
+          end
+
         end
 
-        context 'with belongs_to association attributes' do
-          it 'falls back to associated model + column name when no translation' do
+        context 'with `belongs_to` association attributes' do
+
+          it 'localizes "#{singularized model}_#{attribute name}_#{predicate}"' do
             @controller.view_context.search_form_for Comment.search do |f|
-              html = f.label :article_title_cont
-              expect(html).to match /Article Title contains/
+              html = f.label :article_body_start
+              expect(html).to match /Article maiN BoDy starts with/
             end
           end
+
+          it 'falls back to `model_name.capitalize + attribute_name.capitalize` when no translation' do
+            @controller.view_context.search_form_for Comment.search do |f|
+              html = f.label :article_title_eq
+              expect(html).to match /Article Title equals/
+              html = f.label :article_subject_header_end
+              expect(html).to match /Article Subject header ends with/
+            end
+          end
+
         end
 
       end
