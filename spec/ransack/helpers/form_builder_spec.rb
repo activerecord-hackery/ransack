@@ -68,7 +68,7 @@ module Ransack
 
         context 'with `has_many` association attributes' do
 
-          it 'localizes "#{pluralized model}_#{attribute name}_#{predicate}"' do
+          it 'localizes :"#{pluralized model}_#{attribute name}_#{predicate}"' do
             html = @f.label :articles_body_start
             expect(html).to match /Article maiN BoDy starts with/
           end
@@ -81,10 +81,10 @@ module Ransack
           end
 
         end
-
+        # TODO: DRY the #label associations specs with a common method.
         context 'with `belongs_to` association attributes' do
 
-          it 'localizes "#{singularized model}_#{attribute name}_#{predicate}"' do
+          it 'localizes :"#{singularized model}_#{attribute name}_#{predicate}"' do
             @controller.view_context.search_form_for Comment.search do |f|
               html = f.label :article_body_start
               expect(html).to match /Article maiN BoDy starts with/
