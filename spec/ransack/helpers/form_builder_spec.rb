@@ -16,18 +16,10 @@ module Ransack
       before do
         @controller = ActionView::TestCase::TestController.new
         @controller.instance_variable_set(:@_routes, router)
-        @controller.class_eval do
-          include router.url_helpers
-        end
-
-        @controller.view_context_class.class_eval do
-          include router.url_helpers
-        end
-
+        @controller.class_eval { include router.url_helpers }
+        @controller.view_context_class.class_eval { include router.url_helpers }
         @s = Person.search
-        @controller.view_context.search_form_for @s do |f|
-          @f = f
-        end
+        @controller.view_context.search_form_for(@s) { |f| @f = f }
       end
 
       it 'selects previously-entered time values with datetime_select' do
@@ -41,67 +33,40 @@ module Ransack
       end
 
       describe '#label' do
-
         context 'with direct model attributes' do
-
           it 'localizes attribute names' do
-            html = @f.label :name_cont
-            expect(html).to match /Full Name contains/
-            html = @f.label :only_admin_start
-            expect(html).to match /admin uSer Only starts with/
-            html = @f.label :salary_gt
-            expect(html).to match /wages greater than/
-            html = @f.label :awesome_true
-            expect(html).to match /ransack is really awesome is true/
+            test_label(@f, :name_cont, /Full Name contains/)
+            test_label(@f, :only_admin_start, /admin uSer Only starts with/)
+            test_label(@f, :salary_gt, /wages greater than/)
+            test_label(@f, :awesome_true, /ransack is really awesome is true/)
           end
-
           it 'falls back to `attribute_name.capitalize` when no translation' do
-            html = @f.label :email_cont
-            expect(html).to match /Email contains/
-            html = @f.label :only_sort_start
-            expect(html).to match /Only sort starts with/
-            html = @f.label :only_search_eq
-            expect(html).to match /Only search equals/
+            test_label(@f, :email_cont, /Email contains/)
+            test_label(@f, :only_sort_start, /Only sort starts with/)
+            test_label(@f, :only_search_eq, /Only search equals/)
           end
-
         end
-
         context 'with `has_many` association attributes' do
-
           it 'localizes :"#{pluralized model}_#{attribute name}_#{predicate}"' do
-            html = @f.label :articles_body_start
-            expect(html).to match /Article maiN BoDy starts with/
+            test_label(@f, :articles_body_start, /Article maiN BoDy starts with/)
           end
-
           it 'falls back to `model_name.capitalize + attribute_name.capitalize` when no translation' do
-            html = @f.label :articles_title_cont
-            expect(html).to match /Article Title contains/
-            html = @f.label :articles_subject_header_start
-            expect(html).to match /Article Subject header starts with/
+            test_label(@f, :articles_title_cont, /Article Title contains/)
+            test_label(@f, :articles_subject_header_start, /Article Subject header starts with/)
           end
-
         end
-        # TODO: DRY the #label associations specs with a common method.
         context 'with `belongs_to` association attributes' do
-
+          before do
+            @controller.view_context.search_form_for(Comment.search) { |f| @f = f }
+          end
           it 'localizes :"#{singularized model}_#{attribute name}_#{predicate}"' do
-            @controller.view_context.search_form_for Comment.search do |f|
-              html = f.label :article_body_start
-              expect(html).to match /Article maiN BoDy starts with/
-            end
+            test_label(@f, :article_body_start, /Article maiN BoDy starts with/)
           end
-
           it 'falls back to `model_name.capitalize + attribute_name.capitalize` when no translation' do
-            @controller.view_context.search_form_for Comment.search do |f|
-              html = f.label :article_title_eq
-              expect(html).to match /Article Title equals/
-              html = f.label :article_subject_header_end
-              expect(html).to match /Article Subject header ends with/
-            end
+            test_label(@f, :article_title_eq, /Article Title equals/)
+            test_label(@f, :article_subject_header_end, /Article Subject header ends with/)
           end
-
         end
-
       end
 
       describe '#sort_link' do
@@ -115,7 +80,6 @@ module Ransack
           expect(sort_link).to match /sort_link/
           expect(sort_link).to match /Full Name<\/a>/
         end
-
         it 'sort_link for common attribute' do
           sort_link = @f.sort_link :id, :controller => 'people'
           expect(sort_link).to match /id<\/a>/
@@ -123,67 +87,56 @@ module Ransack
       end
 
       describe '#submit' do
-
         it 'localizes :search when no default value given' do
           html = @f.submit
           expect(html).to match /"Search"/
         end
-
       end
 
       describe '#attribute_select' do
-
         it 'returns ransackable attributes' do
           html = @f.attribute_select
-          expect(html.split(/\n/).size).
-            to eq(Person.ransackable_attributes.size + 1)
+          expect(html.split(/\n/).size).to eq(Person.ransackable_attributes.size + 1)
           Person.ransackable_attributes.each do |attribute|
             expect(html).to match /<option value="#{attribute}">/
           end
         end
-
         it 'returns ransackable attributes for associations with :associations' do
-          attributes = Person.ransackable_attributes + Article.
-            ransackable_attributes.map { |a| "articles_#{a}" }
+          attributes = Person.ransackable_attributes +
+            Article.ransackable_attributes.map { |a| "articles_#{a}" }
           html = @f.attribute_select(:associations => ['articles'])
           expect(html.split(/\n/).size).to eq(attributes.size)
           attributes.each do |attribute|
             expect(html).to match /<option value="#{attribute}">/
           end
         end
-
         it 'returns option groups for base and associations with :associations' do
           html = @f.attribute_select(:associations => ['articles'])
           [Person, Article].each do |model|
             expect(html).to match /<optgroup label="#{model}">/
           end
         end
-
       end
 
       describe '#predicate_select' do
-
         it 'returns predicates with predicate_select' do
           html = @f.predicate_select
           Predicate.names.each do |key|
             expect(html).to match /<option value="#{key}">/
           end
         end
-
         it 'filters predicates with single-value :only' do
           html = @f.predicate_select :only => 'eq'
           Predicate.names.reject { |k| k =~ /^eq/ }.each do |key|
             expect(html).not_to match /<option value="#{key}">/
           end
         end
-
         it 'filters predicates with multi-value :only' do
-          html = @f.predicate_select only: [:eq, :lt]
+          html = @f.predicate_select only: %i(eq lt)
           Predicate.names.reject { |k| k =~ /^(eq|lt)/ }.each do |key|
             expect(html).not_to match /<option value="#{key}">/
           end
         end
-
         it 'excludes compounds when compounds: false' do
           html = @f.predicate_select :compounds => false
           Predicate.names.select { |k| k =~ /_(any|all)$/ }.each do |key|
@@ -194,9 +147,7 @@ module Ransack
 
       context 'fields used in polymorphic relations as search attributes in form' do
         before do
-          @controller.view_context.search_form_for Note.search do |f|
-            @f = f
-          end
+          @controller.view_context.search_form_for(Note.search) { |f| @f = f }
         end
         it 'accepts poly_id field' do
           html = @f.text_field(:notable_id_eq)
@@ -210,16 +161,19 @@ module Ransack
 
       private
 
-      # Starting from Rails 4.2, the date_select html attributes no longer have
-      # `sort` applied (for a speed gain), so the tests have to be different:
-
-      def date_select_html(val)
-        if ::ActiveRecord::VERSION::STRING >= '4.2'.freeze
-          %(<option value="#{val}" selected="selected">#{val}</option>)
-        else
-          %(<option selected="selected" value="#{val}">#{val}</option>)
+        def test_label(f, query, expected)
+          expect(f.label query).to match expected
         end
-      end
+
+        # Starting from Rails 4.2, the date_select html attributes are no longer
+        # `sort`ed (for a speed gain), so the tests have to be different:
+        def date_select_html(val)
+          if ::ActiveRecord::VERSION::STRING >= '4.2'.freeze
+            %(<option value="#{val}" selected="selected">#{val}</option>)
+          else
+            %(<option selected="selected" value="#{val}">#{val}</option>)
+          end
+        end
 
     end
   end
