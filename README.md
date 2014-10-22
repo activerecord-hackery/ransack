@@ -533,16 +533,14 @@ artists.result.to_sql
 
 ### Using SimpleForm
 
-If you want to combine form builders of ransack and SimpleForm, just set the
-RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in
-``config/application.rb`` before ``require 'rails/all'`` and of course use
-``gem 'simple_form'`` in your ``Gemfile``:
+If you would like to combine the Ransack and SimpleForm form builders, set the
+`RANSACK_FORM_BUILDER` environment variable before Rails boots up, e.g. in
+`config/application.rb` before `require 'rails/all'` as shown below (and add
+`gem 'simple_form'` to your `Gemfile`).
 
 ```ruby
 require File.expand_path('../boot', __FILE__)
-
 ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
-
 require 'rails/all'
 ```
 
@@ -554,9 +552,9 @@ many translations for Ransack available at
 http://www.localeapp.com/projects/2999.
 
 Predicate and attribute translations in forms may be specified as follows (see
-the locale files in [Ransack::Locale](lib/ransack/locale) for more examples):
+the translation files in [Ransack::Locale](lib/ransack/locale) for more examples):
 
-`locales/en.yml`
+locales/en.yml:
 ```yml
 en:
   ransack:
