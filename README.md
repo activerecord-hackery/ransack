@@ -553,6 +553,46 @@ Ransack translation files are available in
 many translations for Ransack available at
 http://www.localeapp.com/projects/2999.
 
+Predicate and attribute translations in forms may be specified as follows (see
+the locale files in [Ransack::Locale](lib/ransack/locale) for more examples):
+
+`locales/en.yml`
+```yml
+en:
+  ransack:
+    asc: ascending
+    desc: descending
+    predicates:
+      cont: contains
+      not_cont: not contains
+      start: starts with
+      end: ends with
+      gt: greater than
+      lt: less than
+    attributes:
+      person:
+        name: Full Name
+      article:
+        title: Article Title
+        body: Main Content
+```
+
+Attribute names may also be changed globally, or under `activerecord`:
+
+```yml
+en:
+  attributes:
+    model_name:
+      model_field1: field name1
+      model_field2: field name2
+  activerecord:
+    attributes:
+      namespace/article:
+        title: AR Namespaced Title
+      namespace_article:
+        title: Old Ransack Namespaced Title
+```
+
 ## Contributions
 
 To support the project:
