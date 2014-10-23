@@ -46,8 +46,8 @@ module Ransack
           elsif (segments = str.split(/_/)).size > 1
             remainder = []
             found_assoc = nil
-            while !found_assoc && remainder.unshift(
-              segments.pop) && segments.size > 0 do
+            while !found_assoc && remainder.unshift(segments.pop) &&
+            segments.size > 0 do
               assoc, poly_class = unpolymorphize_association(
                 segments.join(Ransack::Constants::UNDERSCORE)
                 )
