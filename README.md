@@ -536,7 +536,7 @@ artists.result.to_sql
 If you would like to combine the Ransack and SimpleForm form builders, set the
 `RANSACK_FORM_BUILDER` environment variable before Rails boots up, e.g. in
 `config/application.rb` before `require 'rails/all'` as shown below (and add
-`gem 'simple_form'` to your `Gemfile`).
+`gem 'simple_form'` in your Gemfile).
 
 ```ruby
 require File.expand_path('../boot', __FILE__)
