@@ -28,15 +28,15 @@ module Ransack
         names_by_decreasing_length.detect { |p| str.end_with?("_#{p}") }
       end
 
-      def name_from_attribute_name(attribute_name)
-        names_by_decreasing_length.detect {
-          |p| attribute_name.to_s.match(/_#{p}$/)
-        }
-      end
+#      def name_from_attribute_name(attribute_name)
+#        names_by_decreasing_length.detect {
+#          |p| attribute_name.to_s.match(/_#{p}$/)
+#        }
+#      end
 
-      def for_attribute_name(attribute_name)
-        self.named(detect_from_string(attribute_name.to_s))
-      end
+#      def for_attribute_name(attribute_name)
+#        self.named(detect_from_string(attribute_name.to_s))
+#      end
 
     end
 
