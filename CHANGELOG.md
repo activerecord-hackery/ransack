@@ -37,6 +37,12 @@ henceforth should be documented here.
 
     *joeyates*
 
+*   Fix checks for `attribute_method?` for method that ends with a pradicate,
+    for example `_start` and `_end`. Now, a `life_start` attribute will be
+    recognized instead of raising a NoMethodError `life_start`.
+
+    *Timo Schilling*, *Jon Atack*
+
 ### Changed
 
 *   Reduce object allocations and memory footprint (with a slight speed gain as
