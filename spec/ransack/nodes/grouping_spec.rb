@@ -2,7 +2,9 @@ require 'spec_helper'
 
 module Ransack
   module Nodes
+
     describe Grouping do
+
       before do
         @g = 1
       end
@@ -17,15 +19,27 @@ module Ransack
             expect(subject.attribute_method?('name')).to be_true
           end
 
-          context "where the attribute contains '_and_'" do
+          context "when the attribute contains '_and_'" do
             it 'is true' do
               expect(subject.attribute_method?('terms_and_conditions')).to be_true
             end
           end
 
-          context "where the attributes ends with '_start'" do
+          context "when the attribute contains '_or_'" do
+            it 'is true' do
+              expect(subject.attribute_method?('true_or_false')).to be_true
+            end
+          end
+
+          context "when the attribute ends with '_start'" do
             it 'is true' do
               expect(subject.attribute_method?('life_start')).to be_true
+            end
+          end
+
+          context "when the attribute ends with '_end'" do
+            it 'is true' do
+              expect(subject.attribute_method?('stop_end')).to be_true
             end
           end
         end
@@ -36,6 +50,7 @@ module Ransack
           end
         end
       end
+
     end
   end
 end

@@ -133,10 +133,13 @@ module Schema
         t.string   :only_search
         t.string   :only_sort
         t.string   :only_admin
+        t.string   :new_start
+        t.string   :stop_end
         t.integer  :salary
         t.date     :life_start
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
+        t.boolean  :true_or_false, default: true
         t.timestamps null: false
       end
 
