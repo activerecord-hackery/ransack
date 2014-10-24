@@ -134,6 +134,7 @@ module Schema
         t.string   :only_sort
         t.string   :only_admin
         t.integer  :salary
+        t.date     :life_start
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
         t.timestamps null: false

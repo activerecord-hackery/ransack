@@ -126,13 +126,15 @@ module Ransack
       end
 
       def attribute_method?(name)
-        name = strip_predicate_and_index(name)
-        return true if @context.attribute_method?(name)
-        case name
+        stripped_name = strip_predicate_and_index(name)
+        return true if @context.attribute_method?(stripped_name) ||
+                       @context.attribute_method?(name)
+        case stripped_name
         when /^(g|c|m|groupings|conditions|combinator)=?$/
           true
         else
-          name.split(/_and_|_or_/)
+          stripped_name
+          .split(/_and_|_or_/)
           .select { |n| !@context.attribute_method?(n) }
           .empty?
         end

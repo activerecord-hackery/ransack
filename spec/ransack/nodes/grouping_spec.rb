@@ -22,6 +22,12 @@ module Ransack
               expect(subject.attribute_method?('terms_and_conditions')).to be_true
             end
           end
+
+          context "where the attributes ends with '_start'" do
+            it 'is true' do
+              expect(subject.attribute_method?('life_start')).to be_true
+            end
+          end
         end
 
         context 'for unknown attributes' do
