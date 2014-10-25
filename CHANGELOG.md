@@ -11,9 +11,12 @@ henceforth should be documented here.
    
     *Caleb Land*, *James u007*
 
-*   Add test specs for the `lteq`, `lt`, `gteq`, and `gt` predicates. These are
+*   Add test specs for `lteq`, `lt`, `gteq` and `gt` predicates. These are
     also tested in Arel, but testing them in Ransack has proven useful to
     detect issues.
+
+*   Add test specs for `start`, `not_start`, `end` and `not_end` predicates,
+    with emphasis on cases when attribute names end with `_start` and `_end`.
 
     *Jon Atack*
 
@@ -31,15 +34,15 @@ henceforth should be documented here.
 
     *Jon Atack*
 
-*   Fix checks for `attribute_method?` for method names containing
-    `_and_` and `_or_`. Now, a `terms_and_conditions` attribute will be
-    recognized instead of running (failing) checks for `terms` and `conditions`.
+*   Improve `attribute_method?` parsing for method names containing `_and_` and
+    `_or_`. Attributes named like `foo_and_bar` or `foo_or_bar` are recognized
+    now instead of running failing checks for `foo` and `bar`.
 
     *joeyates*
 
-*   Fix checks for `attribute_method?` for method that ends with a pradicate,
-    for example `_start` and `_end`. Now, a `life_start` attribute will be
-    recognized instead of raising a NoMethodError `life_start`.
+*   Improve `attribute_method?` parsing for method names ending with a
+    predicate like `_start` and `_end`. For instance, a `life_start` attribute
+    is now recognized instead of raising a NoMethodError.
 
     *Timo Schilling*, *Jon Atack*
 
