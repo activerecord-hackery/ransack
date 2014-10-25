@@ -162,6 +162,86 @@ module Ransack
       end
     end
 
+    describe 'start' do
+      it 'generates a LIKE query with value followed by %' do
+        @s.name_start = 'Er'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE 'Er%'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_start = 'hEy'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE 'hEy%'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_start = 'begin'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE 'begin%'/
+      end
+    end
+
+    describe 'not_start' do
+      it 'generates a NOT LIKE query with value followed by %' do
+        @s.name_not_start = 'Eri'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE 'Eri%'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_not_start = 'hEy'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE 'hEy%'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_not_start = 'begin'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE 'begin%'/
+      end
+    end
+
+    describe 'end' do
+      it 'generates a LIKE query with value preceded by %' do
+        @s.name_end = 'Miller'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%Miller'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_end = 'finish'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%finish'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_end = 'Ending'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%Ending'/
+      end
+    end
+
+    describe 'not_end' do
+      it 'generates a NOT LIKE query with value preceded by %' do
+        @s.name_not_end = 'Miller'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%Miller'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_not_end = 'finish'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%finish'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_not_end = 'Ending'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%Ending'/
+      end
+    end
+
     describe 'true' do
       it 'generates an equality condition for boolean true' do
         @s.awesome_true = true
