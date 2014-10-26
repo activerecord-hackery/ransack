@@ -2,7 +2,7 @@
 This change log was started in August 2014. All notable changes to this project
 henceforth should be documented here.
 
-## Unreleased
+## Version 1.5.0 - 2014-10-26
 ### Added
 
 *   Add support for multiple sort fields and default orders in Ransack
@@ -11,12 +11,26 @@ henceforth should be documented here.
    
     *Caleb Land*, *James u007*
 
-*   Add test specs for `lteq`, `lt`, `gteq` and `gt` predicates. These are
-    also tested in Arel, but testing them in Ransack has proven useful to
-    detect issues.
+*   Add tests for `lteq`, `lt`, `gteq` and `gt` predicates. They are also
+    tested in Arel, but testing them in Ransack has proven useful to detect
+    issues.
 
-*   Add test specs for `start`, `not_start`, `end` and `not_end` predicates,
-    with emphasis on cases when attribute names end with `_start` and `_end`.
+    *Jon Atack*
+
+*   Add tests for unknown attribute names.
+    
+    *Joe Yates*
+
+*   Add tests for attribute names containing '_or_' and '_and_'.
+    
+    *Joe Yates*, *Jon Atack*
+
+*   Add tests for attribute names ending with '_start' and '_end'.
+    
+    *Jon Atack*, *Timo Schilling*
+
+*   Add tests for `start`, `not_start`, `end` and `not_end` predicates, with
+    emphasis on cases when attribute names end with `_start` and `_end`.
 
     *Jon Atack*
 
@@ -38,7 +52,7 @@ henceforth should be documented here.
     `_or_`. Attributes named like `foo_and_bar` or `foo_or_bar` are recognized
     now instead of running failing checks for `foo` and `bar`.
 
-    *joeyates*
+    *Joe Yates*
 
 *   Improve `attribute_method?` parsing for method names ending with a
     predicate like `_start` and `_end`. For instance, a `life_start` attribute
