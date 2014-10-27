@@ -55,7 +55,7 @@ henceforth should be documented here.
     *Joe Yates*
 
 *   Improve `attribute_method?` parsing for method names ending with a
-    predicate like `_start` and `_end`. For instance, a `life_start` attribute
+    predicate like `_start` and `_end`. For instance, a `foo_start` attribute
     is now recognized instead of raising a NoMethodError.
 
     *Timo Schilling*, *Jon Atack*
