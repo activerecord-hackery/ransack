@@ -66,21 +66,6 @@ class Person < ActiveRecord::Base
     end
   end
 
-  def self.ransackable_attributes(auth_object = nil)
-    if auth_object == :admin
-      column_names + _ransackers.keys - ['only_sort']
-    else
-      column_names + _ransackers.keys - ['only_sort', 'only_admin']
-    end
-  end
-
-  def self.ransortable_attributes(auth_object = nil)
-    if auth_object == :admin
-      column_names + _ransackers.keys - ['only_search']
-    else
-      column_names + _ransackers.keys - ['only_search', 'only_admin']
-    end
-  end
 end
 
 class Article < ActiveRecord::Base
