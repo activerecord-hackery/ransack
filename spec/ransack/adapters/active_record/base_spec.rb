@@ -132,7 +132,6 @@ module Ransack
           it "should function correctly when using fields with % in them" do
             p = Person.create!(:name => "110%-er")
             s = Person.search(:name_cont => "10%")
-            expect(s.result.exists?).to be true
             expect(s.result.to_a).to eq [p]
           end
 
@@ -175,7 +174,7 @@ module Ransack
           # search is not detecting the attribute
             puts "Search not detecting the `terms_and_conditions` attribute: #{
                   s.result.to_sql}"
-            # expect(s.result.to_a).to eq [p]
+          # expect(s.result.to_a).to eq [p]
           end
 
           it 'allows sort by "only_sort" field' do
