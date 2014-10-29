@@ -158,7 +158,7 @@ module Ransack
         def get_association(str, parent = @base)
           klass = klassify parent
           ransackable_association?(str, klass) &&
-            klass.reflect_on_all_associations.detect { |a| a.name.to_s == str }
+          klass.reflect_on_all_associations.detect { |a| a.name.to_s == str }
         end
 
         def join_dependency(relation)
@@ -175,13 +175,13 @@ module Ransack
           buckets = relation.joins_values.group_by do |join|
             case join
             when String
-              STRING_JOIN
+              Ransack::Constants::STRING_JOIN
             when Hash, Symbol, Array
-              ASSOCIATION_JOIN
+              Ransack::Constants::ASSOCIATION_JOIN
             when JoinDependency, JoinDependency::JoinAssociation
-              STASHED_JOIN
+              Ransack::Constants::STASHED_JOIN
             when Arel::Nodes::Join
-              JOIN_NODE
+              Ransack::Constants::JOIN_NODE
             else
               raise 'unknown class: %s' % join.class.name
             end
