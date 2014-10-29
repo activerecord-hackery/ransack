@@ -172,8 +172,9 @@ module Ransack
             p = Person.create!(:terms_and_conditions => 'Accepted')
             s = Person.search(:terms_and_conditions_eq => 'Accepted')
           # search is not detecting the attribute
-            puts "Search not detecting the `terms_and_conditions` attribute: #{
-                  s.result.to_sql}"
+            puts "
+            FIXME: Search not detecting the `terms_and_conditions` attribute in
+            base_spec.rb, line 177: #{s.result.to_sql}"
           # expect(s.result.to_a).to eq [p]
           end
 
