@@ -2,6 +2,13 @@
 This change log was started in August 2014. All notable changes to this project
 henceforth should be documented here.
 
+## Master (Unreleased)
+### Fixed
+
+*   Add support for passing stringy booleans for ransackable scopes. ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
+
+    *Josh Kovach*
+
 ## Version 1.5.1 - 2014-10-30
 ### Added
 
@@ -27,14 +34,13 @@ henceforth should be documented here.
 
     *Jon Atack*
 
-
 ## Version 1.5.0 - 2014-10-26
 ### Added
 
 *   Add support for multiple sort fields and default orders in Ransack
     `sort_link` helpers
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/438)).
-   
+
     *Caleb Land*, *James u007*
 
 *   Add tests for `lteq`, `lt`, `gteq` and `gt` predicates. They are also
@@ -44,15 +50,15 @@ henceforth should be documented here.
     *Jon Atack*
 
 *   Add tests for unknown attribute names.
-    
+
     *Joe Yates*
 
 *   Add tests for attribute names containing '_or_' and '_and_'.
-    
+
     *Joe Yates*, *Jon Atack*
 
 *   Add tests for attribute names ending with '_start' and '_end'.
-    
+
     *Jon Atack*, *Timo Schilling*
 
 *   Add tests for `start`, `not_start`, `end` and `not_end` predicates, with
@@ -164,7 +170,7 @@ henceforth should be documented here.
 *   Rewrite much of the Ransack README documentation, including the
     Associations section code examples and the Authorizations section detailing
     how to whitelist attributes, associations, sorts and scopes.
-    
+
     *Jon Atack*
 
 ## Version 1.3.0 - 2014-08-23

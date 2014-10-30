@@ -28,6 +28,11 @@ module Ransack
               search.result.to_sql.should include "active = 1"
             end
 
+            it "applies stringy true scopes" do
+              search = Person.search('active' => 'true')
+              search.result.to_sql.should include "active = 1"
+            end
+
             it "ignores unlisted scopes" do
               search = Person.search('restricted' => true)
               search.result.to_sql.should_not include "restricted"
@@ -35,6 +40,11 @@ module Ransack
 
             it "ignores false scopes" do
               search = Person.search('active' => false)
+              search.result.to_sql.should_not include "active"
+            end
+
+            it "ignores stringy false scopes" do
+              search = Person.search('active' => 'false')
               search.result.to_sql.should_not include "active"
             end
 

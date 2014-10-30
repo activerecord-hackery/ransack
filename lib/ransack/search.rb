@@ -125,7 +125,17 @@ module Ransack
       else
         @scope_args[key] = args
       end
-      @context.chain_scope(key, args)
+      @context.chain_scope(key, scope_args(args))
+    end
+
+    def scope_args(args)
+      if Ransack::Constants::TRUE_VALUES.include? args
+        true
+      elsif Ransack::Constants::FALSE_VALUES.include? args
+        false
+      else
+        args
+      end
     end
 
     def collapse_multiparameter_attributes!(attrs)
