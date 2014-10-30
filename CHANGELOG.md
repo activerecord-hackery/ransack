@@ -2,6 +2,32 @@
 This change log was started in August 2014. All notable changes to this project
 henceforth should be documented here.
 
+## Version 1.5.1 - 2014-10-30
+### Added
+
+*   Add base specs for search on fields with `_start` and `_end`.
+
+    *Jon Atack*
+
+*   Add a failing spec for detecting attribute fields containing `_and_` that
+    needs to be fixed. Method names containing `_and_` and `_or_` are still not
+    parsed/detected correctly.
+
+    *Jon Atack*
+
+### Fixed
+
+*   Fix a regression caused by incorrect string constants in context.rb.
+
+    *Kazuhiro NISHIYAMA*
+
+### Changed
+
+*   Remove duplicate code in spec/support/schema.rb.
+
+    *Jon Atack*
+
+
 ## Version 1.5.0 - 2014-10-26
 ### Added
 
@@ -48,13 +74,14 @@ henceforth should be documented here.
 
     *Jon Atack*
 
-*   Improve `attribute_method?` parsing for method names containing `_and_` and
-    `_or_`. Attributes named like `foo_and_bar` or `foo_or_bar` are recognized
-    now instead of running failing checks for `foo` and `bar`.
+*   Improve `attribute_method?` parsing for attribute names containing `_and_`
+    and `_or_`. Attributes named like `foo_and_bar` or `foo_or_bar` are
+    recognized now instead of running failing checks for `foo` and `bar`.
+    CORRECTION October 28, 2014: this feature is still not working!
 
     *Joe Yates*
 
-*   Improve `attribute_method?` parsing for method names ending with a
+*   Improve `attribute_method?` parsing for attribute names ending with a
     predicate like `_start` and `_end`. For instance, a `foo_start` attribute
     is now recognized instead of raising a NoMethodError.
 
