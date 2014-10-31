@@ -2,15 +2,96 @@
 This change log was started in August 2014. All notable changes to this project
 henceforth should be documented here.
 
-## Unreleased
+## Master (Unreleased)
+### Fixed
+
+*   Add support for passing stringy booleans for ransackable scopes. ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
+
+    *Josh Kovach*
+
+## Version 1.5.1 - 2014-10-30
 ### Added
 
-*   `sort_link` helper: Add support for multiple sort fields and default orders
+*   Add base specs for search on fields with `_start` and `_end`.
+
+    *Jon Atack*
+
+*   Add a failing spec for detecting attribute fields containing `_and_` that
+    needs to be fixed. Method names containing `_and_` and `_or_` are still not
+    parsed/detected correctly.
+
+    *Jon Atack*
+
+### Fixed
+
+*   Fix a regression caused by incorrect string constants in context.rb.
+
+    *Kazuhiro NISHIYAMA*
+
+### Changed
+
+*   Remove duplicate code in spec/support/schema.rb.
+
+    *Jon Atack*
+
+## Version 1.5.0 - 2014-10-26
+### Added
+
+*   Add support for multiple sort fields and default orders in Ransack
+    `sort_link` helpers
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/438)).
 
     *Caleb Land*, *James u007*
 
+*   Add tests for `lteq`, `lt`, `gteq` and `gt` predicates. They are also
+    tested in Arel, but testing them in Ransack has proven useful to detect
+    issues.
+
+    *Jon Atack*
+
+*   Add tests for unknown attribute names.
+
+    *Joe Yates*
+
+*   Add tests for attribute names containing '_or_' and '_and_'.
+
+    *Joe Yates*, *Jon Atack*
+
+*   Add tests for attribute names ending with '_start' and '_end'.
+
+    *Jon Atack*, *Timo Schilling*
+
+*   Add tests for `start`, `not_start`, `end` and `not_end` predicates, with
+    emphasis on cases when attribute names end with `_start` and `_end`.
+
+    *Jon Atack*
+
 ### Fixed
+
+*   Fix a regression where form labels for attributes through a `belongs_to`
+    association without a translation for the attribute in the locales file
+    would cause a "no implicit conversion of nil into Hash" crash instead of
+    falling back on the attribute name. Added test coverage.
+
+    *John Dell*, *Jon Atack*, *jasdeepgosal*
+
+*   Fix the `form_helper date_select` spec that was failing with Rails 4.2 and
+    master.
+
+    *Jon Atack*
+
+*   Improve `attribute_method?` parsing for attribute names containing `_and_`
+    and `_or_`. Attributes named like `foo_and_bar` or `foo_or_bar` are
+    recognized now instead of running failing checks for `foo` and `bar`.
+    CORRECTION October 28, 2014: this feature is still not working!
+
+    *Joe Yates*
+
+*   Improve `attribute_method?` parsing for attribute names ending with a
+    predicate like `_start` and `_end`. For instance, a `foo_start` attribute
+    is now recognized instead of raising a NoMethodError.
+
+    *Timo Schilling*, *Jon Atack*
 
 ### Changed
 
@@ -89,7 +170,7 @@ henceforth should be documented here.
 *   Rewrite much of the Ransack README documentation, including the
     Associations section code examples and the Authorizations section detailing
     how to whitelist attributes, associations, sorts and scopes.
-    
+
     *Jon Atack*
 
 ## Version 1.3.0 - 2014-08-23

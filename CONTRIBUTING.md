@@ -4,8 +4,8 @@ Ransack is an open source project and we encourage contributions.
 
 When filing an issue on the Ransack project, please provide these details:
 
-* A comprehensive list of steps to reproduce the issue.
-* The version of Ransack *and* the version of Rails and Ruby.
+* A comprehensive list of steps to reproduce the issue, or, _far better_, a failing spec!
+* The version (and branch) of Ransack *and* the versions of Rails and Ruby.
 * Any relevant stack traces ("Full trace" preferred).
 
 In 99% of cases, this information is enough to determine the cause and
@@ -53,17 +53,17 @@ day). We may suggest some changes or improvements or alternatives.
 Some things that will increase the chance that your pull request is accepted,
 taken straight from the Ruby on Rails guide:
 
-* Use Rails idioms and helpers
-* Include tests that fail without your code, and pass with it
-* Update the documentation, the surrounding one, examples elsewhere, guides,
-  whatever is affected by your contribution
+* Use Rails idioms and helpers.
+* Include tests that fail without your code, and pass with it.
+* Update the README, the change log, the wiki documentation... anything that is
+  affected by your contribution.
 
 Syntax:
 
 * Two spaces, no tabs.
 * 80 characters per line.
 * No trailing whitespace. Blank lines should not have any space.
-* Prefer &&/|| over and/or.
+* Prefer `&&`/`||` over `and`/`or`.
 * `MyClass.my_method(my_arg)` not `my_method( my_arg )` or my_method my_arg.
 * `a = b` and not `a=b`.
 * `a_method { |block| ... }` and not `a_method { | block | ... }` or

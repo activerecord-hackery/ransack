@@ -24,7 +24,10 @@ module Ransack
       end
       @context = options[:context] || Context.for(object, options)
       @context.auth_object = options[:auth_object]
-      @base = Nodes::Grouping.new(@context, options[:grouping] || 'and')
+      @base = Nodes::Grouping.new(
+        @context,
+        options[:grouping] || Ransack::Constants::AND
+        )
       @scope_args = {}
       build(params.with_indifferent_access)
     end
@@ -35,7 +38,7 @@ module Ransack
 
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
-        if ['s', 'sorts'].include?(key)
+        if Ransack::Constants::S_SORTS.include?(key)
           send("#{key}=", value)
         elsif base.attribute_method?(key)
           base.send("#{key}=", value)
@@ -90,7 +93,7 @@ module Ransack
 
     def method_missing(method_id, *args)
       method_name = method_id.to_s
-      getter_name = method_name.sub(/=$/, '')
+      getter_name = method_name.sub(/=$/, Ransack::Constants::EMPTY)
       if base.attribute_method?(getter_name)
         base.send(method_id, *args)
       elsif @context.ransackable_scope?(getter_name, @context.object)
@@ -109,7 +112,10 @@ module Ransack
         [:class, klass.name],
         ([:scope, @scope_args] if @scope_args.present?),
         [:base, base.inspect]
-      ].compact.map { |d| d.join(': ') }.join(', ')
+      ]
+      .compact.map { |d| d.join(': '.freeze) }
+      .join(Ransack::Constants::COMMA_SPACE)
+
       "Ransack::Search<#{details}>"
     end
 
@@ -119,21 +125,36 @@ module Ransack
       if @context.scope_arity(key) == 1
         @scope_args[key] = args.is_a?(Array) ? args[0] : args
       else
-        @scope_args[key] = args
+        @scope_args[key] = args.is_a?(Array) ? sanitized_scope_args(args) : args
       end
-      @context.chain_scope(key, args)
+      @context.chain_scope(key, sanitized_scope_args(args))
+    end
+
+    def sanitized_scope_args(args)
+      if args.is_a?(Array)
+        args = args.map(&method(:sanitized_scope_args))
+      end
+
+      if Ransack::Constants::TRUE_VALUES.include? args
+        true
+      elsif Ransack::Constants::FALSE_VALUES.include? args
+        false
+      else
+        args
+      end
     end
 
     def collapse_multiparameter_attributes!(attrs)
       attrs.keys.each do |k|
-        if k.include?("(")
+        if k.include?('('.freeze)
           real_attribute, position = k.split(/\(|\)/)
-          cast = %w(a s i).include?(position.last) ? position.last : nil
+          cast = %w(a s i).freeze.include?(position.last) ? position.last : nil
           position = position.to_i - 1
           value = attrs.delete(k)
           attrs[real_attribute] ||= []
-          attrs[real_attribute][position] = if cast
-            (value.blank? && cast == 'i') ? nil : value.send("to_#{cast}")
+          attrs[real_attribute][position] =
+          if cast
+            value.blank? && cast == 'i'.freeze ? nil : value.send("to_#{cast}")
           else
             value
           end

@@ -28,7 +28,7 @@ module Ransack
     alias_method :cache_key, :collection
 
     def initialize
-      super("Search")
+      super("Search".freeze)
       @singular = "search".freeze
       @plural = "searches".freeze
       @element = "search".freeze

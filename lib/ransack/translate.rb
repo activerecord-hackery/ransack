@@ -1,6 +1,8 @@
 require 'i18n'
 
-I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'locale', '*.yml')]
+I18n.load_path += Dir[
+  File.join(File.dirname(__FILE__), 'locale'.freeze, '*.yml'.freeze)
+]
 
 module Ransack
   module Translate
@@ -23,7 +25,8 @@ module Ransack
         |x| x.respond_to?(:model_name)
       }
       predicate = Predicate.detect_from_string(original_name)
-      attributes_str = original_name.sub(/_#{predicate}$/, '')
+      attributes_str = original_name
+        .sub(/_#{predicate}$/, Ransack::Constants::EMPTY)
       attribute_names = attributes_str.split(/_and_|_or_/)
       combinator = attributes_str.match(/_and_/) ? :and : :or
       defaults = base_ancestors.map do |klass|
@@ -71,7 +74,7 @@ module Ransack
     def self.attribute_name(context, name, include_associations = nil)
       @context, @name = context, name
       @assoc_path = context.association_path(name)
-      @attr_name = @name.sub(/^#{@assoc_path}_/, '')
+      @attr_name = @name.sub(/^#{@assoc_path}_/, Ransack::Constants::EMPTY)
       associated_class = @context.traverse(@assoc_path) if @assoc_path.present?
       @include_associated = include_associations && associated_class
 
@@ -97,9 +100,9 @@ module Ransack
     def self.build_interpolations(associated_class)
       {
         :attr_fallback_name => attr_fallback_name(associated_class),
-        :association_name   => association_name 
+        :association_name   => association_name
       }
-      .reject! { |_, value| value.nil? }
+      .reject { |_, value| value.nil? }
     end
 
     def self.attr_fallback_name(associated_class)

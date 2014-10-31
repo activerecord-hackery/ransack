@@ -29,8 +29,14 @@ module Ransack
             relation = relation.except(:order)
             .reorder(viz.accept(search.sorts))
           end
-          opts[:distinct] ?
-          relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
+          if opts[:distinct]
+            relation.select(
+              Ransack::Constants::DISTINCT + @klass.quoted_table_name +
+              '.*'.freeze
+              )
+          else
+            relation
+          end
         end
 
         def attribute_method?(str, klass = @klass)
@@ -44,11 +50,12 @@ module Ransack
             while !found_assoc && remainder.unshift(segments.pop) &&
               segments.size > 0 do
               assoc, poly_class = unpolymorphize_association(
-                segments.join('_')
+                segments.join(Ransack::Constants::UNDERSCORE)
                 )
               if found_assoc = get_association(assoc, klass)
                 exists = attribute_method?(
-                  remainder.join('_'), poly_class || found_assoc.klass
+                  remainder.join(Ransack::Constants::UNDERSCORE),
+                  poly_class || found_assoc.klass
                   )
               end
             end
@@ -96,13 +103,15 @@ module Ransack
             found_assoc = nil
             while remainder.unshift(segments.pop) && segments.size > 0 &&
               !found_assoc do
-              assoc, klass = unpolymorphize_association(segments.join('_'))
+              assoc, klass = unpolymorphize_association(
+                segments.join(Ransack::Constants::UNDERSCORE)
+                )
               if found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(
                   found_assoc.name, parent, klass
                   )
                 parent, attr_name = get_parent_and_attribute_name(
-                  remainder.join('_'), join
+                  remainder.join(Ransack::Constants::UNDERSCORE), join
                   )
               end
             end
@@ -128,24 +137,31 @@ module Ransack
           buckets = relation.joins_values.group_by do |join|
             case join
             when String
-              'string_join'
+              Ransack::Constants::STRING_JOIN
             when Hash, Symbol, Array
-              'association_join'
+              Ransack::Constants::ASSOCIATION_JOIN
             when ::ActiveRecord::Associations::ClassMethods::JoinDependency::JoinAssociation
-              'stashed_join'
+              Ransack::Constants::STASHED_JOIN
             when Arel::Nodes::Join
-              'join_node'
+              Ransack::Constants::JOIN_NODE
             else
               raise 'unknown class: %s' % join.class.name
             end
           end
 
-          association_joins         = buckets['association_join'] || []
-          stashed_association_joins = buckets['stashed_join'] || []
-          join_nodes                = buckets['join_node'] || []
-          string_joins              = (buckets['string_join'] || [])
-                                      .map { |x| x.strip }
-                                      .uniq
+          association_joins =
+            buckets[Ransack::Constants::ASSOCIATION_JOIN] || []
+
+          stashed_association_joins =
+            buckets[Ransack::Constants::STASHED_JOIN] || []
+
+          join_nodes =
+            buckets[Ransack::Constants::JOIN_NODE] || []
+
+          string_joins =
+            (buckets[Ransack::Constants::STRING_JOIN] || [])
+            .map { |x| x.strip }
+            .uniq
 
           join_list = relation.send :custom_join_sql, (string_joins + join_nodes)
 

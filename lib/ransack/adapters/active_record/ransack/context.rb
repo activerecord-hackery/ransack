@@ -48,16 +48,28 @@ module Ransack
     end
 
     def klassify(obj)
-      if Class === obj && ::ActiveRecord::Base > obj
-        obj
-      elsif obj.respond_to? :klass
-        obj.klass
-      elsif obj.respond_to? :active_record  # Rails 3
-        obj.active_record
-      elsif obj.respond_to? :base_klass     # Rails 4
-        obj.base_klass
+      @object = relation_for(object)
+      @klass = @object.klass
+      @join_dependency = join_dependency(@object)
+      @join_type = options[:join_type] || Polyamorous::OuterJoin
+      @search_key = options[:search_key] || Ransack.options[:search_key]
+
+      if ::ActiveRecord::VERSION::STRING >= "4.1".freeze
+        @base = @join_dependency.join_root
+        @engine = @base.base_klass.arel_engine
       else
-        raise ArgumentError, "Don't know how to klassify #{obj.inspect}"
+        @base = @join_dependency.join_base
+        @engine = @base.arel_engine
+      end
+
+      @default_table = Arel::Table.new(
+        @base.table_name, :as => @base.aliased_table_name, :engine => @engine
+        )
+      @bind_pairs = Hash.new do |hash, key|
+        parent, attr_name = get_parent_and_attribute_name(key.to_s)
+        if parent && attr_name
+          hash[key] = [parent, attr_name]
+        end
       end
     end
 

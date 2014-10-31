@@ -69,7 +69,7 @@ module Ransack
       def respond_to?(method_id)
         super or begin
           method_name = method_id.to_s
-          writer = method_name.sub!(/\=$/, '')
+          writer = method_name.sub!(/\=$/, Ransack::Constants::EMPTY)
           attribute_method?(method_name) ? true : false
         end
       end
@@ -115,7 +115,7 @@ module Ransack
 
       def method_missing(method_id, *args)
         method_name = method_id.to_s
-        writer = method_name.sub!(/\=$/, '')
+        writer = method_name.sub!(/\=$/, Ransack::Constants::EMPTY)
         if attribute_method?(method_name)
           writer ?
             write_attribute(method_name, *args) :
@@ -126,12 +126,15 @@ module Ransack
       end
 
       def attribute_method?(name)
-        name = strip_predicate_and_index(name)
-        case name
+        stripped_name = strip_predicate_and_index(name)
+        return true if @context.attribute_method?(stripped_name) ||
+                       @context.attribute_method?(name)
+        case stripped_name
         when /^(g|c|m|groupings|conditions|combinator)=?$/
           true
         else
-          name.split(/_and_|_or_/)
+          stripped_name
+          .split(/_and_|_or_/)
           .select { |n| !@context.attribute_method?(n) }
           .empty?
         end
@@ -161,10 +164,13 @@ module Ransack
       end
 
       def inspect
-        data = [['conditions', conditions], ['combinator', combinator]]
-               .reject { |e| e[1].blank? }
-               .map { |v| "#{v[0]}: #{v[1]}" }
-               .join(', ')
+        data = [
+          ['conditions'.freeze, conditions],
+          [Ransack::Constants::COMBINATOR, combinator]
+        ]
+        .reject { |e| e[1].blank? }
+        .map { |v| "#{v[0]}: #{v[1]}" }
+        .join(Ransack::Constants::COMMA_SPACE)
         "Grouping <#{data}>"
       end
 

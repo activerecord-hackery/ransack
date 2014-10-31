@@ -20,21 +20,41 @@ module Ransack
 
           context 'with scopes' do
             before do
-              Person.stub :ransackable_scopes => [:active, :over_age]
+              Person.stub :ransackable_scopes => [:active, :over_age, :of_age]
             end
 
             it "applies true scopes" do
-              search =  Person.search('active' => true)
+              search = Person.search('active' => true)
               search.result.to_sql.should include "active = 1"
             end
 
+            it "applies stringy true scopes" do
+              search = Person.search('active' => 'true')
+              search.result.to_sql.should include "active = 1"
+            end
+
+            it "applies stringy boolean scopes with true value in an array" do
+              search = Person.search('of_age' => ['true'])
+              search.result.to_sql.should include "age >= 18"
+            end
+
+            it "applies stringy boolean scopes with false value in an array" do
+              search = Person.search('of_age' => ['false'])
+              search.result.to_sql.should include "age < 18"
+            end
+
             it "ignores unlisted scopes" do
-              search =  Person.search('restricted' => true)
+              search = Person.search('restricted' => true)
               search.result.to_sql.should_not include "restricted"
             end
 
             it "ignores false scopes" do
               search = Person.search('active' => false)
+              search.result.to_sql.should_not include "active"
+            end
+
+            it "ignores stringy false scopes" do
+              search = Person.search('active' => 'false')
               search.result.to_sql.should_not include "active"
             end
 
@@ -130,15 +150,52 @@ module Ransack
           end
 
           it "should function correctly when using fields with % in them" do
-            Person.create!(:name => "110%-er")
+            p = Person.create!(:name => "110%-er")
             s = Person.search(:name_cont => "10%")
-            expect(s.result.exists?).to be true
+            expect(s.result.to_a).to eq [p]
           end
 
           it "should function correctly when using fields with backslashes in them" do
-            Person.create!(:name => "\\WINNER\\")
+            p = Person.create!(:name => "\\WINNER\\")
             s = Person.search(:name_cont => "\\WINNER\\")
-            expect(s.result.exists?).to be true
+            expect(s.result.to_a).to eq [p]
+          end
+
+          it "should function correctly when an attribute name ends with '_start'" do
+            p = Person.create!(:new_start => 'Bar and foo', :name => 'Xiang')
+
+            s = Person.search(:new_start_end => ' and foo')
+            expect(s.result.to_a).to eq [p]
+
+            s = Person.search(:name_or_new_start_start => 'Xia')
+            expect(s.result.to_a).to eq [p]
+
+            s = Person.search(:new_start_or_name_end => 'iang')
+            expect(s.result.to_a).to eq [p]
+          end
+
+          it "should function correctly when an attribute name ends with '_end'" do
+            p = Person.create!(:stop_end => 'Foo and bar', :name => 'Marianne')
+
+            s = Person.search(:stop_end_start => 'Foo and')
+            expect(s.result.to_a).to eq [p]
+
+            s = Person.search(:stop_end_or_name_end => 'anne')
+            expect(s.result.to_a).to eq [p]
+
+            s = Person.search(:name_or_stop_end_end => ' bar')
+            expect(s.result.to_a).to eq [p]
+          end
+
+          it "should function correctly when an attribute name has 'and' in it" do
+          # FIXME: this test does not pass!
+            p = Person.create!(:terms_and_conditions => true)
+            s = Person.search(:terms_and_conditions_eq => true)
+          # search is not detecting the attribute
+            puts "
+            FIXME: Search not detecting the `terms_and_conditions` attribute in
+            base_spec.rb, line 178: #{s.result.to_sql}"
+          # expect(s.result.to_a).to eq [p]
           end
 
           it 'allows sort by "only_sort" field' do

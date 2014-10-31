@@ -176,7 +176,7 @@ Ransack to _always_ sort that particular field in the specified direction.
 Multiple `default_order` fields may also be specified with a hash:
 
 ```erb
-<%= sort_link(@q, :last_name, [:last_name, :first_name],
+<%= sort_link(@q, :last_name, %i(last_name first_name),
   default_order: { last_name: 'asc', first_name: 'desc' }) %>
 ```
 
@@ -461,6 +461,8 @@ Employee.search({ active: true, hired_since: '2013-01-01' })
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
+If the `true` value is being passed via url params or by some other mechanism that will convert it to a string (i.e. `"active" => "true"`), the true value will *not* be passed to the scope. If you want to pass a `'true'` string to the scope, you should wrap it in an array (i.e. `"active" => ['true']`).
+
 Scopes are a recent addition to Ransack and currently have a few caveats:
 First, a scope involving child associations needs to be defined in the parent
 table model, not in the child model. Second, scopes with an array as an
@@ -470,9 +472,7 @@ wrapped in an array to function (see
 which is not compatible with Ransack form helpers. For this use case, it may be
 better for now to use [ransackers]
 (https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead
-where feasible. Finally, there is also
-[this issue](https://github.com/activerecord-hackery/ransack/issues/403)
-to be aware of. Pull requests with solutions and tests are welcome!
+where feasible. Pull requests with solutions and tests are welcome!
 
 ### Grouping queries by OR instead of AND
 
@@ -533,16 +533,14 @@ artists.result.to_sql
 
 ### Using SimpleForm
 
-If you want to combine form builders of ransack and SimpleForm, just set the
-RANSACK_FORM_BUILDER environment variable before Rails started, e.g. in
-``config/application.rb`` before ``require 'rails/all'`` and of course use
-``gem 'simple_form'`` in your ``Gemfile``:
+If you would like to combine the Ransack and SimpleForm form builders, set the
+`RANSACK_FORM_BUILDER` environment variable before Rails boots up, e.g. in
+`config/application.rb` before `require 'rails/all'` as shown below (and add
+`gem 'simple_form'` in your Gemfile).
 
 ```ruby
 require File.expand_path('../boot', __FILE__)
-
 ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
-
 require 'rails/all'
 ```
 
@@ -553,14 +551,67 @@ Ransack translation files are available in
 many translations for Ransack available at
 http://www.localeapp.com/projects/2999.
 
+Predicate and attribute translations in forms may be specified as follows (see
+the translation files in [Ransack::Locale](lib/ransack/locale) for more examples):
+
+locales/en.yml:
+```yml
+en:
+  ransack:
+    asc: ascending
+    desc: descending
+    predicates:
+      cont: contains
+      not_cont: not contains
+      start: starts with
+      end: ends with
+      gt: greater than
+      lt: less than
+    attributes:
+      person:
+        name: Full Name
+      article:
+        title: Article Title
+        body: Main Content
+```
+
+Attribute names may also be changed globally, or under `activerecord`:
+
+```yml
+en:
+  attributes:
+    model_name:
+      model_field1: field name1
+      model_field2: field name2
+  activerecord:
+    attributes:
+      namespace/article:
+        title: AR Namespaced Title
+      namespace_article:
+        title: Old Ransack Namespaced Title
+```
+
+## Semantic Versioning
+
+Ransack attempts to follow semantic versioning in the format of `x.y.z`, where:
+
+`x` stands for a major version (new features that are not backward-compatible).
+`y` stands for a minor version (new features that are backward-compatible).
+`z` stands for a patch (bug fixes).
+
+In other words: `Major.Minor.Patch`.
+
 ## Contributions
 
 To support the project:
 
 * Use Ransack in your apps, and let us know if you encounter anything that's
-broken or missing. A failing spec is awesome. A pull request with tests that
-pass is even better! Before filing an issue or pull request, be sure to read
-the [Contributing Guide](CONTRIBUTING.md).
+broken or missing. A failing spec to demonstrate the issue is awesome. A pull
+request with passing tests is even better!
+* Before filing an issue or pull request, be sure to read and follow the
+[Contributing Guide](CONTRIBUTING.md).
+* Please use Stack Overflow or other sites for questions or discussion not
+directly related to bug reports, pull requests, or documentation improvements.
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!

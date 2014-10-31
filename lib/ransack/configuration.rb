@@ -1,22 +1,6 @@
 require 'ransack/constants'
 require 'ransack/predicate'
 
-ASC                 = 'asc'.freeze
-DESC                = 'desc'.freeze
-ASC_DESC            = %w(asc desc).freeze
-ASC_ARROW           = '&#9650;'.freeze
-DESC_ARROW          = '&#9660;'.freeze
-OR                  = 'or'.freeze
-AND                 = 'and'.freeze
-SORT                = 'sort'.freeze
-SORT_LINK           = 'sort_link'.freeze
-SUFFIXES            = %w(_any _all).freeze
-ATTRIBUTE           = 'attribute'.freeze
-SEARCH              = 'search'.freeze
-DEFAULT_SEARCH_KEY  = 'q'.freeze
-SPACE               = ' '.freeze
-NON_BREAKING_SPACE  = '&nbsp;'.freeze
-
 module Ransack
   module Configuration
 
@@ -40,7 +24,7 @@ module Ransack
 
       self.predicates[name] = Predicate.new(opts)
 
-      SUFFIXES.each do |suffix|
+      Ransack::Constants::SUFFIXES.each do |suffix|
         compound_name = name + suffix
         self.predicates[compound_name] = Predicate.new(
           opts.merge(

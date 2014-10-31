@@ -39,6 +39,7 @@ class Person < ActiveRecord::Base
   scope :restricted,  lambda { where("restricted = 1") }
   scope :active,      lambda { where("active = 1") }
   scope :over_age,    lambda { |y| where(["age > ?", y]) }
+  scope :of_age,      lambda { |of_age| of_age ? where("age >= ?", 18) : where("age < ?", 18) }
 
   ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
@@ -66,21 +67,6 @@ class Person < ActiveRecord::Base
     end
   end
 
-  def self.ransackable_attributes(auth_object = nil)
-    if auth_object == :admin
-      column_names + _ransackers.keys - ['only_sort']
-    else
-      column_names + _ransackers.keys - ['only_sort', 'only_admin']
-    end
-  end
-
-  def self.ransortable_attributes(auth_object = nil)
-    if auth_object == :admin
-      column_names + _ransackers.keys - ['only_search']
-    else
-      column_names + _ransackers.keys - ['only_search', 'only_admin']
-    end
-  end
 end
 
 class Article < ActiveRecord::Base
@@ -133,14 +119,20 @@ module Schema
         t.string   :only_search
         t.string   :only_sort
         t.string   :only_admin
+        t.string   :new_start
+        t.string   :stop_end
         t.integer  :salary
+        t.date     :life_start
         t.boolean  :awesome, default: false
+        t.boolean  :terms_and_conditions, default: false
+        t.boolean  :true_or_false, default: true
         t.timestamps null: false
       end
 
       create_table :articles, :force => true do |t|
         t.integer :person_id
         t.string  :title
+        t.text    :subject_header
         t.text    :body
       end
 
