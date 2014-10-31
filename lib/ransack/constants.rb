@@ -1,5 +1,23 @@
 module Ransack
   module Constants
+    ASC                 = 'asc'.freeze
+    DESC                = 'desc'.freeze
+    ASC_ARROW           = '&#9650;'.freeze
+    DESC_ARROW          = '&#9660;'.freeze
+    OR                  = 'or'.freeze
+    AND                 = 'and'.freeze
+    SORT                = 'sort'.freeze
+    SORT_LINK           = 'sort_link'.freeze
+    SEARCH              = 'search'.freeze
+    DEFAULT_SEARCH_KEY  = 'q'.freeze
+    ATTRIBUTE           = 'attribute'.freeze
+    COMBINATOR          = 'combinator'.freeze
+    SPACE               = ' '.freeze
+    COMMA_SPACE         = ', '.freeze
+    UNDERSCORE          = '_'.freeze
+    NON_BREAKING_SPACE  = '&nbsp;'.freeze
+    EMPTY               = ''.freeze
+
     TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
     FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
     BOOLEAN_VALUES = TRUE_VALUES + FALSE_VALUES

@@ -1,23 +1,6 @@
 module Ransack
   module Constants
-    ASC                 = 'asc'.freeze
-    DESC                = 'desc'.freeze
-    ASC_ARROW           = '&#9650;'.freeze
-    DESC_ARROW          = '&#9660;'.freeze
-    OR                  = 'or'.freeze
-    AND                 = 'and'.freeze
-    SORT                = 'sort'.freeze
-    SORT_LINK           = 'sort_link'.freeze
-    SEARCH              = 'search'.freeze
-    DEFAULT_SEARCH_KEY  = 'q'.freeze
-    ATTRIBUTE           = 'attribute'.freeze
     DISTINCT            = 'DISTINCT '.freeze
-    COMBINATOR          = 'combinator'.freeze
-    SPACE               = ' '.freeze
-    COMMA_SPACE         = ', '.freeze
-    UNDERSCORE          = '_'.freeze
-    NON_BREAKING_SPACE  = '&nbsp;'.freeze
-    EMPTY               = ''.freeze
     STRING_JOIN         = 'string_join'.freeze
     ASSOCIATION_JOIN    = 'association_join'.freeze
     STASHED_JOIN        = 'stashed_join'.freeze
