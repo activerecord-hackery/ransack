@@ -39,6 +39,7 @@ class Person < ActiveRecord::Base
   scope :restricted,  lambda { where("restricted = 1") }
   scope :active,      lambda { where("active = 1") }
   scope :over_age,    lambda { |y| where(["age > ?", y]) }
+  scope :of_age,      lambda { |of_age| of_age ? where("age >= ?", 18) : where("age < ?", 18) }
 
   ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
