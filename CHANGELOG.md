@@ -3,13 +3,24 @@ This change log was started in August 2014. All notable changes to this project
 henceforth should be documented here.
 
 ## Master (Unreleased)
+### Added
+
 ### Fixed
 
-*   Add support for passing stringy booleans for ransackable scopes. ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
+*   Add support for passing stringy booleans for ransackable scopes (
+    [pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
 
     *Josh Kovach*
 
+### Changed
+
 ## Version 1.5.1 - 2014-10-30
+### Fixed
+
+*   Fix a regression caused by incorrect string constants in `context.rb`.
+
+    *Kazuhiro Nishiyama*
+
 ### Added
 
 *   Add base specs for search on fields with `_start` and `_end`.
@@ -17,20 +28,14 @@ henceforth should be documented here.
     *Jon Atack*
 
 *   Add a failing spec for detecting attribute fields containing `_and_` that
-    needs to be fixed. Method names containing `_and_` and `_or_` are still not
-    parsed/detected correctly.
+    needs to be fixed. Attribute names containing `_and_` and `_or_` are still
+    not parsed/detected correctly.
 
     *Jon Atack*
 
-### Fixed
-
-*   Fix a regression caused by incorrect string constants in context.rb.
-
-    *Kazuhiro NISHIYAMA*
-
 ### Changed
 
-*   Remove duplicate code in spec/support/schema.rb.
+*   Remove duplicate code in `spec/support/schema.rb`.
 
     *Jon Atack*
 
@@ -101,14 +106,12 @@ henceforth should be documented here.
 
     *Jon Atack*
 
-
 ## Version 1.4.1 - 2014-09-23
 ### Fixed
 
 *   Fix README markdown so RubyGems documentation picks up the formatting correctly.
 
     *Jon Atack*
-
 
 ## Version 1.4.0 - 2014-09-23
 ### Added
