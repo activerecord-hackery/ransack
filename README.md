@@ -461,7 +461,10 @@ Employee.search({ active: true, hired_since: '2013-01-01' })
 Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
-If the `true` value is being passed via url params or by some other mechanism that will convert it to a string (i.e. `"active" => "true"`), the true value will *not* be passed to the scope. If you want to pass a `'true'` string to the scope, you should wrap it in an array (i.e. `"active" => ['true']`).
+If the `true` value is being passed via url params or by some other mechanism
+that will convert it to a string (i.e. `"active" => "true"`), the true value
+will *not* be passed to the scope. If you want to pass a `'true'` string to the
+scope, you should wrap it in an array (i.e. `"active" => ['true']`).
 
 Scopes are a recent addition to Ransack and currently have a few caveats:
 First, a scope involving child associations needs to be defined in the parent
