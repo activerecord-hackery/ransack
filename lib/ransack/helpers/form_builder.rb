@@ -1,5 +1,19 @@
 require 'action_view'
 
+# This patch is needed since this Rails commit:
+# https://github.com/rails/rails/commit/c1a118a
+#
+# TODO: Find a better a better to solve this.
+#
+module ActionView::Helpers::Tags
+  class Base
+    private
+    def value(object)
+      object.send @method_name if object # use send instead of public_send
+    end
+  end
+end
+
 RANSACK_FORM_BUILDER = 'RANSACK_FORM_BUILDER'.freeze
 
 require 'simple_form' if
@@ -126,9 +140,8 @@ module Ransack
           end
         end
         collection = keys.map { |k| [k, Translate.predicate(k)] }
-        object.predicate ||= Predicate.named(default) if can_use_default?(
-          default, :predicate, keys
-          )
+        object.predicate ||= Predicate.named(default) if
+          can_use_default?(default, :predicate, keys)
         template_collection_select(:p, collection, options, html_options)
       end
 
