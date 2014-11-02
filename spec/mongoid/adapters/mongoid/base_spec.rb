@@ -198,6 +198,12 @@ module Ransack
             s = Person.search(:only_admin_eq => 'htimS cirA')
             expect(s.result.selector).to eq({})
           end
+
+          it 'searches by id' do
+            ids = ['some_bson_id', 'another_bson_id']
+            s = Person.search(:id_in => ids)
+            expect(s.result.selector).to eq({ '_id' => { '$in' => ids } })
+          end
         end
 
         describe '#ransackable_attributes' do
