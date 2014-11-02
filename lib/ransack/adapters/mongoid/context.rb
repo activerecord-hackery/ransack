@@ -36,6 +36,8 @@ module Ransack
           # when :decimal
           # else # :string
 
+          name = '_id' if name == 'id'
+
           t = object.klass.fields[name].type
 
           t.to_s.demodulize.underscore.to_sym
