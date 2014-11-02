@@ -7,8 +7,8 @@ henceforth should be documented here.
 
 ### Fixed
 
-*   Add support for passing stringy booleans for ransackable scopes (
-    [pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
+*   Add support and tests for passing stringy booleans for ransackable scopes
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
 
     *Josh Kovach*
 
