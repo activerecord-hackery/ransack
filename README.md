@@ -462,9 +462,10 @@ Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
 If the `true` value is being passed via url params or by some other mechanism
-that will convert it to a string (i.e. `"active" => "true"`), the true value
-will *not* be passed to the scope. If you want to pass a `'true'` string to the
-scope, you should wrap it in an array (i.e. `"active" => ['true']`).
+that will convert it to a string (i.e. `active: 'true'` instead of
+`active: true`), the true value will *not* be passed to the scope. If you want
+to pass a `'true'` string to the scope, you should wrap it in an array (i.e.
+`active: ['true']`).
 
 Scopes are a recent addition to Ransack and currently have a few caveats:
 First, a scope involving child associations needs to be defined in the parent
@@ -474,7 +475,7 @@ wrapped in an array to function (see
 [this issue](https://github.com/activerecord-hackery/ransack/issues/404)),
 which is not compatible with Ransack form helpers. For this use case, it may be
 better for now to use [ransackers]
-(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead
+(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead,
 where feasible. Pull requests with solutions and tests are welcome!
 
 ### Grouping queries by OR instead of AND
