@@ -1,14 +1,15 @@
-require 'machinist/active_record'
+require 'machinist/object'
 require 'sham'
 require 'faker'
-require 'ransack'
 require 'pry'
+require 'mongoid'
+require 'ransack'
 
 I18n.enforce_available_locales = false
 Time.zone = 'Eastern Time (US & Canada)'
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 
-Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)]
+Dir[File.expand_path('../{mongoid/helpers,mongoid/support,blueprints}/*.rb', __FILE__)]
 .each do |f|
   require f
 end
@@ -31,9 +32,9 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     puts '=' * 80
-    connection_name = ActiveRecord::Base.connection.adapter_name
-    puts "Running specs against #{connection_name}, ActiveRecord #{
-      ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
+    connection_name = Mongoid.default_session.inspect
+    puts "Running specs against #{connection_name}, Mongoid #{
+      Mongoid::VERSION}, Moped #{Moped::VERSION} and Origin #{Origin::VERSION}..."
     puts '=' * 80
     Schema.create
   end

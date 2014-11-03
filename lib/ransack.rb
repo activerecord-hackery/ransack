@@ -2,6 +2,12 @@ require 'active_support/core_ext'
 
 require 'ransack/configuration'
 
+if defined?(::Mongoid)
+  require 'ransack/adapters/mongoid/ransack/constants'
+else
+  require 'ransack/adapters/active_record/ransack/constants'
+end
+
 module Ransack
   extend Configuration
 
@@ -19,9 +25,12 @@ Ransack.configure do |config|
 end
 
 require 'ransack/translate'
+require 'ransack/adapters/active_record/ransack/translate' if defined?(::ActiveRecord::Base)
+require 'ransack/adapters/mongoid/ransack/translate' if defined?(::Mongoid)
 require 'ransack/search'
 require 'ransack/ransacker'
 require 'ransack/adapters/active_record' if defined?(::ActiveRecord::Base)
+require 'ransack/adapters/mongoid' if defined?(::Mongoid)
 require 'ransack/helpers'
 require 'action_controller'
 

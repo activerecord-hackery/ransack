@@ -171,23 +171,7 @@ module Ransack
       alias :p :predicate_name
 
       def arel_predicate
-        predicates = attributes.map do |attr|
-          attr.attr.send(
-            arel_predicate_for_attribute(attr),
-            formatted_values_for_attribute(attr)
-          )
-        end
-
-        if predicates.size > 1
-          case combinator
-          when Ransack::Constants::AND
-            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
-          when Ransack::Constants::OR
-            predicates.inject(&:or)
-          end
-        else
-          predicates.first
-        end
+        raise "not implemented"
       end
 
       def validated_values
