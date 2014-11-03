@@ -132,7 +132,7 @@ module Ransack
           end
         end
         it 'filters predicates with multi-value :only' do
-          html = @f.predicate_select only: [:eq, :lt]
+          html = @f.predicate_select :only => [:eq, :lt]
           Predicate.names.reject { |k| k =~ /^(eq|lt)/ }.each do |key|
             expect(html).not_to match /<option value="#{key}">/
           end
