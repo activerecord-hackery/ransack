@@ -3,7 +3,7 @@ require 'action_view'
 # This patch is needed since this Rails commit:
 # https://github.com/rails/rails/commit/c1a118a
 #
-# TODO: Find a better a better to solve this.
+# TODO: Find a better way to solve this.
 #
 module ActionView::Helpers::Tags
   class Base
