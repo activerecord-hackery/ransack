@@ -1,10 +1,6 @@
 module Ransack
   module Constants
-    DISTINCT            = 'DISTINCT '.freeze
-    STRING_JOIN         = 'string_join'.freeze
-    ASSOCIATION_JOIN    = 'association_join'.freeze
-    STASHED_JOIN        = 'stashed_join'.freeze
-    JOIN_NODE           = 'join_node'.freeze
+    DISTINCT = 'DISTINCT '.freeze
 
     DERIVED_PREDICATES = [
       ['cont'.freeze, {

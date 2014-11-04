@@ -18,6 +18,11 @@ module Ransack
     NON_BREAKING_SPACE  = '&nbsp;'.freeze
     EMPTY               = ''.freeze
 
+    STRING_JOIN         = 'string_join'.freeze
+    ASSOCIATION_JOIN    = 'association_join'.freeze
+    STASHED_JOIN        = 'stashed_join'.freeze
+    JOIN_NODE           = 'join_node'.freeze
+
     TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
     FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
     BOOLEAN_VALUES = TRUE_VALUES + FALSE_VALUES
