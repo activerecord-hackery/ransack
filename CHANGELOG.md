@@ -5,7 +5,8 @@ henceforth should be documented here.
 ## Master (Unreleased)
 ### Added
 
-*   Add support for `mongoid 4.0`  without associations ([pull request](https://github.com/activerecord-hackery/ransack/pull/407)).
+*   Add support for using Ransack with `Mongoid 4.0` without associations
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/407)).
 
     *Zhomart Mukhamejanov*
 
