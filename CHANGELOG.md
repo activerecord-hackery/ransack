@@ -5,6 +5,10 @@ henceforth should be documented here.
 ## Master (Unreleased)
 ### Added
 
+*   Add support for `mongoid 4.0`  without associations ([pull request](https://github.com/activerecord-hackery/ransack/pull/407)).
+
+    *Zhomart Mukhamejanov*
+
 ### Fixed
 
 *   Add support and tests for passing stringy booleans for ransackable scopes
