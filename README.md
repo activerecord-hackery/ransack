@@ -597,7 +597,7 @@ en:
 
 ### Mongoid
 
-Usage of ransack with Mongoid is same as with ActiveRecord. Currently ransack doesn't support Mongoid's associations. [Here](http://ransack-mongodb-demo.herokuapp.com/) is the demo application (demo source code is [here](https://github.com/Zhomart/ransack-mongodb-demo). `result` method of `Ransack::Search` returns `Mongoid::Criteria`:
+Usage of ransack with Mongoid is same as with ActiveRecord. Currently ransack doesn't support Mongoid's associations. [Here](http://ransack-mongodb-demo.herokuapp.com/) is the demo application (demo source code is [here](https://github.com/Zhomart/ransack-mongodb-demo)). `result` method of `Ransack::Search` returns `Mongoid::Criteria`:
 
 ```ruby
 @q = Person.search(params[:q])
