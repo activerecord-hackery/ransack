@@ -6,7 +6,7 @@ module Ransack
 
         alias :table_name :name
 
-        def initialize object, engine = nil
+        def initialize(object, engine = nil)
           @object  = object
           @name    = object.collection.name
           @engine  = engine
@@ -25,7 +25,7 @@ module Ransack
           end
         end
 
-        def [] name
+        def [](name)
           Ransack::Adapters::Mongoid::Attribute.new self, name
         end
 

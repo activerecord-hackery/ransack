@@ -26,7 +26,7 @@ instead.
 
 ## Getting started
 
-Ransack is currently compatible with Rails 3.x, 4.0, 4.1 and 4.2.
+Ransack is currently compatible with Rails 3.x, 4.0, 4.1 and 4.2. Since 1.6.0 added support for Mongoid 4.0 without associations.
 
 In your Gemfile, for the last officially released Ransack gem:
 
@@ -594,6 +594,19 @@ en:
       namespace_article:
         title: Old Ransack Namespaced Title
 ```
+
+### Mongoid
+
+Usage of ransack with Mongoid is same as with ActiveRecord. Currently ransack doesn't support Mongoid's associations. [Here](http://ransack-mongodb-demo.herokuapp.com/) is the demo application (demo source code is [here](https://github.com/Zhomart/ransack-mongodb-demo)). `result` method of `Ransack::Search` returns `Mongoid::Criteria`:
+
+```ruby
+@q = Person.search(params[:q])
+@people = @q.result # => Mongoid::Criteria
+
+# or you can add more Mongoid queries
+@people = @q.result.active.order_by(updated_at: -1).limit(10)
+```
+
 
 ## Semantic Versioning
 
