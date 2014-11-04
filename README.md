@@ -599,11 +599,11 @@ en:
 
 ## Mongoid
 
-Ransack now works with Mongoid in the same way as ActiveRecord, except that
+Ransack now works with Mongoid in the same way as Active Record, except that
 with Mongoid, associations are not currently supported. A demo app may be found
 [here](http://ransack-mongodb-demo.herokuapp.com/) and the demo source code is
-[here](https://github.com/Zhomart/ransack-mongodb-demo)). The `result` method
-of `Ransack::Search` returns a `Mongoid::Criteria` object:
+[here](https://github.com/Zhomart/ransack-mongodb-demo). A `result` method
+called on a `Ransack::Search` returns a `Mongoid::Criteria` object:
 
 ```ruby
   @q = Person.search(params[:q])
@@ -618,7 +618,9 @@ of `Ransack::Search` returns a `Mongoid::Criteria` object:
 Ransack attempts to follow semantic versioning in the format of `x.y.z`, where:
 
 `x` stands for a major version (new features that are not backward-compatible).
+
 `y` stands for a minor version (new features that are backward-compatible).
+
 `z` stands for a patch (bug fixes).
 
 In other words: `Major.Minor.Patch`.
