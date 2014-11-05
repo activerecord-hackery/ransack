@@ -127,8 +127,12 @@ module Ransack
         options[:compounds] = true if options[:compounds].nil?
         default = options.delete(:default) || 'cont'.freeze
 
-        keys = options[:compounds] ? Predicate.names :
+        keys =
+        if options[:compounds]
+          Predicate.names
+        else
           Predicate.names.reject { |k| k.match(/_(any|all)$/) }
+        end
         if only = options[:only]
           if only.respond_to? :call
             keys = keys.select { |k| only.call(k) }
