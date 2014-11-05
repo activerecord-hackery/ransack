@@ -8,20 +8,10 @@ module Ransack
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
-      ['i_cont'.freeze, {
-        :arel_predicate => 'i_matches'.freeze,
-        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
-      }
-      ],
       ['not_cont'.freeze, {
         :arel_predicate => 'does_not_match'.freeze,
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
-      ],
-      ['i_not_cont'.freeze, {
-        :arel_predicate => 'i_does_not_match'.freeze,
-        :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
-      }
       ],
       ['start'.freeze, {
         :arel_predicate => 'matches'.freeze,
