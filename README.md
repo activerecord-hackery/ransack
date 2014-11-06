@@ -26,7 +26,9 @@ instead.
 
 ## Getting started
 
-Ransack is currently compatible with Rails 3.x, 4.0, 4.1 and 4.2.
+Ransack is currently compatible with Rails 3.x, 4.0, 4.1 and 4.2. It works
+out-of-the box with Active Record and also features new support for Mongoid
+4.0 (without associations, further details below).
 
 In your Gemfile, for the last officially released Ransack gem:
 
@@ -34,9 +36,7 @@ In your Gemfile, for the last officially released Ransack gem:
 gem 'ransack'
 ```
 
-Or, if you would like to use the latest updates, including new support for
-Mongoid 4.0 (without associations, further details below), use the `master`
-branch:
+Or, if you would like to use the latest updates, use the `master` branch:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
