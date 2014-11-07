@@ -54,7 +54,6 @@ module Ransack
         it 'creates conditions for association attributes' do
           search = Search.new(Person, :children_name_eq => 'Ernie')
           condition = search.base[:children_name_eq]
-          binding.pry
           expect(condition).to be_a Nodes::Condition
           expect(condition.predicate.name).to eq 'eq'
           expect(condition.attributes.first.name).to eq 'children_name'
