@@ -13,7 +13,6 @@ module Ransack
       end
 
       def for_object(object, options = {})
-        binding.pry
         case object
         when ActiveRecord::Relation
           Adapters::ActiveRecord::Context.new(object.klass, options)
