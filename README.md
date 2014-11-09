@@ -229,11 +229,22 @@ construct much more complex search forms, such as the one on the
 
 Ransack will try to to make `#search` available in your models, but in the case
 that `#search` has already been defined, you can use `#ransack` instead. For
-example the following would be equivalent:
+example, the following would be equivalent:
 
 ```ruby
 Article.search(params[:q])
 Article.ransack(params[:q])
+```
+
+If Ransack's `#search` method conflicts with the name of another method named
+`search` in your code or another gem, it may be resolved either by patching
+the `extended` class_method in `Ransack::Adapters::ActiveRecord::Base` to
+remove the line `alias :search :ransack unless base.respond_to? :search`, or by
+placing the following line in your Ransack initializer file at
+`config/initializers/ransack.rb`:
+
+```ruby
+Ransack::Adapters::ActiveRecord::Base.class_eval('remove_method :search')
 ```
 
 ### Associations
