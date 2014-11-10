@@ -43,12 +43,8 @@ module Ransack
             end
           )
         }
-        it {
-          should match /sort_link desc/
-        }
-        it {
-          should match /Full Name&nbsp;&#9660;/
-        }
+        it { should match /sort_link desc/ }
+        it { should match /Full Name&nbsp;&#9660;/ }
       end
 
       describe '#sort_link with default search_key defined as symbol' do
@@ -159,12 +155,8 @@ module Ransack
             /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
-        it {
-          should match /sort_link desc/
-        }
-        it {
-          should match /Full Name&nbsp;&#9660;/
-        }
+        it { should match /sort_link desc/ }
+        it { should match /Full Name&nbsp;&#9660;/ }
       end
 
       describe '#sort_link with multiple search_keys should allow a label to be specified' do
@@ -176,9 +168,7 @@ module Ransack
             :controller => 'people'
           )
         }
-        it {
-          should match /Property Name&nbsp;&#9660;/
-        }
+        it { should match /Property Name&nbsp;&#9660;/ }
       end
 
       describe '#sort_link with multiple search_keys should flip multiple fields specified without a direction' do
@@ -194,12 +184,8 @@ module Ransack
             /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
-        it {
-          should match /sort_link desc/
-        }
-        it {
-          should match /Full Name&nbsp;&#9660;/
-        }
+        it { should match /sort_link desc/ }
+        it { should match /Full Name&nbsp;&#9660;/ }
       end
 
       describe '#sort_link with multiple search_keys should allow a default_order to be specified' do
@@ -216,12 +202,8 @@ module Ransack
             /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
-        it {
-          should match /sort_link/
-        }
-        it {
-          should match /Full Name/
-        }
+        it { should match /sort_link/ }
+        it { should match /Full Name/ }
       end
 
       describe '#sort_link with multiple search_keys should allow multiple default_orders to be specified' do
@@ -238,12 +220,8 @@ module Ransack
             /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
           )
         }
-        it {
-          should match /sort_link/
-        }
-        it {
-          should match /Full Name/
-        }
+        it { should match /sort_link/ }
+        it { should match /Full Name/ }
       end
 
       describe '#sort_link with multiple search_keys with multiple default_orders should not override a specified order' do
@@ -260,19 +238,17 @@ module Ransack
             /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
-        it {
-          should match /sort_link/
-        }
-        it {
-          should match /Full Name/
-        }
+        it { should match /sort_link/ }
+        it { should match /Full Name/ }
       end
 
       describe "#sort_link on polymorphic association should preserves association model name case" do
         subject { @controller.view_context
-          .sort_link([:main_app, Note.search()],
-            :notable_of_Person_type_name, "Notable", :controller => 'notes')
-          }
+          .sort_link(
+            [:main_app, Note.search()],
+            :notable_of_Person_type_name, "Notable", :controller => 'notes'
+          )
+        }
         it {
           should match(
             if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
@@ -280,8 +256,8 @@ module Ransack
             else
               /notes\?q(%5B|\[)s(%5D|\])=notable_of_Person_type_name\+asc/
             end
-            )
-          }
+          )
+        }
         it { should match /sort_link/ }
         it { should match /Notable/ }
       end
@@ -300,20 +276,13 @@ module Ransack
               :controller => 'people'
             )
           }
-          it {
-            should match /exist\=existing/
-          }
+          it { should match /exist\=existing/ }
         end
       end
 
       describe '#search_form_for with default format' do
-        subject {
-          @controller.view_context
-          .search_form_for(Person.search) {}
-        }
-        it {
-          should match /action="\/people"/
-        }
+        subject { @controller.view_context.search_form_for(Person.search) {} }
+        it { should match /action="\/people"/ }
       end
 
       describe '#search_form_for with pdf format' do
@@ -321,9 +290,7 @@ module Ransack
           @controller.view_context
           .search_form_for(Person.search, :format => :pdf) {}
         }
-        it {
-          should match /action="\/people.pdf"/
-        }
+        it { should match /action="\/people.pdf"/ }
       end
 
       describe '#search_form_for with json format' do
@@ -331,9 +298,7 @@ module Ransack
           @controller.view_context
           .search_form_for(Person.search, :format => :json) {}
         }
-        it {
-          should match /action="\/people.json"/
-        }
+        it { should match /action="\/people.json"/ }
       end
 
     end
