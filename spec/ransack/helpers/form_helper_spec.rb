@@ -7,6 +7,7 @@ module Ransack
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people
+        resources :notes
         get ':controller(/:action(/:id(.:format)))'
       end
 
@@ -266,6 +267,25 @@ module Ransack
           should match /Full Name/
         }
       end
+
+      describe "#sort_link on polymorphic association should preserves association model name case" do
+        subject { @controller.view_context
+          .sort_link([:main_app, Note.search()],
+            :notable_of_Person_type_name, "Notable", :controller => 'notes')
+          }
+        it {
+          should match(
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /notes\?q%5Bs%5D=notable_of_Person_type_name\+asc/
+            else
+              /notes\?q(%5B|\[)s(%5D|\])=notable_of_Person_type_name\+asc/
+            end
+            )
+          }
+        it { should match /sort_link/ }
+        it { should match /Notable/ }
+      end
+
       context 'view has existing parameters' do
         before do
           @controller.view_context.params.merge!({ :exist => 'existing' })

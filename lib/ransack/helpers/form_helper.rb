@@ -83,7 +83,7 @@ module Ransack
         sort_params = []
 
         Array(sort_fields).each do |sort_field|
-          attr_name, new_dir = sort_field.to_s.downcase.split(/\s+/)
+          attr_name, new_dir = sort_field.to_s.split(/\s+/)
           current_dir = nil
 
           # if the user didn't specify the sort direction, detect the previous
