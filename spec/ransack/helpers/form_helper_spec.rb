@@ -242,7 +242,7 @@ module Ransack
         it { should match /Full Name/ }
       end
 
-      describe "#sort_link on polymorphic association should preserves association model name case" do
+      describe "#sort_link on polymorphic association should preserve association model name case" do
         subject { @controller.view_context
           .sort_link(
             [:main_app, Note.search()],
