@@ -301,6 +301,17 @@ module Ransack
         it { should match /action="\/people.json"/ }
       end
 
+      describe '#search_form_for with custom default search key' do
+        before do
+          Ransack.configure { |c| c.search_key = :example }
+        end
+        subject {
+          @controller.view_context
+          .search_form_for(Person.search) { |f| f.text_field :name_eq }
+        }
+        it { should match /example_name_eq/ }
+      end
+
     end
   end
 end

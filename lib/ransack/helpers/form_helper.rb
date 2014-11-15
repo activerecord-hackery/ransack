@@ -28,7 +28,7 @@ module Ransack
             "#{search.klass.to_s.underscore}_search",
           :method => :get
         }
-        options[:as] ||= Ransack::Constants::DEFAULT_SEARCH_KEY
+        options[:as] ||= Ransack.options[:search_key]
         options[:html].reverse_merge!(html_options)
         options[:builder] ||= FormBuilder
 
