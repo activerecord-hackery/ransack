@@ -9,7 +9,6 @@ module Ransack
     SORT                = 'sort'.freeze
     SORT_LINK           = 'sort_link'.freeze
     SEARCH              = 'search'.freeze
-    DEFAULT_SEARCH_KEY  = 'q'.freeze
     ATTRIBUTE           = 'attribute'.freeze
     COMBINATOR          = 'combinator'.freeze
     SPACE               = ' '.freeze
