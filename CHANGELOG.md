@@ -12,6 +12,15 @@ henceforth should be documented here.
 
 ### Fixed
 
+*   Make `search_form_for`'s default `:as` option respect the custom search key
+    if it has been set
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/470)).
+    Prior to this change, if you set a custom `search_key` option in the
+    Ransack initializer file, you'd have to also pass an `as: :whatever` option
+    to all of the search forms. Fixes #92.
+
+    *Robert Speicher*
+
 *   Add support and tests for passing stringy booleans for ransackable scopes
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
 
