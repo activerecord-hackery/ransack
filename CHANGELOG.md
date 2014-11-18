@@ -10,6 +10,11 @@ henceforth should be documented here.
 
     *Zhomart Mukhamejanov*
 
+*   Add support and tests for passing stringy booleans for ransackable scopes
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
+
+    *Josh Kovach*
+
 ### Fixed
 
 *   Make `search_form_for`'s default `:as` option respect the custom search key
@@ -21,12 +26,8 @@ henceforth should be documented here.
 
     *Robert Speicher*
 
-*   Add support and tests for passing stringy booleans for ransackable scopes
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
-
-    *Josh Kovach*
-
 ### Changed
+
 
 ## Version 1.5.1 - 2014-10-30
 ### Fixed
@@ -53,6 +54,7 @@ henceforth should be documented here.
 
     *Jon Atack*
 
+
 ## Version 1.5.0 - 2014-10-26
 ### Added
 
@@ -72,11 +74,11 @@ henceforth should be documented here.
 
     *Joe Yates*
 
-*   Add tests for attribute names containing '_or_' and '_and_'.
+*   Add tests for attribute names containing `_or_` and `_and_`.
 
     *Joe Yates*, *Jon Atack*
 
-*   Add tests for attribute names ending with '_start' and '_end'.
+*   Add tests for attribute names ending with `_start` and `_end``.
 
     *Jon Atack*, *Timo Schilling*
 
@@ -120,12 +122,14 @@ henceforth should be documented here.
 
     *Jon Atack*
 
+
 ## Version 1.4.1 - 2014-09-23
 ### Fixed
 
 *   Fix README markdown so RubyGems documentation picks up the formatting correctly.
 
     *Jon Atack*
+
 
 ## Version 1.4.0 - 2014-09-23
 ### Added
@@ -189,6 +193,7 @@ henceforth should be documented here.
     how to whitelist attributes, associations, sorts and scopes.
 
     *Jon Atack*
+
 
 ## Version 1.3.0 - 2014-08-23
 ### Added
