@@ -80,7 +80,7 @@ If you're coming from MetaSearch, things to note:
   search object. Instead, you will get your search results (an
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
   `Search#result`.
-  
+
   4. If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
   avoid returning duplicate rows, even if conditions on a join would otherwise
   result in some.
@@ -163,6 +163,14 @@ column title or a default sort order:
 
 ```erb
 <%= sort_link(@q, :name, 'Last Name', default_order: :desc) %>
+```
+
+With a polymorphic association, you may need to specify the name of the link
+explicitly to avoid an `uninitialized constant Model::Xxxable` error (see issue
+[#421](https://github.com/activerecord-hackery/ransack/issues/421)):
+
+```erb
+<%= sort_link(@q, :xxxable_of_Ymodel_type_some_attribute, 'Attribute Name') %>
 ```
 
 You can also sort on multiple fields by specifying an ordered array:
@@ -389,7 +397,7 @@ class Article < ActiveRecord::Base
       super
     else
       # whitelist only the title and body attributes for other users
-      super & %w(title body) 
+      super & %w(title body)
     end
   end
 end
@@ -404,7 +412,7 @@ class ArticlesController < ApplicationController
     @q = Article.search(params[:q], auth_object: set_ransack_auth_object)
     @articles = @q.result
   end
-  
+
   private
 
   def set_ransack_auth_object
@@ -417,13 +425,13 @@ Trying it out in `rails console`:
 
 ```ruby
 > Article
-=> Article(id: integer, person_id: integer, title: string, body: text) 
+=> Article(id: integer, person_id: integer, title: string, body: text)
 
 > Article.ransackable_attributes
-=> ["title", "body"] 
+=> ["title", "body"]
 
 > Article.ransackable_attributes(:admin)
-=> ["id", "person_id", "title", "body"] 
+=> ["id", "person_id", "title", "body"]
 
 > Article.search(id_eq: 1).result.to_sql
 => SELECT "articles".* FROM "articles"  # Note that search param was ignored!
