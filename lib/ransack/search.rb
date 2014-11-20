@@ -113,7 +113,7 @@ module Ransack
         ([:scope, @scope_args] if @scope_args.present?),
         [:base, base.inspect]
       ]
-      .compact.map { |d| d.join(': '.freeze) }
+      .compact.map { |d| d.join(Ransack::Constants::COLON_SPACE) }
       .join(Ransack::Constants::COMMA_SPACE)
 
       "Ransack::Search<#{details}>"
@@ -146,15 +146,24 @@ module Ransack
 
     def collapse_multiparameter_attributes!(attrs)
       attrs.keys.each do |k|
-        if k.include?('('.freeze)
+        if k.include?(Ransack::Constants::LEFT_PARENTHESIS)
           real_attribute, position = k.split(/\(|\)/)
-          cast = %w(a s i).freeze.include?(position.last) ? position.last : nil
+          cast =
+          if Ransack::Constants::A_S_I.include?(position.last)
+            position.last
+          else
+            nil
+          end
           position = position.to_i - 1
           value = attrs.delete(k)
           attrs[real_attribute] ||= []
           attrs[real_attribute][position] =
           if cast
-            value.blank? && cast == 'i'.freeze ? nil : value.send("to_#{cast}")
+            if value.blank? && cast == Ransack::Constants::I
+              nil
+            else
+              value.send("to_#{cast}")
+            end
           else
             value
           end

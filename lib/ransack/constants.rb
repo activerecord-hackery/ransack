@@ -8,12 +8,19 @@ module Ransack
     AND                 = 'and'.freeze
     SORT                = 'sort'.freeze
     SORT_LINK           = 'sort_link'.freeze
+    CAP_SEARCH          = "Search".freeze
     SEARCH              = 'search'.freeze
+    SEARCHES            = 'searches'.freeze
     ATTRIBUTE           = 'attribute'.freeze
     COMBINATOR          = 'combinator'.freeze
     SPACE               = ' '.freeze
     COMMA_SPACE         = ', '.freeze
+    COLON_SPACE         = ': '.freeze
+    TWO_COLONS          = '::'.freeze
     UNDERSCORE          = '_'.freeze
+    LEFT_PARENTHESIS    = '('.freeze
+    Q                   = 'q'.freeze
+    I                   = 'i'.freeze
     NON_BREAKING_SPACE  = '&nbsp;'.freeze
     EMPTY               = ''.freeze
 
@@ -34,11 +41,13 @@ module Ransack
     AREL_PREDICATES     = %w(
       eq not_eq matches does_not_match lt lteq gt gteq in not_in
     ).freeze
+    A_S_I               = %w(a s i).freeze
 
     EQ                  = 'eq'.freeze
     NOT_EQ              = 'not_eq'.freeze
     EQ_ANY              = 'eq_any'.freeze
     NOT_EQ_ALL          = 'not_eq_all'.freeze
 
+    RAILS_4_1           = '4.1'.freeze
   end
 end

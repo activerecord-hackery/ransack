@@ -54,7 +54,9 @@ module Ransack
 
     DISPATCH = Hash.new do |hash, klass|
       hash[klass] = "visit_#{
-        klass.name.gsub('::'.freeze, Ransack::Constants::UNDERSCORE)
+        klass.name.gsub(
+          Ransack::Constants::TWO_COLONS, Ransack::Constants::UNDERSCORE
+          )
         }"
     end
 

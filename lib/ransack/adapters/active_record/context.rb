@@ -79,7 +79,7 @@ module Ransack
           end
         end
 
-        if ::ActiveRecord::VERSION::STRING >= '4.1'.freeze
+        if ::ActiveRecord::VERSION::STRING >= Ransack::Constants::RAILS_4_1
 
           def join_associations
             raise NotImplementedError,
@@ -213,14 +213,14 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          if ::ActiveRecord::VERSION::STRING >= '4.1'.freeze
+          if ::ActiveRecord::VERSION::STRING >= Ransack::Constants::RAILS_4_1
             join_dependency
           else
             join_dependency.graft(*stashed_association_joins)
           end
         end
 
-        if ::ActiveRecord::VERSION::STRING >= '4.1'.freeze
+        if ::ActiveRecord::VERSION::STRING >= Ransack::Constants::RAILS_4_1
 
           def build_or_find_association(name, parent = @base, klass = nil)
             found_association = @join_dependency.join_root.children
