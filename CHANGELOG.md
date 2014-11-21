@@ -28,6 +28,15 @@ henceforth should be documented here.
 
 ### Changed
 
+*   Replace `string#freeze` instances with top level constants to reduce string
+    allocations in Ruby < 2.1.
+
+    *Jon Atack*
+
+*   Remove unneeded `Ransack::` namespacing on most of the constants.
+
+    *Jon Atack*
+
 
 ## Version 1.5.1 - 2014-10-30
 ### Fixed
