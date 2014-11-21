@@ -29,15 +29,15 @@ module Ransack
 
     def initialize
       super(Ransack::Constants::CAP_SEARCH)
-      @singular = Ransack::Constants::SEARCH
-      @plural = Ransack::Constants::SEARCHES
-      @element = Ransack::Constants::SEARCH
-      @human = Ransack::Constants::CAP_SEARCH
-      @collection = "ransack/searches".freeze
-      @partial_path = "#{@collection}/#{@element}".freeze
-      @param_key = Ransack::Constants::Q
-      @route_key = Ransack::Constants::SEARCHES
-      @i18n_key = :ransack
+      @singular     = Ransack::Constants::SEARCH
+      @plural       = Ransack::Constants::SEARCHES
+      @element      = Ransack::Constants::SEARCH
+      @human        = Ransack::Constants::CAP_SEARCH
+      @collection   = Ransack::Constants::RANSACK_SLASH_SEARCHES
+      @partial_path = Ransack::Constants::RANSACK_SLASH_SEARCHES_SLASH_SEARCH
+      @param_key    = Ransack::Constants::Q
+      @route_key    = Ransack::Constants::SEARCHES
+      @i18n_key     = :ransack
     end
   end
 

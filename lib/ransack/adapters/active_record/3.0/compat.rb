@@ -144,7 +144,7 @@ module Arel
       end
 
       def visit_Arel_Nodes_And o
-        o.children.map { |x| visit x }.join(' AND '.freeze)
+        o.children.map { |x| visit x }.join(Ransack::Constants::SPACED_AND)
       end
 
       def visit_Arel_Nodes_Not o

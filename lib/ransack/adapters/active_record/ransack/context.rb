@@ -28,7 +28,7 @@ module Ransack
       @join_type = options[:join_type] || Polyamorous::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
 
-      if ::ActiveRecord::VERSION::STRING >= "4.1".freeze
+      if ::ActiveRecord::VERSION::STRING >= Ransack::Constants::RAILS_4_1
         @base = @join_dependency.join_root
         @engine = @base.base_klass.arel_engine
       else

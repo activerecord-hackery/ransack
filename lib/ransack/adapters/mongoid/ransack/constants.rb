@@ -1,7 +1,7 @@
 module Ransack
   module Constants
     DERIVED_PREDICATES = [
-      ['cont', {
+      [Ransack::Constants::CONT, {
         :arel_predicate => 'matches',
         :formatter => proc { |v| "#{escape_regex(v)}" }
         }

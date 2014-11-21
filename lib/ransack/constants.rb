@@ -6,12 +6,15 @@ module Ransack
     DESC_ARROW          = '&#9660;'.freeze
     OR                  = 'or'.freeze
     AND                 = 'and'.freeze
+    SPACED_AND          = ' AND '.freeze
     SORT                = 'sort'.freeze
     SORT_LINK           = 'sort_link'.freeze
-    CAP_SEARCH          = "Search".freeze
+    SORT_DIRECTION      = 'sort_direction'.freeze
+    CAP_SEARCH          = 'Search'.freeze
     SEARCH              = 'search'.freeze
     SEARCHES            = 'searches'.freeze
     ATTRIBUTE           = 'attribute'.freeze
+    ATTRIBUTES          = 'attributes'.freeze
     COMBINATOR          = 'combinator'.freeze
     SPACE               = ' '.freeze
     COMMA_SPACE         = ', '.freeze
@@ -22,6 +25,7 @@ module Ransack
     Q                   = 'q'.freeze
     I                   = 'i'.freeze
     NON_BREAKING_SPACE  = '&nbsp;'.freeze
+    DOT_ASTERIX         = '.*'.freeze
     EMPTY               = ''.freeze
 
     STRING_JOIN         = 'string_join'.freeze
@@ -47,7 +51,11 @@ module Ransack
     NOT_EQ              = 'not_eq'.freeze
     EQ_ANY              = 'eq_any'.freeze
     NOT_EQ_ALL          = 'not_eq_all'.freeze
+    CONT                = 'cont'.freeze
 
     RAILS_4_1           = '4.1'.freeze
+
+    RANSACK_SLASH_SEARCHES = 'ransack/searches'.freeze
+    RANSACK_SLASH_SEARCHES_SLASH_SEARCH = 'ransack/searches/search'.freeze
   end
 end

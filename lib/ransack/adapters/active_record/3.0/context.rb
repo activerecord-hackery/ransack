@@ -32,7 +32,7 @@ module Ransack
           if opts[:distinct]
             relation.select(
               Ransack::Constants::DISTINCT + @klass.quoted_table_name +
-              '.*'.freeze
+              Ransack::Constants::DOT_ASTERIX
               )
           else
             relation

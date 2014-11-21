@@ -3,7 +3,7 @@ module Ransack
     DISTINCT = 'DISTINCT '.freeze
 
     DERIVED_PREDICATES = [
-      ['cont'.freeze, {
+      [Ransack::Constants::CONT, {
         :arel_predicate => 'matches'.freeze,
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
