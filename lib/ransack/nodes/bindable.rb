@@ -5,9 +5,7 @@ module Ransack
       attr_accessor :parent, :attr_name
 
       def attr
-        @attr ||= ransacker ?
-          ransacker.attr_from(self) :
-          context.table_for(parent)[attr_name]
+        @attr ||= get_arel_attribute
       end
       alias :arel_attribute :attr
 
@@ -26,6 +24,16 @@ module Ransack
       def reset_binding!
         @parent = @attr_name = @attr = @klass = nil
       end
+
+      private
+
+        def get_arel_attribute
+          if ransacker
+            ransacker.attr_from(self)
+          else
+            context.table_for(parent)[attr_name]
+          end
+        end
 
     end
   end
