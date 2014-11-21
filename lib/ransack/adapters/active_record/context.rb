@@ -50,11 +50,11 @@ module Ransack
             while !found_assoc && remainder.unshift(segments.pop) &&
             segments.size > 0 do
               assoc, poly_class = unpolymorphize_association(
-                segments.join(Ransack::Constants::UNDERSCORE)
+                segments.join(Constants::UNDERSCORE)
                 )
               if found_assoc = get_association(assoc, klass)
                 exists = attribute_method?(
-                  remainder.join(Ransack::Constants::UNDERSCORE),
+                  remainder.join(Constants::UNDERSCORE),
                   poly_class || found_assoc.klass
                   )
               end
@@ -79,7 +79,7 @@ module Ransack
           end
         end
 
-        if ::ActiveRecord::VERSION::STRING >= Ransack::Constants::RAILS_4_1
+        if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
 
           def join_associations
             raise NotImplementedError,
@@ -134,20 +134,20 @@ module Ransack
 
           if ransackable_attribute?(str, klassify(parent))
             attr_name = str
-          elsif (segments = str.split(Ransack::Constants::UNDERSCORE)).size > 1
+          elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
             found_assoc = nil
             while remainder.unshift(segments.pop) && segments.size > 0 &&
             !found_assoc do
               assoc, klass = unpolymorphize_association(
-                segments.join(Ransack::Constants::UNDERSCORE)
+                segments.join(Constants::UNDERSCORE)
                 )
               if found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(
                   found_assoc.name, parent, klass
                   )
                 parent, attr_name = get_parent_and_attribute_name(
-                  remainder.join(Ransack::Constants::UNDERSCORE), join
+                  remainder.join(Constants::UNDERSCORE), join
                   )
               end
             end
@@ -176,29 +176,29 @@ module Ransack
           buckets = relation.joins_values.group_by do |join|
             case join
             when String
-              Ransack::Constants::STRING_JOIN
+              Constants::STRING_JOIN
             when Hash, Symbol, Array
-              Ransack::Constants::ASSOCIATION_JOIN
+              Constants::ASSOCIATION_JOIN
             when JoinDependency, JoinDependency::JoinAssociation
-              Ransack::Constants::STASHED_JOIN
+              Constants::STASHED_JOIN
             when Arel::Nodes::Join
-              Ransack::Constants::JOIN_NODE
+              Constants::JOIN_NODE
             else
               raise 'unknown class: %s' % join.class.name
             end
           end
 
           association_joins =
-            buckets[Ransack::Constants::ASSOCIATION_JOIN] || []
+            buckets[Constants::ASSOCIATION_JOIN] || []
 
           stashed_association_joins =
-            buckets[Ransack::Constants::STASHED_JOIN] || []
+            buckets[Constants::STASHED_JOIN] || []
 
           join_nodes =
-            buckets[Ransack::Constants::JOIN_NODE] || []
+            buckets[Constants::JOIN_NODE] || []
 
           string_joins =
-            (buckets[Ransack::Constants::STRING_JOIN] || [])
+            (buckets[Constants::STRING_JOIN] || [])
             .map { |x| x.strip }
             .uniq
 
@@ -213,14 +213,14 @@ module Ransack
             join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
           end
 
-          if ::ActiveRecord::VERSION::STRING >= Ransack::Constants::RAILS_4_1
+          if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
             join_dependency
           else
             join_dependency.graft(*stashed_association_joins)
           end
         end
 
-        if ::ActiveRecord::VERSION::STRING >= Ransack::Constants::RAILS_4_1
+        if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
 
           def build_or_find_association(name, parent = @base, klass = nil)
             found_association = @join_dependency.join_root.children

@@ -3,7 +3,7 @@ module Ransack
     DISTINCT = 'DISTINCT '.freeze
 
     DERIVED_PREDICATES = [
-      [Ransack::Constants::CONT, {
+      [CONT, {
         :arel_predicate => 'matches'.freeze,
         :formatter => proc { |v| "%#{escape_wildcards(v)}%" }
         }
@@ -70,7 +70,7 @@ module Ransack
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
-        :formatter => proc { |v| [nil, Ransack::Constants::EMPTY] }
+        :formatter => proc { |v| [nil, EMPTY] }
         }
       ],
       ['blank'.freeze, {
@@ -78,7 +78,7 @@ module Ransack
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
-        :formatter => proc { |v| [nil, Ransack::Constants::EMPTY] }
+        :formatter => proc { |v| [nil, EMPTY] }
         }
       ],
       ['null'.freeze, {

@@ -37,10 +37,10 @@ module Ransack
       def dir=(dir)
         dir = dir.downcase if dir
         @dir =
-          if Ransack::Constants::ASC_DESC.include?(dir)
+          if Constants::ASC_DESC.include?(dir)
             dir
           else
-            Ransack::Constants::ASC
+            Constants::ASC
           end
       end
 

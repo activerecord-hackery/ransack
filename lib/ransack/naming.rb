@@ -28,15 +28,15 @@ module Ransack
     alias_method :cache_key, :collection
 
     def initialize
-      super(Ransack::Constants::CAP_SEARCH)
-      @singular     = Ransack::Constants::SEARCH
-      @plural       = Ransack::Constants::SEARCHES
-      @element      = Ransack::Constants::SEARCH
-      @human        = Ransack::Constants::CAP_SEARCH
-      @collection   = Ransack::Constants::RANSACK_SLASH_SEARCHES
-      @partial_path = Ransack::Constants::RANSACK_SLASH_SEARCHES_SLASH_SEARCH
-      @param_key    = Ransack::Constants::Q
-      @route_key    = Ransack::Constants::SEARCHES
+      super(Constants::CAP_SEARCH)
+      @singular     = Constants::SEARCH
+      @plural       = Constants::SEARCHES
+      @element      = Constants::SEARCH
+      @human        = Constants::CAP_SEARCH
+      @collection   = Constants::RANSACK_SLASH_SEARCHES
+      @partial_path = Constants::RANSACK_SLASH_SEARCHES_SLASH_SEARCH
+      @param_key    = Constants::Q
+      @route_key    = Constants::SEARCHES
       @i18n_key     = :ransack
     end
   end

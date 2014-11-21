@@ -35,7 +35,7 @@ module Ransack
 
     TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
     FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
-    BOOLEAN_VALUES = TRUE_VALUES + FALSE_VALUES
+    BOOLEAN_VALUES = (TRUE_VALUES + FALSE_VALUES).freeze
 
     S_SORTS             = %w(s sorts).freeze
     ASC_DESC            = %w(asc desc).freeze
@@ -59,3 +59,4 @@ module Ransack
     RANSACK_SLASH_SEARCHES_SLASH_SEARCH = 'ransack/searches/search'.freeze
   end
 end
+

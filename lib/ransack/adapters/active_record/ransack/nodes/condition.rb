@@ -12,9 +12,9 @@ module Ransack
 
         if predicates.size > 1
           case combinator
-          when Ransack::Constants::AND
+          when Constants::AND
             Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
-          when Ransack::Constants::OR
+          when Constants::OR
             predicates.inject(&:or)
           end
         else

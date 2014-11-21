@@ -24,7 +24,7 @@ module Ransack
 
       self.predicates[name] = Predicate.new(opts)
 
-      Ransack::Constants::SUFFIXES.each do |suffix|
+      Constants::SUFFIXES.each do |suffix|
         compound_name = name + suffix
         self.predicates[compound_name] = Predicate.new(
           opts.merge(
