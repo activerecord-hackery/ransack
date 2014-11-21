@@ -16,9 +16,12 @@ end
 
 class ::ActiveRecord::Associations::ClassMethods::JoinDependency::JoinBase
   def table
-    Arel::Table.new(table_name, :as      => aliased_table_name,
-                                :engine  => active_record.arel_engine,
-                                :columns => active_record.columns)
+    Arel::Table.new(
+      table_name,
+      :as      => aliased_table_name,
+      :engine  => active_record.arel_engine,
+      :columns => active_record.columns
+      )
   end
 end
 
@@ -135,16 +138,16 @@ module Arel
         "#{
           o.name
           }(#{
-          o.distinct ? Constants::DISTINCT : Constants::EMPTY
+          o.distinct ? Ransack::Constants::DISTINCT : Ransack::Constants::EMPTY
           }#{
-          o.expressions.map { |x| visit x }.join(Constants::COMMA_SPACE)
+          o.expressions.map { |x| visit x }.join(Ransack::Constants::COMMA_SPACE)
           })#{
-          o.alias ? " AS #{visit o.alias}" : Constants::EMPTY
+          o.alias ? " AS #{visit o.alias}" : Ransack::Constants::EMPTY
           }"
       end
 
       def visit_Arel_Nodes_And o
-        o.children.map { |x| visit x }.join(Constants::SPACED_AND)
+        o.children.map { |x| visit x }.join(Ransack::Constants::SPACED_AND)
       end
 
       def visit_Arel_Nodes_Not o
@@ -161,7 +164,7 @@ module Arel
             quote(value, attr && column_for(attr))
           end
         }
-        .join(Constants::COMMA_SPACE)
+        .join(Ransack::Constants::COMMA_SPACE)
         })"
       end
     end
