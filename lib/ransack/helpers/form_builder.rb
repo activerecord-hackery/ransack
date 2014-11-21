@@ -126,7 +126,7 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        default = options.delete(:default) || 'cont'.freeze
+        default = options.delete(:default) || Constants::CONT
 
         keys =
         if options[:compounds]
