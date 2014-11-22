@@ -38,13 +38,31 @@ module Ransack
       end if compounds
     end
 
-    # default search_key that, it can be overridden on sort_link level
+    # The default `search_key` name is `:q`. The default key may be overridden
+    # in an initializer file like `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Name the search_key `:query` instead of the default `:q`
+    #   config.search_key = :query
+    # end
+    #
+    # Sometimes there are situations when the default search parameter name
+    # cannot be used, for instance if there were two searches on one page.
+    # Another name can be set using the `search_key` option with Ransack
+    # `ransack`, `search` and `@search_form_for` methods in controllers & views.
+    #
+    # In the controller:
+    # @search = Log.ransack(params[:log_search], search_key: :log_search)
+    #
+    # In the view:
+    # <%= f.search_form_for @search, as: :log_search %>
+    #
     def search_key=(name)
       self.options[:search_key] = name
     end
 
-    # raise an error if an unknown predicate, condition or attribute is passed
-    # into a search
+    # Raise an error if an unknown predicate, condition or attribute is passed
+    # into a search.
     def ignore_unknown_conditions=(boolean)
       self.options[:ignore_unknown_conditions] = boolean
     end
