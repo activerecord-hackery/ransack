@@ -65,6 +65,7 @@ module Ransack
           end
 
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
+        hide_indicator = options.delete :hide_indicator
         default_order = options.delete :default_order
         default_order_is_a_hash = Hash === default_order
 
@@ -133,27 +134,27 @@ module Ransack
           url_for(options_for_url)
         end
 
-        name = link_name(label_text, field_current_dir)
+        name = link_name(label_text, field_current_dir, hide_indicator)
 
         link_to(name, url, html_options)
       end
 
       private
 
-      def link_name(label_text, dir)
-        [ERB::Util.h(label_text), order_indicator_for(dir)]
+      def link_name(label_text, dir, hide_indicator)
+        [ERB::Util.h(label_text), order_indicator_for(dir, hide_indicator)]
         .compact
         .join(Constants::NON_BREAKING_SPACE)
         .html_safe
       end
 
-      def order_indicator_for(dir)
-        if dir == Constants::ASC
+      def order_indicator_for(dir, hide_indicator)
+        if hide_indicator
+          nil
+        elsif dir == Constants::ASC
           Constants::ASC_ARROW
         elsif dir == Constants::DESC
           Constants::DESC_ARROW
-        else
-          nil
         end
       end
 

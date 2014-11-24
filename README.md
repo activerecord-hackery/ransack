@@ -194,6 +194,12 @@ This example toggles the sort directions of both fields, by default
 initially sorting the `last_name` field by ascending order, and the
 `first_name` field by descending order.
 
+You can remove the order indicator arrow by passing hide_indicator: true
+
+```erb
+<%= sort_link(@q, :name, hide_indicator: true) %>
+```
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to
