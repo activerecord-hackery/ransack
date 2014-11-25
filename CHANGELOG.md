@@ -15,6 +15,11 @@ henceforth should be documented here.
 
     *Josh Kovach*
 
+*   Add ability to remove sort_link arrows
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/473)).
+
+    *Fred Bergman*
+
 ### Fixed
 
 *   Make `search_form_for`'s default `:as` option respect the custom search key
