@@ -2,20 +2,27 @@ module Ransack
   module Constants
     ASC                 = 'asc'.freeze
     DESC                = 'desc'.freeze
+    ASC_DESC            = [ASC, DESC].freeze
+
     ASC_ARROW           = '&#9650;'.freeze
     DESC_ARROW          = '&#9660;'.freeze
+
     OR                  = 'or'.freeze
     AND                 = 'and'.freeze
     SPACED_AND          = ' AND '.freeze
+
     SORT                = 'sort'.freeze
     SORT_LINK           = 'sort_link'.freeze
     SORT_DIRECTION      = 'sort_direction'.freeze
+
     CAP_SEARCH          = 'Search'.freeze
     SEARCH              = 'search'.freeze
     SEARCHES            = 'searches'.freeze
+
     ATTRIBUTE           = 'attribute'.freeze
     ATTRIBUTES          = 'attributes'.freeze
     COMBINATOR          = 'combinator'.freeze
+
     SPACE               = ' '.freeze
     COMMA_SPACE         = ', '.freeze
     COLON_SPACE         = ': '.freeze
@@ -38,7 +45,6 @@ module Ransack
     BOOLEAN_VALUES = (TRUE_VALUES + FALSE_VALUES).freeze
 
     S_SORTS             = %w(s sorts).freeze
-    ASC_DESC            = %w(asc desc).freeze
     AND_OR              = %w(and or).freeze
     IN_NOT_IN           = %w(in not_in).freeze
     SUFFIXES            = %w(_any _all).freeze
