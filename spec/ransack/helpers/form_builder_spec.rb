@@ -18,12 +18,12 @@ module Ransack
         @controller.instance_variable_set(:@_routes, router)
         @controller.class_eval { include router.url_helpers }
         @controller.view_context_class.class_eval { include router.url_helpers }
-        @s = Person.search
+        @s = Person.ransack
         @controller.view_context.search_form_for(@s) { |f| @f = f }
       end
 
       it 'selects previously-entered time values with datetime_select' do
-        date_values = %w(2011 1 2 03 04 05).freeze
+        date_values = %w(2011 1 2 03 04 05)
       # @s.created_at_eq = date_values # This works in Rails 4.x but not 3.x
         @s.created_at_eq = [2011, 1, 2, 3, 4, 5] # so we have to do this
         html = @f.datetime_select(
@@ -57,7 +57,7 @@ module Ransack
         end
         context 'with `belongs_to` association attributes' do
           before do
-            @controller.view_context.search_form_for(Comment.search) { |f| @f = f }
+            @controller.view_context.search_form_for(Comment.ransack) { |f| @f = f }
           end
           it 'localizes :"#{singularized model}_#{attribute name}_#{predicate}"' do
             test_label(@f, :article_body_start, /Article maiN BoDy starts with/)
@@ -147,7 +147,7 @@ module Ransack
 
       context 'fields used in polymorphic relations as search attributes in form' do
         before do
-          @controller.view_context.search_form_for(Note.search) { |f| @f = f }
+          @controller.view_context.search_form_for(Note.ransack) { |f| @f = f }
         end
         it 'accepts poly_id field' do
           html = @f.text_field(:notable_id_eq)
@@ -168,7 +168,7 @@ module Ransack
         # Starting from Rails 4.2, the date_select html attributes are no longer
         # `sort`ed (for a speed gain), so the tests have to be different:
         def date_select_html(val)
-          if ::ActiveRecord::VERSION::STRING >= '4.2'.freeze
+          if ::ActiveRecord::VERSION::STRING >= '4.2'
             %(<option value="#{val}" selected="selected">#{val}</option>)
           else
             %(<option selected="selected" value="#{val}">#{val}</option>)
