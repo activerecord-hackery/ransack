@@ -35,7 +35,7 @@ module Ransack
         form_for(record, options, &proc)
       end
 
-      # sort_link @q, :name, [:name, 'kind ASC'], 'Player Name'
+      # sort_link(@q, :name, [:name, 'kind ASC'], 'Player Name')
       def sort_link(search, attribute, *args)
         # Extract out a routing proxy for url_for scoping later
         if search.is_a?(Array)
@@ -69,9 +69,11 @@ module Ransack
         default_order = options.delete :default_order
         default_order_is_a_hash = Hash === default_order
 
-        # If the default order is a hash of fields, duplicate it and let us access it with strings or symbols
-        default_order = default_order.dup.with_indifferent_access if
-          default_order_is_a_hash
+        # If the default order is a hash of fields, duplicate it and let us
+        # access it with strings or symbols.
+        if default_order_is_a_hash
+          default_order = default_order.dup.with_indifferent_access
+        end
 
         search_params = params[search.context.search_key].presence ||
           {}.with_indifferent_access
@@ -81,39 +83,14 @@ module Ransack
           field_current_dir = existing_sort.dir
         end
 
-        sort_params = []
-
-        Array(sort_fields).each do |sort_field|
-          attr_name, new_dir = sort_field.to_s.split(/\s+/)
-          current_dir = nil
-
-          # if the user didn't specify the sort direction, detect the previous
-          # sort direction on this field and reverse it
-          if Constants::ASC_DESC.none? { |d| d == new_dir }
-            if existing_sort = search.sorts.detect { |s| s.name == attr_name }
-              current_dir = existing_sort.dir
-            end
-
-            new_dir =
-              if current_dir
-                if current_dir == Constants::DESC
-                  Constants::ASC
-                else
-                  Constants::DESC
-                end
-              elsif default_order_is_a_hash
-                default_order[attr_name] || Constants::ASC
-              else
-                default_order || Constants::ASC
-              end
-          end
-
-          sort_params << "#{attr_name} #{new_dir}"
-        end
+        sort_params = initialize_sort_params(sort_fields, existing_sort,
+        search, default_order_is_a_hash, default_order)
 
         # if there is only one sort parameter, remove it from the array and just
         # use the string as the parameter
-        sort_params = sort_params.first if sort_params.size == 1
+        if sort_params.size == 1
+          sort_params = sort_params.first
+        end
 
         html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
         css = [Constants::SORT_LINK, field_current_dir]
@@ -127,13 +104,7 @@ module Ransack
         options.merge!(query_hash)
         options_for_url = params.merge(options)
 
-        url =
-        if routing_proxy && respond_to?(routing_proxy)
-          send(routing_proxy).url_for(options_for_url)
-        else
-          url_for(options_for_url)
-        end
-
+        url = build_url_for(routing_proxy, options_for_url)
         name = link_name(label_text, field_current_dir, hide_indicator)
 
         link_to(name, url, html_options)
@@ -141,22 +112,81 @@ module Ransack
 
       private
 
-      def link_name(label_text, dir, hide_indicator)
-        [ERB::Util.h(label_text), order_indicator_for(dir, hide_indicator)]
-        .compact
-        .join(Constants::NON_BREAKING_SPACE)
-        .html_safe
-      end
-
-      def order_indicator_for(dir, hide_indicator)
-        if hide_indicator
-          nil
-        elsif dir == Constants::ASC
-          Constants::ASC_ARROW
-        elsif dir == Constants::DESC
-          Constants::DESC_ARROW
+        # Extract out a routing proxy for url_for scoping later
+        def routing_proxy_and_search_object(search)
+          if search.is_a? Array
+            [search.first, search.second]
+          else
+            [nil, search]
+          end
         end
-      end
+
+        def initialize_sort_params(sort_fields, existing_sort, search,
+                                   default_order_is_a_hash, default_order)
+          sort_fields.each_with_object([]) do |field, a|
+            attr_name, new_dir = field.to_s.split(/\s+/)
+            current_dir = nil
+            # if the user didn't specify the sort direction, detect the previous
+            # sort direction on this field and invert it.
+            if neither_asc_nor_desc?(new_dir)
+              if existing_sort = search.sorts.detect { |s| s.name == attr_name }
+                current_dir = existing_sort.dir
+              end
+              new_dir =
+                if current_dir
+                  direction_text(current_dir)
+                elsif default_order_is_a_hash
+                  default_order[attr_name] || Constants::ASC
+                else
+                  default_order || Constants::ASC
+                end
+            end
+            a << "#{attr_name} #{new_dir}"
+          end
+        end
+
+        def build_url_for(routing_proxy, options_for_url)
+          if routing_proxy && respond_to?(routing_proxy)
+            send(routing_proxy).url_for(options_for_url)
+          else
+            url_for(options_for_url)
+          end
+        end
+
+        def link_name(label_text, dir, hide_indicator)
+          [ERB::Util.h(label_text), order_indicator_for(dir, hide_indicator)]
+          .compact
+          .join(Constants::NON_BREAKING_SPACE)
+          .html_safe
+        end
+
+        def order_indicator_for(dir, hide_indicator)
+          if hide_indicator || neither_asc_nor_desc?(dir)
+            nil
+          else
+            direction_arrow(dir)
+          end
+        end
+
+        def neither_asc_nor_desc?(dir)
+          Constants::ASC_DESC.none? { |d| d == dir }
+        end
+
+        def direction_arrow(dir)
+          if dir == Constants::DESC
+            Constants::DESC_ARROW
+          else
+            Constants::ASC_ARROW
+          end
+        end
+
+        def direction_text(dir)
+          if dir == Constants::DESC
+            Constants::ASC
+          else
+            Constants::DESC
+          end
+        end
 
     end
   end
