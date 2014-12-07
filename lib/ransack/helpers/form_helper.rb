@@ -77,15 +77,15 @@ module Ransack
 
         def url(routing_proxy)
           if routing_proxy && respond_to?(routing_proxy)
-            send(routing_proxy).url_for(options_for_url(@options))
+            send(routing_proxy).url_for(options_for_url)
           else
-            url_for(options_for_url(@options))
+            url_for(options_for_url)
           end
         end
 
-        def options_for_url(options)
-          options[@search_object.context.search_key] = search_and_sort_params
-          params.merge(options)
+        def options_for_url
+          @options[@search_object.context.search_key] = search_and_sort_params
+          params.merge(@options)
         end
 
         def search_and_sort_params
