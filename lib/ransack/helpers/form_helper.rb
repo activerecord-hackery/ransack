@@ -2,21 +2,25 @@ module Ransack
   module Helpers
     module FormHelper
 
+      # +search_form_for+
+      #
+      # Example: <%= search_form_for(@q) do |f| %>
+      #
       def search_form_for(record, options = {}, &proc)
-        if record.is_a?(Ransack::Search)
+        if record.is_a? Ransack::Search
           search = record
           options[:url] ||= polymorphic_path(
             search.klass, format: options.delete(:format)
             )
-        elsif record.is_a?(Array) &&
-            (search = record.detect { |o| o.is_a?(Ransack::Search) })
+        elsif record.is_a? Array &&
+            (search = record.detect { |o| o.is_a? Ransack::Search })
           options[:url] ||= polymorphic_path(
-            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o },
+            record.map { |o| o.is_a? Ransack::Search ? o.klass : o },
             format: options.delete(:format)
             )
         else
           raise ArgumentError,
-            "No Ransack::Search object was provided to search_form_for!"
+            'No Ransack::Search object was provided to search_form_for!'
         end
         options[:html] ||= {}
         html_options = {
@@ -35,145 +39,149 @@ module Ransack
         form_for(record, options, &proc)
       end
 
-      # sort_link(@q, :name, [:name, 'kind ASC'], 'Player Name')
+      # +sort_link+
+      #
+      # Example: <%= sort_link(@q, :name, [:name, 'kind ASC'], 'Player Name') %>
+      #
       def sort_link(search, attribute, *args)
-        # Extract out a routing proxy for url_for scoping later
-        if search.is_a?(Array)
-          routing_proxy = search.shift
-          search = search.first
-        end
-
-        raise TypeError, "First argument must be a Ransack::Search!" unless
-          Search === search
-
-        # This is the field that this link represents. The direction of the sort icon (up/down arrow) will
-        # depend on the sort status of this field
-        field_name = attribute.to_s
-
-        # Determine the fields we want to sort on
-        sort_fields = if Array === args.first
-          args.shift
-        else
-          Array(field_name)
-        end
-
-        label_text =
-          if String === args.first
-            args.shift.to_s
-          else
-            Translate.attribute(field_name, :context => search.context)
-          end
-
-        options = args.first.is_a?(Hash) ? args.shift.dup : {}
-        hide_indicator = options.delete :hide_indicator
-        default_order = options.delete :default_order
-        default_order_is_a_hash = Hash === default_order
-
-        # If the default order is a hash of fields, duplicate it and let us
-        # access it with strings or symbols.
-        if default_order_is_a_hash
-          default_order = default_order.dup.with_indifferent_access
-        end
-
-        search_params = params[search.context.search_key].presence ||
-          {}.with_indifferent_access
-
-        # Find the current direction (if there is one) of the primary sort field
-        if existing_sort = search.sorts.detect { |s| s.name == field_name }
-          field_current_dir = existing_sort.dir
-        end
-
-        sort_params = initialize_sort_params(sort_fields, existing_sort,
-        search, default_order_is_a_hash, default_order)
-
-        # if there is only one sort parameter, remove it from the array and just
-        # use the string as the parameter
-        if sort_params.size == 1
-          sort_params = sort_params.first
-        end
-
-        html_options = args.first.is_a?(Hash) ? args.shift.dup : {}
-        css = [Constants::SORT_LINK, field_current_dir]
-          .compact.join(Constants::SPACE)
-        html_options[:class] = [css, html_options[:class]]
-          .compact.join(Constants::SPACE)
-
-        query_hash = {}
-        query_hash[search.context.search_key] = search_params
-          .merge(:s => sort_params)
-        options.merge!(query_hash)
-        options_for_url = params.merge(options)
-
-        url = build_url_for(routing_proxy, options_for_url)
-        name = link_name(label_text, field_current_dir, hide_indicator)
-
-        link_to(name, url, html_options)
+        @search_object, routing_proxy = extract_search_obj_and_routing(search)
+        raise TypeError, 'First argument must be a Ransack::Search!' unless
+          Search === @search_object
+        initialize!(search, attribute, args)
+        link_to(name, url(routing_proxy), html_options(args))
       end
 
       private
 
-        # Extract out a routing proxy for url_for scoping later
-        def routing_proxy_and_search_object(search)
-          if search.is_a? Array
-            [search.first, search.second]
-          else
-            [nil, search]
+        # All mutation and order-dependent code happens here.
+        # Ivars are not mutated outside of this method.
+        def initialize!(search, attribute, args)
+          @field_name        = attribute.to_s
+          @sort_fields, args = extract_sort_fields(args)
+          @label_text,  args = extract_label_text(args)
+          @options,     args = extract_options(args)
+          @hide_indicator    = @options.delete :hide_indicator
+          @default_order     = @options.delete :default_order
+          if Hash === @default_order
+            @default_order = @default_order.with_indifferent_access
           end
+          @sort_params = initialize_sort_params
+          @sort_params = @sort_params.first if @sort_params.size == 1
+          @current_dir = existing_sort_direction
         end
 
-        def initialize_sort_params(sort_fields, existing_sort, search,
-                                   default_order_is_a_hash, default_order)
-          sort_fields.each_with_object([]) do |field, a|
-            attr_name, new_dir = field.to_s.split(/\s+/)
-            current_dir = nil
-            # if the user didn't specify the sort direction, detect the previous
-            # sort direction on this field and invert it.
-            if neither_asc_nor_desc?(new_dir)
-              if existing_sort = search.sorts.detect { |s| s.name == attr_name }
-                current_dir = existing_sort.dir
-              end
-              new_dir =
-                if current_dir
-                  direction_text(current_dir)
-                elsif default_order_is_a_hash
-                  default_order[attr_name] || Constants::ASC
-                else
-                  default_order || Constants::ASC
-                end
-            end
-            a << "#{attr_name} #{new_dir}"
-          end
+        def name
+          [ERB::Util.h(@label_text), order_indicator]
+          .compact.join(Constants::NON_BREAKING_SPACE).html_safe
         end
 
-        def build_url_for(routing_proxy, options_for_url)
+        def url(routing_proxy)
           if routing_proxy && respond_to?(routing_proxy)
-            send(routing_proxy).url_for(options_for_url)
+            send(routing_proxy).url_for(options_for_url(@options))
           else
-            url_for(options_for_url)
+            url_for(options_for_url(@options))
           end
         end
 
-        def link_name(label_text, dir, hide_indicator)
-          [ERB::Util.h(label_text), order_indicator_for(dir, hide_indicator)]
-          .compact
-          .join(Constants::NON_BREAKING_SPACE)
-          .html_safe
+        def options_for_url(options)
+          options[@search_object.context.search_key] = search_and_sort_params
+          params.merge(options)
         end
 
-        def order_indicator_for(dir, hide_indicator)
-          if hide_indicator || neither_asc_nor_desc?(dir)
+        def search_and_sort_params
+          search_params.merge(:s => @sort_params)
+        end
+
+        def search_params
+          params[@search_object.context.search_key].presence ||
+          {}.with_indifferent_access
+        end
+
+        def html_options(args)
+          html_options = extract_options(args).first
+          html_options.merge(class: [css, html_options[:class]]
+          .compact.join(Constants::SPACE))
+        end
+
+        def css
+          [Constants::SORT_LINK, @current_dir].compact.join(Constants::SPACE)
+        end
+
+        def extract_search_obj_and_routing(search)
+          if search.is_a? Array
+            [search.second, search.first]
+          else
+            [search, nil]
+          end
+        end
+
+        def extract_sort_fields(args)
+          if Array === args.first
+            [args.shift, args]
+          else
+            [Array(@field_name), args]
+          end
+        end
+
+        def extract_label_text(args)
+          if String === args.first
+            [args.shift, args]
+          else
+            [Translate.attribute(@field_name, :context => @search_object.context), args]
+          end
+        end
+
+        def extract_options(args)
+          if args.first.is_a? Hash
+            [args.shift, args]
+          else
+            [{}, args]
+          end
+        end
+
+        def initialize_sort_params
+          @sort_fields.each_with_object([]) do |field, _|
+            attr_name, new_dir = field.to_s.split(/\s+/)
+            if no_sort_direction_specified?(new_dir)
+              new_dir = detect_previous_sort_direction_and_invert_it(attr_name)
+            end
+            _ << "#{attr_name} #{new_dir}"
+          end
+        end
+
+        def detect_previous_sort_direction_and_invert_it(attr_name)
+          sort_dir = existing_sort_direction(attr_name)
+          if sort_dir
+            direction_text(sort_dir)
+          else
+            default_order(attr_name) || Constants::ASC
+          end
+        end
+
+        def existing_sort_direction(attr_name = @field_name)
+          if _ = @search_object.sorts.detect { |s| s.name == attr_name }
+            _.dir
+          end
+        end
+
+        def default_order(attr_name)
+          Hash === @default_order ? @default_order[attr_name] : @default_order
+        end
+
+        def order_indicator
+          if @hide_indicator || no_sort_direction_specified?
             nil
           else
-            direction_arrow(dir)
+            direction_arrow
           end
         end
 
-        def neither_asc_nor_desc?(dir)
+        def no_sort_direction_specified?(dir = @current_dir)
           Constants::ASC_DESC.none? { |d| d == dir }
         end
 
-        def direction_arrow(dir)
-          if dir == Constants::DESC
+        def direction_arrow
+          if @current_dir == Constants::DESC
             Constants::DESC_ARROW
           else
             Constants::ASC_ARROW
