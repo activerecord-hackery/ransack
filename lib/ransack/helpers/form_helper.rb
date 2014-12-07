@@ -140,12 +140,12 @@ module Ransack
         end
 
         def initialize_sort_params
-          @sort_fields.each_with_object([]) do |field, _|
+          @sort_fields.each_with_object([]) do |field, a|
             attr_name, new_dir = field.to_s.split(/\s+/)
             if no_sort_direction_specified?(new_dir)
               new_dir = detect_previous_sort_direction_and_invert_it(attr_name)
             end
-            _ << "#{attr_name} #{new_dir}"
+            a << "#{attr_name} #{new_dir}"
           end
         end
 
@@ -154,17 +154,17 @@ module Ransack
           if sort_dir
             direction_text(sort_dir)
           else
-            default_order(attr_name) || Constants::ASC
+            default_sort_order(attr_name) || Constants::ASC
           end
         end
 
         def existing_sort_direction(attr_name = @field_name)
-          if _ = @search_object.sorts.detect { |s| s.name == attr_name }
-            _.dir
+          if sort = @search_object.sorts.detect { |s| s.name == attr_name }
+            sort.dir
           end
         end
 
-        def default_order(attr_name)
+        def default_sort_order(attr_name)
           Hash === @default_order ? @default_order[attr_name] : @default_order
         end
 
