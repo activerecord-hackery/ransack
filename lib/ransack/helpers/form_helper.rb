@@ -63,11 +63,11 @@ module Ransack
           @hide_indicator    = @options.delete :hide_indicator
           @default_order     = @options.delete :default_order
           if Hash === @default_order
-            @default_order = @default_order.with_indifferent_access
+            @default_order   = @default_order.with_indifferent_access
           end
-          @sort_params = initialize_sort_params
-          @sort_params = @sort_params.first if @sort_params.size == 1
-          @current_dir = existing_sort_direction
+          @sort_params       = initialize_sort_params
+          @sort_params       = @sort_params.first if @sort_params.size == 1
+          @current_dir       = existing_sort_direction
         end
 
         def name
