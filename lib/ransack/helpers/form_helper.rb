@@ -57,7 +57,7 @@ module Ransack
         # Ivars are not mutated outside of this method.
         def initialize!(search, attribute, args)
           @field_name        = attribute.to_s
-          @sort_fields, args = extract_sort_fields(args)
+          sort_fields,  args = extract_sort_fields(args)
           @label_text,  args = extract_label_text(args)
           @options,     args = extract_options(args)
           @hide_indicator    = @options.delete :hide_indicator
@@ -65,7 +65,7 @@ module Ransack
           if Hash === @default_order
             @default_order   = @default_order.with_indifferent_access
           end
-          @sort_params       = initialize_sort_params
+          @sort_params       = initialize_sort_params(sort_fields)
           @sort_params       = @sort_params.first if @sort_params.size == 1
           @current_dir       = existing_sort_direction
         end
@@ -139,8 +139,8 @@ module Ransack
           end
         end
 
-        def initialize_sort_params
-          @sort_fields.each_with_object([]) do |field, a|
+        def initialize_sort_params(sort_fields)
+          sort_fields.each_with_object([]) do |field, a|
             attr_name, new_dir = field.to_s.split(/\s+/)
             if no_sort_direction_specified?(new_dir)
               new_dir = detect_previous_sort_direction_and_invert_it(attr_name)
