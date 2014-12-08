@@ -183,7 +183,7 @@ module Ransack
       end
 
       def no_sort_direction_specified?(dir = @current_dir)
-        Constants::ASC_DESC.none? { |d| d == dir }
+        !Constants::ASC_DESC.include?(dir)
       end
 
       def direction_arrow
