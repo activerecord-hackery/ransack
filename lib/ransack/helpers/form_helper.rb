@@ -53,9 +53,10 @@ module Ransack
 
       private
 
-        # +sort_link+ mutations and order-dependent code is centralized here.
+        # +sort_link+ mutations and order-dependent code are centralized here.
         # Ivars are not mutated outside of this method.
         # `args` are mutated in the `mutate_args!` method.
+        #
         def initialize_sort_link_ivars(search, attribute, args)
           @field_name      = attribute.to_s
           @current_dir     = existing_sort_direction
@@ -81,25 +82,28 @@ module Ransack
           end
         end
 
-        def mutate_args!(type, value, args)
-          if args.first.is_a? type
+        def extract_sort_fields_and_mutate_args!(args)
+          if args.first.is_a? Array
             args.shift
           else
-            value ||
+            [@field_name]
+          end
+        end
+
+        def extract_label_text_and_mutate_args!(args)
+          if args.first.is_a? String
+            args.shift
+          else
             Translate.attribute(@field_name, :context => @search_object.context)
           end
         end
 
-        def extract_sort_fields_and_mutate_args!(args)
-          mutate_args!(Array, Array(@field_name), args)
-        end
-
-        def extract_label_text_and_mutate_args!(args)
-          mutate_args!(String, nil, args)
-        end
-
         def extract_options_and_mutate_args!(args)
-          mutate_args!(Hash, {}, args)
+          if args.first.is_a? Hash
+            args.shift
+          else
+            {}
+          end
         end
 
         def name
