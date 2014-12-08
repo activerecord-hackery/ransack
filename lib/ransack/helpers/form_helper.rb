@@ -47,27 +47,59 @@ module Ransack
         @search_object, routing_proxy = extract_search_obj_and_routing(search)
         raise TypeError, 'First argument must be a Ransack::Search!' unless
           Search === @search_object
-        initialize!(search, attribute, args)
+        initialize_sort_link_ivars(search, attribute, args)
         link_to(name, url(routing_proxy), html_options(args))
       end
 
       private
 
-        # All mutation and order-dependent code happens here.
+        # +sort_link+ mutations and order-dependent code is centralized here.
         # Ivars are not mutated outside of this method.
-        def initialize!(search, attribute, args)
-          @field_name        = attribute.to_s
-          sort_fields,  args = extract_sort_fields(args)
-          @label_text,  args = extract_label_text(args)
-          @options,     args = extract_options(args)
-          @hide_indicator    = @options.delete :hide_indicator
-          @default_order     = @options.delete :default_order
+        # `args` are mutated in the `mutate_args!` method.
+        def initialize_sort_link_ivars(search, attribute, args)
+          @field_name      = attribute.to_s
+          @current_dir     = existing_sort_direction
+          # begin order-dependent assignments
+          sort_fields      = extract_sort_fields_and_mutate_args!(args)
+          @label_text      = extract_label_text_and_mutate_args!(args)
+          @options         = extract_options_and_mutate_args!(args)
+          @hide_indicator  = @options.delete :hide_indicator
+          @default_order   = @options.delete :default_order
           if Hash === @default_order
-            @default_order   = @default_order.with_indifferent_access
+            @default_order = @default_order.with_indifferent_access
           end
-          @sort_params       = initialize_sort_params(sort_fields)
-          @sort_params       = @sort_params.first if @sort_params.size == 1
-          @current_dir       = existing_sort_direction
+          @sort_params     = initialize_sort_params(sort_fields)
+          @sort_params     = @sort_params.first if @sort_params.size == 1
+          # end order-dependent assignments
+        end
+
+        def extract_search_obj_and_routing(search)
+          if search.is_a? Array
+            [search.second, search.first]
+          else
+            [search, nil]
+          end
+        end
+
+        def mutate_args!(type, value, args)
+          if args.first.is_a? type
+            args.shift
+          else
+            value ||
+            Translate.attribute(@field_name, :context => @search_object.context)
+          end
+        end
+
+        def extract_sort_fields_and_mutate_args!(args)
+          mutate_args!(Array, Array(@field_name), args)
+        end
+
+        def extract_label_text_and_mutate_args!(args)
+          mutate_args!(String, nil, args)
+        end
+
+        def extract_options_and_mutate_args!(args)
+          mutate_args!(Hash, {}, args)
         end
 
         def name
@@ -101,45 +133,13 @@ module Ransack
         end
 
         def html_options(args)
-          html_options = extract_options(args).first
+          html_options = extract_options_and_mutate_args!(args)
           html_options.merge(class: [css, html_options[:class]]
           .compact.join(Constants::SPACE))
         end
 
         def css
           [Constants::SORT_LINK, @current_dir].compact.join(Constants::SPACE)
-        end
-
-        def extract_search_obj_and_routing(search)
-          if search.is_a? Array
-            [search.second, search.first]
-          else
-            [search, nil]
-          end
-        end
-
-        def extract_sort_fields(args)
-          if Array === args.first
-            [args.shift, args]
-          else
-            [Array(@field_name), args]
-          end
-        end
-
-        def extract_label_text(args)
-          if String === args.first
-            [args.shift, args]
-          else
-            [Translate.attribute(@field_name, :context => @search_object.context), args]
-          end
-        end
-
-        def extract_options(args)
-          if args.first.is_a? Hash
-            [args.shift, args]
-          else
-            [{}, args]
-          end
         end
 
         def initialize_sort_params(sort_fields)
