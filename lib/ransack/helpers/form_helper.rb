@@ -84,8 +84,11 @@ module Ransack
         end
 
         def options_for_url
-          @options[@search_object.context.search_key] = search_and_sort_params
-          params.merge(@options)
+          params.merge(
+            @options.merge(
+              @search_object.context.search_key => search_and_sort_params
+              )
+            )
         end
 
         def search_and_sort_params
