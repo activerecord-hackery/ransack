@@ -83,18 +83,19 @@ If you're coming from MetaSearch, things to note:
 
   4. If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
   avoid returning duplicate rows, even if conditions on a join would otherwise
-  result in some.
+  result in some. It generates the same SQL as calling `uniq` on the relation.
 
   Please note that for many databases, a sort on an associated table's columns
   may result in invalid SQL with `distinct: true` -- in those cases, you're on
   your own, and will need to modify the result as needed to allow these queries
   to work.
 
-  If `distinct: true` or calling #uniq on the relation, which generates the
-  same SQL, is causing invalid SQL, another way to remove duplicates is to
-  call `#to_a.uniq` on your collection instead (see the next section below) --
-  with the caveat that it may display awkwardly with pagination if the number
-  of results is greater than the page size.
+  If `distinct: true` or `uniq` is causing invalid SQL, another way to remove
+  duplicates is to call `to_a.uniq` on the collection at the end (see the next
+  section below) -- with the caveat that the de-duping is taking place in Ruby
+  instead of in SQL, which is potentially slower and uses more memory, and that
+  it may display awkwardly with pagination if the number of results is greater
+  than the page size.
 
 ####In your controller
 
@@ -111,8 +112,9 @@ this example, with preloading each Person's Articles and pagination):
 def index
   @q = Person.search(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
+
   # or use `to_a.uniq` to remove duplicates (can also be done in the view):
-  @people = @q.result.includes(:articles).uniq.page(params[:page])
+  @people = @q.result.includes(:articles).page(params[:page]).to_a.uniq
 end
 ```
 
