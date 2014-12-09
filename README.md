@@ -88,9 +88,13 @@ If you're coming from MetaSearch, things to note:
   Please note that for many databases, a sort on an associated table's columns
   may result in invalid SQL with `distinct: true` -- in those cases, you're on
   your own, and will need to modify the result as needed to allow these queries
-  to work. If `distinct: true` is causing you problems, another way to remove
-  duplicates is to call `#to_a.uniq` on your collection instead (see the next
-  section below).
+  to work.
+
+  If `distinct: true` or calling #uniq on the relation, which generates the
+  same SQL, is causing invalid SQL, another way to remove duplicates is to
+  call `#to_a.uniq` on your collection instead (see the next section below) --
+  with the caveat that it may display awkwardly with pagination if the number
+  of results is greater than the page size.
 
 ####In your controller
 
@@ -107,7 +111,7 @@ this example, with preloading each Person's Articles and pagination):
 def index
   @q = Person.search(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
-  # or use `uniq` to remove duplicates:
+  # or use `to_a.uniq` to remove duplicates (can also be done in the view):
   @people = @q.result.includes(:articles).uniq.page(params[:page])
 end
 ```
