@@ -327,7 +327,6 @@ end
   <%= content_tag :th, sort_link(@q, :last_name) %>
   <%= content_tag :th, sort_link(@q, 'departments.title') %>
   <%= content_tag :th, sort_link(@q, 'employees.last_name') %>
-<% end %>
 ```
 
 ### Using Ransackers to add custom search functions via Arel
