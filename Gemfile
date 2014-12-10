@@ -5,7 +5,7 @@ gem 'rake'
 
 rails = ENV['RAILS'] || 'master'
 
-if %w(5.0 4.2).include?(rails[0,3]) || rails == 'master'
+if rails == 'master'
   gem 'arel', github: 'rails/arel'
 end
 
