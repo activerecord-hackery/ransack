@@ -136,8 +136,7 @@ module Ransack
         else
           stripped_name
           .split(/_and_|_or_/)
-          .select { |n| !@context.attribute_method?(n) }
-          .empty?
+          .none? { |n| !@context.attribute_method?(n) }
         end
       end
 
