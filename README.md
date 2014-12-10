@@ -323,7 +323,7 @@ end
   <%= f.submit "search" %>
 <% end %>
 ...
-<%= content_tag :table %>
+<%= content_tag :table do %>
   <%= content_tag :th, sort_link(@q, :last_name) %>
   <%= content_tag :th, sort_link(@q, 'departments.title') %>
   <%= content_tag :th, sort_link(@q, 'employees.last_name') %>
