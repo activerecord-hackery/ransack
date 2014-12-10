@@ -16,8 +16,7 @@ module Ransack
         end
 
         def ransacker(name, opts = {}, &block)
-          self._ransackers = _ransackers.merge name.to_s => Ransacker
-            .new(self, name, opts, &block)
+          self._ransackers[name.to_s] = Ransacker.new(self, name, opts, &block)
         end
 
         # Ransackable_attributes, by default, returns all column names
