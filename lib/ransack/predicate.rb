@@ -71,7 +71,7 @@ module Ransack
     end
 
     def validate(vals, type = @type)
-      vals.select { |v| validator.call(type ? v.cast(type) : v.value) }.any?
+      vals.any? { |v| validator.call(type ? v.cast(type) : v.value) }
     end
 
   end
