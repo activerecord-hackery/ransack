@@ -137,12 +137,10 @@ module Ransack
 
       def html_options(args)
         html_options = extract_options_and_mutate_args!(args)
-        html_options.merge(class: [css, html_options[:class]]
-        .compact.join(Constants::SPACE))
-      end
-
-      def css
-        [Constants::SORT_LINK, @current_dir].compact.join(Constants::SPACE)
+        html_options.merge(class:
+          [[Constants::SORT_LINK, @current_dir], html_options[:class]]
+          .compact.join(Constants::SPACE)
+          )
       end
 
       def initialize_sort_params(sort_fields)
