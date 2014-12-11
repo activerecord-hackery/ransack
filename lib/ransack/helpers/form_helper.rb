@@ -47,7 +47,7 @@ module Ransack
         @search_object, routing_proxy = extract_search_obj_and_routing(search)
         raise TypeError, 'First argument must be a Ransack::Search!' unless
           Search === @search_object
-        initialize_sort_link_ivars(search, attribute, args)
+        initialize_sort_link_ivars(attribute, args)
         link_to(name, url(routing_proxy), html_options(args))
       end
 
@@ -56,7 +56,7 @@ module Ransack
       # `initialize_sort_link_ivars` centralizes the +sort_link+ value
       # mutations and order-dependent code. No ivars are mutated outside of
       # this method. `args` are mutated in the `mutate_args!` methods.
-      def initialize_sort_link_ivars(search, attribute, args)
+      def initialize_sort_link_ivars(attribute, args)
         @field_name      = attribute.to_s
         @current_dir     = existing_sort_direction
         # begin order-dependent assignments
