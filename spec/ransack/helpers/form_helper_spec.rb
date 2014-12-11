@@ -159,6 +159,23 @@ module Ransack
         it { should match /Full Name&nbsp;&#9660;/ }
       end
 
+      describe '#sort_link with multiple search_keys does not break on nil values & ignores them' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(:sorts => ['name desc', nil, 'email', nil])],
+            :name, [nil, :name, nil, 'email DESC', nil],
+            :controller => 'people'
+          )
+        }
+        it {
+          should match(
+            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          )
+        }
+        it { should match /sort_link desc/ }
+        it { should match /Full Name&nbsp;&#9660;/ }
+      end
+
       describe '#sort_link with multiple search_keys should allow a label to be specified' do
         subject { @controller.view_context
           .sort_link(

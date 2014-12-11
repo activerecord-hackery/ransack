@@ -60,7 +60,7 @@ module Ransack
         @field_name      = attribute.to_s
         @current_dir     = existing_sort_direction
         # begin order-dependent assignments
-        sort_fields      = extract_sort_fields_and_mutate_args!(args)
+        sort_fields      = extract_sort_fields_and_mutate_args!(args).compact
         @label_text      = extract_label_text_and_mutate_args!(args)
         @options         = extract_options_and_mutate_args!(args)
         @hide_indicator  = @options.delete :hide_indicator
@@ -163,7 +163,7 @@ module Ransack
       end
 
       def existing_sort_direction(attr_name = @field_name)
-        if sort = @search_object.sorts.detect { |s| s.name == attr_name }
+        if sort = @search_object.sorts.detect { |s| s && s.name == attr_name }
           sort.dir
         end
       end
