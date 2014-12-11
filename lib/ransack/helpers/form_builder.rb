@@ -204,8 +204,7 @@ module Ransack
       def association_array(obj, prefix = nil)
         ([prefix] + association_object(obj))
         .compact
-        .flatten
-        .map { |v| [prefix, v].compact.join(Constants::UNDERSCORE) }
+        .flat_map { |v| [prefix, v].compact.join(Constants::UNDERSCORE) }
       end
 
       def association_object(obj)
