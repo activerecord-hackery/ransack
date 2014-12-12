@@ -261,7 +261,7 @@ module Ransack
       end
 
       def attr_from_base_and_column(base, column)
-        [base, column].reject { |v| v.blank? }.join(Constants::UNDERSCORE)
+        [base, column].reject(&:blank?).join(Constants::UNDERSCORE)
       end
 
       def formbuilder_error_message(action)

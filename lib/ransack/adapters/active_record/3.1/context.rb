@@ -166,9 +166,7 @@ module Ransack
 
           join_nodes = buckets[Constants::JOIN_NODE] || []
 
-          string_joins = (buckets[Constants::STRING_JOIN] || [])
-            .map { |x| x.strip }
-            .uniq
+          string_joins = (buckets[Constants::STRING_JOIN] || []).map(&:strip).uniq
 
           join_list = relation.send :custom_join_ast,
             relation.table.from(relation.table), string_joins

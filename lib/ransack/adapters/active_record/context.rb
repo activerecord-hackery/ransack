@@ -193,19 +193,13 @@ module Ransack
             end
           end
 
-          association_joins =
-            buckets[Constants::ASSOCIATION_JOIN] || []
+          association_joins = buckets[Constants::ASSOCIATION_JOIN] || []
 
-          stashed_association_joins =
-            buckets[Constants::STASHED_JOIN] || []
+          stashed_association_joins = buckets[Constants::STASHED_JOIN] || []
 
-          join_nodes =
-            buckets[Constants::JOIN_NODE] || []
+          join_nodes = buckets[Constants::JOIN_NODE] || []
 
-          string_joins =
-            (buckets[Constants::STRING_JOIN] || [])
-            .map { |x| x.strip }
-            .uniq
+          string_joins = (buckets[Constants::STRING_JOIN] || []).map(&:strip).uniq
 
           join_list =
             if ::ActiveRecord::VERSION::MAJOR >= 5
