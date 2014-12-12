@@ -297,7 +297,7 @@ module Ransack
         end
       end
 
-      describe '#sort_link without order indicator' do
+      describe '#sort_link with hide order indicator set to true' do
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search(:sorts => ['name desc'])],
@@ -306,7 +306,19 @@ module Ransack
             :hide_indicator => true
           )
         }
-        it { should match /Full Name<\/a>/ }
+        it { should match /Full Name/ }
+      end
+
+      describe '#sort_link with hide order indicator set to false' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(:sorts => ['name desc'])],
+            :name,
+            :controller => 'people',
+            :hide_indicator => false
+          )
+        }
+        it { should match /Full Name&nbsp;&#9660;/ }
       end
 
       describe '#search_form_for with default format' do
