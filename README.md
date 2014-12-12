@@ -17,7 +17,7 @@ and backwards compatibility is not a design goal.
 
 Ransack enables the creation of both simple and
 [advanced](http://ransack-demo.herokuapp.com/users/advanced_search)
-search forms against your application's models (demo source code
+search forms for your Ruby on Rails application (demo source code
 [here](https://github.com/activerecord-hackery/ransack_demo)).
 If you're looking for something that simplifies query generation at the model
 or controller layer, you're probably not looking for Ransack (or MetaSearch,
@@ -26,9 +26,9 @@ instead.
 
 ## Getting started
 
-Ransack is currently compatible with Rails 3.x, 4.0, 4.1 and 4.2. It works
-out-of-the box with Active Record and also features new support for Mongoid
-4.0 (without associations, further details below).
+Ransack is compatible with Ruby on Rails 3 and 4 running on Ruby 1.9 and later.
+Ransack works out-of-the box with Active Record and features new support for
+Mongoid 4.0 (without associations, further details below).
 
 In your Gemfile, for the last officially released Ransack gem:
 
