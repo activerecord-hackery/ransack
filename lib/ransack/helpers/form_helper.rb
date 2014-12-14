@@ -83,9 +83,6 @@ module Ransack
           @options        = extract_options_and_mutate_args!(args)
           @hide_indicator = @options.delete :hide_indicator
           @default_order  = @options.delete :default_order
-          if Hash === @default_order
-            @default_order = @default_order.with_indifferent_access
-          end
           @sort_params    = build_sort(sort_fields)
           @sort_params    = @sort_params.first if @sort_params.size == 1
         end
@@ -142,8 +139,7 @@ module Ransack
           end
 
           def search_params
-            @params[@search.context.search_key].presence ||
-            {}.with_indifferent_access
+            @params[@search.context.search_key].presence || {}
           end
 
           def build_sort(fields)
