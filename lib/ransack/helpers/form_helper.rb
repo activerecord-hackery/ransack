@@ -85,7 +85,7 @@ module Ransack
           if Hash === @default_order
             @default_order = @default_order.with_indifferent_access
           end
-          @sort_params    = initialize_sort_params(search, sort_fields)
+          @sort_params    = build_sort(search, sort_fields)
           @sort_params    = @sort_params.first if @sort_params.size == 1
         end
 
@@ -145,10 +145,9 @@ module Ransack
             {}.with_indifferent_access
           end
 
-          def initialize_sort_params(search, sort_fields)
-            sort_fields.reduce([]) do |array, field|
-              array + [parse_sort(search, field)]
-            end
+          def build_sort(search, fields)
+            return [] if fields.empty?
+            [parse_sort(search, fields[0])] + build_sort(search, fields.drop(1))
           end
 
           def parse_sort(search, field)
