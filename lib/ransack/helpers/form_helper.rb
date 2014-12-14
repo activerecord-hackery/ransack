@@ -48,10 +48,9 @@ module Ransack
         unless Search === search
           raise TypeError, 'First argument must be a Ransack::Search!'
         end
-        s = SortLinkParser.new(search, attribute, args)
+        s = SortLinkParser.new(search, attribute, args, params)
         link_to(
-          s.name, url(routing_proxy, s.options_for_url(search, params)),
-          s.html_options(args)
+          s.name, url(routing_proxy, s.options_for_url), s.html_options(args)
           )
       end
 
@@ -74,32 +73,34 @@ module Ransack
         end
 
       class SortLinkParser
-        def initialize(search, attribute, args)
+        def initialize(search, attribute, args, params)
+          @search         = search
+          @params         = params
           field           = attribute.to_s
           sort_fields     = extract_sort_fields_and_mutate_args!(field, args).compact
-          @current_dir    = existing_sort_direction(search, field)
-          @label_text     = extract_label_and_mutate_args!(search, field, args)
+          @current_dir    = existing_sort_direction(field)
+          @label_text     = extract_label_and_mutate_args!(field, args)
           @options        = extract_options_and_mutate_args!(args)
           @hide_indicator = @options.delete :hide_indicator
           @default_order  = @options.delete :default_order
           if Hash === @default_order
             @default_order = @default_order.with_indifferent_access
           end
-          @sort_params    = build_sort(search, sort_fields)
+          @sort_params    = build_sort(sort_fields)
           @sort_params    = @sort_params.first if @sort_params.size == 1
         end
 
         def name
           [ERB::Util.h(@label_text), order_indicator]
-          .compact.join(Constants::NON_BREAKING_SPACE).html_safe
+          .compact
+          .join(Constants::NON_BREAKING_SPACE)
+          .html_safe
         end
 
-        def options_for_url(search, params)
-          params.merge(
+        def options_for_url
+          @params.merge(
             @options.merge(
-              search.context.search_key => search_and_sort_params(search, params)
-              )
-            )
+              @search.context.search_key => search_and_sort_params))
         end
 
         def html_options(args)
@@ -120,11 +121,11 @@ module Ransack
             end
           end
 
-          def extract_label_and_mutate_args!(search, field, args)
+          def extract_label_and_mutate_args!(field, args)
             if args.first.is_a? String
               args.shift
             else
-              Translate.attribute(field, :context => search.context)
+              Translate.attribute(field, :context => @search.context)
             end
           end
 
@@ -136,30 +137,30 @@ module Ransack
             end
           end
 
-          def search_and_sort_params(search, params)
-            search_params(search, params).merge(:s => @sort_params)
+          def search_and_sort_params
+            search_params.merge(:s => @sort_params)
           end
 
-          def search_params(search, params)
-            params[search.context.search_key].presence ||
+          def search_params
+            @params[@search.context.search_key].presence ||
             {}.with_indifferent_access
           end
 
-          def build_sort(search, fields)
+          def build_sort(fields)
             return [] if fields.empty?
-            [parse_sort(search, fields[0])] + build_sort(search, fields.drop(1))
+            [parse_sort(fields[0])] + build_sort(fields.drop(1))
           end
 
-          def parse_sort(search, field)
+          def parse_sort(field)
             attr_name, new_dir = field.to_s.split(/\s+/)
             if no_sort_direction_specified?(new_dir)
-              new_dir = detect_previous_sort_direction_and_invert_it(search, attr_name)
+              new_dir = detect_previous_sort_direction_and_invert_it(attr_name)
             end
             "#{attr_name} #{new_dir}"
           end
 
-          def detect_previous_sort_direction_and_invert_it(search, attr_name)
-            sort_dir = existing_sort_direction(search, attr_name)
+          def detect_previous_sort_direction_and_invert_it(attr_name)
+            sort_dir = existing_sort_direction(attr_name)
             if sort_dir
               direction_text(sort_dir)
             else
@@ -167,8 +168,8 @@ module Ransack
             end
           end
 
-          def existing_sort_direction(search, attr_name)
-            if sort = search.sorts.detect { |s| s && s.name == attr_name }
+          def existing_sort_direction(attr_name)
+            if sort = @search.sorts.detect { |s| s && s.name == attr_name }
               sort.dir
             end
           end
