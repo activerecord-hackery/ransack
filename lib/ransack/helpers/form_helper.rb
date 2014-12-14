@@ -146,13 +146,17 @@ module Ransack
           end
 
           def initialize_sort_params(search, sort_fields)
-            sort_fields.each_with_object([]) do |field, a|
-              attr_name, new_dir = field.to_s.split(/\s+/)
-              if no_sort_direction_specified?(new_dir)
-                new_dir = detect_previous_sort_direction_and_invert_it(search, attr_name)
-              end
-              a << "#{attr_name} #{new_dir}"
+            sort_fields.reduce([]) do |array, field|
+              array + [parse_sort(search, field)]
             end
+          end
+
+          def parse_sort(search, field)
+            attr_name, new_dir = field.to_s.split(/\s+/)
+            if no_sort_direction_specified?(new_dir)
+              new_dir = detect_previous_sort_direction_and_invert_it(search, attr_name)
+            end
+            "#{attr_name} #{new_dir}"
           end
 
           def detect_previous_sort_direction_and_invert_it(search, attr_name)
