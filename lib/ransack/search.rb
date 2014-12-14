@@ -35,6 +35,7 @@ module Ransack
         @context, options[:grouping] || Constants::AND
         )
       @scope_args = {}
+      @sorts ||= []
       build(params.with_indifferent_access)
     end
 
@@ -83,7 +84,7 @@ module Ransack
     alias :s= :sorts=
 
     def sorts
-      @sorts ||= []
+      @sorts
     end
     alias :s :sorts
 
