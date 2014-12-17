@@ -4,12 +4,12 @@ Ransack is an open source project and we encourage contributions.
 
 When filing an issue on the Ransack project, please provide these details:
 
-* A comprehensive list of steps to reproduce the issue, or, _far better_, a failing spec!
+* A comprehensive list of steps to reproduce the issue, or, far better, a failing spec!
 * The version (and branch) of Ransack *and* the versions of Rails and Ruby.
 * Any relevant stack traces ("Full trace" preferred).
 
-In 99% of cases, this information is enough to determine the cause and
-solution to the problem that is being described.
+In most cases, this information is enough to determine the cause and solution
+to the problem that is being described.
 
 Any issue that is open for 14 days without actionable information or activity
 will be marked as "stalled" and then closed. Stalled issues can be re-opened
@@ -42,9 +42,11 @@ a test!
 
 5. Push to your fork and submit a pull request. If the changes will apply
 cleanly to the latest stable branches and master branch, you will only need
-to submit one pull request. If the pull request only contains documentation
-changes, please add `[skip ci]` to the commit message so that the Travis test
-suite does not needlessly run.
+to submit one pull request.
+
+6. If your pull request only contains documentation changes, please remember to
+add `[skip ci]` to your commit message so that the Travis test suite does not
+run needlessly.
 
 At this point you're waiting on us. We like to at least comment on, if not
 accept, pull requests within three business days (and, typically, one business
