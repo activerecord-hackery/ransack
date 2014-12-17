@@ -24,8 +24,19 @@ or controller layer, you're probably not looking for Ransack (or MetaSearch,
 for that matter). Try [Squeel](https://github.com/activerecord-hackery/squeel)
 instead.
 
+If you're viewing this at
+[https://github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
+you're reading the documentation for the master branch with the latest features.
+[View documentation for the last release (1.5.1).](https://github.com/activerecord-hackery/ransack/tree/v.1.5.1)
+
 ## Getting started
 
+Ransack is compatible with Rails 3 and 4 (including 4.2) on Ruby 1.9 and later.
+We try to keep it functioning with Rails master as well. Ransack works
+out-of-the-box with Active Record and features new support for Mongoid 4.0
+(without associations, further details below). If you are on Ruby 1.8, you may
+need to use a slightly earlier version of Ransack, like '< 1.4'.
+=======
 Ransack is compatible with Ruby on Rails 3 and 4 running on Ruby 1.9 and later.
 Ransack works out-of-the box with Active Record and features new support for
 Mongoid 4.0 (without associations, further details below).
