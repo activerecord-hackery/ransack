@@ -115,13 +115,10 @@ module Ransack
         objects ||= @object.send(name)
         objects = [objects] unless Array === objects
         name = "#{options[:object_name] || object_name}[#{name}]"
-        output = ActiveSupport::SafeBuffer.new
-        objects.each do |child|
-          output << @template.fields_for("#{name}[#{
-            options[:child_index] || nested_child_index(name)
-            }]", child, options, &block)
+        objects.inject(ActiveSupport::SafeBuffer.new) do |output, child|
+          output << @template.fields_for("#{name}[#{options[:child_index] ||
+          nested_child_index(name)}]", child, options, &block)
         end
-        output
       end
 
       def predicate_select(options = {}, html_options = {})
