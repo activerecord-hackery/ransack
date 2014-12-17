@@ -25,8 +25,7 @@ module Ransack
         |x| x.respond_to?(:model_name)
       }
       predicate = Predicate.detect_from_string(original_name)
-      attributes_str = original_name
-        .sub(/_#{predicate}$/, Constants::EMPTY)
+      attributes_str = original_name.sub(/_#{predicate}$/, Constants::EMPTY)
       attribute_names = attributes_str.split(/_and_|_or_/)
       combinator = attributes_str.match(/_and_/) ? :and : :or
       defaults = base_ancestors.map do |klass|

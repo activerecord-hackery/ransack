@@ -14,8 +14,7 @@ module Ransack
       end
 
       def eql?(other)
-        self.class == other.class &&
-        self.value == other.value
+        self.class == other.class && self.value == other.value
       end
       alias :== :eql?
 

@@ -3,9 +3,7 @@ require 'mongoid_spec_helper'
 module Ransack
   describe Configuration do
     it 'yields Ransack on configure' do
-      Ransack.configure do |config|
-        expect(config).to eq Ransack
-      end
+      Ransack.configure { |config| expect(config).to eq Ransack }
     end
 
     it 'adds predicates' do
