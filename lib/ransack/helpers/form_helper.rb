@@ -128,7 +128,7 @@ module Ransack
 
           def extract_options_and_mutate_args!(args)
             if args.first.is_a? Hash
-              args.shift
+              args.shift.with_indifferent_access
             else
               {}
             end

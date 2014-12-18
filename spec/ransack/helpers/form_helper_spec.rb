@@ -121,7 +121,7 @@ module Ransack
         }
       end
 
-      describe '#sort_link with default search_key defined as string' do
+      describe '#sort_link with search_key defined as a string' do
         subject {
           @controller.view_context.sort_link(
             Person.search(
@@ -140,6 +140,18 @@ module Ransack
             end
           )
         }
+      end
+
+      describe '#sort_link with default_order defined with a string key' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search()],
+            :name,
+            :controller => 'people',
+            'default_order' => 'desc'
+          )
+        }
+        it { should_not match /default_order/ }
       end
 
       describe '#sort_link with multiple search_keys defined as an array' do
@@ -205,13 +217,31 @@ module Ransack
         it { should match /Full Name&nbsp;&#9660;/ }
       end
 
-      describe '#sort_link with multiple search_keys should allow a default_order to be specified' do
+      describe '#sort_link with multiple search_keys and default_order specified as a string' do
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search()],
             :name, [:name, :email],
             :controller => 'people',
-            :default_order => 'desc'
+            'default_order' => 'desc'
+          )
+        }
+        it {
+          should match(
+            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          )
+        }
+        it { should match /sort_link/ }
+        it { should match /Full Name/ }
+      end
+
+      describe '#sort_link with multiple search_keys and default_order specified as a symbol' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search()],
+            :name, [:name, :email],
+            :controller => 'people',
+            :default_order => :desc
           )
         }
         it {
