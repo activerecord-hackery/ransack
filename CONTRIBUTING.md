@@ -1,15 +1,31 @@
+# Contributing to Ransack
+
+Please take a moment to review this document in order to make the contribution
+process easy and effective for everyone involved!
+
 Ransack is an open source project and we encourage contributions.
 
 ## Filing an issue
 
-When filing an issue on the Ransack project, please provide these details:
+A bug is a _demonstrable problem_ that is caused by the code in the repository.
+Good bug reports are extremely helpful!
 
-* A comprehensive list of steps to reproduce the issue, or, far better, a failing spec!
-* The version (and branch) of Ransack *and* the versions of Rails and Ruby.
+Guidelines for bug reports:
+
+1. **Use the GitHub issue search** &mdash; check if the issue has already been
+   reported.
+
+2. **Check if the issue has been fixed** &mdash; try to reproduce it using the
+   `master` branch in the repository.
+
+3. **Isolate and report the problem** &mdash; ideally create a reduced test
+   case.
+
+When filing an issue, please provide these details:
+
+* A comprehensive list of steps to reproduce the issue, or - far better - **a failing spec**.
+* The version (and branch) of Ransack *and* the versions of Rails, Ruby, and your operating system.
 * Any relevant stack traces ("Full trace" preferred).
-
-In most cases, this information is enough to determine the cause and solution
-to the problem that is being described.
 
 Any issue that is open for 14 days without actionable information or activity
 will be marked as "stalled" and then closed. Stalled issues can be re-opened
@@ -45,8 +61,8 @@ cleanly to the latest stable branches and master branch, you will only need
 to submit one pull request.
 
 6. If your pull request only contains documentation changes, please remember to
-add `[skip ci]` to your commit message so that the Travis test suite does not
-run needlessly.
+add `[skip ci]` to your commit message so the Travis test suite doesn't run
+needlessly.
 
 At this point you're waiting on us. We like to at least comment on, if not
 accept, pull requests within three business days (and, typically, one business
