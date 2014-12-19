@@ -121,11 +121,11 @@ module Arel
       end
 
       def column_cache
-        @column_cache ||= Hash.new do |hash, key|
-          hash[key] = Hash[
-            @engine.connection.columns(key, "#{key} Columns").map do |c|
-              [c.name, c]
-            end
+        @column_cache ||= Hash.new do |h, key|
+          h[key] = Hash[
+            @engine.connection
+            .columns(key, "#{key} Columns")
+            .map { |c| [c.name, c] }
           ]
         end
       end
