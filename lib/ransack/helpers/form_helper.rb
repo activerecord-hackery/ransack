@@ -48,10 +48,8 @@ module Ransack
         unless Search === search
           raise TypeError, 'First argument must be a Ransack::Search!'
         end
-        s = SortLinkParser.new(search, attribute, args, params)
-        link_to(
-          s.name, url(routing_proxy, s.options_for_url), s.html_options(args)
-          )
+        s = SortLink.new(search, attribute, args, params)
+        link_to(s.name, url(routing_proxy, s.url_options), s.html_options(args))
       end
 
       private
@@ -72,14 +70,14 @@ module Ransack
           end
         end
 
-      class SortLinkParser
+      class SortLink
         def initialize(search, attribute, args, params)
           @search         = search
           @params         = params
-          field           = attribute.to_s
-          sort_fields     = extract_sort_fields_and_mutate_args!(field, args).compact
-          @current_dir    = existing_sort_direction(field)
-          @label_text     = extract_label_and_mutate_args!(field, args)
+          @field          = attribute.to_s
+          sort_fields     = extract_sort_fields_and_mutate_args!(args).compact
+          @current_dir    = existing_sort_direction
+          @label_text     = extract_label_and_mutate_args!(args)
           @options        = extract_options_and_mutate_args!(args)
           @hide_indicator = @options.delete :hide_indicator
           @default_order  = @options.delete :default_order
@@ -94,7 +92,7 @@ module Ransack
           .html_safe
         end
 
-        def options_for_url
+        def url_options
           @params.merge(
             @options.merge(
               @search.context.search_key => search_and_sort_params))
@@ -110,19 +108,19 @@ module Ransack
 
         private
 
-          def extract_sort_fields_and_mutate_args!(field, args)
+          def extract_sort_fields_and_mutate_args!(args)
             if args.first.is_a? Array
               args.shift
             else
-              [field]
+              [@field]
             end
           end
 
-          def extract_label_and_mutate_args!(field, args)
+          def extract_label_and_mutate_args!(args)
             if args.first.is_a? String
               args.shift
             else
-              Translate.attribute(field, :context => @search.context)
+              Translate.attribute(@field, :context => @search.context)
             end
           end
 
@@ -164,7 +162,7 @@ module Ransack
             end
           end
 
-          def existing_sort_direction(attr_name)
+          def existing_sort_direction(attr_name = @field)
             if sort = @search.sorts.detect { |s| s && s.name == attr_name }
               sort.dir
             end
