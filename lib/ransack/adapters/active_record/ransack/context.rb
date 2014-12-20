@@ -39,10 +39,10 @@ module Ransack
       @default_table = Arel::Table.new(
         @base.table_name, :as => @base.aliased_table_name, :engine => @engine
         )
-      @bind_pairs = Hash.new do |h, key|
+      @bind_pairs = Hash.new do |hash, key|
         parent, attr_name = get_parent_and_attribute_name(key.to_s)
         if parent && attr_name
-          h[key] = [parent, attr_name]
+          hash[key] = [parent, attr_name]
         end
       end
     end

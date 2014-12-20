@@ -52,8 +52,8 @@ module Ransack
       send(DISPATCH[object.class], object)
     end
 
-    DISPATCH = Hash.new do |h, klass|
-      h[klass] = "visit_#{
+    DISPATCH = Hash.new do |hash, klass|
+      hash[klass] = "visit_#{
         klass.name.gsub(Constants::TWO_COLONS, Constants::UNDERSCORE)
         }"
     end
