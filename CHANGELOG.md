@@ -20,7 +20,17 @@ henceforth should be documented here.
 
     *Fred Bergman*
 
+*   Numerous documentation improvements to the README, Contributing Guide and
+    wiki.
+
+    *Jon Atack*
+
 ### Fixed
+
+*   Fix Rails 5 / Arel 5 compatibility after the Arel and Active Record API
+    changed.
+
+    *Jon Atack*
 
 *   Make `search_form_for`'s default `:as` option respect the custom search key
     if it has been set
@@ -31,7 +41,30 @@ henceforth should be documented here.
 
     *Robert Speicher*
 
+*   Fix and add tests for sort_link `default_order` parsing if the option is set
+    as a string instead of symbol.
+
+    *Jon Atack*
+
+*   Fix sorting on polymorphic associations (missing downcase)
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/467))
+
+    *Eugen Neagoe*
+
 ### Changed
+
+*   Refactor FormHelper#SortLink into a PORO with small, functional methods/API.
+
+    *Jon Atack*
+
+*   Numerous speed improvements by using more specific Ruby methods like:
+      - `Hash#each_key` instead of `Hash#keys.each`
+      - `#none?` instead of `select#empty?`
+      - `#any?` instead of `#select` followed by `#any?`
+      - `#flat_map` instead of `#flatten` followed by `#map`
+      - `!include?` instead of `#none?`
+
+    *Jon Atack*
 
 *   Replace `string#freeze` instances with top level constants to reduce string
     allocations in Ruby < 2.1.
@@ -42,6 +75,9 @@ henceforth should be documented here.
 
     *Jon Atack*
 
+*   Update Travis-ci for Rails 5.0.0 and 4-2-stable.
+
+    *Jon Atack*
 
 ## Version 1.5.1 - 2014-10-30
 ### Fixed
