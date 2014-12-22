@@ -15,7 +15,7 @@ henceforth should be documented here.
 
     *Josh Kovach*
 
-*   Add ability to remove sort_link arrows
+*   Add an sort_link option to not display sort direction arrows
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/473)).
 
     *Fred Bergman*
@@ -27,11 +27,6 @@ henceforth should be documented here.
 
 ### Fixed
 
-*   Fix Rails 5 / Arel 5 compatibility after the Arel and Active Record API
-    changed.
-
-    *Jon Atack*
-
 *   Make `search_form_for`'s default `:as` option respect the custom search key
     if it has been set
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/470)).
@@ -41,21 +36,28 @@ henceforth should be documented here.
 
     *Robert Speicher*
 
-*   Fix and add tests for sort_link `default_order` parsing if the option is set
-    as a string instead of symbol.
-
-    *Jon Atack*
-
 *   Fix sorting on polymorphic associations (missing downcase)
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/467))
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/467)).
 
     *Eugen Neagoe*
 
-### Changed
+*   Fix Rails 5 / Arel 5 compatibility after the Arel and Active Record API
+    changed.
 
-*   Refactor FormHelper#SortLink into a PORO with small, functional methods/API.
+*   Fix and add tests for sort_link `default_order` parsing if the option is set
+    as a string instead of symbol.
+
+*   Fix and add a test to handle `nil` in options passed to sort_link.
+
+*   Fix #search method name conflicts in the README.
 
     *Jon Atack*
+
+### Changed
+
+*   Refactor and DRY up FormHelper#SortLink. Encapsulate parsing into a
+    Plain Old Ruby Object with few public methods and small, private functional
+    methods. Limit mutations to explicit methods and mutate no ivars.
 
 *   Numerous speed improvements by using more specific Ruby methods like:
       - `Hash#each_key` instead of `Hash#keys.each`
@@ -64,16 +66,12 @@ henceforth should be documented here.
       - `#flat_map` instead of `#flatten` followed by `#map`
       - `!include?` instead of `#none?`
 
-    *Jon Atack*
-
 *   Replace `string#freeze` instances with top level constants to reduce string
     allocations in Ruby < 2.1.
 
-    *Jon Atack*
-
 *   Remove unneeded `Ransack::` namespacing on most of the constants.
 
-    *Jon Atack*
+*   In enumerable methods, pass a symbol as an argument instead of a block.
 
 *   Update Travis-ci for Rails 5.0.0 and 4-2-stable.
 
