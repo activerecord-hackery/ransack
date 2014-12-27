@@ -50,17 +50,24 @@ matrix:
     - env: RAILS=master DB=sqlite3
     - env: RAILS=master DB=mysql
     - env: RAILS=master DB=postgres
+
     - rvm: 2.2
       env: RAILS=3-2-stable DB=sqlite
+    - rvm: 2.2
       env: RAILS=3-2-stable DB=mysql
+    - rvm: 2.2
       env: RAILS=3-2-stable DB=postgres
     - rvm: 2.2
       env: RAILS=3-1-stable DB=sqlite
+    - rvm: 2.2
       env: RAILS=3-1-stable DB=mysql
+    - rvm: 2.2
       env: RAILS=3-1-stable DB=postgres
     - rvm: 2.2
       env: RAILS=3-0-stable DB=sqlite
+    - rvm: 2.2
       env: RAILS=3-0-stable DB=mysql
+    - rvm: 2.2
       env: RAILS=3-0-stable DB=postgres
 
 before_script:
