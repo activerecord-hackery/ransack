@@ -11,6 +11,9 @@ rvm:
   - 1.9
 
 env:
+  - RAILS=master DB=mongodb
+  - RAILS=master DB=sqlite3
+  - RAILS=master DB=mysql
   - RAILS=master DB=postgres
 
   - RAILS=4-2-stable DB=mongodb
@@ -40,8 +43,20 @@ env:
   - RAILS=3-0-stable DB=postgres
 
 matrix:
+  exclude:
+    - rvm: 1.9
+      env: RAILS=master
+    - rvm: 2.0
+      env: RAILS=master
   allow_failures:
+    - env: RAILS=master DB=mongodb
+    - env: RAILS=master DB=sqlite3
+    - env: RAILS=master DB=mysql
     - env: RAILS=master DB=postgres
+    - rvm: 2.2
+      env: RAILS=3-2-stable
+      env: RAILS=3-1-stable
+      env: RAILS=3-0-stable
 
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'
