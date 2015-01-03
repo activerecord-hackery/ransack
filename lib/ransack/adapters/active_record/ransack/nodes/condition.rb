@@ -18,7 +18,7 @@ module Ransack
             predicates.inject(&:or)
           end
         else
-          predicates.first.right[0] = predicates.first.right[0].val if predicates.first.right[0].class == Arel::Nodes::Casted
+          predicates.first.right[0] = predicates.first.right[0].val if defined?(Arel::Nodes::Casted) && predicates.first.class == Arel::Nodes::In && predicates.first.right.is_a?(Array) && predicates.first.right[0].class == Arel::Nodes::Casted
           predicates.first
         end
       end
