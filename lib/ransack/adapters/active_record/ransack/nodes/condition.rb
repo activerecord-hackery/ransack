@@ -18,11 +18,30 @@ module Ransack
             predicates.inject(&:or)
           end
         else
-          predicates.first.right[0] = predicates.first.right[0].val if defined?(Arel::Nodes::Casted) && predicates.first.class == Arel::Nodes::In && predicates.first.right.is_a?(Array) && predicates.first.right[0].class == Arel::Nodes::Casted
-          predicates.first
+          return_predicate(predicates.first)
         end
       end
 
-    end # Condition
+      private
+
+        # FIXME: Improve this edge case patch for Arel >= 6.0 (Rails >= 4.2)
+        #        that adds several conditionals to handle changing Arel API.
+        #        Related to Ransack github issue #472 and pull request #486.
+        #
+        def return_predicate(predicate)
+          if casted_array_with_in_predicate?(predicate)
+            predicate.right[0] = predicate.right[0].val
+          end
+          predicate
+        end
+        #
+        def casted_array_with_in_predicate?(predicate)
+          return unless defined?(Arel::Nodes::Casted)
+          predicate.class == Arel::Nodes::In &&
+          predicate.right.is_a?(Array) &&
+          predicate.right[0].class == Arel::Nodes::Casted
+        end
+
+    end
   end
 end
