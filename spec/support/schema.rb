@@ -45,6 +45,10 @@ class Person < ActiveRecord::Base
     parent.table[:name]
   end
 
+  ransacker :array_users, formatter: proc { |v| Person.first(2).map(&:id) } do |parent|
+    parent.table[:id]
+  end
+
   ransacker :doubled_name do |parent|
     Arel::Nodes::InfixOperation.new(
       '||', parent.table[:name], parent.table[:name]

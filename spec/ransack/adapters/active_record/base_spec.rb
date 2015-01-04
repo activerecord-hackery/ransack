@@ -161,6 +161,11 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          it "should function correctly when an array is passed into custom ransacker with _in" do
+            s = Person.search(array_users_in: true)
+            expect(s.result.length).to be > 0
+          end
+
           it "should function correctly when an attribute name ends with '_start'" do
             p = Person.create!(:new_start => 'Bar and foo', :name => 'Xiang')
 
