@@ -27,6 +27,12 @@ henceforth should be documented here.
 
 ### Fixed
 
+*   Fix passing in arrays for custom ransackers searching by id, to improve
+    compatibility with Rails 4.2 (Arel 6.0).
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/486))
+
+    *Idean Labib*
+
 *   Make `search_form_for`'s default `:as` option respect the custom search key
     if it has been set
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/470)).
