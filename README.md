@@ -32,7 +32,8 @@ you're reading the documentation for the master branch with the latest features.
 ## Getting started
 
 Ransack is compatible with Rails 3 and 4 (including 4.2) on Ruby 1.9 and later.
-We try to keep it functioning with Rails master as well. Ransack works
+We try to keep it functioning with Rails master too, although frequent changes
+in Arel and Active Record make that a moving target. Ransack works
 out-of-the-box with Active Record and features new support for Mongoid 4.0
 (without associations, further details below). If you are on Ruby 1.8, you may
 need to use a slightly earlier version of Ransack, like '< 1.4'.
@@ -86,7 +87,7 @@ If you're coming from MetaSearch, things to note:
   3. Common ActiveRecord::Relation methods are no longer delegated by the
   search object. Instead, you will get your search results (an
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
-  `Search#result`.
+  `Ransack#result`.
 
   4. If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
   avoid returning duplicate rows, even if conditions on a join would otherwise
@@ -108,7 +109,7 @@ If you're coming from MetaSearch, things to note:
 
 ```ruby
 def index
-  @q = Person.search(params[:q])
+  @q = Person.ransack(params[:q])
   @people = @q.result(distinct: true)
 end
 ```
@@ -117,7 +118,7 @@ this example, with preloading each Person's Articles and pagination):
 
 ```ruby
 def index
-  @q = Person.search(params[:q])
+  @q = Person.ransack(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
 
   # or use `to_a.uniq` to remove duplicates (can also be done in the view):
@@ -256,19 +257,22 @@ construct much more complex search forms, such as the one on the
 ### Ransack #search method
 
 Ransack will try to to make `#search` available in your models, but in the case
-that `#search` has already been defined, you can use `#ransack` instead. For
-example, the following would be equivalent:
+that `#search` has already been defined, you can always use the default
+`#ransack` method. For example, the following would be equivalent:
 
 ```ruby
-Article.search(params[:q])
 Article.ransack(params[:q])
+Article.search(params[:q])
 ```
 
-If Ransack's `#search` method conflicts with the name of another method named
-`search` in your code or another gem, it may be resolved either by patching
-the `extended` class_method in `Ransack::Adapters::ActiveRecord::Base` to
-remove the line `alias :search :ransack unless base.respond_to? :search`, or by
-placing the following line in your Ransack initializer file at
+Users have reported issues of name conflicts with other gems, so `#search` may
+possibly be deprecated in the next major version of Ransack.
+
+For now, if Ransack's `#search` method conflicts with the name of another
+method named `search` in your code or another gem, you may resolve it either by
+patching the `extended` class_method in `Ransack::Adapters::ActiveRecord::Base`
+to remove the line `alias :search :ransack unless base.respond_to? :search`, or
+by placing the following line in your Ransack initializer file at
 `config/initializers/ransack.rb`:
 
 ```ruby
@@ -308,7 +312,7 @@ end
 ```ruby
 class SupervisorsController < ApplicationController
   def index
-    @q = Supervisor.search(params[:q])
+    @q = Supervisor.ransack(params[:q])
     @supervisors = @q.result.includes(:department, :employees)
   end
 end
@@ -429,7 +433,7 @@ Here is example code for the `articles_controller`:
 class ArticlesController < ApplicationController
 
   def index
-    @q = Article.search(params[:q], auth_object: set_ransack_auth_object)
+    @q = Article.ransack(params[:q], auth_object: set_ransack_auth_object)
     @articles = @q.result
   end
 
@@ -453,13 +457,13 @@ Trying it out in `rails console`:
 > Article.ransackable_attributes(:admin)
 => ["id", "person_id", "title", "body"]
 
-> Article.search(id_eq: 1).result.to_sql
+> Article.ransack(id_eq: 1).result.to_sql
 => SELECT "articles".* FROM "articles"  # Note that search param was ignored!
 
-> Article.search({ id_eq: 1 }, { auth_object: nil }).result.to_sql
+> Article.ransack({ id_eq: 1 }, { auth_object: nil }).result.to_sql
 => SELECT "articles".* FROM "articles"  # Search param still ignored!
 
-> Article.search({ id_eq: 1 }, { auth_object: :admin }).result.to_sql
+> Article.ransack({ id_eq: 1 }, { auth_object: :admin }).result.to_sql
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
 
@@ -497,9 +501,9 @@ class Employee < ActiveRecord::Base
   end
 end
 
-Employee.search({ active: true, hired_since: '2013-01-01' })
+Employee.ransack({ active: true, hired_since: '2013-01-01' })
 
-Employee.search({ salary_gt: 100_000 }, { auth_object: current_user })
+Employee.ransack({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
 If the `true` value is being passed via url params or by some other mechanism
@@ -529,7 +533,7 @@ You can easily try it in your controller code by changing `params[:q]` in the
 
 ```ruby
 def index
-  @q = Artist.search(params[:q].try(:merge, m: 'or'))
+  @q = Artist.ransack(params[:q].try(:merge, m: 'or'))
   @artists = @q.result
 end
 ```
@@ -541,7 +545,7 @@ quickly.
 Alternatively, trying it in the Rails console:
 
 ```ruby
-artists = Artist.search(name_cont: 'foo', style_cont: 'bar', m: 'or')
+artists = Artist.ransack(name_cont: 'foo', style_cont: 'bar', m: 'or')
 => Ransack::Search<class: Artist, base: Grouping <conditions: [
   Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
   Condition <attributes: ["style"], predicate: cont, values: ["bar"]>
@@ -560,7 +564,7 @@ This works with associations as well. Imagine an Artist model that has many
 Memberships, and many Musicians through Memberships:
 
 ```ruby
-artists = Artist.search(name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
+artists = Artist.ransack(name_cont: 'foo', musicians_email_cont: 'bar', m: 'or')
 => Ransack::Search<class: Artist, base: Grouping <conditions: [
   Condition <attributes: ["name"], predicate: cont, values: ["foo"]>,
   Condition <attributes: ["musicians_email"], predicate: cont, values: ["bar"]>
@@ -642,10 +646,10 @@ Ransack now works with Mongoid in the same way as Active Record, except that
 with Mongoid, associations are not currently supported. A demo app may be found
 [here](http://ransack-mongodb-demo.herokuapp.com/) and the demo source code is
 [here](https://github.com/Zhomart/ransack-mongodb-demo). A `result` method
-called on a `Ransack::Search` returns a `Mongoid::Criteria` object:
+called on a `ransack` search returns a `Mongoid::Criteria` object:
 
 ```ruby
-  @q = Person.search(params[:q])
+  @q = Person.ransack(params[:q])
   @people = @q.result # => Mongoid::Criteria
 
   # or you can add more Mongoid queries
