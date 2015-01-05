@@ -1,6 +1,4 @@
 # Change Log
-This change log was started in August 2014. All notable changes to this project
-henceforth should be documented here.
 
 ## Master (Unreleased)
 ### Added
@@ -27,9 +25,9 @@ henceforth should be documented here.
 
 ### Fixed
 
-*   Fix passing arrays to ransackers with Rails 4.2 / Arel 6.0. Pull requests
-    ([#486](https://github.com/activerecord-hackery/ransack/pull/486)) and
-    ([#488](https://github.com/activerecord-hackery/ransack/pull/488)).
+*   Fix passing arrays to ransackers with Rails 4.2 / Arel 6.0 (pull requests
+    [#486](https://github.com/activerecord-hackery/ransack/pull/486) and
+    [#488](https://github.com/activerecord-hackery/ransack/pull/488)).
 
     *Idean Labib*
 
