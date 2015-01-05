@@ -161,9 +161,17 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
-          it "should function correctly when an array is passed into custom ransacker with _in" do
-            s = Person.search(array_users_in: true)
-            expect(s.result.length).to be > 0
+          context "when an array is passed into a custom ransacker with _in" do
+            it "should function correctly with ids." do
+              s = Person.search(array_users_in: true)
+              expect(s.result.length).to be > 0
+            end
+
+            it "should function correctly with strings." do
+              p = Person.create!(name: Person.first.id.to_s)
+              s = Person.search(array_names_in: true)
+              expect(s.result.length).to be > 0
+            end
           end
 
           it "should function correctly when an attribute name ends with '_start'" do
