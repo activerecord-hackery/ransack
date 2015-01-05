@@ -31,6 +31,7 @@ module Ransack
         def return_predicate(predicate)
           if casted_array_with_in_predicate?(predicate)
             predicate.right[0] = predicate.right[0].val
+            predicate.right[0].map! { |v| v.is_a?(String) ? Arel::Nodes.build_quoted(v) : v }
           end
           predicate
         end

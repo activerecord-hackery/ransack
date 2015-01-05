@@ -27,9 +27,10 @@ henceforth should be documented here.
 
 ### Fixed
 
-*   Fix passing in arrays for custom ransackers searching by id, to improve
-    compatibility with Rails 4.2 (Arel 6.0).
+*   Fix passing in arrays for custom ransackers, to improve compatibility 
+    with Rails 4.2 (Arel 6.0).
     ([pull request](https://github.com/activerecord-hackery/ransack/pull/486))
+    ([pull request](https://github.com/activerecord-hackery/ransack/pull/488))
 
     *Idean Labib*
 
