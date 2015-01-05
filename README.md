@@ -64,6 +64,15 @@ To use one of the branches, for example the `rails-4.1` branch:
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
+If you are using Rails master, be advised that Ransack master does not
+currently work with the latest breaking changes in Rails master and
+Arel 7/master of late December 2014. The most recent working commits are:
+
+```ruby
+gem 'rails', github: 'rails/rails', ref: '266ff70'
+gem 'arel', github: 'rails/arel', ref: '008445d'
+```
+
 ## Usage
 
 Ransack can be used in one of two modes, simple or advanced.
