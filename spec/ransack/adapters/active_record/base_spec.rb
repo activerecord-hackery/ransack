@@ -161,13 +161,13 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
-          context "when an array is passed into a custom ransacker with _in" do
-            it "should function correctly with ids." do
+          context "search using an `in` predicate and an array passed to a ransacker" do
+            it "should function correctly when passing an array of ids" do
               s = Person.search(array_users_in: true)
               expect(s.result.length).to be > 0
             end
 
-            it "should function correctly with strings." do
+            it "should function correctly when passing an array of strings" do
               p = Person.create!(name: Person.first.id.to_s)
               s = Person.search(array_names_in: true)
               expect(s.result.length).to be > 0
