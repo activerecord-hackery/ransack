@@ -6,17 +6,17 @@ henceforth should be documented here.
 ### Added
 
 *   Add support for using Ransack with `Mongoid 4.0` without associations
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/407)).
+    ([PR #407](https://github.com/activerecord-hackery/ransack/pull/407)).
 
     *Zhomart Mukhamejanov*
 
 *   Add support and tests for passing stringy booleans for ransackable scopes
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/460)).
+    ([PR #460](https://github.com/activerecord-hackery/ransack/pull/460)).
 
     *Josh Kovach*
 
 *   Add an sort_link option to not display sort direction arrows
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/473)).
+    ([PR #473](https://github.com/activerecord-hackery/ransack/pull/473)).
 
     *Fred Bergman*
 
@@ -27,16 +27,15 @@ henceforth should be documented here.
 
 ### Fixed
 
-*   Fix passing in arrays for custom ransackers, to improve compatibility 
-    with Rails 4.2 (Arel 6.0).
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/486))
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/488))
+*   Fix passing arrays to ransackers with Rails 4.2 / Arel 6.0. Pull requests
+    ([#486](https://github.com/activerecord-hackery/ransack/pull/486)) and
+    ([#488](https://github.com/activerecord-hackery/ransack/pull/488)).
 
     *Idean Labib*
 
 *   Make `search_form_for`'s default `:as` option respect the custom search key
     if it has been set
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/470)).
+    ([PR #470](https://github.com/activerecord-hackery/ransack/pull/470)).
     Prior to this change, if you set a custom `search_key` option in the
     Ransack initializer file, you'd have to also pass an `as: :whatever` option
     to all of the search forms. Fixes #92.
@@ -44,7 +43,7 @@ henceforth should be documented here.
     *Robert Speicher*
 
 *   Fix sorting on polymorphic associations (missing downcase)
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/467)).
+    ([PR #467](https://github.com/activerecord-hackery/ransack/pull/467)).
 
     *Eugen Neagoe*
 
@@ -115,7 +114,7 @@ henceforth should be documented here.
 
 *   Add support for multiple sort fields and default orders in Ransack
     `sort_link` helpers
-    ([pull request](https://github.com/activerecord-hackery/ransack/pull/438)).
+    ([PR #438](https://github.com/activerecord-hackery/ransack/pull/438)).
 
     *Caleb Land*, *James u007*
 
