@@ -36,7 +36,8 @@
     ([PR #470](https://github.com/activerecord-hackery/ransack/pull/470)).
     Prior to this change, if you set a custom `search_key` option in the
     Ransack initializer file, you'd have to also pass an `as: :whatever` option
-    to all of the search forms. Fixes #92.
+    to all of the search forms. Fixes
+    [#92](https://github.com/activerecord-hackery/ransack/issues/92).
 
     *Robert Speicher*
 
@@ -78,6 +79,13 @@
 *   In enumerable methods, pass a symbol as an argument instead of a block.
 
 *   Update Travis-ci for Rails 5.0.0 and 4-2-stable.
+
+*   Update Travis-ci tests for Ruby 2.2.
+
+*   Replace `#search` with `#ransack` class methods in the README and wiki
+    code examples. Enabling the `#search` alias by default may possibly be
+    deprecated in the next major release (Ransack v.2.0.0) to address
+    [#369](https://github.com/activerecord-hackery/ransack/issues/369).
 
     *Jon Atack*
 
