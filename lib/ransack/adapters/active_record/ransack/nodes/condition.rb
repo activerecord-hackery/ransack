@@ -26,7 +26,7 @@ module Ransack
 
         # FIXME: Improve this edge case patch for Arel >= 6.0 (Rails >= 4.2)
         #        that adds several conditionals to handle changing Arel API.
-        #        Related to Ransack github issue #472 and pull request #486.
+        #        Related to Ransack issue #472 and pull requests #486-488.
         #
         def return_predicate(predicate)
           if casted_array_with_in_predicate?(predicate)
