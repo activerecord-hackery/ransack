@@ -46,5 +46,5 @@ end
 
 # Removed from Ruby 2.2 but needed for testing Rails 3.x.
 group :test do
-  gem 'test-unit', '~> 3.0'
+  gem 'test-unit', '~> 3.0' if RUBY_VERSION >= '2.2'
 end
