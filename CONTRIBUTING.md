@@ -8,7 +8,7 @@ Ransack is an open source project and we encourage contributions.
 ## Filing an issue
 
 A bug is a _demonstrable problem_ that is caused by the code in the repository.
-Good bug reports are extremely helpful!
+Good bug reports are extremely helpful! Please do not use the issue tracker for personal support requests.
 
 Guidelines for bug reports:
 
@@ -42,36 +42,46 @@ backward compatibility has a very good reason for doing so.
 
 Here's a quick guide:
 
-1. Fork the repo.
+1. Fork the repo, clone it, create a thoughtfully-named branch for your changes,
+   and install the development dependencies by running `bundle install`.
 
-2. Run the tests. We only take pull requests with passing tests, and it's great
-to know that you have a clean slate:
+2. Begin by running the tests. We only take pull requests with passing tests,
+   and it's great to know that you have a clean slate:
 
         $ bundle install
         $ bundle exec rake spec
 
-3. Add a test for your change. Only refactoring and documentation changes
-require no new tests. If you are adding functionality or fixing a bug, we need
-a test!
+3. Hack away! Please use Ruby features that are compatible down to Ruby 1.9.
+   Since version 1.5, Ransack no longer maintains Ruby 1.8 compatibility.
 
-4. Make the test pass.
+4. Add tests for your changes. Only refactoring and documentation changes
+   require no new tests. If you are adding functionality or fixing a bug, we
+   need a test!
 
-5. Push to your fork and submit a pull request. If the changes will apply
-cleanly to the latest stable branches and master branch, you will only need
-to submit one pull request.
+5. Make the tests pass.
 
-6. If your pull request only contains documentation changes, please remember to
-add `[skip ci]` to your commit message so the Travis test suite doesn't run
-needlessly.
+6. Update the Change Log. If you are adding new functionality, document it in
+   the README.
+
+7. Do not change the version number; we will do that on our end.
+
+8. If necessary, rebase your commits into logical chunks, without errors.
+
+9. Push the branch up to your fork on Github and submit a pull request. If the
+   changes will apply cleanly to the latest stable branches and master branch,
+   you will only need to submit one pull request.
+
+10. If your pull request only contains documentation changes, please remember to
+   add `[skip ci]` to your commit message so the Travis test suite doesn't run
+   needlessly.
 
 At this point you're waiting on us. We like to at least comment on, if not
 accept, pull requests within three business days (and, typically, one business
 day). We may suggest some changes or improvements or alternatives.
 
-Some things that will increase the chance that your pull request is accepted,
-taken straight from the Ruby on Rails guide:
+Some things that will increase the chance that your pull request is accepted:
 
-* Use Rails idioms and helpers.
+* Use idiomatic Ruby and follow the syntax conventions below.
 * Include tests that fail without your code, and pass with it.
 * Update the README, the change log, the wiki documentation... anything that is
   affected by your contribution.
@@ -86,6 +96,7 @@ Syntax:
 * `a = b` and not `a=b`.
 * `a_method { |block| ... }` and not `a_method { | block | ... }` or
 `a_method{|block| ...}`.
-* Follow the conventions you see used in the source already.
+* Prefer simplicity, readability, and maintainability over terseness.
+* Follow the conventions you see used in the code already.
 
 And in case we didn't emphasize it enough: we love tests!
