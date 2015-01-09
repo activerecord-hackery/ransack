@@ -80,7 +80,7 @@
 
 *   Update Travis-ci for Rails 5.0.0 and 4-2-stable.
 
-*   Update Travis-ci tests for Ruby 2.2.
+*   Update the Travis-ci tests and the Gemfile for Ruby 2.2.
 
 *   Replace `#search` with `#ransack` class methods in the README and wiki
     code examples. Enabling the `#search` alias by default may possibly be
