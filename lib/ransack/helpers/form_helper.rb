@@ -64,6 +64,7 @@ module Ransack
 
         options = args.first.is_a?(Hash) ? args.shift.dup : {}
         default_order = options.delete :default_order
+        hide_indicator = options.delete :hide_indicator
         current_dir = prev_attr == attr_name ? prev_dir : nil
 
         if current_dir
@@ -88,7 +89,7 @@ module Ransack
         end
 
         link_to(
-          [ERB::Util.h(name), order_indicator_for(current_dir)]
+          [ERB::Util.h(name), order_indicator_for(current_dir, hide_indicator)]
             .compact
             .join(' ')
             .html_safe,
@@ -99,7 +100,8 @@ module Ransack
 
       private
 
-      def order_indicator_for(order)
+      def order_indicator_for(order, hide_indicator = false)
+        return nil if hide_indicator
         if order == 'asc'
           '&#9650;'
         elsif order == 'desc'
