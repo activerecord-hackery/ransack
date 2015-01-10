@@ -3,46 +3,61 @@ require 'spec_helper'
 module Ransack
   module Adapters
     module ActiveRecord
+      version = ::ActiveRecord::VERSION
+      AR_version = "#{version::MAJOR}.#{version::MINOR}"
+
       describe Context do
         subject { Context.new(Person) }
 
         describe '#relation_for' do
           it 'returns relation for given object' do
-            subject.object.should be_an ::ActiveRecord::Relation
+            expect(subject.object).to be_an ::ActiveRecord::Relation
           end
         end
 
         describe '#evaluate' do
           it 'evaluates search objects' do
-            search = Search.new(Person, name_eq: 'Joe Blow')
+            search = Search.new(Person, :name_eq => 'Joe Blow')
             result = subject.evaluate(search)
 
-            result.should be_an ::ActiveRecord::Relation
-            result.to_sql.should match /#{quote_column_name("name")} = 'Joe Blow'/
+            expect(result).to be_an ::ActiveRecord::Relation
+            expect(result.to_sql)
+            .to match /#{quote_column_name("name")} = 'Joe Blow'/
           end
 
           it 'SELECTs DISTINCT when distinct: true' do
-            search = Search.new(Person, name_eq: 'Joe Blow')
-            result = subject.evaluate(search, distinct: true)
+            search = Search.new(Person, :name_eq => 'Joe Blow')
+            result = subject.evaluate(search, :distinct => true)
 
-            result.should be_an ::ActiveRecord::Relation
-            result.to_sql.should match /SELECT DISTINCT/
+            expect(result).to be_an ::ActiveRecord::Relation
+            expect(result.to_sql).to match /SELECT DISTINCT/
+          end
+        end
+
+        describe "sharing context across searches" do
+          let(:shared_context) { Context.for(Person) }
+
+          before do
+            Search.new(Person, { :parent_name_eq => 'A' },
+              context: shared_context)
+            Search.new(Person, { :children_name_eq => 'B' },
+              context: shared_context)
           end
         end
 
         it 'contextualizes strings to attributes' do
           attribute = subject.contextualize 'children_children_parent_name'
-          attribute.should be_a Arel::Attributes::Attribute
-          attribute.name.to_s.should eq 'name'
-          attribute.relation.table_alias.should eq 'parents_people'
+          expect(attribute).to be_a Arel::Attributes::Attribute
+          expect(attribute.name.to_s).to eq 'name'
+          expect(attribute.relation.table_alias).to eq 'parents_people'
         end
 
         it 'builds new associations if not yet built' do
           attribute = subject.contextualize 'children_articles_title'
-          attribute.should be_a Arel::Attributes::Attribute
-          attribute.name.to_s.should eq 'title'
-          attribute.relation.name.should eq 'articles'
-          attribute.relation.table_alias.should be_nil
+          expect(attribute).to be_a Arel::Attributes::Attribute
+          expect(attribute.name.to_s).to eq 'title'
+          expect(attribute.relation.name).to eq 'articles'
+          expect(attribute.relation.table_alias).to be_nil
         end
 
       end

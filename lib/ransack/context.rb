@@ -52,8 +52,6 @@ module Ransack
     def klassify(obj)
       if Class === obj && ::ActiveRecord::Base > obj
         obj
-      elsif obj.respond_to? :klass
-        obj.klass
       elsif obj.respond_to? :base_klass
         obj.base_klass
       else
@@ -132,6 +130,10 @@ module Ransack
 
     def ransackable_association?(str, klass)
       klass.ransackable_associations(auth_object).include? str
+    end
+
+    def ransackable_scope?(str, klass)
+      klass.ransackable_scopes(auth_object).any? { |s| s.to_s == str }
     end
 
     def searchable_attributes(str = '')

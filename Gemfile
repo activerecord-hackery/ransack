@@ -3,22 +3,14 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || 'master'
-arel  = ENV['AREL']  || 'master'
+rails = ENV['RAILS'] || '4-2-stable'
 
-arel_opts =
-  case arel
-  when /\// # A path
-    { path: arel }
-  when /^v/ # A tagged version
-    { git: 'git://github.com/rails/arel.git', tag: arel }
-  else
-    { git: 'git://github.com/rails/arel.git', branch: arel }
-  end
+gem 'polyamorous', '~> 1.1'
 
-gem 'arel', arel_opts
+gem 'pry'
 
-gem 'polyamorous', git: 'git://github.com/activerecord-hackery/polyamorous.git'
+# Provide timezone information on Windows
+gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
 
 case rails
 when /\// # A path

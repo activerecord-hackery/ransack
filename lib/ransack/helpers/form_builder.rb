@@ -1,4 +1,19 @@
 require 'action_view'
+
+# This patch is needed since this Rails commit:
+# https://github.com/rails/rails/commit/c1a118a
+#
+# TODO: Find a better way to solve this.
+#
+module ActionView::Helpers::Tags
+  class Base
+    private
+    def value(object)
+      object.send @method_name if object # use send instead of public_send
+    end
+  end
+end
+
 require 'simple_form' if
   (ENV['RANSACK_FORM_BUILDER'] || '').match('SimpleForm')
 
@@ -107,7 +122,7 @@ module Ransack
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
         default = options.delete(:default) || 'cont'
-        keys = options[:compounds] ? Predicate.names : 
+        keys = options[:compounds] ? Predicate.names :
           Predicate.names.reject { |k| k.match(/_(any|all)$/) }
         if only = options[:only]
           if only.respond_to? :call
