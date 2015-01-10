@@ -160,6 +160,12 @@ column title or a default sort order:
 <%= content_tag :th, sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
 
+The sort link may be displayed without the order indicator arrow by passing hide_indicator: true, default: false
+
+```erb
+<%= content_tag :th, sort_link(@q, :name, 'Last Name', hide_indicator: true) %>
+```
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to
