@@ -36,6 +36,11 @@ if the information requested is provided.
 We gladly accept pull requests to fix bugs and, in some circumstances, add new
 features to Ransack.
 
+If you're new to contributing to open source, welcome! It can seem scary, so
+here is a [great blog post to help you get started]
+(http://robots.thoughtbot.com/8-new-steps-for-fixing-other-peoples-code),
+step by step.
+
 Before issuing a pull request, please make sure that all specs are passing,
 that any new features have test coverage, and that anything that breaks
 backward compatibility has a very good reason for doing so.
@@ -48,7 +53,6 @@ Here's a quick guide:
 2. Begin by running the tests. We only take pull requests with passing tests,
    and it's great to know that you have a clean slate:
 
-        $ bundle install
         $ bundle exec rake spec
 
 3. Hack away! Please use Ruby features that are compatible down to Ruby 1.9.
