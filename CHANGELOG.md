@@ -1,6 +1,6 @@
 # Change Log
 
-## Master (Unreleased)
+## Version 1.6.0 - 2015-01-12
 ### Added
 
 *   Add support for using Ransack with `Mongoid 4.0` without associations
