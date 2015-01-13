@@ -27,7 +27,7 @@ instead.
 If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (1.5.1).](https://github.com/activerecord-hackery/ransack/tree/v.1.5.1)
+[View documentation for the last release (1.6.0).](https://github.com/activerecord-hackery/ransack/tree/v.1.6.0)
 
 ## Getting started
 
@@ -36,7 +36,7 @@ We try to keep it functioning with Rails master too, although frequent changes
 in Arel and Active Record make that a moving target. Ransack works
 out-of-the-box with Active Record and features new support for Mongoid 4.0
 (without associations, further details below). If you are on Ruby 1.8, you may
-need to use a slightly earlier version of Ransack, like '< 1.4'.
+need to use an earlier version of Ransack like 1.3.0.
 
 In your Gemfile, for the last officially released Ransack gem:
 
@@ -64,9 +64,9 @@ To use one of the branches, for example the `rails-4.1` branch:
 gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
-If you are using Rails master, be advised that Ransack master does not
-currently work with the latest breaking changes in Rails master and
-Arel 7/master of late December 2014. The most recent working commits are:
+If you are using Rails master, be advised that Ransack master does not yet work
+with the breaking changes in Rails master and Arel master added since December
+2014. The most recent working commits are:
 
 ```ruby
 gem 'rails', github: 'rails/rails', ref: '266ff70'
@@ -275,7 +275,7 @@ Article.search(params[:q])
 ```
 
 Users have reported issues of name conflicts with other gems, so `#search` may
-possibly be deprecated in the next major version of Ransack.
+possibly be deprecated in the next major version of Ransack (2.0).
 
 For now, if Ransack's `#search` method conflicts with the name of another
 method named `search` in your code or another gem, you may resolve it either by
@@ -372,7 +372,7 @@ class methods in your models to apply selective authorization:
 Here is how these four methods are implemented in Ransack:
 
 ```ruby
-  # Ransackable_attributes, by default, returns all column names
+  # `ransackable_attributes` by default returns all column names
   # and any defined ransackers as an array of strings.
   # For overriding with a whitelist array of strings.
   #
@@ -380,7 +380,7 @@ Here is how these four methods are implemented in Ransack:
     column_names + _ransackers.keys
   end
 
-  # Ransackable_associations, by default, returns the names
+  # `ransackable_associations` by default returns the names
   # of all associations as an array of strings.
   # For overriding with a whitelist array of strings.
   #
@@ -388,7 +388,7 @@ Here is how these four methods are implemented in Ransack:
     reflect_on_all_associations.map { |a| a.name.to_s }
   end
 
-  # Ransortable_attributes, by default, returns the names
+  # `ransortable_attributes` by default returns the names
   # of all attributes available for sorting as an array of strings.
   # For overriding with a whitelist array of strings.
   #
@@ -396,7 +396,7 @@ Here is how these four methods are implemented in Ransack:
     ransackable_attributes(auth_object)
   end
 
-  # Ransackable_scopes, by default, returns an empty array
+  # `ransackable_scopes` by default returns an empty array
   # i.e. no class methods/scopes are authorized.
   # For overriding with a whitelist array of *symbols*.
   #
