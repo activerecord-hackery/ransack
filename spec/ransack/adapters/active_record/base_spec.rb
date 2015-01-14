@@ -80,6 +80,14 @@ module Ransack
           end
         end
 
+        context "search on an `in` predicate with an array" do
+          it "should function correctly when passing an array of ids" do
+            array = Person.pluck(:id)
+            s = Person.ransack(id_in: array)
+            expect(s.result.count).to eq array.size
+          end
+        end
+
         describe '#ransacker' do
           # For infix tests
           def self.sane_adapter?
@@ -161,16 +169,16 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
-          context "search using an `in` predicate and an array passed to a ransacker" do
+          context "search on an `in` predicate with an array to a ransacker" do
             it "should function correctly when passing an array of ids" do
               s = Person.ransack(array_users_in: true)
-              expect(s.result.length).to be > 0
+              expect(s.result.count).to be > 0
             end
 
             it "should function correctly when passing an array of strings" do
               p = Person.create!(name: Person.first.id.to_s)
               s = Person.ransack(array_names_in: true)
-              expect(s.result.length).to be > 0
+              expect(s.result.count).to be > 0
             end
           end
 
