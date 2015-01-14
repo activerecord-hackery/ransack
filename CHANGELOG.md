@@ -1,8 +1,18 @@
 # Change Log
 
+## Version 1.6.2 - 2015-01-14
+
+*   Fix a regression
+    ([#494](https://github.com/activerecord-hackery/ransack/issues/494))
+    where passing an array of routes of `search_form_for` no longer worked,
+    and add a failing/passing test that would have caught the issue.
+
+    *Daniel Rikowski*, *Jon Atack*
+
+
 ## Version 1.6.1 - 2015-01-14
 
-*   Fix a regression with using `in` predicates caused by PR [#488](https://github.com/activerecord-hackery/ransack/pull/488)). Add a test.
+*   Fix a regression with using `in` predicates caused by PR [#488](https://github.com/activerecord-hackery/ransack/pull/488)) and add a test.
 
 *   README improvements to clarify `sort_link` syntax with associations and
     Ransack#search vs #ransack.
