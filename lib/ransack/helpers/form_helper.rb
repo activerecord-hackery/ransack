@@ -12,15 +12,15 @@ module Ransack
           options[:url] ||= polymorphic_path(
             search.klass, format: options.delete(:format)
             )
-        elsif record.is_a? Array &&
-            (search = record.detect { |o| o.is_a? Ransack::Search })
+        elsif record.is_a?(Array) &&
+        (search = record.detect { |o| o.is_a?(Ransack::Search) })
           options[:url] ||= polymorphic_path(
-            record.map { |o| o.is_a? Ransack::Search ? o.klass : o },
+            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o },
             format: options.delete(:format)
             )
         else
           raise ArgumentError,
-            'No Ransack::Search object was provided to search_form_for!'
+          'No Ransack::Search object was provided to search_form_for!'
         end
         options[:html] ||= {}
         html_options = {
