@@ -82,7 +82,7 @@ module Ransack
 
         context "search on an `in` predicate with an array" do
           it "should function correctly when passing an array of ids" do
-            array = Person.pluck(:id)
+            array = Person.all.map(&:id)
             s = Person.ransack(id_in: array)
             expect(s.result.count).to eq array.size
           end
