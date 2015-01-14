@@ -6,8 +6,10 @@ module Ransack
 
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
-        resources :people
-        resources :notes
+        resources :people, :notes
+        namespace :admin do
+          resources :comments
+        end
         get ':controller(/:action(/:id(.:format)))'
       end
 
@@ -370,6 +372,13 @@ module Ransack
           .search_form_for(Person.search, :format => :json) {}
         }
         it { should match /action="\/people.json"/ }
+      end
+
+      describe '#search_form_for with an array of routes' do
+        subject {
+          @controller.view_context.search_form_for([:admin, Comment.search]) {}
+        }
+        it { should match /action="\/admin\/comments"/ }
       end
 
       describe '#search_form_for with custom default search key' do
