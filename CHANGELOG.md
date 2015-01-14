@@ -1,5 +1,17 @@
 # Change Log
 
+## Version 1.6.1 - 2015-01-14
+
+*   Fix a regression with using `in` predicates caused by PR [#488](https://github.com/activerecord-hackery/ransack/pull/488)). Add a test.
+
+*   README improvements to clarify `sort_link` syntax with associations and
+    Ransack#search vs #ransack.
+
+*   Default the Gemfile to Rails 4-2-stable.
+
+    *Jon Atack*
+
+
 ## Version 1.6.0 - 2015-01-12
 ### Added
 
@@ -88,6 +100,7 @@
     [#369](https://github.com/activerecord-hackery/ransack/issues/369).
 
     *Jon Atack*
+
 
 ## Version 1.5.1 - 2014-10-30
 ### Fixed
