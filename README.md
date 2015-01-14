@@ -265,17 +265,18 @@ construct much more complex search forms, such as the one on the
 
 ### Ransack #search method
 
-Ransack will try to to make `#search` available in your models, but in the case
-that `#search` has already been defined, you can always use the default
-`#ransack` method. For example, the following would be equivalent:
+Ransack will try to to make the class method `#search` available in your
+models, but if `#search` has already been defined elsewhere, you can always use
+the default `#ransack` class method. So the following are equivalent:
 
 ```ruby
 Article.ransack(params[:q])
 Article.search(params[:q])
 ```
 
-Users have reported issues of name conflicts with other gems, so `#search` may
-possibly be deprecated in the next major version of Ransack (2.0).
+Users have reported issues of `#search` name conflicts with other gems, so
+the `#search` method alias might be deprecated in the next major version of
+Ransack (2.0). It's advisable to use the default `#ransack` instead.
 
 For now, if Ransack's `#search` method conflicts with the name of another
 method named `search` in your code or another gem, you may resolve it either by
