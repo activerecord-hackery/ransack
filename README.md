@@ -293,7 +293,7 @@ Ransack::Adapters::ActiveRecord::Base.class_eval('remove_method :search')
 You can easily use Ransack to search for objects in `has_many` and `belongs_to`
 associations.
 
-Given you have these associations ...
+Given these associations...
 
 ```ruby
 class Employee < ActiveRecord::Base
@@ -316,7 +316,7 @@ class Supervisor < ActiveRecord::Base
 end
 ```
 
-... and a controller ...
+... and a controller...
 
 ```ruby
 class SupervisorsController < ApplicationController
@@ -327,7 +327,7 @@ class SupervisorsController < ApplicationController
 end
 ```
 
-... you might set up your form like this ...
+... you might set up your form like this...
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -349,6 +349,11 @@ end
   <%= content_tag :th, sort_link(@q, 'employees.last_name') %>
 <% end %>
 ```
+
+Please note that in a sort link, the association is expressed as an SQL string
+(`'employees.last_name'`) with a pluralized table name, instead of the symbol
+`:employee_last_name` syntax with a class#underscore table name used for
+Ransack objects elsewhere.
 
 ### Using Ransackers to add custom search functions via Arel
 
