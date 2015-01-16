@@ -4,7 +4,7 @@
 
 *   Fix a regression
     ([#494](https://github.com/activerecord-hackery/ransack/issues/494))
-    where passing an array of routes of `search_form_for` no longer worked,
+    where passing an array of routes to `search_form_for` no longer worked,
     and add a failing/passing test that would have caught the issue.
 
     *Daniel Rikowski*, *Jon Atack*
