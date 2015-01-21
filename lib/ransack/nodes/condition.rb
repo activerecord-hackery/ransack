@@ -123,9 +123,11 @@ module Ransack
       end
 
       def value
-        predicate.wants_array ?
-          values.map { |v| v.cast(default_type) } :
+        if predicate.wants_array
+          values.map { |v| v.cast(default_type) }
+        else
           values.first.cast(default_type)
+        end
       end
 
       def build(params)
@@ -184,8 +186,9 @@ module Ransack
 
       def formatted_values_for_attribute(attr)
         formatted = casted_values_for_attribute(attr).map do |val|
-          val = attr.ransacker.formatter.call(val) if
-            attr.ransacker && attr.ransacker.formatter
+          if attr.ransacker && attr.ransacker.formatter
+            val = attr.ransacker.formatter.call(val)
+          end
           val = predicate.format(val)
           val
         end
