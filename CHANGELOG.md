@@ -11,6 +11,12 @@
 
     *Nate Berkopec*, *Jon Atack*
 
+*   Update travis-ci to no longer test Rails 3.1 with Ruby 2.2 and speed up the test matrix.
+
+*   Refactor Nodes::Condition.
+
+    *Jon Atack*
+
 
 ## Version 1.6.2 - 2015-01-14
 
