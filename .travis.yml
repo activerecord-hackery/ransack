@@ -52,7 +52,6 @@ matrix:
       env: RAILS=3-1-stable DB=mysql
     - rvm: 2.2
       env: RAILS=3-1-stable DB=postgres
-  exclude:
     - rvm: 2.2
       env: RAILS=3-0-stable DB=sqlite
     - rvm: 2.2
