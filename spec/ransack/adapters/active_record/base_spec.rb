@@ -152,6 +152,18 @@ module Ransack
             s = Person.ransack('')
           end
 
+          it "should function correctly with a multi-parameter attribute" do
+            date = Date.current
+            s = Person.ransack(
+              { "created_at_gteq(1i)" => date.year,
+                "created_at_gteq(2i)" => date.month,
+                "created_at_gteq(3i)" => date.day
+              }
+            )
+            expect(s.result.to_sql).to match />=/
+            expect(s.result.to_sql).to match date.to_s
+          end
+
           it "should function correctly when using fields with dots in them" do
             s = Person.ransack(:email_cont => "example.com")
             expect(s.result.exists?).to be true
