@@ -1,11 +1,11 @@
 # Change Log
 
-## Master (unreleased)
+## Version 1.6.3 - 2015-01-21
 
 *   Fix a regression
     ([#496](https://github.com/activerecord-hackery/ransack/issues/496)) caused
     by [ee571fe](https://github.com/activerecord-hackery/ransack/commit/ee571fe)
-    where passing a multi-parameter attribute (i.e. `date_select`) raised
+    where passing a multi-parameter attribute (like `date_select`) raised
     `RuntimeError: can't add a new key into hash during iteration`, and add a
     regression spec for the issue.
 
