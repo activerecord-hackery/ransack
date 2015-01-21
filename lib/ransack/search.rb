@@ -153,7 +153,7 @@ module Ransack
     end
 
     def collapse_multiparameter_attributes!(attrs)
-      attrs.each_key do |k|
+      attrs.keys.each do |k|
         if k.include?(Constants::LEFT_PARENTHESIS)
           real_attribute, position = k.split(/\(|\)/)
           cast =
