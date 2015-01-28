@@ -42,6 +42,9 @@ class Person < ActiveRecord::Base
   scope :of_age,      lambda { |of_age|
     of_age ? where("age >= ?", 18) : where("age < ?", 18)
   }
+  scope :article_count_equals, lambda { |n|
+    joins(:articles).group("people.id").having("count(articles.id) = ?", n)
+  }
 
   ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
