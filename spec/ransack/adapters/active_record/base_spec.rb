@@ -3,7 +3,6 @@ require 'spec_helper'
 module Ransack
   module Adapters
     module ActiveRecord
-
       describe Base do
 
         subject { ::ActiveRecord::Base }
@@ -12,20 +11,11 @@ module Ransack
         it { should respond_to :search }
 
         describe '#search' do
-
           subject { Person.ransack }
 
           it { should be_a Search }
           it 'has a Relation as its object' do
             expect(subject.object).to be_an ::ActiveRecord::Relation
-          end
-
-          context 'using ransacker with a SqlLiteral callable' do
-            it 'should not raise an error' do
-              # The `with_banana` ransacker has a SqlLiteral callable
-              search = Person.search("with_banana_in" => "peel")
-              expect { search.result }.to_not raise_error
-            end
           end
 
           context 'with scopes' do
@@ -112,14 +102,6 @@ module Ransack
           it 'does not modify the parameters' do
             params = { :name_eq => '' }
             expect { Person.ransack(params) }.not_to change { params }
-          end
-        end
-
-        context "search on an `in` predicate with an array" do
-          it "should function correctly when passing an array of ids" do
-            array = Person.all.map(&:id)
-            s = Person.ransack(id_in: array)
-            expect(s.result.count).to eq array.size
           end
         end
 
@@ -216,7 +198,7 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
-          context "search on an `in` predicate with an array to a ransacker" do
+          context "searching on an `in` predicate with a ransacker" do
             it "should function correctly when passing an array of ids" do
               s = Person.ransack(array_users_in: true)
               expect(s.result.count).to be > 0
@@ -227,6 +209,24 @@ module Ransack
               s = Person.ransack(array_names_in: true)
               expect(s.result.count).to be > 0
             end
+
+            it 'should function correctly with an Arel SqlLiteral' do
+              s = Person.search(sql_literal_id_in: 1)
+              expect(s.result.count).to be 1
+              s = Person.search(sql_literal_id_in: ['2', 4, '5', 8])
+              expect(s.result.count).to be 4
+            end
+          end
+
+          context "search on an `in` predicate with an array" do
+            it "should function correctly when passing an array of ids" do
+              array = Person.all.map(&:id)
+              s = Person.ransack(id_in: array)
+              expect(s.result.count).to eq array.size
+            end
+          end
+
+          context 'search on an `in` predicate with an Arel.sql ransacker' do
           end
 
           it "should function correctly when an attribute name ends with '_start'" do
