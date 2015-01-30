@@ -3,6 +3,7 @@ require 'spec_helper'
 module Ransack
   module Adapters
     module ActiveRecord
+
       describe Base do
 
         subject { ::ActiveRecord::Base }
@@ -11,6 +12,7 @@ module Ransack
         it { should respond_to :search }
 
         describe '#search' do
+
           subject { Person.ransack }
 
           it { should be_a Search }
@@ -70,21 +72,28 @@ module Ransack
               search.result.to_sql.should include "active = 1"
             end
 
-            context "applying joins/group/having scope" do
-              it "applies scope correctly when input is 0" do
-                search = Person.ransack('article_count_equals' => 0)
-                search.result.to_sql.should include "HAVING count(articles.id) = 0"
+            unless AR_VERSION =~ /^3\.0\./
+
+              context "applying joins/group/having scope" do
+                it "applies scope correctly when input is 0" do
+                  search = Person.ransack('article_count_equals' => 0)
+                  search.result.to_sql.should include
+                  "HAVING count(articles.id) = 0"
+                end
+
+                it "applies scope correctly when input is 1" do
+                  search = Person.ransack('article_count_equals' => 1)
+                  search.result.to_sql.should include
+                  "HAVING count(articles.id) = 1"
+                end
+
+                it "applies scope correctly when input is 1337" do
+                  search = Person.ransack('article_count_equals' => 1337)
+                  search.result.to_sql.should include
+                  "HAVING count(articles.id) = 1337"
+                end
               end
 
-              it "applies scope correctly when input is 1" do
-                search = Person.ransack('article_count_equals' => 1)
-                search.result.to_sql.should include "HAVING count(articles.id) = 1"
-              end
-
-              it "applies scope correctly when input is 1337" do
-                search = Person.ransack('article_count_equals' => 1337)
-                search.result.to_sql.should include "HAVING count(articles.id) = 1337"
-              end
             end
           end
 

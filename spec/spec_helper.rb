@@ -4,6 +4,10 @@ require 'faker'
 require 'ransack'
 require 'pry'
 
+# FIXME: remove this AR_VERSION constant when no longer need it in base_spec.rb.
+# Basically as soon as we no longer run the Travis CI suite for Rails 3.0.
+AR_VERSION = ActiveRecord::VERSION::STRING
+
 I18n.enforce_available_locales = false
 Time.zone = 'Eastern Time (US & Canada)'
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
