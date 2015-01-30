@@ -226,9 +226,6 @@ module Ransack
             end
           end
 
-          context 'search on an `in` predicate with an Arel.sql ransacker' do
-          end
-
           it "should function correctly when an attribute name ends with '_start'" do
             p = Person.create!(:new_start => 'Bar and foo', :name => 'Xiang')
 
