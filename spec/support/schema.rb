@@ -50,6 +50,17 @@ class Person < ActiveRecord::Base
     parent.table[:name]
   end
 
+  # The `with_banana` ransacker is just to reproduce a
+  # particular issue (#504) and probably should be removed
+  # eventually, because it doesn't represent a useful
+  # ransacker one might want in an actual application.
+  ransacker(:with_banana,
+    callable: proc { |parent|
+      Arel::Nodes::SqlLiteral.new("#{Article.table_name}.banana")
+    },
+    formatter: proc { |v| v }
+  )
+
   ransacker :array_users,
     formatter: proc { |v| Person.first(2).map(&:id) } do |parent|
     parent.table[:id]

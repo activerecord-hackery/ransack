@@ -43,6 +43,7 @@ module Ransack
         def casted_array_with_in_predicate?(predicate)
           return unless defined?(Arel::Nodes::Casted)
           predicate.class == Arel::Nodes::In &&
+          predicate.right[0].respond_to?(:val) &&
           predicate.right[0].val.is_a?(Array)
         end
 
