@@ -20,6 +20,14 @@ module Ransack
             expect(subject.object).to be_an ::ActiveRecord::Relation
           end
 
+          context 'using ransacker with a SqlLiteral callable' do
+            it 'should not raise an error' do
+              # The `with_banana` ransacker has a SqlLiteral callable
+              search = Person.search("with_banana_in" => "peel")
+              expect { search.result }.to_not raise_error
+            end
+          end
+
           context 'with scopes' do
             before do
               Person.stub :ransackable_scopes =>
