@@ -144,6 +144,25 @@ module Ransack
             s = Person.ransack('')
           end
 
+          context 'boolean column' do
+            let(:is_mysql) { ENV["DB"] == "mysql" }
+            let(:sql_col_ref) { is_mysql ? %Q{`people`.`awesome`} : %Q{"people"."awesome"} }
+
+            it "should find true records" do
+              sql_true = is_mysql ? '1' : "'t'"
+              s = Person.ransack(:awesome_eq => '1')
+              expected = "%s = %s" % [sql_col_ref, sql_true]
+              expect(s.result.to_sql).to include(expected)
+            end
+
+            it "should find false records" do
+              sql_false = is_mysql ? '0' : "'f'"
+              s = Person.ransack(:awesome_eq => '0')
+              expected = "%s = %s" % [sql_col_ref, sql_false]
+              expect(s.result.to_sql).to include(expected)
+            end
+          end
+
           it "should function correctly with a multi-parameter attribute" do
             date = Date.current
             s = Person.ransack(
