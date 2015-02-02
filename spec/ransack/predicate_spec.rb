@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 module Ransack
+  TRUE_VALUES  = [true,  1, '1', 't', 'T', 'true',  'TRUE'].to_set
+  FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
+
   describe Predicate do
 
     before do
@@ -20,18 +23,12 @@ module Ransack
     end
 
     describe 'eq' do
-      it 'generates an equality condition for boolean true' do
-        @s.awesome_eq = true
-        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
-        expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_true}/
+      it 'generates an equality condition for boolean true values' do
+        test_boolean_equality_for(true)
       end
 
-      it 'generates an equality condition for boolean false' do
-        @s.awesome_eq = false
-        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
-        expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_false}/
+      it 'generates an equality condition for boolean false values' do
+        test_boolean_equality_for(false)
       end
 
       it 'does not generate a condition for nil' do
@@ -361,5 +358,30 @@ module Ransack
         expect(@s.result.to_sql).to match /#{field} IS NOT NULL AND #{field} != ''/
       end
     end
-  end
+
+    private
+
+      def test_boolean_equality_for(boolean_value)
+        test_values_for(boolean_value).each do |value|
+          s = Search.new(Person, awesome_eq: value)
+          expect(s.result.to_sql).to match expected_boolean_query(boolean_value)
+        end
+      end
+
+      def test_values_for(boolean_value)
+        case boolean_value
+        when true
+          TRUE_VALUES
+        when false
+          FALSE_VALUES
+        end
+      end
+
+      def expected_boolean_query(boolean_value)
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        condition = ActiveRecord::Base.connection.send("quoted_#{boolean_value}")
+        /#{field} = #{condition}/
+      end
+    end
+
 end
