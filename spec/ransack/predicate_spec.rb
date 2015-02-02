@@ -362,9 +362,10 @@ module Ransack
     private
 
       def test_boolean_equality_for(boolean_value)
+        query = expected_query(boolean_value)
         test_values_for(boolean_value).each do |value|
           s = Search.new(Person, awesome_eq: value)
-          expect(s.result.to_sql).to match expected_boolean_query(boolean_value)
+          expect(s.result.to_sql).to match query
         end
       end
 
@@ -377,10 +378,10 @@ module Ransack
         end
       end
 
-      def expected_boolean_query(boolean_value)
-        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
-        condition = ActiveRecord::Base.connection.send("quoted_#{boolean_value}")
-        /#{field} = #{condition}/
+      def expected_query(value, attribute = 'awesome', operator = '=')
+        field = "#{quote_table_name("people")}.#{quote_column_name(attribute)}"
+        quoted_value = ActiveRecord::Base.connection.quote(value)
+        /#{field} #{operator} #{quoted_value}/
       end
     end
 
