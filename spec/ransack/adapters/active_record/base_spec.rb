@@ -25,73 +25,68 @@ module Ransack
             end
 
             it "applies true scopes" do
-              search = Person.ransack('active' => true)
-              search.result.to_sql.should include "active = 1"
+              s = Person.ransack('active' => true)
+              s.result.to_sql.should include "active = 1"
             end
 
             it "applies stringy true scopes" do
-              search = Person.ransack('active' => 'true')
-              search.result.to_sql.should include "active = 1"
+              s = Person.ransack('active' => 'true')
+              s.result.to_sql.should include "active = 1"
             end
 
             it "applies stringy boolean scopes with true value in an array" do
-              search = Person.ransack('of_age' => ['true'])
-              search.result.to_sql.should include "age >= 18"
+              s = Person.ransack('of_age' => ['true'])
+              s.result.to_sql.should include "age >= 18"
             end
 
             it "applies stringy boolean scopes with false value in an array" do
-              search = Person.ransack('of_age' => ['false'])
-              search.result.to_sql.should include "age < 18"
+              s = Person.ransack('of_age' => ['false'])
+              s.result.to_sql.should include "age < 18"
             end
 
             it "ignores unlisted scopes" do
-              search = Person.ransack('restricted' => true)
-              search.result.to_sql.should_not include "restricted"
+              s = Person.ransack('restricted' => true)
+              s.result.to_sql.should_not include "restricted"
             end
 
             it "ignores false scopes" do
-              search = Person.ransack('active' => false)
-              search.result.to_sql.should_not include "active"
+              s = Person.ransack('active' => false)
+              s.result.to_sql.should_not include "active"
             end
 
             it "ignores stringy false scopes" do
-              search = Person.ransack('active' => 'false')
-              search.result.to_sql.should_not include "active"
+              s = Person.ransack('active' => 'false')
+              s.result.to_sql.should_not include "active"
             end
 
             it "passes values to scopes" do
-              search = Person.ransack('over_age' => 18)
-              search.result.to_sql.should include "age > 18"
+              s = Person.ransack('over_age' => 18)
+              s.result.to_sql.should include "age > 18"
             end
 
             it "chains scopes" do
-              search = Person.ransack('over_age' => 18, 'active' => true)
-              search.result.to_sql.should include "age > 18"
-              search.result.to_sql.should include "active = 1"
+              s = Person.ransack('over_age' => 18, 'active' => true)
+              s.result.to_sql.should include "age > 18"
+              s.result.to_sql.should include "active = 1"
             end
 
             unless AR_VERSION =~ /^3\.0\./
-
               context "applying joins/group/having scope" do
                 it "applies scope correctly when input is 0" do
-                  search = Person.ransack('article_count_equals' => 0)
-                  search.result.to_sql.should include
-                  "HAVING count(articles.id) = 0"
+                  s = Person.ransack('article_count_equals' => 0)
+                  s.result.to_sql.should include "HAVING count(articles.id) = 0"
                 end
 
                 it "applies scope correctly when input is 1" do
-                  search = Person.ransack('article_count_equals' => 1)
-                  search.result.to_sql.should include
-                  "HAVING count(articles.id) = 1"
+                  s = Person.ransack('article_count_equals' => 1)
+                  s.result.to_sql.should include "HAVING count(articles.id) = 1"
                 end
 
                 it "applies scope correctly when input is 1337" do
-                  search = Person.ransack('article_count_equals' => 1337)
-                  search.result.to_sql.should include
-                  "HAVING count(articles.id) = 1337"
+                  s = Person.ransack('article_count_equals' => 1337)
+                  s.result.to_sql.should include "HAVING count(articles.id) = 1337"
                 end
               end
-
             end
           end
 
@@ -211,9 +206,9 @@ module Ransack
             end
 
             it 'should function correctly with an Arel SqlLiteral' do
-              s = Person.search(sql_literal_id_in: 1)
+              s = Person.ransack(sql_literal_id_in: 1)
               expect(s.result.count).to be 1
-              s = Person.search(sql_literal_id_in: ['2', 4, '5', 8])
+              s = Person.ransack(sql_literal_id_in: ['2', 4, '5', 8])
               expect(s.result.count).to be 4
             end
           end
