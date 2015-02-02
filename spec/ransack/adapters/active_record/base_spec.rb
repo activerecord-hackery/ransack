@@ -20,8 +20,7 @@ module Ransack
 
           context 'with scopes' do
             before do
-              Person.stub :ransackable_scopes =>
-                [:active, :over_age, :of_age, :article_count_equals]
+              Person.stub :ransackable_scopes => [:active, :over_age, :of_age]
             end
 
             it "applies true scopes" do
@@ -68,25 +67,6 @@ module Ransack
               s = Person.ransack('over_age' => 18, 'active' => true)
               s.result.to_sql.should include "age > 18"
               s.result.to_sql.should include "active = 1"
-            end
-
-            unless AR_VERSION =~ /^3\.0\./
-              context "applying joins/group/having scope" do
-                it "applies scope correctly when input is 0" do
-                  s = Person.ransack('article_count_equals' => 0)
-                  s.result.to_sql.should include "HAVING count(articles.id) = 0"
-                end
-
-                it "applies scope correctly when input is 1" do
-                  s = Person.ransack('article_count_equals' => 1)
-                  s.result.to_sql.should include "HAVING count(articles.id) = 1"
-                end
-
-                it "applies scope correctly when input is 1337" do
-                  s = Person.ransack('article_count_equals' => 1337)
-                  s.result.to_sql.should include "HAVING count(articles.id) = 1337"
-                end
-              end
             end
           end
 

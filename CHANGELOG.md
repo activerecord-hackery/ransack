@@ -1,9 +1,6 @@
 # Change Log
 
-*   When sanitizing scope arguments, do not replace 0 and 1 with false and true
-    cf. https://github.com/activerecord-hackery/ransack/issues/502
-
-    *Gabe Kopley*
+## Master (unreleased)
 
 
 ## Version 1.6.3 - 2015-01-21
