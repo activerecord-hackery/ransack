@@ -200,7 +200,7 @@ module Ransack
             end
 
             it "should function correctly when passing an array of strings" do
-              p = Person.create!(name: Person.first.id.to_s)
+              Person.create!(name: Person.first.id.to_s)
               s = Person.ransack(array_names_in: true)
               expect(s.result.count).to be > 0
             end
