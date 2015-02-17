@@ -67,6 +67,21 @@ class Person < ActiveRecord::Base
     Arel.sql('people.id')
   end
 
+  ransacker :articles_title_with_specified_body_size, args: [:parent, :rargs] do |parent, rargs|
+    min_body = rargs[0]
+    max_body = rargs[1]
+
+    sql = <<-SQL
+      (SELECT title
+         FROM articles
+        WHERE articles.person_id = people.id
+          AND CHAR_LENGTH(articles.body) BETWEEN #{min_body} AND #{max_body}
+      )
+    SQL
+
+    Arel.sql(sql.squish)
+  end
+
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       column_names + _ransackers.keys - ['only_sort']

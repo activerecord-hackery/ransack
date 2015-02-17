@@ -3,14 +3,15 @@ module Ransack
     class Attribute < Node
       include Bindable
 
-      attr_reader :name
+      attr_reader :name, :rargs
 
       delegate :blank?, :present?, :==, :to => :name
       delegate :engine, :to => :context
 
-      def initialize(context, name = nil)
+      def initialize(context, name = nil, rargs = [])
         super(context)
         self.name = name unless name.blank?
+        @rargs = rargs
       end
 
       def name=(name)
