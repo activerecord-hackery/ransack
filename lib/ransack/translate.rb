@@ -59,7 +59,8 @@ module Ransack
 
       defaults =
         if key.blank?
-          [:"#{context.klass.i18n_scope}.models.#{i18n_key(context.klass)}"]
+          [:"ransack.models.#{i18n_key(context.klass)}",
+           :"#{context.klass.i18n_scope}.models.#{i18n_key(context.klass)}"]
         else
           [:"ransack.associations.#{i18n_key(context.klass)}.#{key}"]
         end

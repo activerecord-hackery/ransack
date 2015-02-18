@@ -632,6 +632,8 @@ en:
       end: ends with
       gt: greater than
       lt: less than
+    models:
+      person: Passanger
     attributes:
       person:
         name: Full Name
