@@ -314,7 +314,7 @@ module Ransack
             )
           end
 
-          it 'searches by ransacker with ransacker_attributes', focus: true do
+          it 'searches by ransacker with ransacker_attributes' do
             s = Person.ransack(
               c: [{
                 a: {
@@ -324,7 +324,7 @@ module Ransack
                   }
                 },
                 p: 'cont',
-                v: ['Rails 5.0 released']
+                v: ['Rails has been released']
               }]
             )
 
@@ -333,7 +333,7 @@ module Ransack
             )
 
             expect(s.result.to_sql).to match(
-              /LIKE \'\%Rails 5\.0 released\%\'/
+              /LIKE \'\%Rails has been released\%\'/
             )
           end
         end
