@@ -2,6 +2,8 @@
 
 ## Master (unreleased)
 
+*   Fix and a test to handle a scope of an array argument to `ransackable_scopes`
+    ([#404](https://github.com/activerecord-hackery/ransack/issues/404))
 
 ## Version 1.6.3 - 2015-01-21
 

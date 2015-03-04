@@ -52,6 +52,8 @@ module Ransack
       return unless @klass.method(scope) && args != false
       @object = if scope_arity(scope) < 1 && args == true
                   @object.public_send(scope)
+                elsif args.is_a?(Array) && args.length > 1
+                  @object.public_send(scope, args)
                 else
                   @object.public_send(scope, *args)
                 end
