@@ -313,6 +313,29 @@ module Ransack
                 quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
+
+          it 'searches by ransacker with ransacker_attributes' do
+            s = Person.ransack(
+              c: [{
+                a: {
+                  '0' => {
+                    name: 'articles_title_with_specified_body_size',
+                    rargs: [10, 100]
+                  }
+                },
+                p: 'cont',
+                v: ['Rails has been released']
+              }]
+            )
+
+            expect(s.result.to_sql).to match(
+              /CHAR_LENGTH\(articles.body\) BETWEEN 10 AND 100/
+            )
+
+            expect(s.result.to_sql).to match(
+              /LIKE \'\%Rails has been released\%\'/
+            )
+          end
         end
 
         describe '#ransackable_attributes' do
