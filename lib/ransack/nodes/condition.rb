@@ -66,7 +66,7 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
-            attr = Attribute.new(@context, attrs[:name], attrs[:rargs])
+            attr = Attribute.new(@context, attrs[:name], attrs[:ransacker_args])
             self.attributes << attr if attr.valid?
           end
         else

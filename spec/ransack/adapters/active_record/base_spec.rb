@@ -314,24 +314,21 @@ module Ransack
             )
           end
 
-          it 'searches by ransacker with ransacker_attributes' do
+          it 'should allow passing ransacker arguments to a ransacker' do
             s = Person.ransack(
               c: [{
                 a: {
                   '0' => {
-                    name: 'articles_title_with_specified_body_size',
-                    rargs: [10, 100]
+                    name: 'with_passed_arguments', ransacker_args: [10, 100]
                   }
                 },
                 p: 'cont',
                 v: ['Rails has been released']
               }]
             )
-
             expect(s.result.to_sql).to match(
               /CHAR_LENGTH\(articles.body\) BETWEEN 10 AND 100/
             )
-
             expect(s.result.to_sql).to match(
               /LIKE \'\%Rails has been released\%\'/
             )

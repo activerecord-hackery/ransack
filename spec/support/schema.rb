@@ -67,10 +67,8 @@ class Person < ActiveRecord::Base
     Arel.sql('people.id')
   end
 
-  ransacker :articles_title_with_specified_body_size, args: [:parent, :rargs] do |parent, rargs|
-    min_body = rargs[0]
-    max_body = rargs[1]
-
+  ransacker :with_passed_arguments, args: [:parent, :ransacker_args] do |parent, args|
+    min_body, max_body = args
     sql = <<-SQL
       (SELECT title
          FROM articles
@@ -78,7 +76,6 @@ class Person < ActiveRecord::Base
           AND CHAR_LENGTH(articles.body) BETWEEN #{min_body} AND #{max_body}
       )
     SQL
-
     Arel.sql(sql.squish)
   end
 
