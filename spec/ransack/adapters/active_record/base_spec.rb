@@ -20,7 +20,7 @@ module Ransack
 
           context 'with scopes' do
             before do
-              Person.stub :ransackable_scopes => [:active, :over_age, :of_age]
+              Person.stub :ransackable_scopes => [:active, :over_age, :of_age, :between_age]
             end
 
             it "applies true scopes" do
@@ -41,6 +41,11 @@ module Ransack
             it "applies stringy boolean scopes with false value in an array" do
               s = Person.ransack('of_age' => ['false'])
               s.result.to_sql.should include "age < 18"
+            end
+
+            it "applies arrays scopes" do
+              s = Person.ransack('between_age' => [18, 19, 20])
+              s.result.to_sql.should include "\"age\" IN (18, 19, 20)"
             end
 
             it "ignores unlisted scopes" do

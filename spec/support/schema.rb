@@ -42,6 +42,9 @@ class Person < ActiveRecord::Base
   scope :of_age,      lambda { |of_age|
     of_age ? where("age >= ?", 18) : where("age < ?", 18)
   }
+  scope :between_age, lambda { |ages|
+    where(age: ages)
+  }
 
   ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
