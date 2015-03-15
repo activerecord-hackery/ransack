@@ -2,6 +2,10 @@
 
 ## Master (unreleased)
 
+*   Add ransacker arguments
+    ([#513](https://github.com/activerecord-hackery/ransack/pull/513))
+
+    *Denis Tataurov*, *Jon Atack*
 
 ## Version 1.6.3 - 2015-01-21
 
