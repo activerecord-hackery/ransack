@@ -70,10 +70,11 @@ class Person < ActiveRecord::Base
   ransacker :with_passed_arguments, args: [:parent, :ransacker_args] do |parent, args|
     min_body, max_body = args
     sql = <<-SQL
-      (SELECT title
+      (SELECT MAX(articles.title)
          FROM articles
         WHERE articles.person_id = people.id
           AND CHAR_LENGTH(articles.body) BETWEEN #{min_body} AND #{max_body}
+        GROUP BY articles.person_id
       )
     SQL
     Arel.sql(sql.squish)
