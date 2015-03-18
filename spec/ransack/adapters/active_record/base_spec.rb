@@ -333,6 +333,34 @@ module Ransack
               /LIKE \'\%Rails has been released\%\'/
             )
           end
+
+          it 'should allow search and sort passing ransacker arguments to a ransacker' do
+            s = Person.ransack(
+              c: [{
+                a: {
+                  '0' => {
+                    name: 'dynamic_hstore',
+                    ransacker_args: ['hstore_column', 'example_field']
+                  }
+                },
+                p: 'cont',
+                v: ['Some Value']
+              }],
+              s: {
+                '0' => {
+                  'name' => 'dynamic_hstore',
+                  'dir' => 'asc',
+                  'ransacker_args' => ['hstore_column', 'example_field']
+                }
+              }
+            )
+            expect(s.result.to_sql).to match(
+              /(\"people\".\"hstore_column\" -> 'example_field' LIKE '%Some Value%')/
+            )
+            expect(s.result.to_sql).to match(
+              /ORDER BY \"people\".\"hstore_column\" -> 'example_field' ASC/
+            )
+          end
         end
 
         describe '#ransackable_attributes' do
