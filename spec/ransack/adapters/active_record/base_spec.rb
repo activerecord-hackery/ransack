@@ -339,26 +339,29 @@ module Ransack
               c: [{
                 a: {
                   '0' => {
-                    name: 'dynamic_hstore',
-                    ransacker_args: ['hstore_column', 'example_field']
+                    name: 'with_passed_arguments',
+                    ransacker_args: [10, 100]
                   }
                 },
                 p: 'cont',
-                v: ['Some Value']
+                v: ['Rails has been released']
               }],
               s: {
                 '0' => {
-                  'name' => 'dynamic_hstore',
-                  'dir' => 'asc',
-                  'ransacker_args' => ['hstore_column', 'example_field']
+                  name: 'with_passed_arguments',
+                  dir: 'asc',
+                  ransacker_args: [10, 100]
                 }
               }
             )
             expect(s.result.to_sql).to match(
-              /(\"people\".\"hstore_column\" -> 'example_field' LIKE '%Some Value%')/
+              /CHAR_LENGTH\(articles.body\) BETWEEN 10 AND 100/
             )
             expect(s.result.to_sql).to match(
-              /ORDER BY \"people\".\"hstore_column\" -> 'example_field' ASC/
+              /LIKE \'\%Rails has been released\%\'/
+            )
+            expect(s.result.to_sql).to match(
+              /ORDER BY \(SELECT.*CHAR_LENGTH\(articles.body\) BETWEEN 10 AND 100/
             )
           end
         end

@@ -80,11 +80,6 @@ class Person < ActiveRecord::Base
     Arel.sql(sql.squish)
   end
 
-  ransacker :dynamic_hstore, args: [:parent, :ransacker_args] do |parent, args|
-    column, field = args
-    Arel::Nodes::InfixOperation.new("->", Person.arel_table[column], Arel::Nodes.build_quoted(field))
-  end
-
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       column_names + _ransackers.keys - ['only_sort']
