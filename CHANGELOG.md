@@ -1,5 +1,10 @@
 # Change Log
 
+*   Allowing `:wants_array` to be set to `false` in the predicate options.
+    ([#32](https://github.com/activerecord-hackery/ransack/issues/32))
+
+    *Michael Pavling*
+
 ## Version 1.6.4 - 2015-03-20
 
 *   ActionView patch to maintain compatibility with Rails 4.2.1 released today.
