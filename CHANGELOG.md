@@ -1,9 +1,18 @@
 # Change Log
 
-## Master (unreleased)
+## Version 1.6.4 - 2015-03-20
+
+*   ActionView patch to maintain compatibility with Rails 4.2.1 released today.
+
+    *Jon Atack*
+
+*   Enable scoping I18n by 'ransack.models'
+    ([#514](https://github.com/activerecord-hackery/ransack/pull/514)).
+
+    *nagyt234*
 
 *   Add ransacker arguments
-    ([#513](https://github.com/activerecord-hackery/ransack/pull/513))
+    ([#513](https://github.com/activerecord-hackery/ransack/pull/513)).
 
     *Denis Tataurov*, *Jon Atack*
 
