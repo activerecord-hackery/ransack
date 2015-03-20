@@ -27,8 +27,8 @@ instead.
 If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (1.6.3).]
-(https://github.com/activerecord-hackery/ransack/tree/v1.6.3)
+[View documentation for the last release (1.6.4).]
+(https://github.com/activerecord-hackery/ransack/tree/v1.6.4)
 
 ## Getting started
 
