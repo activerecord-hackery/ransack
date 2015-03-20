@@ -1,15 +1,34 @@
 require 'action_view'
 
-# This patch is needed since this Rails commit:
-# https://github.com/rails/rails/commit/c1a118a
-#
-# TODO: Find a better way to solve this.
+# Monkey-patching, avert your eyes!
+# TODO: Find a better way to solve these two issues:
 #
 module ActionView::Helpers::Tags
+
+  # This patch is needed since this Rails commit:
+  # https://github.com/rails/rails/commit/c1a118a
+  #
   class Base
     private
     def value(object)
       object.send @method_name if object # use send instead of public_send
+    end
+  end
+
+  # This patch is needed for Rails 4.2.1 and 5.0.0 since these commits:
+  #
+  # Rails 4.2:
+  # https://github.com/rails/rails/commits/4-2-stable/actionview/lib/action_view/helpers/tags/translator.rb
+  # https://github.com/rails/rails/commits/4-2-stable/actionview/lib/action_view/helpers/tags/placeholderable.rb
+  #
+  # Rails master:
+  # https://github.com/rails/rails/commits/master/actionview/lib/action_view/helpers/tags/translator.rb
+  # https://github.com/rails/rails/commits/master/actionview/lib/action_view/helpers/tags/placeholderable.rb
+  #
+  class Translator
+    def i18n_default
+      return '' unless model
+      ["#{model}.#{method_and_value}".to_sym, ""]
     end
   end
 end
