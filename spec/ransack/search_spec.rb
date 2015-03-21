@@ -210,23 +210,21 @@ module Ransack
       it 'evaluates conditions contextually' do
         search = Search.new(Person, :children_name_eq => 'Ernie')
         expect(search.result).to be_an ActiveRecord::Relation
-        where = search.result.where_values.first
-        expect(where.to_sql).to match /#{children_people_name_field} = 'Ernie'/
+        expect(search.result.to_sql).to match /#{
+          children_people_name_field} = 'Ernie'/
       end
 
       it 'evaluates compound conditions contextually' do
-        search = Search.new(Person, :children_name_or_name_eq => 'Ernie')
-        expect(search.result).to be_an ActiveRecord::Relation
-        where = search.result.where_values.first
-        expect(where.to_sql).to match /#{children_people_name_field
+        search = Search.new(Person, :children_name_or_name_eq => 'Ernie').result
+        expect(search).to be_an ActiveRecord::Relation
+        expect(search.to_sql).to match /#{children_people_name_field
           } = 'Ernie' OR #{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates polymorphic belongs_to association conditions contextually' do
-        search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie')
-        expect(search.result).to be_an ActiveRecord::Relation
-        where = search.result.where_values.first
-        expect(where.to_sql).to match /#{people_name_field} = 'Ernie'/
+        search = Search.new(Note, :notable_of_Person_type_name_eq => 'Ernie').result
+        expect(search).to be_an ActiveRecord::Relation
+        expect(search.to_sql).to match /#{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates nested conditions' do
@@ -237,13 +235,14 @@ module Ransack
               :children_children_name_eq => 'Ernie'
             }
           ]
-        )
-        expect(search.result).to be_an ActiveRecord::Relation
-        where = search.result.where_values.first
-        expect(where.to_sql).to match /#{children_people_name_field} = 'Ernie'/
-        expect(where.to_sql).to match /#{people_name_field} = 'Ernie'/
-        expect(where.to_sql).to match /#{quote_table_name("children_people_2")
-          }.#{quote_column_name("name")} = 'Ernie'/
+        ).result
+        expect(search).to be_an ActiveRecord::Relation
+        first, last = search.to_sql.split(/ AND /)
+        expect(first).to match /#{children_people_name_field} = 'Ernie'/
+        expect(last).to match /#{
+          people_name_field} = 'Ernie' OR #{
+          quote_table_name("children_people_2")}.#{
+          quote_column_name("name")} = 'Ernie'/
       end
 
       it 'evaluates arrays of groupings' do
@@ -252,15 +251,13 @@ module Ransack
             { :m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie' },
             { :m => 'or', :name_eq => 'Bert', :children_name_eq => 'Bert' }
           ]
-        )
-        expect(search.result).to be_an ActiveRecord::Relation
-        where = search.result.where_values.first
-        sql = where.to_sql
-        first, second = sql.split(/ AND /)
-        expect(first).to match /#{people_name_field} = 'Ernie'/
-        expect(first).to match /#{children_people_name_field} = 'Ernie'/
-        expect(second).to match /#{people_name_field} = 'Bert'/
-        expect(second).to match /#{children_people_name_field} = 'Bert'/
+        ).result
+        expect(search).to be_an ActiveRecord::Relation
+        first, last = search.to_sql.split(/ AND /)
+        expect(first).to match /#{people_name_field} = 'Ernie' OR #{
+          children_people_name_field} = 'Ernie'/
+        expect(last).to match /#{people_name_field} = 'Bert' OR #{
+          children_people_name_field} = 'Bert'/
       end
 
       it 'returns distinct records when passed :distinct => true' do
