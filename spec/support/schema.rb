@@ -67,17 +67,17 @@ class Person < ActiveRecord::Base
     Arel.sql('people.id')
   end
 
-  ransacker :with_passed_arguments, args: [:parent, :ransacker_args] do |parent, args|
-    min_body, max_body = args
-    sql = <<-SQL
+  ransacker :with_arguments, args: [:parent, :ransacker_args] do |parent, args|
+    min, max = args
+    query = <<-SQL
       (SELECT MAX(articles.title)
          FROM articles
         WHERE articles.person_id = people.id
-          AND CHAR_LENGTH(articles.body) BETWEEN #{min_body} AND #{max_body}
+          AND LENGTH(articles.body) BETWEEN #{min} AND #{max}
         GROUP BY articles.person_id
       )
     SQL
-    Arel.sql(sql.squish)
+    Arel.sql(query)
   end
 
   def self.ransackable_attributes(auth_object = nil)

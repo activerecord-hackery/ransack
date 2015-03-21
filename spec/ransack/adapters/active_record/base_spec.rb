@@ -319,19 +319,22 @@ module Ransack
               c: [{
                 a: {
                   '0' => {
-                    name: 'with_passed_arguments', ransacker_args: [10, 100]
+                    name: 'with_arguments', ransacker_args: [10, 100]
                   }
                 },
                 p: 'cont',
-                v: ['Rails has been released']
+                v: ['Passing arguments to ransackers!']
               }]
             )
+            puts "
+            #{s.result.to_sql}"
             expect(s.result.to_sql).to match(
-              /CHAR_LENGTH\(articles.body\) BETWEEN 10 AND 100/
+              /LENGTH\(articles.body\) BETWEEN 10 AND 100/
             )
             expect(s.result.to_sql).to match(
-              /LIKE \'\%Rails has been released\%\'/
-            )
+              /LIKE \'\%Passing arguments to ransackers!\%\'/
+              )
+            expect { s.result.first }.to_not raise_error
           end
         end
 
