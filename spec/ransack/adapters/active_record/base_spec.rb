@@ -71,7 +71,7 @@ module Ransack
           end
 
           it 'does not raise exception for string :params argument' do
-            lambda { Person.ransack('') }.should_not raise_error
+            expect { Person.ransack('') }.to_not raise_error
           end
 
           it 'does not modify the parameters' do
