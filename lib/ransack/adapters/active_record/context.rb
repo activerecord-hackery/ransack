@@ -96,7 +96,7 @@ module Ransack
           def join_sources
             base =
               if ::ActiveRecord::VERSION::MAJOR >= 5
-                Arel::SelectManager.new(@object.engine)
+                Arel::SelectManager.new(@object.table)
               else
                 Arel::SelectManager.new(@object.engine, @object.table)
               end
@@ -171,39 +171,37 @@ module Ransack
           if relation.respond_to?(:join_dependency) # Squeel will enable this
             relation.join_dependency
           else
-            build_join_dependency(relation)
+            build_joins(relation)
           end
         end
 
         # Checkout active_record/relation/query_methods.rb +build_joins+ for
         # reference. Lots of duplicated code maybe we can avoid it
-        def build_join_dependency(relation)
+        def build_joins(relation)
           buckets = relation.joins_values.group_by do |join|
             case join
             when String
-              Constants::STRING_JOIN
+              :string_join
             when Hash, Symbol, Array
-              Constants::ASSOCIATION_JOIN
-            when JoinDependency, JoinDependency::JoinAssociation
-              Constants::STASHED_JOIN
+              :association_join
+            when ActiveRecord::Associations::JoinDependency
+              :stashed_join
             when Arel::Nodes::Join
-              Constants::JOIN_NODE
+              :join_node
             else
               raise 'unknown class: %s' % join.class.name
             end
           end
-
-          association_joins = buckets[Constants::ASSOCIATION_JOIN] || []
-
-          stashed_association_joins = buckets[Constants::STASHED_JOIN] || []
-
-          join_nodes = buckets[Constants::JOIN_NODE] || []
-
-          string_joins = (buckets[Constants::STRING_JOIN] || []).map(&:strip).uniq
+          buckets.default = []
+          association_joins         = buckets[:association_join]
+          stashed_association_joins = buckets[:stashed_join]
+          join_nodes                = buckets[:join_node].uniq
+          string_joins              = buckets[:string_join].map(&:strip).uniq
 
           join_list =
             if ::ActiveRecord::VERSION::MAJOR >= 5
-              relation.send :custom_join_ast, relation.table.from, string_joins
+              join_nodes +
+              convert_join_strings_to_ast(relation.table, string_joins)
             else
               relation.send :custom_join_ast,
                 relation.table.from(relation.table), string_joins
@@ -222,6 +220,13 @@ module Ransack
           else
             join_dependency.graft(*stashed_association_joins)
           end
+        end
+
+        def convert_join_strings_to_ast(table, joins)
+          joins
+          .flatten
+          .reject(&:blank?)
+          .map { |join| table.create_string_join(Arel.sql(join)) }
         end
 
         if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1

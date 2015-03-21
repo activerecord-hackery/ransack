@@ -37,7 +37,7 @@ module Ransack
       end
 
       @default_table = Arel::Table.new(
-        @base.table_name, :as => @base.aliased_table_name, :engine => @engine
+        @base.table_name, as: @base.aliased_table_name, type_caster: self
         )
       @bind_pairs = Hash.new do |hash, key|
         parent, attr_name = get_parent_and_attribute_name(key.to_s)
