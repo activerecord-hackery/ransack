@@ -33,10 +33,6 @@ env:
   - RAILS=3-1-stable DB=mysql
   - RAILS=3-1-stable DB=postgres
 
-  - RAILS=3-0-stable DB=sqlite
-  - RAILS=3-0-stable DB=mysql
-  - RAILS=3-0-stable DB=postgres
-
 matrix:
   include:
     - rvm: 2.2
@@ -52,12 +48,6 @@ matrix:
       env: RAILS=3-1-stable DB=mysql
     - rvm: 2.2
       env: RAILS=3-1-stable DB=postgres
-    - rvm: 2.2
-      env: RAILS=3-0-stable DB=sqlite
-    - rvm: 2.2
-      env: RAILS=3-0-stable DB=mysql
-    - rvm: 2.2
-      env: RAILS=3-0-stable DB=postgres
   allow_failures:
     - env: RAILS=master DB=sqlite3
     - env: RAILS=master DB=mysql
