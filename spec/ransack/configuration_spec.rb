@@ -64,5 +64,41 @@ module Ransack
       expect(Ransack.predicates).not_to have_key 'test_array_predicate_any'
       expect(Ransack.predicates).not_to have_key 'test_array_predicate_all'
     end
+
+    describe '`wants_array` option takes precedence over Arel predicate' do
+      it 'implicitly wants an array for in/not in predicates' do
+        Ransack.configure do |config|
+          config.add_predicate(
+            :test_in_predicate,
+            :arel_predicate => 'in'
+          )
+          config.add_predicate(
+            :test_not_in_predicate,
+            :arel_predicate => 'not_in'
+          )
+        end
+
+        expect(Ransack.predicates['test_in_predicate'].wants_array).to eq true
+        expect(Ransack.predicates['test_not_in_predicate'].wants_array).to eq true
+      end
+
+      it 'explicitly does not want array for in/not_in predicates' do
+        Ransack.configure do |config|
+          config.add_predicate(
+            :test_in_predicate_no_array,
+            :arel_predicate => 'in',
+            :wants_array => false
+          )
+          config.add_predicate(
+            :test_not_in_predicate_no_array,
+            :arel_predicate => 'not_in',
+            :wants_array => false
+          )
+        end
+
+        expect(Ransack.predicates['test_in_predicate_no_array'].wants_array).to eq false
+        expect(Ransack.predicates['test_not_in_predicate_no_array'].wants_array).to eq false
+      end
+    end
   end
 end

@@ -48,8 +48,8 @@ module Ransack
       @validator = opts[:validator] ||
         lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
       @compound = opts[:compound]
-      @wants_array = opts[:wants_array] == true || @compound ||
-        Constants::IN_NOT_IN.include?(@arel_predicate)
+      @wants_array = opts.fetch(:wants_array,
+        @compound || Constants::IN_NOT_IN.include?(@arel_predicate))
     end
 
     def eql?(other)
