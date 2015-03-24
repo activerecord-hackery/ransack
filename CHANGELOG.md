@@ -1,9 +1,21 @@
 # Change Log
 
-*   Allowing `:wants_array` to be set to `false` in the predicate options.
+## Unreleased
+
+*   Allow `:wants_array` to be set to `false` in the predicate options.
     ([#32](https://github.com/activerecord-hackery/ransack/issues/32))
 
     *Michael Pavling*
+
+*   [WIP/experimental] Fix compatibility with Rails 5/master and Arel 7.
+
+    *Jon Atack*
+
+*   Stop relying on Active Record::relation#where_values which are deprecated
+    in Rails 5.
+
+    *Jon Atack*
+
 
 ## Version 1.6.4 - 2015-03-20
 
