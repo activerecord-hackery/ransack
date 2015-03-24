@@ -326,8 +326,6 @@ module Ransack
                 v: ['Passing arguments to ransackers!']
               }]
             )
-            puts "
-            #{s.result.to_sql}"
             expect(s.result.to_sql).to match(
               /LENGTH\(articles.body\) BETWEEN 10 AND 100/
             )
