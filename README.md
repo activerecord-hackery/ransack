@@ -35,8 +35,8 @@ you're reading the documentation for the master branch with the latest features.
 Ransack is compatible with Rails 3 and 4 (including 4.2.1) on Ruby 1.9 and
 later.
 
-It currently works with Rails 5.0.0/master too! Although changes in Arel
-and Active Record keep that a moving target.
+It currently works with Rails 5/master too -- although changes in Arel and
+Active Record keep that a moving target.
 
 Ransack works out-of-the-box with Active Record and also features experimental
 support for Mongoid 4.0 (without associations, further details below).

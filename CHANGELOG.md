@@ -2,10 +2,19 @@
 
 ## Unreleased
 
+*   Add a failing spec for issue
+    [#374](https://github.com/activerecord-hackery/ransack/issues/374).
+
+    *Jamie Davidson*
+
 *   Allow `:wants_array` to be set to `false` in the predicate options.
     ([#32](https://github.com/activerecord-hackery/ransack/issues/32))
 
     *Michael Pavling*
+
+*   Clarify database options and improve the header message when running tests.
+
+    *Jon Atack*
 
 *   [WIP/experimental] Fix compatibility with Rails 5/master and Arel 7.
 
