@@ -28,11 +28,10 @@ RSpec.configure do |config|
   config.alias_it_should_behave_like_to :it_has_behavior, 'has behavior'
 
   config.before(:suite) do
-    puts '=' * 80
     connection_name = ActiveRecord::Base.connection.adapter_name
-    puts "Running specs against #{connection_name}, ActiveRecord #{
-      ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
-    puts '=' * 80
+    message = "Running specs against #{connection_name}, Active Record #{
+    ActiveRecord::VERSION::STRING} and Arel #{Arel::VERSION}..."
+     puts '=' * message.length, message, '=' * message.length
     Schema.create
   end
 
