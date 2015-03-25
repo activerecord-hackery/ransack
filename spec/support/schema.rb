@@ -1,6 +1,6 @@
 require 'active_record'
 
-case ENV['DB'].downcase
+case ENV['DB'].try(:downcase)
 when 'mysql', 'mysql2'
   # To test with MySQL: `DB=mysql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
@@ -113,6 +113,12 @@ class Article < ActiveRecord::Base
   end
 end
 
+class Recommendation < ActiveRecord::Base
+  belongs_to :person
+  belongs_to :target_person, class_name: 'Person'
+  belongs_to :article
+end
+
 module Namespace
   class Article < ::Article
 
@@ -161,33 +167,38 @@ module Schema
       end
 
       create_table :articles, :force => true do |t|
-        t.integer :person_id
-        t.string  :title
-        t.text    :subject_header
-        t.text    :body
+        t.integer  :person_id
+        t.string   :title
+        t.text     :subject_header
+        t.text     :body
       end
 
       create_table :comments, :force => true do |t|
-        t.integer :article_id
-        t.integer :person_id
-        t.text :body
+        t.integer  :article_id
+        t.integer  :person_id
+        t.text     :body
       end
 
       create_table :tags, :force => true do |t|
-        t.string :name
+        t.string   :name
       end
 
       create_table :articles_tags, :force => true, :id => false do |t|
-        t.integer :article_id
-        t.integer :tag_id
+        t.integer  :article_id
+        t.integer  :tag_id
       end
 
       create_table :notes, :force => true do |t|
-        t.integer :notable_id
-        t.string :notable_type
-        t.string :note
+        t.integer  :notable_id
+        t.string   :notable_type
+        t.string   :note
       end
 
+      create_table :recommendations, :force => true do |t|
+        t.integer  :person_id
+        t.integer  :target_person_id
+        t.integer  :article_id
+      end
     end
 
     10.times do
