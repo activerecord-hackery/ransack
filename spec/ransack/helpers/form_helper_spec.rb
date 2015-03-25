@@ -31,9 +31,9 @@ module Ransack
       describe '#sort_link with default search_key' do
         subject { @controller.view_context
           .sort_link(
-            [:main_app, Person.search(:sorts => ['name desc'])],
+            [:main_app, Person.search(sorts: ['name desc'])],
             :name,
-            :controller => 'people'
+            controller: 'people'
           )
         }
         it {
@@ -53,10 +53,10 @@ module Ransack
         subject { @controller.view_context
           .sort_link(
             Person.search(
-              { :sorts => ['name desc'] }, :search_key => :people_search
+              { sorts: ['name desc'] }, search_key: :people_search
               ),
             :name,
-            :controller => 'people'
+            controller: 'people'
           )
         }
         it {
@@ -73,10 +73,11 @@ module Ransack
       describe '#sort_link desc through association table defined as a symbol' do
         subject { @controller.view_context
           .sort_link(
-            Person.search({ :sorts => 'comments_body asc' }),
-            :comments_body, :controller => 'people'
-            )
-          }
+            Person.search({ sorts: 'comments_body asc' }),
+            :comments_body,
+            controller: 'people'
+          )
+        }
         it {
           should match(
             if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
@@ -93,10 +94,11 @@ module Ransack
       describe '#sort_link through association table defined as a string' do
         subject { @controller.view_context
           .sort_link(
-            Person.search({ :sorts => 'comments.body desc' }),
-            'comments.body', :controller => 'people'
-            )
-          }
+            Person.search({ sorts: 'comments.body desc' }),
+            'comments.body',
+            controller: 'people'
+          )
+        }
         it {
           should match(
             if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
@@ -113,24 +115,25 @@ module Ransack
       describe '#sort_link works even if search params are a blank string' do
         before { @controller.view_context.params[:q] = '' }
         specify {
-          expect {
-            @controller.view_context.sort_link(
-              Person.search(@controller.view_context.params[:q]),
-              :name,
-              :controller => 'people'
-            )
+          expect { @controller.view_context
+            .sort_link(
+              Person.search(
+                @controller.view_context.params[:q]),
+                :name,
+                controller: 'people'
+              )
           }.not_to raise_error
         }
       end
 
       describe '#sort_link with search_key defined as a string' do
-        subject {
-          @controller.view_context.sort_link(
+        subject { @controller.view_context
+          .sort_link(
             Person.search(
-              { :sorts => ['name desc'] }, :search_key => 'people_search'
-              ),
+              { sorts: ['name desc'] }, search_key: 'people_search'
+            ),
             :name,
-            :controller => 'people'
+            controller: 'people'
           )
         }
         it {
@@ -149,8 +152,8 @@ module Ransack
           .sort_link(
             [:main_app, Person.search()],
             :name,
-            :controller => 'people',
-            'default_order' => 'desc'
+            controller: 'people',
+            default_order: 'desc'
           )
         }
         it { should_not match /default_order/ }
@@ -159,9 +162,9 @@ module Ransack
       describe '#sort_link with multiple search_keys defined as an array' do
         subject { @controller.view_context
           .sort_link(
-            [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
+            [:main_app, Person.search(sorts: ['name desc', 'email asc'])],
             :name, [:name, 'email DESC'],
-            :controller => 'people'
+            controller: 'people'
           )
         }
         it {
@@ -176,9 +179,9 @@ module Ransack
       describe '#sort_link with multiple search_keys does not break on nil values & ignores them' do
         subject { @controller.view_context
           .sort_link(
-            [:main_app, Person.search(:sorts => ['name desc', nil, 'email', nil])],
+            [:main_app, Person.search(sorts: ['name desc', nil, 'email', nil])],
             :name, [nil, :name, nil, 'email DESC', nil],
-            :controller => 'people'
+            controller: 'people'
           )
         }
         it {
@@ -193,10 +196,10 @@ module Ransack
       describe '#sort_link with multiple search_keys should allow a label to be specified' do
         subject { @controller.view_context
           .sort_link(
-            [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
+            [:main_app, Person.search(sorts: ['name desc', 'email asc'])],
             :name, [:name, 'email DESC'],
             'Property Name',
-            :controller => 'people'
+            controller: 'people'
           )
         }
         it { should match /Property Name&nbsp;&#9660;/ }
@@ -205,9 +208,9 @@ module Ransack
       describe '#sort_link with multiple search_keys should flip multiple fields specified without a direction' do
         subject { @controller.view_context
           .sort_link(
-            [:main_app, Person.search(:sorts => ['name desc', 'email asc'])],
+            [:main_app, Person.search(sorts: ['name desc', 'email asc'])],
             :name, [:name, :email],
-            :controller => 'people'
+            controller: 'people'
           )
         }
         it {
@@ -224,8 +227,8 @@ module Ransack
           .sort_link(
             [:main_app, Person.search()],
             :name, [:name, :email],
-            :controller => 'people',
-            'default_order' => 'desc'
+            controller: 'people',
+            default_order: 'desc'
           )
         }
         it {
@@ -242,8 +245,8 @@ module Ransack
           .sort_link(
             [:main_app, Person.search()],
             :name, [:name, :email],
-            :controller => 'people',
-            :default_order => :desc
+            controller: 'people',
+            default_order: :desc
           )
         }
         it {
@@ -260,8 +263,8 @@ module Ransack
           .sort_link(
             [:main_app, Person.search()],
             :name, [:name, :email],
-            :controller => 'people',
-            :default_order => { 'name' => 'desc', :email => 'asc' }
+            controller: 'people',
+            default_order: { name: 'desc', email: 'asc' }
           )
         }
         it {
@@ -278,8 +281,8 @@ module Ransack
           .sort_link(
             [:main_app, Person.search()],
             :name, [:name, 'email desc'],
-            :controller => 'people',
-            :default_order => { 'name' => 'desc', :email => 'asc' }
+            controller: 'people',
+            default_order: { name: 'desc', email: 'asc' }
           )
         }
         it {
@@ -295,7 +298,8 @@ module Ransack
         subject { @controller.view_context
           .sort_link(
             [:main_app, Note.search()],
-            :notable_of_Person_type_name, "Notable", :controller => 'notes'
+            :notable_of_Person_type_name, "Notable",
+            controller: 'notes'
           )
         }
         it {
@@ -313,16 +317,17 @@ module Ransack
 
       context 'view has existing parameters' do
         before do
-          @controller.view_context.params.merge!({ :exist => 'existing' })
+          @controller.view_context.params.merge!({ exist: 'existing' })
         end
         describe '#sort_link should not remove existing params' do
-          subject {
-            @controller.view_context.sort_link(
+          subject { @controller.view_context
+            .sort_link(
               Person.search(
-                { :sorts => ['name desc'] }, :search_key => 'people_search'
-                ),
+                { sorts: ['name desc'] },
+                search_key: 'people_search'
+              ),
               :name,
-              :controller => 'people'
+              controller: 'people'
             )
           }
           it { should match /exist\=existing/ }
@@ -332,10 +337,10 @@ module Ransack
       describe '#sort_link with hide order indicator set to true' do
         subject { @controller.view_context
           .sort_link(
-            [:main_app, Person.search(:sorts => ['name desc'])],
+            [:main_app, Person.search(sorts: ['name desc'])],
             :name,
-            :controller => 'people',
-            :hide_indicator => true
+            controller: 'people',
+            hide_indicator: true
           )
         }
         it { should match /Full Name/ }
@@ -344,24 +349,25 @@ module Ransack
       describe '#sort_link with hide order indicator set to false' do
         subject { @controller.view_context
           .sort_link(
-            [:main_app, Person.search(:sorts => ['name desc'])],
+            [:main_app, Person.search(sorts: ['name desc'])],
             :name,
-            :controller => 'people',
-            :hide_indicator => false
+            controller: 'people',
+            hide_indicator: false
           )
         }
         it { should match /Full Name&nbsp;&#9660;/ }
       end
 
       describe '#search_form_for with default format' do
-        subject { @controller.view_context.search_form_for(Person.search) {} }
+        subject { @controller.view_context
+          .search_form_for(Person.search) {} }
         it { should match /action="\/people"/ }
       end
 
       describe '#search_form_for with pdf format' do
         subject {
           @controller.view_context
-          .search_form_for(Person.search, :format => :pdf) {}
+          .search_form_for(Person.search, format: :pdf) {}
         }
         it { should match /action="\/people.pdf"/ }
       end
@@ -369,14 +375,15 @@ module Ransack
       describe '#search_form_for with json format' do
         subject {
           @controller.view_context
-          .search_form_for(Person.search, :format => :json) {}
+          .search_form_for(Person.search, format: :json) {}
         }
         it { should match /action="\/people.json"/ }
       end
 
       describe '#search_form_for with an array of routes' do
         subject {
-          @controller.view_context.search_form_for([:admin, Comment.search]) {}
+          @controller.view_context
+          .search_form_for([:admin, Comment.search]) {}
         }
         it { should match /action="\/admin\/comments"/ }
       end
