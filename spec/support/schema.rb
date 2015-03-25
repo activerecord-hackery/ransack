@@ -1,21 +1,23 @@
 require 'active_record'
 
-case ENV['DB']
-when "mysql"
+case ENV['DB'].downcase
+when 'mysql', 'mysql2'
+  # To test with MySQL: `DB=mysql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter:  'mysql2',
     database: 'ransack',
     encoding: 'utf8'
   )
-when "postgres"
+when 'pg', 'postgres', 'postgresql'
+  # To test with PostgreSQL: `DB=postgresql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter: 'postgresql',
     database: 'ransack',
-    username: 'postgres',
+  # username: 'postgres', # Uncomment the username option if you have set one
     min_messages: 'warning'
   )
 else
-  # Assume SQLite3
+  # Otherwise, assume SQLite3: `bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter: 'sqlite3',
     database: ':memory:'
