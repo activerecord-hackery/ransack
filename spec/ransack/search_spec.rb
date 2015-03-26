@@ -225,19 +225,15 @@ module Ransack
           ).result
           expect(s).to be_an ActiveRecord::Relation
           query = <<-SQL
-            SELECT \"recommendations\".* FROM \"recommendations\"
-            LEFT OUTER JOIN \"people\"
-              ON \"people\".\"id\" = \"recommendations\".\"person_id\"
-            LEFT OUTER JOIN \"people\" \"target_people_recommendations\"
-              ON \"target_people_recommendations\".\"id\" =
-                  \"recommendations\".\"target_person_id\"
-            LEFT OUTER JOIN \"people\" \"parents_people\"
-              ON \"parents_people\".\"id\" =
-                  \"target_people_recommendations\".\"parent_id\"
-            WHERE ((\"people\".\"name\" = 'Ernie'
-              AND \"parents_people\".\"name\" = 'Test'))
+            SELECT recommendations.* FROM recommendations
+            LEFT OUTER JOIN people ON people.id = recommendations.person_id
+            LEFT OUTER JOIN people target_people_recommendations
+              ON target_people_recommendations.id = recommendations.target_person_id
+            LEFT OUTER JOIN people parents_people
+              ON parents_people.id = target_people_recommendations.parent_id
+            WHERE ((people.name = 'Ernie' AND parents_people.name = 'Test'))
           SQL
-          expect(s.to_sql).to eq query.squish
+          expect(s.to_sql.gsub(/[\"`]/, '')).to eq query.squish
         end
       end
 
