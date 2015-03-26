@@ -214,20 +214,32 @@ module Ransack
           children_people_name_field} = 'Ernie'/
       end
 
-      # FIXME: Uncomment this failing spec by Jamie Davidson / @jhdavids8
-      # for testing issue #374 and fix it:
-      # https://github.com/activerecord-hackery/ransack/issues/374
+      # FIXME: Make this spec pass for Rails 4.1 / 4.2 / 5.0 and not just 4.0
+      # (issue #374) https://github.com/activerecord-hackery/ransack/issues/374
       #
-      # it 'evaluates conditions for multiple belongs_to associations to the same table contextually' do
-      #   search = Search.new(Recommendation,
-      #     person_name_eq: 'Ernie',
-      #     target_person_parent_name_eq: 'Test'
-      #     ).result
-      #   expect(search).to be_an ActiveRecord::Relation
-      #   expect(search.to_sql).to match /LEFT OUTER JOIN \"people\" \"parents_people\" ON \"parents_people\".\"id\" = \"target_people_recommendations\".\"parent_id\" WHERE/
-      #   Full expected query is (uncomment this when first tests are passing):
-      #   expect(search.to_sql).to match /SELECT \"recommendations\".* FROM \"recommendations\" LEFT OUTER JOIN \"people\" ON \"people\".\"id\" = \"recommendations\".\"person_id\" LEFT OUTER JOIN \"people\" \"target_people_recommendations\" ON \"target_people_recommendations\".\"id\" = \"recommendations\".\"target_person_id\" LEFT OUTER JOIN \"people\" \"parents_people\" ON \"parents_people\".\"id\" = \"target_people_recommendations\".\"parent_id\" WHERE ((\"people\".\"name\" = 'Ernie' AND \"parents_people\".\"name\" = 'Test'))/
-      # end
+      if ::ActiveRecord::VERSION::STRING.first(3) == '4.0'
+        it 'evaluates conditions for multiple belongs_to associations to the same table contextually' do
+          s = Search.new(Recommendation,
+            person_name_eq: 'Ernie',
+            target_person_parent_name_eq: 'Test'
+          ).result
+          expect(s).to be_an ActiveRecord::Relation
+          query = <<-SQL
+            SELECT \"recommendations\".* FROM \"recommendations\"
+            LEFT OUTER JOIN \"people\"
+              ON \"people\".\"id\" = \"recommendations\".\"person_id\"
+            LEFT OUTER JOIN \"people\" \"target_people_recommendations\"
+              ON \"target_people_recommendations\".\"id\" =
+                  \"recommendations\".\"target_person_id\"
+            LEFT OUTER JOIN \"people\" \"parents_people\"
+              ON \"parents_people\".\"id\" =
+                  \"target_people_recommendations\".\"parent_id\"
+            WHERE ((\"people\".\"name\" = 'Ernie'
+              AND \"parents_people\".\"name\" = 'Test'))
+          SQL
+          expect(s.to_sql).to eq query.squish
+        end
+      end
 
       it 'evaluates compound conditions contextually' do
         search = Search.new(Person, :children_name_or_name_eq => 'Ernie').result
