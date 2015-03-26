@@ -214,14 +214,19 @@ module Ransack
           children_people_name_field} = 'Ernie'/
       end
 
-      # Uncomment the following failing spec by Jamie Davidson / @jhdavids8
-      # for testing issue #374:
+      # FIXME: Uncomment this failing spec by Jamie Davidson / @jhdavids8
+      # for testing issue #374 and fix it:
       # https://github.com/activerecord-hackery/ransack/issues/374
       #
       # it 'evaluates conditions for multiple belongs_to associations to the same table contextually' do
-      # search = Search.new(Recommendation, person_name_eq: 'Ernie', target_person_parent_name_eq: 'Test')
-      # search.result.should be_an ActiveRecord::Relation
-      # search.result.to_sql.should == "SELECT \"recommendations\".* FROM \"recommendations\" LEFT OUTER JOIN \"people\" ON \"people\".\"id\" = \"recommendations\".\"person_id\" LEFT OUTER JOIN \"people\" \"target_people_recommendations\" ON \"target_people_recommendations\".\"id\" = \"recommendations\".\"target_person_id\" LEFT OUTER JOIN \"people\" \"parents_people\" ON \"parents_people\".\"id\" = \"target_people_recommendations\".\"parent_id\" WHERE ((\"people\".\"name\" = 'Ernie' AND \"parents_people\".\"name\" = 'Test'))"
+      #   search = Search.new(Recommendation,
+      #     person_name_eq: 'Ernie',
+      #     target_person_parent_name_eq: 'Test'
+      #     ).result
+      #   expect(search).to be_an ActiveRecord::Relation
+      #   expect(search.to_sql).to match /LEFT OUTER JOIN \"people\" \"parents_people\" ON \"parents_people\".\"id\" = \"target_people_recommendations\".\"parent_id\" WHERE/
+      #   Full expected query is (uncomment this when first tests are passing):
+      #   expect(search.to_sql).to match /SELECT \"recommendations\".* FROM \"recommendations\" LEFT OUTER JOIN \"people\" ON \"people\".\"id\" = \"recommendations\".\"person_id\" LEFT OUTER JOIN \"people\" \"target_people_recommendations\" ON \"target_people_recommendations\".\"id\" = \"recommendations\".\"target_person_id\" LEFT OUTER JOIN \"people\" \"parents_people\" ON \"parents_people\".\"id\" = \"target_people_recommendations\".\"parent_id\" WHERE ((\"people\".\"name\" = 'Ernie' AND \"parents_people\".\"name\" = 'Test'))/
       # end
 
       it 'evaluates compound conditions contextually' do
