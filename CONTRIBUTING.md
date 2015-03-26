@@ -34,7 +34,8 @@ if the information requested is provided.
 ## Pull requests
 
 We gladly accept pull requests to fix bugs and, in some circumstances, add new
-features to Ransack.
+features to Ransack. If you'd like to contribute and wonder what would be
+helpful, simply run a search for "FIXME" and "TODO" on the codebase :smiley:
 
 If you're new to contributing to open source, welcome! It can seem scary, so
 here is a [great blog post to help you get started]
