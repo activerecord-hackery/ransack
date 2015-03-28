@@ -5,8 +5,8 @@
 
 *   [WIP/experimental] Add compatibility with Rails 5/master and Arel 7.
 
-*   Update the Contributing Guide with detailed steps for contributing to
-    Ransack.
+*   Update the [Contributing Guide](CONTRIBUTING.md) with detailed steps for
+    contributing to Ransack.
 
 *   Broaden the test suite database options in `schema.rb` and add
     code documentation.
@@ -27,10 +27,11 @@
 
 ### Fixed
 
-*   Stop relying on Active Record::relation#where_values which are deprecated
+*   Stop relying on `Active Record::relation#where_values` which are deprecated
     in Rails 5.
 
-*   Make the ransacker_args test work correctly with Sqlite3.
+*   Make the test for passing search arguments to a ransacker
+    (`ransacker_args`) work correctly with Sqlite3.
 
     *Jon Atack*
 

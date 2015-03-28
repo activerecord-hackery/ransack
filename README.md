@@ -33,16 +33,12 @@ you're reading the documentation for the master branch with the latest features.
 ## Getting started
 
 Ransack is compatible with Rails 3 and 4 (including 4.2.1) on Ruby 1.9 and
-later.
-
-It currently works with Rails 5/master too -- although changes in Arel and
-Active Record keep that a moving target.
+later. It currently works with Rails 5 as well, though changes in Arel and
+Active Record keep that a moving target. If you are using Ruby 1.8, you can use
+an earlier version of Ransack up to v1.3.0.
 
 Ransack works out-of-the-box with Active Record and also features experimental
 support for Mongoid 4.0 (without associations, further details below).
-
-If you are using Ruby 1.8, you may need to use an earlier version of Ransack,
-like 1.3.0.
 
 In your Gemfile, for the last officially released Ransack gem:
 
