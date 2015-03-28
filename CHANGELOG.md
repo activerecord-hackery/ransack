@@ -1,32 +1,47 @@
 # Change Log
 
-## Unreleased
+## Version 1.6.5 - 2015-03-28 - Rails 5.0.0 update
+### Added
+
+*   [WIP/experimental] Add compatibility with Rails 5/master and Arel 7.
+
+*   Update the Contributing Guide with detailed steps for contributing to
+    Ransack.
+
+*   Broaden the test suite database options in `schema.rb` and add
+    code documentation.
+
+*   Improve the header message when running tests.
+
+    *Jon Atack*
+
+*   Allow `:wants_array` to be set to `false` in the predicate options
+    ([#32](https://github.com/activerecord-hackery/ransack/issues/32)).
+
+    *Michael Pavling*
 
 *   Add a failing spec for issue
     [#374](https://github.com/activerecord-hackery/ransack/issues/374).
 
-    *Jamie Davidson*
+    *Jamie Davidson*, *Jon Atack*
 
-*   Allow `:wants_array` to be set to `false` in the predicate options.
-    ([#32](https://github.com/activerecord-hackery/ransack/issues/32))
-
-    *Michael Pavling*
-
-*   Clarify database options and improve the header message when running tests.
-
-    *Jon Atack*
-
-*   [WIP/experimental] Fix compatibility with Rails 5/master and Arel 7.
-
-    *Jon Atack*
+### Fixed
 
 *   Stop relying on Active Record::relation#where_values which are deprecated
     in Rails 5.
 
+*   Make the ransacker_args test work correctly with Sqlite3.
+
+    *Jon Atack*
+
+### Changed
+
+*   Stop CI testing for Rails 3.0 to reduce the size of the Travis test matrix.
+
     *Jon Atack*
 
 
-## Version 1.6.4 - 2015-03-20
+## Version 1.6.4 - 2015-03-20 - Rails 4.2.1 update
 
 *   ActionView patch to maintain compatibility with Rails 4.2.1 released today.
 
@@ -41,6 +56,7 @@
     ([#513](https://github.com/activerecord-hackery/ransack/pull/513)).
 
     *Denis Tataurov*, *Jon Atack*
+
 
 ## Version 1.6.3 - 2015-01-21
 
@@ -173,23 +189,21 @@
 
 
 ## Version 1.5.1 - 2014-10-30
-### Fixed
-
-*   Fix a regression caused by incorrect string constants in `context.rb`.
-
-    *Kazuhiro Nishiyama*
-
 ### Added
 
 *   Add base specs for search on fields with `_start` and `_end`.
-
-    *Jon Atack*
 
 *   Add a failing spec for detecting attribute fields containing `_and_` that
     needs to be fixed. Attribute names containing `_and_` and `_or_` are still
     not parsed/detected correctly.
 
     *Jon Atack*
+
+### Fixed
+
+*   Fix a regression caused by incorrect string constants in `context.rb`.
+
+    *Kazuhiro Nishiyama*
 
 ### Changed
 
@@ -267,7 +281,6 @@
 
 
 ## Version 1.4.1 - 2014-09-23
-### Fixed
 
 *   Fix README markdown so RubyGems documentation picks up the formatting correctly.
 

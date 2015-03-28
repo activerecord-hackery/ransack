@@ -27,8 +27,8 @@ instead.
 If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (1.6.4).]
-(https://github.com/activerecord-hackery/ransack/tree/v1.6.4)
+[View documentation for the last release (1.6.5).]
+(https://github.com/activerecord-hackery/ransack/tree/v1.6.5)
 
 ## Getting started
 
@@ -54,20 +54,6 @@ Or, if you would like to use the latest updates, use the `master` branch:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
-```
-
-The other branches (`rails-4`, `rails-4.1`, and `rails-4.2`) were each used for
-developing and running Ransack with the latest upcoming version of Rails at the
-time. They are smaller and possibly slightly faster because they do not have to
-support previous versions of Rails and Active Record. Once support for that
-Rails version is merged from the branch into Ransack master, the branch is no
-longer actively maintained -- unless the open source community submits pull
-requests to maintain them. You are welcome to do so!
-
-To use one of the branches, for example the `rails-4.1` branch:
-
-```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'rails-4.1'
 ```
 
 ## Usage
