@@ -48,42 +48,47 @@ backward compatibility has a very good reason for doing so.
 
 Here's a quick guide:
 
-1. Fork the repo, clone it, create a thoughtfully-named branch for your changes,
-   and install the development dependencies by running `bundle install`.
+1. Fork the repo.
 
-2. Begin by running the tests. We only take pull requests with passing tests,
+2. Create a thoughtfully-named branch for your changes (`git checkout -b my-new-feature`).
+
+3. Install the development dependencies by running `bundle install`.
+
+4. Begin by running the tests. We only take pull requests with passing tests,
    and it's great to know that you have a clean slate:
 
         $ bundle exec rake spec
 
    The test suite runs by default with SQLite3. To run the test suite with PostgreSQL or MySQL, use:
 
-        $ DB=postgresql bundle exec rake spec
+        $ DB=postgresql bundle exec rake spec (`DB=pg` & `DB=postgres` work too)
         $ DB=mysql bundle exec rake spec
 
-3. Hack away! Please use Ruby features that are compatible down to Ruby 1.9.
+5. Hack away! Please use Ruby features that are compatible down to Ruby 1.9.
    Since version 1.5, Ransack no longer maintains Ruby 1.8 compatibility.
 
-4. Add tests for your changes. Only refactoring and documentation changes
+6. Add tests for your changes. Only refactoring and documentation changes
    require no new tests. If you are adding functionality or fixing a bug, we
    need a test!
 
-5. Make the tests pass.
+7. Make the tests pass.
 
-6. Update the Change Log. If you are adding new functionality, document it in
+8. Update the Change Log. If you are adding new functionality, document it in
    the README.
 
-7. Do not change the version number; we will do that on our end.
+9. Commit your changes (`git commit -am 'Add feature/fix bug/improve docs'`).
 
-8. If necessary, rebase your commits into logical chunks, without errors.
+10. If necessary, rebase your commits into logical chunks, without errors. To
+   interactively rebase and cherry-pick from, say, the last 10 commits:
+   `git rebase -i HEAD~10`, then `git push -f`.
 
-9. Push the branch up to your fork on Github and submit a pull request. If the
-   changes will apply cleanly to the latest stable branches and master branch,
-   you will only need to submit one pull request.
+11. Push the branch up to your fork on Github
+   (`git push origin my-new-feature`) and from Github submit a pull request to
+   Ransack's `master` branch.
 
-10. If your pull request only contains documentation changes, please remember to
-   add `[skip ci]` to your commit message so the Travis test suite doesn't run
-   needlessly.
+12. If your pull request only contains documentation changes, please remember
+   to add `[skip ci]` to the beginning of your commit message so the Travis
+   test suite doesn't :runner: needlessly.
 
 At this point you're waiting on us. We like to at least comment on, if not
 accept, pull requests within three business days (and, typically, one business
@@ -91,14 +96,14 @@ day). We may suggest some changes or improvements or alternatives.
 
 Some things that will increase the chance that your pull request is accepted:
 
-* Use idiomatic Ruby and follow the syntax conventions below.
 * Include tests that fail without your code, and pass with it.
 * Update the README, the change log, the wiki documentation... anything that is
   affected by your contribution.
+* Use idiomatic Ruby and follow the syntax conventions below.
 
 Syntax:
 
-* Two spaces, no tabs.
+* Indent with two spaces, no tabs.
 * 80 characters per line.
 * No trailing whitespace. Blank lines should not have any space.
 * Prefer `&&`/`||` over `and`/`or`.
