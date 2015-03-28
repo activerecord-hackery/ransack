@@ -184,7 +184,7 @@ module Ransack
               :string_join
             when Hash, Symbol, Array
               :association_join
-            when ActiveRecord::Associations::JoinDependency
+            when ::ActiveRecord::Associations::JoinDependency
               :stashed_join
             when Arel::Nodes::Join
               :join_node
