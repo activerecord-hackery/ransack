@@ -681,4 +681,4 @@ fix bugs!
 
 ## Copyright
 
-Copyright &copy; 2011-2014 [Ernie Miller](http://twitter.com/erniemiller)
+Copyright &copy; 2011-2015 [Ernie Miller](http://twitter.com/erniemiller)
