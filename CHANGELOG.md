@@ -1,5 +1,15 @@
 # Change Log
 
+## Unreleased
+### Fixed
+*   A better fix for the "undefined method `model_name' for Ransack::Search"
+    issue [#518](https://github.com/activerecord-hackery/ransack/issues/518)
+    affecting Rails 4.2.1 and 5.0.0. This fix allows us to remove the
+    ActionView patch in Ransack version 1.6.4.
+
+    *Gleb Mazovetskiy*
+
+
 ## Version 1.6.5 - 2015-03-28 - Rails 5.0.0 update
 ### Added
 

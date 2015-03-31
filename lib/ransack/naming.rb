@@ -20,6 +20,10 @@ module Ransack
     def to_model
       self
     end
+
+    def model_name
+      self.class.model_name
+    end
   end
 
   class Name < String
