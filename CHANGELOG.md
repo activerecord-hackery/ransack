@@ -1,9 +1,15 @@
 # Change Log
 
-## Unreleased
+## Version 1.6.6 - 2015-04-05
+### Changed
+
+*   Upgrade Polyamorous dependency to version 1.2.0, which uses Module#prepend instead of monkey-patching for hooking into Active Record (with Ruby 2.x).
+
+    *Jon Atack*
+
 ### Fixed
 
-*   A better fix for the "undefined method `model_name` for Ransack::Search"
+*   An improved fix for the "undefined method `model_name` for Ransack::Search"
     issue [#518](https://github.com/activerecord-hackery/ransack/issues/518)
     affecting Rails 4.2.1 and 5.0.0. This fix allows us to remove the
     ActionView patch in Ransack version 1.6.4.
@@ -18,10 +24,16 @@
 
     *Nahuel Cuesta Luengo*
 
+*   Fix RubyGems YARD rendering of the README docs.
+
+    *Jon Atack*
+
 ### Added
 
 *   Add the Ruby version to the the header message that shows the database,
     Active Record and Arel versions when running tests.
+
+*   Add Code Climate analysis.
 
     *Jon Atack*
 

@@ -30,19 +30,19 @@ If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
 [View documentation for the last release (1.6.6).]
-(https://github.com/activerecord-hackery/ransack/tree/v1.6.5)
+(https://github.com/activerecord-hackery/ransack/tree/v1.6.6)
 
 ## Getting started
 
 Ransack is compatible with Rails 3 and 4 (including 4.2.1) on Ruby 1.9 and
-later. It currently works with Rails 5 as well, though changes in Arel and
-Active Record keep that a moving target. If you are using Ruby 1.8, you can use
-an earlier version of Ransack up to v1.3.0.
+later (Ruby 2.2 recommended). Ransack currently works with Rails master (5.0.0)
+too! If you are using Ruby 1.8, you can use an earlier version of Ransack up to
+1.3.0.
 
 Ransack works out-of-the-box with Active Record and also features experimental
 support for Mongoid 4.0 (without associations, further details below).
 
-In your Gemfile, for the last officially released Ransack gem:
+In your Gemfile, for the last officially released gem:
 
 ```ruby
 gem 'ransack'
