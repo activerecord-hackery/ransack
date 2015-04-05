@@ -4,6 +4,8 @@
 (https://travis-ci.org/activerecord-hackery/ransack)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)]
 (http://badge.fury.io/rb/ransack)
+[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)]
+(https://codeclimate.com/github/activerecord-hackery/ransack)
 
 Ransack is a rewrite of [MetaSearch]
 (https://github.com/activerecord-hackery/meta_search)
@@ -27,7 +29,7 @@ instead.
 If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (1.6.5).]
+[View documentation for the last release (1.6.6).]
 (https://github.com/activerecord-hackery/ransack/tree/v1.6.5)
 
 ## Getting started
@@ -120,7 +122,7 @@ The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in
 [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-#####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form:
+####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -142,20 +144,21 @@ which are defined in
 ```
 
 `cont` (contains) and `start` (starts with) are just two of the available
-search predicates. See [Constants]
-(https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb)
-for a full list and the [wiki]
-(https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching)
+search predicates. See
+[Constants](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb)
+for a full list and the
+[wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching)
 for more information.
 
 The `search_form_for` answer format can be set like this:
+
 ```erb
 <%= search_form_for(@q, format: :pdf) do |f| %>
 
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
-#####Ransack's `sort_link` helper creates table headers that are sortable links:
+####Ransack's `sort_link` helper creates table headers that are sortable links
 
 ```erb
 <%= sort_link(@q, :name) %>
