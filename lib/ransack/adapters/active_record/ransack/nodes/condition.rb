@@ -35,7 +35,7 @@ module Ransack
         def format_predicate(predicate)
           predicate.tap do
             if casted_array_with_in_predicate?(predicate)
-              predicate.right[0] = predicate.right[0].val.map { |v| format(v) }
+              predicate.right[0] = format_values_for(predicate.right[0])
             end
           end
         end
@@ -47,12 +47,9 @@ module Ransack
           predicate.right[0].val.is_a?(Array)
         end
 
-        # Necessary for Arel >= 6.0 (Rails >= 4.2)
-        def format(value)
-          if value.is_a?(String)
-            Arel::Nodes.build_quoted(value)
-          else
-            value
+        def format_values_for(predicate)
+          predicate.val.map do |value|
+            value.is_a?(String) ? Arel::Nodes.build_quoted(value) : value
           end
         end
 
