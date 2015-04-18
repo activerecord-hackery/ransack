@@ -9,10 +9,11 @@ module Ransack
       describe Context do
         subject { Context.new(Person) }
 
-        if AR_version >= "3.1"
-          its(:alias_tracker) {
-            should be_a ::ActiveRecord::Associations::AliasTracker
-          }
+        if AR_version >= '3.1'
+          it 'has an Active Record alias tracker method' do
+            expect(subject.alias_tracker)
+            .to be_an ::ActiveRecord::Associations::AliasTracker
+          end
         end
 
         describe '#relation_for' do
