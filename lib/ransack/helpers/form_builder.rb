@@ -7,7 +7,13 @@ module ActionView::Helpers::Tags
   class Base
     private
     def value(object)
-      object.send @method_name if object # use send instead of public_send
+      search_attr = @method_name.to_s.sub(/_#{Ransack::Predicate.detect_from_string(@method_name.to_s)}$/, Ransack::Constants::EMPTY)
+      search_pred = @method_name.to_s.sub(/^#{search_attr}_/, Ransack::Constants::EMPTY)
+	    if object.klass._ransacker_aliases.has_key?(search_attr)
+        object.send "#{object.klass._ransacker_aliases[search_attr]}_#{search_pred}" if object
+      else
+        object.send @method_name if object # use send instead of public_send
+      end
     end
   end
 end
