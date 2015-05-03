@@ -7,7 +7,9 @@ module Ransack
           alias :search :ransack unless base.respond_to? :search
           base.class_eval do
             class_attribute :_ransackers
+            class_attribute :_ransacker_aliases
             self._ransackers ||= {}
+            self._ransacker_aliases ||= {}
           end
         end
 
@@ -18,6 +20,10 @@ module Ransack
         def ransacker(name, opts = {}, &block)
           self._ransackers = _ransackers.merge name.to_s => Ransacker
             .new(self, name, opts, &block)
+        end
+        
+        def ransacker_alias(alias_name, normal_name)
+          self._ransacker_aliases[alias_name.to_s] = normal_name.to_s
         end
 
         # Ransackable_attributes, by default, returns all column names
