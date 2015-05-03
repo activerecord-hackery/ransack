@@ -335,7 +335,7 @@ module Ransack
             expect { s.result.first }.to_not raise_error
           end
         end
-        
+
         describe '#ransack_alias' do
           s1 = Person.ransack(cmnt_bd_cont: "some_words")
           s2 = Person.ransack(comments_body_cont: "some_words")
