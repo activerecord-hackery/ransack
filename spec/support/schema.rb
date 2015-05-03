@@ -81,6 +81,8 @@ class Person < ActiveRecord::Base
     SQL
     Arel.sql(query)
   end
+  
+  ransacker_alias :cmnt_bd, :comments_body
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
