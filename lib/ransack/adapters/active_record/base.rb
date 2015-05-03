@@ -14,7 +14,7 @@ module Ransack
         end
 
         def ransack(params = {}, options = {})
-          Search.new(self, params, options)
+          Search.new(self, params_with_ransacker_aliases(params), options)
         end
 
         def ransacker(name, opts = {}, &block)
@@ -24,6 +24,18 @@ module Ransack
 
         def ransacker_alias(alias_name, normal_name)
           self._ransacker_aliases[alias_name.to_s] = normal_name.to_s
+        end
+
+        def params_with_ransacker_aliases(params)
+          params.keys.each do |k|
+            predicate = Predicate.detect_from_string(k)
+            attribute = k.sub(/_#{predicate}$/, Ransack::Constants::EMPTY)            
+            if _ransacker_aliases.has_key?(attribute)
+              normal_key = "#{_ransacker_aliases[attribute]}_#{predicate}"
+              params[normal_key] = params.delete(k)
+            end
+          end
+          params
         end
 
         # Ransackable_attributes, by default, returns all column names
