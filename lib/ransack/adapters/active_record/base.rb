@@ -21,7 +21,7 @@ module Ransack
           self._ransackers = _ransackers.merge name.to_s => Ransacker
             .new(self, name, opts, &block)
         end
-        
+
         def ransacker_alias(alias_name, normal_name)
           self._ransacker_aliases[alias_name.to_s] = normal_name.to_s
         end
