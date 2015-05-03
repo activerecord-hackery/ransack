@@ -14,6 +14,14 @@ module Ransack
         end
 
         def ransack(params = {}, options = {})
+          params.keys.each do |k|
+            search_attr = k.to_s.sub(/_#{Ransack::Predicate.detect_from_string(k.to_s)}$/, Ransack::Constants::EMPTY)
+            search_pred = k.to_s.sub(/^#{search_attr}_/, Ransack::Constants::EMPTY)
+            if _ransacker_aliases.has_key?(search_attr)
+              params["#{_ransacker_aliases[search_attr]}_#{search_pred}"] = params.delete(k)
+            end
+          end
+
           Search.new(self, params, options)
         end
 
