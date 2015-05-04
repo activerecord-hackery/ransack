@@ -28,8 +28,8 @@ module Ransack
 
         def params_with_ransacker_aliases(params)
           params.keys.each do |k|
-            predicate = Predicate.detect_from_string(k)
-            attribute = k.sub(/_#{predicate}$/, Ransack::Constants::EMPTY)
+            predicate = Predicate.detect_from_string(k.to_s)
+            attribute = k.to_s.sub(/_#{predicate}$/, Ransack::Constants::EMPTY)
             if _ransacker_aliases.has_key?(attribute)
               normal_key = "#{_ransacker_aliases[attribute]}_#{predicate}"
               params[normal_key] = params.delete(k)
