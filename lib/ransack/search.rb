@@ -1,14 +1,6 @@
 require 'ransack/nodes'
 require 'ransack/context'
-
-if defined?(::ActiveRecord::Base)
-  require 'ransack/adapters/active_record/ransack/context'
-end
-
-if defined?(::Mongoid)
-  require 'ransack/adapters/mongoid/ransack/context'
-end
-
+Ransack::Adapters.require_search
 require 'ransack/naming'
 
 module Ransack
