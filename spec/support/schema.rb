@@ -33,6 +33,7 @@ class Person < ActiveRecord::Base
   belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :children, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :articles
+  has_many   :published_articles, :class_name => 'Article', :conditions => {published: true}
   has_many   :comments
   has_many   :authored_article_comments, :through => :articles,
              :source => :comments, :foreign_key => :person_id
@@ -171,6 +172,7 @@ module Schema
         t.string   :title
         t.text     :subject_header
         t.text     :body
+        t.boolean  :published, default: true
       end
 
       create_table :comments, :force => true do |t|

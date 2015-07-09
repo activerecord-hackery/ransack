@@ -93,9 +93,10 @@ module Ransack
         expect(condition.value).to eq 'Ernie'
       end
 
-      it 'preserves default scope conditions for associations' do
-        search = Search.new(Person, articles_title_eq: 'Test')
+      it 'preserves default scope and conditions for associations' do
+        search = Search.new(Person, published_articles_title_eq: 'Test')
         expect(search.result.to_sql).to include 'default_scope'
+        expect(search.result.to_sql).to include 'published'
       end
 
       it 'discards empty conditions' do
