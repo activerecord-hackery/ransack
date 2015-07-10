@@ -33,7 +33,11 @@ class Person < ActiveRecord::Base
   belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :children, :class_name => 'Person', :foreign_key => :parent_id
   has_many   :articles
-  has_many   :published_articles, :class_name => 'Article', :conditions => {published: true}
+  if ActiveRecord::VERSION::MAJOR == 3
+    has_many :published_articles, conditions: { published: true }, class_name: "Article"
+  else
+    has_many :published_articles, ->{ where(published: true) }, class_name: "Article"
+  end
   has_many   :comments
   has_many   :authored_article_comments, :through => :articles,
              :source => :comments, :foreign_key => :person_id
