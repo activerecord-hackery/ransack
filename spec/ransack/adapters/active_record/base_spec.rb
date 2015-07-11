@@ -145,6 +145,9 @@ module Ransack
           end
 
           it "should function correctly with a multi-parameter attribute" do
+            ::ActiveRecord::Base.default_timezone = :utc
+            Time.zone = 'UTC'
+
             date = Date.current
             s = Person.ransack(
               { "created_at_gteq(1i)" => date.year,
