@@ -31,7 +31,7 @@ module Ransack
 
         private
 
-        def extract_attributes_and_predicate(key, context=nil)
+        def extract_attributes_and_predicate(key, context = nil)
           str = key.dup
           name = Predicate.detect_and_strip_from_string!(str)
           predicate = Predicate.named(name)
