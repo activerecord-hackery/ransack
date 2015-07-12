@@ -90,8 +90,8 @@ module Ransack
         #
         def join_sources
           base = Arel::SelectManager.new(@object.engine, @object.table)
-          joins = @object.joins_values
-          joins.each do |assoc|
+          @object.joins_values.each do |assoc|
+            next unless assoc.is_a?(JoinDependency::JoinAssociation)
             assoc.join_to(base)
           end
           base.join_sources
@@ -151,7 +151,7 @@ module Ransack
               Constants::STRING_JOIN
             when Hash, Symbol, Array
               Constants::ASSOCIATION_JOIN
-            when ::ActiveRecord::Associations::JoinDependency::JoinAssociation
+            when JoinDependency::JoinAssociation
               Constants::STASHED_JOIN
             when Arel::Nodes::Join
               Constants::JOIN_NODE
@@ -196,21 +196,17 @@ module Ransack
               :build, Polyamorous::Join.new(name, @join_type, klass), parent
               )
             found_association = @join_dependency.join_associations.last
-            apply_default_conditions(found_association)
+
+            default_conditions = found_association.active_record.scoped.arel.constraints
+            if default_conditions.any?
+              and_default_conditions = "AND #{default_conditions.reduce(&:and).to_sql}"
+            end
+
             # Leverage the stashed association functionality in AR
-            @object = @object.joins(found_association)
+            @object = @object.joins(found_association).joins(and_default_conditions)
           end
 
           found_association
-        end
-
-        def apply_default_conditions(join_association)
-          reflection = join_association.reflection
-          default_scope = join_association.active_record.scoped
-          default_conditions = default_scope.arel.where_clauses
-          if default_conditions.any?
-            reflection.options[:conditions] = default_conditions
-          end
         end
 
       end
