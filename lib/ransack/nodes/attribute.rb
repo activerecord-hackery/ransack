@@ -22,7 +22,7 @@ module Ransack
       def valid?
         bound? && attr &&
         context.klassify(parent).ransackable_attributes(context.auth_object)
-        .include?(attr_name)
+        .include?(attr_name.split('.').last)
       end
 
       def type

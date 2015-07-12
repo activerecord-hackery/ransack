@@ -73,7 +73,7 @@ module Ransack
           end
 
           def reflect_on_all_associations_all
-            reflect_on_all_associations(:belongs_to, :has_one, :has_many)
+            reflect_on_all_associations(:belongs_to, :has_one, :has_many, :embeds_many, :embedded_in)
           end
 
           # For overriding with a whitelist of symbols
@@ -84,6 +84,10 @@ module Ransack
           # imitating active record
 
           def joins_values *args
+            []
+          end
+
+          def custom_join_ast *args
             []
           end
 

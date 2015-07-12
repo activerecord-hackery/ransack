@@ -21,7 +21,7 @@ module Ransack
 
         def type_for(attr)
           return nil unless attr && attr.valid?
-          name    = attr.arel_attribute.name.to_s
+          name    = attr.arel_attribute.name.to_s.split('.').last
           # table   = attr.arel_attribute.relation.table_name
 
           # schema_cache = @engine.connection.schema_cache
@@ -38,7 +38,7 @@ module Ransack
 
           name = '_id' if name == 'id'
 
-          t = object.klass.fields[name].type
+          t = object.klass.fields[name].try(:type) || @bind_pairs[attr.name].first.fields[name].type
 
           t.to_s.demodulize.underscore.to_sym
         end
@@ -114,10 +114,10 @@ module Ransack
               segments.pop) && segments.size > 0 && !found_assoc do
               assoc, klass = unpolymorphize_association(segments.join('_'))
               if found_assoc = get_association(assoc, parent)
-                join = build_or_find_association(found_assoc.name, parent, klass)
                 parent, attr_name = get_parent_and_attribute_name(
-                  remainder.join('_'), join
+                  remainder.join('_'), found_assoc.klass
                   )
+                attr_name = "#{segments.join('_')}.#{attr_name}"
               end
             end
           end
