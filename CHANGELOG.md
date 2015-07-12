@@ -1,5 +1,15 @@
 # Change Log
 
+## Version 1.6.7 - 2015-07-13
+### Fixed
+
+*   Fix handling attribute-name with `_and_` `_or_`
+    issue [#299](https://github.com/activerecord-hackery/ransack/issues/299)
+    Ransack must recognize attribute-name which includes `_and_` `_or_` in searching key.
+    If the model hadn't attribute-name, Ransack would recognize normal seaching key.
+
+    *Ryohei Hoshi*
+
 ## Version 1.6.6 - 2015-04-05
 ### Changed
 
