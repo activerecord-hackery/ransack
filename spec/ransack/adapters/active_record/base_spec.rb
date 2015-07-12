@@ -228,14 +228,9 @@ module Ransack
           end
 
           it "should function correctly when an attribute name has 'and' in it" do
-          # FIXME: this test does not pass!
             p = Person.create!(:terms_and_conditions => true)
             s = Person.ransack(:terms_and_conditions_eq => true)
-          # search is not detecting the attribute
-            puts "
-            FIXME: Search not detecting the `terms_and_conditions` attribute in
-            base_spec.rb, line 178: #{s.result.to_sql}"
-          # expect(s.result.to_a).to eq [p]
+            expect(s.result.to_a).to eq [p]
           end
 
           it 'allows sort by "only_sort" field' do
