@@ -5,7 +5,7 @@ if defined?(::ActiveRecord::Base)
   require 'ransack/adapters/active_record/ransack/context'
 end
 
-if defined?(::Mongoid)
+if defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
   require 'ransack/adapters/mongoid/ransack/context'
 end
 

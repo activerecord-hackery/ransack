@@ -4,7 +4,7 @@ if defined?(::ActiveRecord::Base)
   require 'ransack/adapters/active_record/ransack/visitor'
 end
 
-if defined?(::Mongoid)
+if defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
   require 'ransack/adapters/mongoid/ransack/visitor'
 end
 
