@@ -2,7 +2,7 @@ require 'active_support/core_ext'
 
 require 'ransack/configuration'
 
-if defined?(::Mongoid)
+if defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
   require 'ransack/adapters/mongoid/ransack/constants'
 else
   require 'ransack/adapters/active_record/ransack/constants'
@@ -34,7 +34,7 @@ if defined?(::ActiveRecord::Base)
   require 'ransack/adapters/active_record'
 end
 
-if defined?(::Mongoid)
+if defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
   require 'ransack/adapters/mongoid/ransack/translate'
   require 'ransack/adapters/mongoid'
 end
