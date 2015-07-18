@@ -1,14 +1,63 @@
 # Change Log
 
-## Version 1.6.7 - 2015-07-13
+## Unreleased
 ### Fixed
 
-*   Fix handling attribute-name with `_and_` `_or_`
-    issue [#299](https://github.com/activerecord-hackery/ransack/issues/299)
-    Ransack must recognize attribute-name which includes `_and_` `_or_` in searching key.
-    If the model hadn't attribute-name, Ransack would recognize normal seaching key.
+*   Fix [#299](https://github.com/activerecord-hackery/ransack/issues/299)
+    `attribute_method?` parsing for attribute names containing `_and_`
+    and `_or_`. Attributes named like `foo_and_bar` or `foo_or_bar` are
+    recognized now instead of running failing checks for `foo` and `bar`.
 
     *Ryohei Hoshi*
+
+*   Support referenced relations with Mongoid.
+
+    *Penn Su*
+
+*   Avoid overwriting association conditions with default scope in Rails 3.
+    When a model with default scope was associated with conditions
+    (`has_many :x, conditions: ...`), the default scope would overwrite the
+    association conditions. This patch ensures that both sources of conditions
+    are applied. Avoid selecting records from joins that would normally be
+    filtered out if they were selected from the base table. Only applies to
+    Rails 3, as this issue was fixed since Rails 4.
+
+*   Fix test suite for ActiveRecord version differences.
+
+*   Fix time-dependent test failure.
+
+*   Avoid overwriting association conditions with default scope. When joining
+    ransackable associations in Rails 3, preserve both:
+
+    * association default_scope
+    * association conditions
+
+    Combining the stashed JoinAssociation with a separate string join for
+    the "AND" conditions looks like a hack, but there is no cleaner way to
+    extract the default_scope conditions with correct table aliases and
+    merge them back into the association, since Active Record rebuilds its own
+    join parts when generating the query.
+
+    *Andrew Vit*
+
+*   Fix RSpec `its` method deprecation warning: 'Use of rspec-core's `its`
+    method is deprecated. Use the rspec-its gem instead.
+
+*   Fix deprecated RSpec syntax in `grouping_spec.rb`.
+
+*   Remove method call from iteration in `nodes/condition.rb`.
+
+*   Simplify `ransack.rb` and remove conditionals.
+
+    *Jon Atack*
+
+
+### Added
+
+*   Add German locale file (de.yml).
+
+    *Philipp Weissensteiner*
+
 
 ## Version 1.6.6 - 2015-04-05
 ### Changed
