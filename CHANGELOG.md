@@ -1,18 +1,28 @@
 # Change Log
 
 ## Unreleased
+
 ### Fixed
 
 *   Fix [#299](https://github.com/activerecord-hackery/ransack/issues/299)
     `attribute_method?` parsing for attribute names containing `_and_`
     and `_or_`. Attributes named like `foo_and_bar` or `foo_or_bar` are
     recognized now instead of running failing checks for `foo` and `bar`.
+    PR [#562](https://github.com/activerecord-hackery/ransack/pull/562).
 
     *Ryohei Hoshi*
 
-*   Support referenced relations with Mongoid.
+*   Support referenced relations with Mongoid. PR
+    [#498](https://github.com/activerecord-hackery/ransack/pull/498).
+    TODO: Missing spec coverage!
 
     *Penn Su*
+
+*   Fix test suite for ActiveRecord version differences and fix time-dependent
+    test failure. PR
+    [#561](https://github.com/activerecord-hackery/ransack/pull/561).
+
+    *Andrew Vit*
 
 *   Avoid overwriting association conditions with default scope in Rails 3.
     When a model with default scope was associated with conditions
@@ -20,23 +30,8 @@
     association conditions. This patch ensures that both sources of conditions
     are applied. Avoid selecting records from joins that would normally be
     filtered out if they were selected from the base table. Only applies to
-    Rails 3, as this issue was fixed since Rails 4.
-
-*   Fix test suite for ActiveRecord version differences.
-
-*   Fix time-dependent test failure.
-
-*   Avoid overwriting association conditions with default scope. When joining
-    ransackable associations in Rails 3, preserve both:
-
-    * association default_scope
-    * association conditions
-
-    Combining the stashed JoinAssociation with a separate string join for
-    the "AND" conditions looks like a hack, but there is no cleaner way to
-    extract the default_scope conditions with correct table aliases and
-    merge them back into the association, since Active Record rebuilds its own
-    join parts when generating the query.
+    Rails 3, as this issue was fixed since Rails 4. PR
+    [#560](https://github.com/activerecord-hackery/ransack/pull/560).
 
     *Andrew Vit*
 
@@ -54,7 +49,8 @@
 
 ### Added
 
-*   Add German locale file (de.yml).
+*   Add German locale file (de.yml). PR
+    [#537](https://github.com/activerecord-hackery/ransack/pull/537).
 
     *Philipp Weissensteiner*
 
@@ -62,7 +58,8 @@
 ## Version 1.6.6 - 2015-04-05
 ### Changed
 
-*   Upgrade Polyamorous dependency to version 1.2.0, which uses Module#prepend instead of monkey-patching for hooking into Active Record (with Ruby 2.x).
+*   Upgrade Polyamorous dependency to version 1.2.0, which uses `Module#prepend`
+    instead of `alias_method` for hooking into Active Record (with Ruby 2.x).
 
     *Jon Atack*
 
