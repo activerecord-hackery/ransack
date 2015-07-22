@@ -34,10 +34,11 @@ you're reading the documentation for the master branch with the latest features.
 
 ## Getting started
 
-Ransack is compatible with Rails 3 and 4 (including 4.2.1) on Ruby 1.9 and
-later (Ruby 2.2 recommended). Ransack currently works with Rails master (5.0.0)
-too! If you are using Ruby 1.8, you can use an earlier version of Ransack up to
-1.3.0.
+Ransack is compatible with Rails 3 and 4 on Ruby 1.9 and later (Ruby 2.2
+recommended). JRuby 9 ought to work as well (see
+[this](https://github.com/activerecord-hackery/polyamorous/issues/17)).
+If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
+issues, you can use an earlier version of Ransack, say, up to 1.3.0.
 
 Ransack works out-of-the-box with Active Record and also features experimental
 support for Mongoid 4.0 (without associations, further details below).
