@@ -20,9 +20,7 @@ module Ransack
 
           context 'with scopes' do
             before do
-              allow(Person).to receive_messages(
-                ransackable_scopes: [:active, :over_age]
-                )
+              Person.stub :ransackable_scopes => [:active, :over_age]
             end
 
             it "applies true scopes" do
