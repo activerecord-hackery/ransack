@@ -20,53 +20,55 @@ module Ransack
 
           context 'with scopes' do
             before do
-              Person.stub :ransackable_scopes => [:active, :over_age, :of_age]
+              allow(Person).to receive_messages(
+                ransackable_scopes: [:active, :over_age, :of_age]
+                )
             end
 
             it "applies true scopes" do
               s = Person.ransack('active' => true)
-              s.result.to_sql.should include "active = 1"
+              expect(s.result.to_sql).to (include 'active = 1')
             end
 
             it "applies stringy true scopes" do
               s = Person.ransack('active' => 'true')
-              s.result.to_sql.should include "active = 1"
+              expect(s.result.to_sql).to (include 'active = 1')
             end
 
             it "applies stringy boolean scopes with true value in an array" do
               s = Person.ransack('of_age' => ['true'])
-              s.result.to_sql.should include "age >= 18"
+              expect(s.result.to_sql).to (include 'age >= 18')
             end
 
             it "applies stringy boolean scopes with false value in an array" do
               s = Person.ransack('of_age' => ['false'])
-              s.result.to_sql.should include "age < 18"
+              expect(s.result.to_sql).to (include 'age < 18')
             end
 
             it "ignores unlisted scopes" do
               s = Person.ransack('restricted' => true)
-              s.result.to_sql.should_not include "restricted"
+              expect(s.result.to_sql).to_not (include 'restricted')
             end
 
             it "ignores false scopes" do
               s = Person.ransack('active' => false)
-              s.result.to_sql.should_not include "active"
+              expect(s.result.to_sql).not_to (include 'active')
             end
 
             it "ignores stringy false scopes" do
               s = Person.ransack('active' => 'false')
-              s.result.to_sql.should_not include "active"
+              expect(s.result.to_sql).to_not (include 'active')
             end
 
             it "passes values to scopes" do
               s = Person.ransack('over_age' => 18)
-              s.result.to_sql.should include "age > 18"
+              expect(s.result.to_sql).to (include 'age > 18')
             end
 
             it "chains scopes" do
               s = Person.ransack('over_age' => 18, 'active' => true)
-              s.result.to_sql.should include "age > 18"
-              s.result.to_sql.should include "active = 1"
+              expect(s.result.to_sql).to (include 'age > 18')
+              expect(s.result.to_sql).to (include 'active = 1')
             end
           end
 

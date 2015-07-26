@@ -34,7 +34,7 @@ module Ransack
             Ransack.configure { |c| c.ignore_unknown_conditions = true }
           end
 
-          specify { subject.should be_nil }
+          specify { expect(subject).to be_nil }
         end
       end
     end
