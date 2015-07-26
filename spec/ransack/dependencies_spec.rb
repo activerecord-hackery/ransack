@@ -1,3 +1,4 @@
+=begin
 rails = ::ActiveRecord::VERSION::STRING.first(3)
 
 if %w(3.2 4.0 4.1).include?(rails) || rails == '3.1' && RUBY_VERSION < '2.2'
@@ -8,3 +9,4 @@ if %w(3.2 4.0 4.1).include?(rails) || rails == '3.1' && RUBY_VERSION < '2.2'
     end
   end
 end
+=end
