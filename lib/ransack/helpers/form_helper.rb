@@ -75,14 +75,12 @@ module Ransack
           @search         = search
           @params         = params
           @field          = attribute.to_s
-          sort_fields     = extract_sort_fields_and_mutate_args!(args).compact
+          @sort_fields    = extract_sort_fields_and_mutate_args!(args).compact
           @current_dir    = existing_sort_direction
           @label_text     = extract_label_and_mutate_args!(args)
           @options        = extract_options_and_mutate_args!(args)
           @hide_indicator = @options.delete :hide_indicator
           @default_order  = @options.delete :default_order
-          @sort_params    = build_sort(sort_fields)
-          @sort_params    = @sort_params.first if @sort_params.size == 1
         end
 
         def name
@@ -100,10 +98,10 @@ module Ransack
 
         def html_options(args)
           html_options = extract_options_and_mutate_args!(args)
-          html_options.merge(class:
-            [[Constants::SORT_LINK, @current_dir], html_options[:class]]
-            .compact.join(Constants::SPACE)
-            )
+          html_options.merge(
+            class: [[Constants::SORT_LINK, @current_dir], html_options[:class]]
+                   .compact.join(Constants::SPACE)
+          )
         end
 
         private
@@ -120,7 +118,7 @@ module Ransack
             if args.first.is_a? String
               args.shift
             else
-              Translate.attribute(@field, :context => @search.context)
+              Translate.attribute(@field, context: @search.context)
             end
           end
 
@@ -133,16 +131,25 @@ module Ransack
           end
 
           def search_and_sort_params
-            search_params.merge(:s => @sort_params)
+            search_params.merge(s: sort_params)
           end
 
           def search_params
             @params[@search.context.search_key].presence || {}
           end
 
-          def build_sort(fields)
+          def sort_params
+            sort_array = recursive_sort_params_build(@sort_fields)
+            if sort_array.size == 1
+              sort_array.first
+            else
+              sort_array
+            end
+          end
+
+          def recursive_sort_params_build(fields)
             return [] if fields.empty?
-            [parse_sort(fields[0])] + build_sort(fields.drop(1))
+            [parse_sort(fields[0])] + recursive_sort_params_build(fields.drop 1)
           end
 
           def parse_sort(field)
@@ -154,8 +161,7 @@ module Ransack
           end
 
           def detect_previous_sort_direction_and_invert_it(attr_name)
-            sort_dir = existing_sort_direction(attr_name)
-            if sort_dir
+            if sort_dir = existing_sort_direction(attr_name)
               direction_text(sort_dir)
             else
               default_sort_order(attr_name) || Constants::ASC
@@ -169,7 +175,11 @@ module Ransack
           end
 
           def default_sort_order(attr_name)
-            Hash === @default_order ? @default_order[attr_name] : @default_order
+            if Hash === @default_order
+              @default_order[attr_name]
+            else
+              @default_order
+            end
           end
 
           def order_indicator
