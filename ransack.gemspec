@@ -21,16 +21,15 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport', '>= 3.0'
   s.add_dependency 'i18n'
   s.add_dependency 'polyamorous', '~> 1.2'
-  s.add_development_dependency 'rspec', '~> 2.14.0'
+  s.add_development_dependency 'rspec', '~> 2'
   s.add_development_dependency 'machinist', '~> 1.0.6'
-  s.add_development_dependency 'faker', '~> 0.9.5'
+  s.add_development_dependency 'faker', '~> 1.4'
   s.add_development_dependency 'sqlite3', '~> 1.3.3'
   s.add_development_dependency 'pg'
-  s.add_development_dependency 'mysql2', '0.3.14'
+  s.add_development_dependency 'mysql2', '0.3.18'
   s.add_development_dependency 'pry', '0.9.12.2'
 
-  s.files         = `git ls-files`
-                    .split("\n")
+  s.files         = `git ls-files`.split("\n")
 
   s.test_files    = `git ls-files -- {test,spec,features}/*`
                     .split("\n")
