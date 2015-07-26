@@ -21,7 +21,7 @@ module Ransack
           context 'with scopes' do
             before do
               allow(Person).to receive_messages(
-                ransackable_scopes: [:active, :over_age, :of_age]
+                ransackable_scopes: [:active, :over_age]
                 )
             end
 
