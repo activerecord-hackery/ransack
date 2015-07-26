@@ -15,8 +15,7 @@ module Ransack
         elsif record.is_a?(Array) &&
         (search = record.detect { |o| o.is_a?(Ransack::Search) })
           options[:url] ||= polymorphic_path(
-            record.map { |o| o.is_a?(Ransack::Search) ? o.klass : o },
-            format: options.delete(:format)
+            options_for(record), format: options.delete(:format)
             )
         else
           raise ArgumentError,
@@ -24,13 +23,9 @@ module Ransack
         end
         options[:html] ||= {}
         html_options = {
-          :class => options[:class].present? ?
-            "#{options[:class]}" :
-            "#{search.klass.to_s.underscore}_search",
-          :id => options[:id].present? ?
-            "#{options[:id]}" :
-            "#{search.klass.to_s.underscore}_search",
-          :method => :get
+          class:  html_option_for(options[:class], search),
+          id:     html_option_for(options[:id], search),
+          method: :get
         }
         options[:as] ||= Ransack.options[:search_key]
         options[:html].reverse_merge!(html_options)
@@ -53,6 +48,26 @@ module Ransack
       end
 
       private
+
+        def options_for(record)
+          record.map &method(:parse_record)
+        end
+
+        def parse_record(object)
+          if object.is_a?(Ransack::Search)
+            object.klass
+          else
+            object
+          end
+        end
+
+        def html_option_for(option, search)
+          if option.present?
+            option.to_s
+          else
+            "#{search.klass.to_s.underscore}_search"
+          end
+        end
 
         def extract_search_and_routing_proxy(search)
           if search.is_a? Array
