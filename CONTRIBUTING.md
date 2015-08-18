@@ -107,7 +107,7 @@ Syntax:
 * 80 characters per line.
 * No trailing whitespace. Blank lines should not have any space.
 * Prefer `&&`/`||` over `and`/`or`.
-* `MyClass.my_method(my_arg)` not `my_method( my_arg )` or my_method my_arg.
+* `MyClass.my_method(my_arg)` not `my_method( my_arg )` or `my_method my_arg`.
 * `a = b` and not `a=b`.
 * `a_method { |block| ... }` and not `a_method { | block | ... }` or
 `a_method{|block| ...}`.
