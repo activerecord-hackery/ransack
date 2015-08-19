@@ -656,6 +656,8 @@ called on a `ransack` search returns a `Mongoid::Criteria` object:
   @people = @q.result.active.order_by(updated_at: -1).limit(10)
 ```
 
+_NOTE: You can't use ActiveRecord and Mongoid in the same App at the moment. Mongoid works only if you don't have ActiveRecord in your Gemfile and and vice versa._
+
 ## Semantic Versioning
 
 Ransack attempts to follow semantic versioning in the format of `x.y.z`, where:
