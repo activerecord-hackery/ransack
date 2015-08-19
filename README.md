@@ -656,7 +656,16 @@ called on a `ransack` search returns a `Mongoid::Criteria` object:
   @people = @q.result.active.order_by(updated_at: -1).limit(10)
 ```
 
-_NOTE: You can't use ActiveRecord and Mongoid in the same App at the moment. Mongoid works only if you don't have ActiveRecord in your Gemfile and and vice versa._
+_NOTE: Ransack currently works with either Active Record or Mongoid, but not
+both in the same application. If both are present, Ransack will default to
+Active Record only. Here is the code containing the logic:_
+
+```ruby
+  @current_adapters ||= {
+    :active_record => defined?(::ActiveRecord::Base),
+    :mongoid => defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
+  }
+```
 
 ## Semantic Versioning
 
