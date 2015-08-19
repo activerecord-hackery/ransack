@@ -7,8 +7,12 @@ Ransack is an open source project and we encourage contributions.
 
 ## Filing an issue
 
-A bug is a _demonstrable problem_ that is caused by the code in the repository.
-Good bug reports are extremely helpful! Please do not use the issue tracker for personal support requests.
+Good issue reports are extremely helpful!  Please only open an issue if a bug
+is _caused by Ransack_, is _new_ (has not already been reported), and can be
+_reproduced_ from the information you provide.
+
+Please do not use the issue tracker for questions or personal support requests.
+Stack Overflow is a better place for that where a wider community can help you.
 
 Guidelines for bug reports:
 
@@ -23,13 +27,13 @@ Guidelines for bug reports:
 
 When filing an issue, please provide these details:
 
-* A comprehensive list of steps to reproduce the issue, or - far better - **a failing spec**.
-* The version (and branch) of Ransack *and* the versions of Rails, Ruby, and your operating system.
+* A comprehensive list of steps to _reproduce_ the issue, or - even better - a **failing spec**.
+* The versions of Ruby, Rails, Ransack and your operating system and database.
 * Any relevant stack traces ("Full trace" preferred).
 
 Any issue that is open for 14 days without actionable information or activity
 will be marked as "stalled" and then closed. Stalled issues can be re-opened
-if the information requested is provided.
+if actionable information to reproduce the issue is provided.
 
 ## Pull requests
 
