@@ -1,20 +1,20 @@
 # Contributing to Ransack
 
-Please take a moment to review this document in order to make the contribution
-process easy and effective for everyone involved!
+Please take a moment to review this document to make contributing easy and
+effective for everyone involved!
 
 Ransack is an open source project and we encourage contributions.
 
 ## Filing an issue
 
 Good issue reports are extremely helpful!  Please only open an issue if a bug
-is _caused by Ransack_, is _new_ (has not already been reported), and can be
-_reproduced_ from the information you provide.
+is caused by Ransack, is new (has not already been reported), and can be
+reproduced from the information you provide.
 
-Please do not use the issue tracker for questions or personal support requests.
-Stack Overflow is a better place for that where a wider community can help you.
+Please do not use the issue tracker personal support requests. Stack Overflow
+is a better place for that where a wider community can help you.
 
-Guidelines for bug reports:
+Steps:
 
 1. **Use the GitHub issue search** &mdash; check if the issue has already been
    reported.
@@ -27,7 +27,7 @@ Guidelines for bug reports:
 
 When filing an issue, please provide these details:
 
-* A comprehensive list of steps to _reproduce_ the issue, or - even better - a **failing spec**.
+* A comprehensive list of steps to reproduce the issue :smiley: or even better, a failing spec!
 * The versions of Ruby, Rails, Ransack and your operating system and database.
 * Any relevant stack traces ("Full trace" preferred).
 
@@ -118,4 +118,4 @@ Syntax:
 * Prefer simplicity, readability, and maintainability over terseness.
 * Follow the conventions you see used in the code already.
 
-And in case we didn't emphasize it enough: we love tests!
+And in case we didn't emphasize it enough: We love tests!
