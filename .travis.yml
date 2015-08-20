@@ -4,62 +4,73 @@ language: ruby
 
 sudo: false
 
-rvm:
-  - 2.2.1
-  - 2.1
-  - 2.0
-  - 1.9
+before_install:
+  - travis_retry gem install bundler
 
-env:
-  - RAILS=4-2-stable DB=mongodb
-  - RAILS=4-2-stable DB=sqlite3
-  - RAILS=4-2-stable DB=mysql
-  - RAILS=4-2-stable DB=postgres
+cache:
+  - bundler
 
-  - RAILS=4-1-stable DB=mongodb
-  - RAILS=4-1-stable DB=sqlite3
-  - RAILS=4-1-stable DB=mysql
-  - RAILS=4-1-stable DB=postgres
+bundler:
+  rvm:
+    - 2.2.3
+    - 2.1
+    - 2.0
+    - 1.9
 
-  - RAILS=4-0-stable DB=sqlite3
-  - RAILS=4-0-stable DB=mysql
-  - RAILS=4-0-stable DB=postgres
+  env:
+    - RAILS=4-2-stable DB=mongodb
+    - RAILS=4-2-stable DB=sqlite3
+    - RAILS=4-2-stable DB=mysql
+    - RAILS=4-2-stable DB=postgres
 
-  - RAILS=3-2-stable DB=sqlite
-  - RAILS=3-2-stable DB=mysql
-  - RAILS=3-2-stable DB=postgres
+    - RAILS=4-1-stable DB=mongodb
+    - RAILS=4-1-stable DB=sqlite3
+    - RAILS=4-1-stable DB=mysql
+    - RAILS=4-1-stable DB=postgres
 
-  - RAILS=3-1-stable DB=sqlite
-  - RAILS=3-1-stable DB=mysql
-  - RAILS=3-1-stable DB=postgres
+    - RAILS=4-0-stable DB=sqlite3
+    - RAILS=4-0-stable DB=mysql
+    - RAILS=4-0-stable DB=postgres
 
-matrix:
-  include:
-    - rvm: 2.2
-      env: RAILS=master DB=sqlite3
-    - rvm: 2.2
-      env: RAILS=master DB=mysql
-    - rvm: 2.2
-      env: RAILS=master DB=postgres
-  exclude:
-    - rvm: 2.2
-      env: RAILS=3-1-stable DB=sqlite
-    - rvm: 2.2
-      env: RAILS=3-1-stable DB=mysql
-    - rvm: 2.2
-      env: RAILS=3-1-stable DB=postgres
-  allow_failures:
-    - env: RAILS=master DB=sqlite3
-    - env: RAILS=master DB=mysql
-    - env: RAILS=master DB=postgres
-    - rvm: 2.2
-      env: RAILS=3-2-stable DB=sqlite
-    - rvm: 2.2
-      env: RAILS=3-2-stable DB=mysql
-    - rvm: 2.2
-      env: RAILS=3-2-stable DB=postgres
+    - RAILS=3-2-stable DB=sqlite
+    - RAILS=3-2-stable DB=mysql
+    - RAILS=3-2-stable DB=postgres
+
+    - RAILS=3-1-stable DB=sqlite
+    - RAILS=3-1-stable DB=mysql
+    - RAILS=3-1-stable DB=postgres
+
+  matrix:
+    include:
+      - rvm: 2.2
+        env: RAILS=master DB=sqlite3
+      - rvm: 2.2
+        env: RAILS=master DB=mysql
+      - rvm: 2.2
+        env: RAILS=master DB=postgres
+    exclude:
+      - rvm: 2.2
+        env: RAILS=3-1-stable DB=sqlite
+      - rvm: 2.2
+        env: RAILS=3-1-stable DB=mysql
+      - rvm: 2.2
+        env: RAILS=3-1-stable DB=postgres
+    allow_failures:
+      - env: RAILS=master DB=sqlite3
+      - env: RAILS=master DB=mysql
+      - env: RAILS=master DB=postgres
+      - rvm: 2.2
+        env: RAILS=3-2-stable DB=sqlite
+      - rvm: 2.2
+        env: RAILS=3-2-stable DB=mysql
+      - rvm: 2.2
+        env: RAILS=3-2-stable DB=postgres
 
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'
   - mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";'
   - psql -c 'create database ransack;' -U postgres
+
+addons:
+  code_climate:
+    repo_token: 8b701c4364d51a0217105e08c06922d600cec3d9e60d546a89e3ddfe46e0664e
