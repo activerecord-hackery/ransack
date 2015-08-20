@@ -2,7 +2,20 @@
 
 ## Unreleased
 
+
+## Version 1.7.0 - 2015-08-20
 ### Fixed
+
+*   Fix
+    [#499](https://github.com/activerecord-hackery/ransack/issues/499) and
+    [#549](https://github.com/activerecord-hackery/ransack/issues/549).
+    Ransack now loads only Active Record if both Active Record and Mongoid are
+    running to avoid the two adapters overriding each other. This clarifies
+    that Ransack currently knows how to work with only one database adapter
+    active at a time. PR
+    [#541](https://github.com/activerecord-hackery/ransack/pull/541).
+
+    *ASnow (Большов Андрей)*
 
 *   Fix [#299](https://github.com/activerecord-hackery/ransack/issues/299)
     `attribute_method?` parsing for attribute names containing `_and_`
@@ -12,14 +25,10 @@
 
     *Ryohei Hoshi*
 
-*   Support referenced relations with Mongoid. PR
-    [#498](https://github.com/activerecord-hackery/ransack/pull/498).
-    TODO: Missing spec coverage!
-
-    *Penn Su*
-
-*   Fix test suite for ActiveRecord version differences and fix time-dependent
-    test failure. PR
+*   Fix a time-dependent test failure. When the database has
+    `default_timezone = :local` (system time) and the `Time.zone` is set to
+    elsewhere, then `Date.current` does not match what the query produces for
+    the stored timestamps. Resolved by setting everything to UTC. PR
     [#561](https://github.com/activerecord-hackery/ransack/pull/561).
 
     *Andrew Vit*
@@ -36,23 +45,38 @@
     *Andrew Vit*
 
 *   Fix RSpec `its` method deprecation warning: 'Use of rspec-core's `its`
-    method is deprecated. Use the rspec-its gem instead.
+    method is deprecated. Use the rspec-its gem instead (c09aa17).
 
-*   Fix deprecated RSpec syntax in `grouping_spec.rb`.
-
-*   Remove method call from iteration in `nodes/condition.rb`.
-
-*   Simplify `ransack.rb` and remove conditionals.
+*   Fix deprecated RSpec syntax in `grouping_spec.rb` (ba92a0b).
 
     *Jon Atack*
 
-
 ### Added
+
+*   Add Mongoid support for referenced/embedded relations. PR
+    [#498](https://github.com/activerecord-hackery/ransack/pull/498).
+    TODO: Missing spec coverage! Add documentation!
+
+    *Penn Su*
 
 *   Add German locale file (de.yml). PR
     [#537](https://github.com/activerecord-hackery/ransack/pull/537).
 
     *Philipp Weissensteiner*
+
+### Changed
+
+*   Upgrade gemspec dependencies: MySQL2 from '0.3.14' to '0.3.18', and RSpec
+    from '~> 2.14.0' to '~> 2' which loads 2.99 (000cd2).
+
+*   Upgrade spec suite to RSpec 3 `expect` syntax (backward compatible with
+    RSpec 2.9) (87cd36d and d296caa).
+
+*   Various FormHelper refactorings (17dd97a, 29a73b9).
+
+*   Various documentation updates.
+
+    *Jon Atack*
 
 
 ## Version 1.6.6 - 2015-04-05
