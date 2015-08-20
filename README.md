@@ -55,6 +55,12 @@ Or, if you would like to use the latest updates, use the `master` branch:
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
+## Issues tracker
+
+* Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
+* File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
+* Contributions are welcome, but please do not add "+1" comments to issues or pull requests :smiley:
+
 ## Usage
 
 Ransack can be used in one of two modes, simple or advanced.
