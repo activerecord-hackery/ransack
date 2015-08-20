@@ -45,9 +45,11 @@
     *Andrew Vit*
 
 *   Fix RSpec `its` method deprecation warning: 'Use of rspec-core's `its`
-    method is deprecated. Use the rspec-its gem instead (c09aa17).
+    method is deprecated. Use the rspec-its gem instead
+    ([c09aa17](https://github.com/activerecord-hackery/ransack/commit/c09aa17)).
 
-*   Fix deprecated RSpec syntax in `grouping_spec.rb` (ba92a0b).
+*   Fix deprecated RSpec syntax in `grouping_spec.rb`
+    ([ba92a0b](https://github.com/activerecord-hackery/ransack/commit/ba92a0b)).
 
     *Jon Atack*
 
@@ -67,12 +69,19 @@
 ### Changed
 
 *   Upgrade gemspec dependencies: MySQL2 from '0.3.14' to '0.3.18', and RSpec
-    from '~> 2.14.0' to '~> 2' which loads 2.99 (000cd2).
+    from '~> 2.14.0' to '~> 2' which loads 2.99
+    ([000cd2](https://github.com/activerecord-hackery/ransack/commit/000cd2)).
 
-*   Upgrade spec suite to RSpec 3 `expect` syntax (backward compatible with
-    RSpec 2.9) (87cd36d and d296caa).
+*   Upgrade spec suite to RSpec 3 `expect` syntax backward compatible with
+    RSpec 2.9
+    ([87cd36d](https://github.com/activerecord-hackery/ransack/commit/87cd36d)
+    and
+    [d296caa](https://github.com/activerecord-hackery/ransack/commit/d296caa)).
 
-*   Various FormHelper refactorings (17dd97a, 29a73b9).
+*   Various FormHelper refactorings
+    ([17dd97a](https://github.com/activerecord-hackery/ransack/commit/17dd97a)
+    and
+    [29a73b9](https://github.com/activerecord-hackery/ransack/commit/29a73b9)).
 
 *   Various documentation updates.
 
