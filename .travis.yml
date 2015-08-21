@@ -45,14 +45,14 @@ matrix:
       env: RAILS=master DB=postgres
 
     - rvm: 2.2
-      env: RAILS=3-2-stable DB=sqlite3
+      env: RAILS=3-2-stable DB=sqlite
     - rvm: 2.2
       env: RAILS=3-2-stable DB=mysql
     - rvm: 2.2
       env: RAILS=3-2-stable DB=postgres
 
     - rvm: 2.2
-      env: RAILS=3-1-stable DB=sqlite3
+      env: RAILS=3-1-stable DB=sqlite
     - rvm: 2.2
       env: RAILS=3-1-stable DB=mysql
     - rvm: 2.2
