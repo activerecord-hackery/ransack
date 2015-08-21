@@ -215,9 +215,9 @@ The sort link may be displayed without the order indicator arrow by passing
 
 Alternatively, all sort links may be displayed without the order indicator arrow by adding this to an initializer like config/initializers/ransack.rb:
 
-Ransack.configure do |c|
-  c.remove_search_order_indicators = true
-end
+    Ransack.configure do |c|
+      c.remove_search_order_indicators = true
+    end
 
 
 ### Advanced Mode
