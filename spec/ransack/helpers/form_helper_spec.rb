@@ -399,6 +399,34 @@ module Ransack
         it { should match /example_name_eq/ }
       end
 
+      describe '#search_form_for with config set to remove search order indicators' do
+        before do
+          Ransack.configure { |c| c.remove_search_order_indicators = true }
+        end
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people'
+          )
+        }
+        it { should match /Full Name/ }
+      end
+
+      describe '#search_form_for with config set to remove search order indicators' do
+        before do
+          Ransack.configure { |c| c.remove_search_order_indicators = false }
+        end
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people'
+          )
+        }
+        it { should match /Full Name&nbsp;&#9660;/ }
+      end
+
     end
   end
 end

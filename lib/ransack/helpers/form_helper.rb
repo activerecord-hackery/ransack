@@ -198,7 +198,7 @@ module Ransack
           end
 
           def order_indicator
-            if @hide_indicator || no_sort_direction_specified?
+            if @hide_indicator || no_sort_direction_specified? || Ransack.options[:remove_search_order_indicators]
               nil
             else
               direction_arrow
