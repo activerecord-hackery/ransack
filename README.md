@@ -335,15 +335,15 @@ end
 ...
 <%= content_tag :table do %>
   <%= content_tag :th, sort_link(@q, :last_name) %>
-  <%= content_tag :th, sort_link(@q, 'departments.title') %>
-  <%= content_tag :th, sort_link(@q, 'employees.last_name') %>
+  <%= content_tag :th, sort_link(@q, :department_title) %>
+  <%= content_tag :th, sort_link(@q, :employees_last_name) %>
 <% end %>
 ```
 
-Please note that in a sort link, the association is expressed as an SQL string
-(`'employees.last_name'`) with a pluralized table name, instead of the symbol
-`:employee_last_name` syntax with a class#underscore table name used for
-Ransack objects elsewhere.
+If you have trouble sorting on associations, try using an SQL string with the
+pluralized table (`'departments.title'`,`'employees.last_name'`) instead of the
+symbolized association (`:department_title)`, `:employees_last_name`).
+
 
 ### Using Ransackers to add custom search functions via Arel
 
