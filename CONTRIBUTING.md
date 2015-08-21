@@ -11,8 +11,8 @@ Good issue reports are extremely helpful!  Please only open an issue if a bug
 is caused by Ransack, is new (has not already been reported), and can be
 reproduced from the information you provide.
 
-Please do not use the issue tracker personal support requests. Stack Overflow
-is a better place for that where a wider community can help you.
+Please do not use the issue tracker for personal support requests. Stack
+Overflow is a better place for that where a wider community can help you!
 
 Steps:
 
@@ -28,6 +28,7 @@ Steps:
 When filing an issue, please provide these details:
 
 * A comprehensive list of steps to reproduce the issue :smiley: or even better, a failing spec!
+* Whether you are using Ransack through another gem like ActiveAdmin, SimpleForm, etc.
 * The versions of Ruby, Rails, Ransack and your operating system and database.
 * Any relevant stack traces ("Full trace" preferred).
 
