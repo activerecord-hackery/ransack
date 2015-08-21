@@ -8,7 +8,8 @@ module Ransack
     self.predicates = {}
     self.options = {
       :search_key => :q,
-      :ignore_unknown_conditions => true
+      :ignore_unknown_conditions => true,
+      :hide_sort_order_indicators => false
     }
 
     def configure
@@ -65,6 +66,12 @@ module Ransack
     # into a search.
     def ignore_unknown_conditions=(boolean)
       self.options[:ignore_unknown_conditions] = boolean
+    end
+
+    # Globally hide `sort_link` order indicator arrows if passed `true`.
+    # Defaults to `false`.
+    def hide_sort_order_indicators=(boolean)
+      self.options[:hide_sort_order_indicators] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)
