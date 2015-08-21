@@ -413,7 +413,7 @@ module Ransack
         it { should match /Full Name/ }
       end
 
-      describe '#search_form_for with config set to remove search order indicators' do
+      describe '#search_form_for with config set to not remove search order indicators' do
         before do
           Ransack.configure { |c| c.remove_search_order_indicators = false }
         end
