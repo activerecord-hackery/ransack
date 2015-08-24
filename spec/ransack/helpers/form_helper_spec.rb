@@ -413,11 +413,7 @@ module Ransack
         it { should match /Full Name/ }
       end
 
-<<<<<<< HEAD
       describe '#search_form_for with config set to remove sort order indicators' do
-=======
-      describe '#search_form_for with config set to not remove search order indicators' do
->>>>>>> aad81baf6130f0fa13cfabdb4dedcd25f0297b8c
         before do
           Ransack.configure { |c| c.hide_sort_order_indicators = false }
         end
