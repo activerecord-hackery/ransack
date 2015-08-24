@@ -9,7 +9,7 @@ module Ransack
     self.options = {
       :search_key => :q,
       :ignore_unknown_conditions => true,
-      :remove_search_order_indicators => false
+      :hide_sort_order_indicators => false
     }
 
     def configure
@@ -76,7 +76,7 @@ module Ransack
       end
     end
 
-    def remove_search_order_indicators=(boolean)
+    def hide_sort_order_indicators=(boolean)
       self.options[:remove_search_order_indicators] = boolean
     end
 

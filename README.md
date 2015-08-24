@@ -213,6 +213,14 @@ The sort link may be displayed without the order indicator arrow by passing
 <%= sort_link(@q, :name, hide_indicator: true) %>
 ```
 
+Alternatively, all sort links may be displayed without the order indicator arrow by adding this to an initializer like config/initializers/ransack.rb:
+
+```ruby
+Ransack.configure do |c|
+  c.remove_search_order_indicators = true
+end
+```
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to

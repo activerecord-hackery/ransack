@@ -399,9 +399,9 @@ module Ransack
         it { should match /example_name_eq/ }
       end
 
-      describe '#search_form_for with config set to remove search order indicators' do
+      describe '#search_form_for with config set to remove sort order indicators' do
         before do
-          Ransack.configure { |c| c.remove_search_order_indicators = true }
+          Ransack.configure { |c| c.hide_sort_order_indicators = true }
         end
         subject { @controller.view_context
           .sort_link(
@@ -413,9 +413,9 @@ module Ransack
         it { should match /Full Name/ }
       end
 
-      describe '#search_form_for with config set to remove search order indicators' do
+      describe '#search_form_for with config set to remove sort order indicators' do
         before do
-          Ransack.configure { |c| c.remove_search_order_indicators = false }
+          Ransack.configure { |c| c.hide_sort_order_indicators = false }
         end
         subject { @controller.view_context
           .sort_link(
