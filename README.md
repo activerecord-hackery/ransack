@@ -218,7 +218,7 @@ by adding this to an initializer like `config/initializers/ransack.rb`:
 
 ```ruby
 Ransack.configure do |c|
-  c.remove_search_order_indicators = true
+  c.hide_sort_order_indicators = true
 end
 ```
 
