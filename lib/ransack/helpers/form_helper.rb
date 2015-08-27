@@ -199,11 +199,8 @@ module Ransack
           end
 
           def order_indicator
-            if @hide_indicator || no_sort_direction_specified?
-              nil
-            else
-              direction_arrow
-            end
+            return if @hide_indicator || no_sort_direction_specified?
+            direction_arrow
           end
 
           def no_sort_direction_specified?(dir = @current_dir)
