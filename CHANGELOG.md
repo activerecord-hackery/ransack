@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
+*   Add ability to globally hide sort link order indicator arrows with
+    `Ransack.configure#hide_sort_order_indicators = true`. PR
+    [#577](https://github.com/activerecord-hackery/ransack/issues/577), commit
+    [95d4591](https://github.com/activerecord-hackery/ransack/commit/95d4591).
+
+    *Josh Hunter (@kalimi)*
+
 
 ## Version 1.7.0 - 2015-08-20
 ### Fixed
