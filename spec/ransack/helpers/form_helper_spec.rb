@@ -343,7 +343,7 @@ module Ransack
             hide_indicator: true
           )
         }
-        it { should match /Full Name/ }
+        it { should_not match /&#9660;|&#9650;/ }
       end
 
       describe '#sort_link with hide order indicator set to false' do
@@ -353,6 +353,34 @@ module Ransack
             :name,
             controller: 'people',
             hide_indicator: false
+          )
+        }
+        it { should match /Full Name&nbsp;&#9660;/ }
+      end
+
+      describe '#sort_link with config set to remove sort order indicators' do
+        before do
+          Ransack.configure { |c| c.hide_sort_order_indicators = true }
+        end
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people'
+          )
+        }
+        it { should_not match /&#9660;|&#9650;/ }
+      end
+
+      describe '#sort_link with config set to not remove sort order indicators' do
+        before do
+          Ransack.configure { |c| c.hide_sort_order_indicators = false }
+        end
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people'
           )
         }
         it { should match /Full Name&nbsp;&#9660;/ }
@@ -398,7 +426,6 @@ module Ransack
         }
         it { should match /example_name_eq/ }
       end
-
     end
   end
 end

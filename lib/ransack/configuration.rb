@@ -8,7 +8,8 @@ module Ransack
     self.predicates = {}
     self.options = {
       :search_key => :q,
-      :ignore_unknown_conditions => true
+      :ignore_unknown_conditions => true,
+      :hide_sort_order_indicators => false
     }
 
     def configure
@@ -73,6 +74,10 @@ module Ransack
       else
         "#{arel_predicate}#{suffix}"
       end
+    end
+
+    def hide_sort_order_indicators=(boolean)
+      self.options[:hide_sort_order_indicators] = boolean
     end
 
   end

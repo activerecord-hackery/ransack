@@ -94,7 +94,7 @@ module Ransack
           @current_dir    = existing_sort_direction
           @label_text     = extract_label_and_mutate_args!(args)
           @options        = extract_options_and_mutate_args!(args)
-          @hide_indicator = @options.delete :hide_indicator
+          @hide_indicator = @options.delete(:hide_indicator) || Ransack.options[:hide_sort_order_indicators]
           @default_order  = @options.delete :default_order
         end
 
@@ -198,11 +198,8 @@ module Ransack
           end
 
           def order_indicator
-            if @hide_indicator || no_sort_direction_specified?
-              nil
-            else
-              direction_arrow
-            end
+            return if @hide_indicator || no_sort_direction_specified?
+            direction_arrow
           end
 
           def no_sort_direction_specified?(dir = @current_dir)
