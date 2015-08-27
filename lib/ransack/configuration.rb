@@ -77,7 +77,7 @@ module Ransack
     end
 
     def hide_sort_order_indicators=(boolean)
-      self.options[:remove_search_order_indicators] = boolean
+      self.options[:hide_sort_order_indicators] = boolean
     end
 
   end

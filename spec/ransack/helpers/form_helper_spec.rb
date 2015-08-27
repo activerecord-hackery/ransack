@@ -343,7 +343,7 @@ module Ransack
             hide_indicator: true
           )
         }
-        it { should match /Full Name/ }
+        it { should_not match /&#9660;|&#9650;/ }
       end
 
       describe '#sort_link with hide order indicator set to false' do
@@ -410,10 +410,10 @@ module Ransack
             controller: 'people'
           )
         }
-        it { should match /Full Name/ }
+        it { should_not match /&#9660;|&#9650;/ }
       end
 
-      describe '#search_form_for with config set to remove sort order indicators' do
+      describe '#search_form_for with config set to not remove sort order indicators' do
         before do
           Ransack.configure { |c| c.hide_sort_order_indicators = false }
         end
