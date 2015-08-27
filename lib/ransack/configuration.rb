@@ -62,14 +62,28 @@ module Ransack
       self.options[:search_key] = name
     end
 
-    # Raise an error if an unknown predicate, condition or attribute is passed
-    # into a search.
+    # By default Ransack ignores errors if an unknown predicate, condition or
+    # attribute is passed into a search. The default may be overridden in an
+    # initializer file like `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Raise if an unknown predicate, condition or attribute is passed
+    #   config.ignore_unknown_conditions = false
+    # end
+    #
     def ignore_unknown_conditions=(boolean)
       self.options[:ignore_unknown_conditions] = boolean
     end
 
-    # Globally hide `sort_link` order indicator arrows if passed `true`.
-    # Defaults to `false`.
+    # By default, Ransack displays sort order indicator arrows in sort links.
+    # The default may be globally overridden in an initializer file like
+    # `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Hide sort link order indicators globally across the application
+    #   config.hide_sort_order_indicators = true
+    # end
+    #
     def hide_sort_order_indicators=(boolean)
       self.options[:hide_sort_order_indicators] = boolean
     end
