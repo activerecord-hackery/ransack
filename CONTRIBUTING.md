@@ -81,19 +81,23 @@ Here's a quick guide:
 8. Update the Change Log. If you are adding new functionality, document it in
    the README.
 
-9. Commit your changes (`git commit -am 'Add feature/fix bug/improve docs'`).
+9. Make sure git knows your name and email address in your `~/.gitconfig` file:
 
-10. If necessary, rebase your commits into logical chunks, without errors. To
+        $ git config --global user.name "Your Name"
+        $ git config --global user.email "contributor@example.com"
+
+10. Commit your changes (`git commit -am 'Add feature/fix bug/improve docs'`).
+   If your pull request only contains documentation changes, please remember
+   to add `[skip ci]` to the beginning of your commit message so the Travis
+   test suite doesn't :runner: needlessly.
+
+11. If necessary, rebase your commits into logical chunks, without errors. To
    interactively rebase and cherry-pick from, say, the last 10 commits:
    `git rebase -i HEAD~10`, then `git push -f`.
 
-11. Push the branch up to your fork on Github
-   (`git push origin my-new-feature`) and from Github submit a pull request to
+12. Push the branch up to your fork on GitHub
+   (`git push origin my-new-feature`) and from GitHub submit a pull request to
    Ransack's `master` branch.
-
-12. If your pull request only contains documentation changes, please remember
-   to add `[skip ci]` to the beginning of your commit message so the Travis
-   test suite doesn't :runner: needlessly.
 
 At this point you're waiting on us. We like to at least comment on, if not
 accept, pull requests within three business days (and, typically, one business
