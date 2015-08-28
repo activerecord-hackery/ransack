@@ -334,6 +334,12 @@ module Ransack
           end
         end
 
+        describe '#ransack_alias' do
+          s1 = Person.ransack(cmnt_bd_cont: "some_words")
+          s2 = Person.ransack(comments_body_cont: "some_words")
+          expect(s1.result.to_sql).to eq(s2.result.to_sql)
+        end
+
         describe '#ransackable_attributes' do
           context 'when auth_object is nil' do
             subject { Person.ransackable_attributes }

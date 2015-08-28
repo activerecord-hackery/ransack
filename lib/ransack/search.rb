@@ -93,6 +93,16 @@ module Ransack
     def method_missing(method_id, *args)
       method_name = method_id.to_s
       getter_name = method_name.sub(/=$/, Constants::EMPTY)
+
+      # Check for ransacker aliases
+      predicate = Predicate.detect_from_string(getter_name)
+      attribute = getter_name.sub(/_#{predicate}$/, Ransack::Constants::EMPTY)
+      if klass._ransacker_aliases[attribute]
+        getter_name = klass._ransacker_aliases[attribute]
+        method_name = "#{getter_name}_#{predicate}"
+        method_id = method_name.to_sym
+      end
+
       if base.attribute_method?(getter_name)
         base.send(method_id, *args)
       elsif @context.ransackable_scope?(getter_name, @context.object)
