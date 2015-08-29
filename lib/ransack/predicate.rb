@@ -10,7 +10,7 @@ module Ransack
       end
 
       def names_by_decreasing_length
-        names.sort { |a,b| b.length <=> a.length }
+        names.sort { |a, b| b.length <=> a.length }
       end
 
       def named(name)
@@ -19,7 +19,7 @@ module Ransack
 
       def detect_and_strip_from_string!(str)
         if p = detect_from_string(str)
-          str.sub! /_#{p}$/, Constants::EMPTY
+          str.sub! /_#{p}$/, ''.freeze
           p
         end
       end

@@ -37,7 +37,7 @@ module Ransack
 
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
-        if Constants::S_SORTS.include?(key)
+        if ['s'.freeze, 'sorts'.freeze].freeze.include?(key)
           send("#{key}=", value)
         elsif base.attribute_method?(key)
           base.send("#{key}=", value)
@@ -92,7 +92,7 @@ module Ransack
 
     def method_missing(method_id, *args)
       method_name = method_id.to_s
-      getter_name = method_name.sub(/=$/, Constants::EMPTY)
+      getter_name = method_name.sub(/=$/, ''.freeze)
       if base.attribute_method?(getter_name)
         base.send(method_id, *args)
       elsif @context.ransackable_scope?(getter_name, @context.object)
@@ -113,8 +113,8 @@ module Ransack
         [:base, base.inspect]
       ]
       .compact
-      .map { |d| d.join(Constants::COLON_SPACE) }
-      .join(Constants::COMMA_SPACE)
+      .map { |d| d.join(': '.freeze) }
+      .join(', '.freeze)
 
       "Ransack::Search<#{details}>"
     end

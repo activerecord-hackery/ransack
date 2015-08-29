@@ -15,8 +15,7 @@ end
 RANSACK_FORM_BUILDER = 'RANSACK_FORM_BUILDER'.freeze
 
 require 'simple_form' if
-  (ENV[RANSACK_FORM_BUILDER] || Ransack::Constants::EMPTY)
-  .match('SimpleForm'.freeze)
+  (ENV[RANSACK_FORM_BUILDER] || ''.freeze).match('SimpleForm'.freeze)
 
 module Ransack
   module Helpers
@@ -47,7 +46,7 @@ module Ransack
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)
         options[:include_blank] = true unless options.has_key?(:include_blank)
-        bases = [Constants::EMPTY] + association_array(options[:associations])
+        bases = [''.freeze].freeze + association_array(options[:associations])
         if bases.size > 1
           collection = attribute_collection_for_bases(action, bases)
           object.name ||= default if can_use_default?(
@@ -66,13 +65,13 @@ module Ransack
       def sort_direction_select(options = {}, html_options = {})
         unless object.respond_to?(:context)
           raise ArgumentError,
-          formbuilder_error_message(Constants::SORT_DIRECTION)
+          formbuilder_error_message('sort_direction'.freeze)
         end
         template_collection_select(:dir, sort_array, options, html_options)
       end
 
       def sort_select(options = {}, html_options = {})
-        attribute_select(options, html_options, Constants::SORT) +
+        attribute_select(options, html_options, 'sort'.freeze) +
         sort_direction_select(options, html_options)
       end
 
@@ -135,7 +134,7 @@ module Ransack
           else
             only = Array.wrap(only).map(&:to_s)
             keys = keys.select {
-              |k| only.include? k.sub(/_(any|all)$/, Constants::EMPTY)
+              |k| only.include? k.sub(/_(any|all)$/, ''.freeze)
             }
           end
         end

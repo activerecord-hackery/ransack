@@ -25,7 +25,7 @@ module Ransack
         |x| x.respond_to?(:model_name)
       }
       predicate = Predicate.detect_from_string(original_name)
-      attributes_str = original_name.sub(/_#{predicate}$/, Constants::EMPTY)
+      attributes_str = original_name.sub(/_#{predicate}$/, ''.freeze)
       attribute_names = attributes_str.split(/_and_|_or_/)
       combinator = attributes_str.match(/_and_/) ? :and : :or
       defaults = base_ancestors.map do |klass|
@@ -74,7 +74,7 @@ module Ransack
     def self.attribute_name(context, name, include_associations = nil)
       @context, @name = context, name
       @assoc_path = context.association_path(name)
-      @attr_name = @name.sub(/^#{@assoc_path}_/, Constants::EMPTY)
+      @attr_name = @name.sub(/^#{@assoc_path}_/, ''.freeze)
       associated_class = @context.traverse(@assoc_path) if @assoc_path.present?
       @include_associated = include_associations && associated_class
 

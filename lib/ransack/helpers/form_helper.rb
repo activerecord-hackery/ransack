@@ -93,7 +93,7 @@ module Ransack
         def name
           [ERB::Util.h(@label_text), order_indicator]
           .compact
-          .join(Constants::NON_BREAKING_SPACE)
+          .join('&nbsp;'.freeze)
           .html_safe
         end
 
@@ -106,8 +106,8 @@ module Ransack
         def html_options(args)
           html_options = extract_options_and_mutate_args!(args)
           html_options.merge(
-            class: [[Constants::SORT_LINK, @current_dir], html_options[:class]]
-                   .compact.join(Constants::SPACE)
+            class: [['sort_link'.freeze, @current_dir], html_options[:class]]
+                   .compact.join(' '.freeze)
           )
         end
 
@@ -159,7 +159,7 @@ module Ransack
             if sort_dir = existing_sort_direction(attr_name)
               direction_text(sort_dir)
             else
-              default_sort_order(attr_name) || Constants::ASC
+              default_sort_order(attr_name) || 'asc'.freeze
             end
           end
 
@@ -179,17 +179,17 @@ module Ransack
           end
 
           def no_sort_direction_specified?(dir = @current_dir)
-            !Constants::ASC_DESC.include?(dir)
+            !['asc'.freeze, 'desc'.freeze].freeze.include?(dir)
           end
 
           def direction_arrow
-            return Constants::DESC_ARROW if @current_dir == Constants::DESC
+            return Constants::DESC_ARROW if @current_dir == 'desc'.freeze
             Constants::ASC_ARROW
           end
 
           def direction_text(dir)
-            return Constants::ASC if dir == Constants::DESC
-            Constants::DESC
+            return 'asc'.freeze if dir == 'desc'.freeze
+            'desc'.freeze
           end
       end
     end

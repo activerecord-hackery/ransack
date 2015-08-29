@@ -224,7 +224,7 @@ module Ransack
         ]
         .reject { |e| e[1].blank? }
         .map { |v| "#{v[0]}: #{v[1]}" }
-        .join(Constants::COMMA_SPACE)
+        .join(', '.freeze)
         "Condition <#{data}>"
       end
 

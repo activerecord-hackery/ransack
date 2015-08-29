@@ -17,9 +17,12 @@ module Ransack
       end
 
       def for(object, options = {})
-        context = Class === object ?
-          for_class(object, options) :
-          for_object(object, options)
+        context =
+          if Class === object
+            for_class(object, options)
+          else
+            for_object(object, options)
+          end
         context or raise ArgumentError,
           "Don't know what context to use for #{object}"
       end
@@ -59,7 +62,7 @@ module Ransack
     end
 
     def traverse(str, base = @base)
-      str ||= Constants::EMPTY
+      str ||= ''.freeze
 
       if (segments = str.split(/_/)).size > 0
         remainder = []
@@ -68,13 +71,12 @@ module Ransack
           # Strip the _of_Model_type text from the association name, but hold
           # onto it in klass, for use as the next base
           assoc, klass = unpolymorphize_association(
-            segments.join(Constants::UNDERSCORE)
+            segments.join('_'.freeze)
             )
           if found_assoc = get_association(assoc, base)
             base = traverse(
-              remainder.join(
-                Constants::UNDERSCORE), klass || found_assoc.klass
-                )
+              remainder.join('_'.freeze), klass || found_assoc.klass
+              )
           end
 
           remainder.unshift segments.pop
@@ -88,7 +90,7 @@ module Ransack
 
     def association_path(str, base = @base)
       base = klassify(base)
-      str ||= Constants::EMPTY
+      str ||= ''.freeze
       path = []
       segments = str.split(/_/)
       association_parts = []
@@ -131,15 +133,15 @@ module Ransack
       klass.ransackable_scopes(auth_object).any? { |s| s.to_s == str }
     end
 
-    def searchable_attributes(str = Constants::EMPTY)
+    def searchable_attributes(str = ''.freeze)
       traverse(str).ransackable_attributes(auth_object)
     end
 
-    def sortable_attributes(str = Constants::EMPTY)
+    def sortable_attributes(str = ''.freeze)
       traverse(str).ransortable_attributes(auth_object)
     end
 
-    def searchable_associations(str = Constants::EMPTY)
+    def searchable_associations(str = ''.freeze)
       traverse(str).ransackable_associations(auth_object)
     end
   end
