@@ -64,7 +64,7 @@ module Ransack
         end
 
         def extract_search_and_routing_proxy(search)
-          return [search.second, search.first] if search.is_a?(Array)
+          return [search[1], search[0]] if search.is_a?(Array)
           [search, nil]
         end
 
@@ -114,17 +114,17 @@ module Ransack
         private
 
           def extract_sort_fields_and_mutate_args!(args)
-            return args.shift if args.first.is_a?(Array)
+            return args.shift if args[0].is_a?(Array)
             [@field]
           end
 
           def extract_label_and_mutate_args!(args)
-            return args.shift if args.first.is_a?(String)
+            return args.shift if args[0].is_a?(String)
             Translate.attribute(@field, context: @search.context)
           end
 
           def extract_options_and_mutate_args!(args)
-            return args.shift.with_indifferent_access if args.first.is_a?(Hash)
+            return args.shift.with_indifferent_access if args[0].is_a?(Hash)
             {}
           end
 
@@ -138,7 +138,7 @@ module Ransack
 
           def sort_params
             sort_array = recursive_sort_params_build(@sort_fields)
-            return sort_array[0] if sort_array.size == 1
+            return sort_array[0] if sort_array.length == 1
             sort_array
           end
 
