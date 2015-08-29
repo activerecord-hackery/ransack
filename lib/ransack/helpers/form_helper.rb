@@ -54,27 +54,18 @@ module Ransack
         end
 
         def parse_record(object)
-          if object.is_a?(Ransack::Search)
-            object.klass
-          else
-            object
-          end
+          return object.klass if object.is_a?(Ransack::Search)
+          object
         end
 
         def html_option_for(option, search)
-          if option.present?
-            option.to_s
-          else
-            "#{search.klass.to_s.underscore}_search"
-          end
+          return option.to_s if option.present?
+          "#{search.klass.to_s.underscore}_search"
         end
 
         def extract_search_and_routing_proxy(search)
-          if search.is_a? Array
-            [search.second, search.first]
-          else
-            [search, nil]
-          end
+          return [search.second, search.first] if search.is_a?(Array)
+          [search, nil]
         end
 
         def url(routing_proxy, options_for_url)
@@ -123,27 +114,18 @@ module Ransack
         private
 
           def extract_sort_fields_and_mutate_args!(args)
-            if args.first.is_a? Array
-              args.shift
-            else
-              [@field]
-            end
+            return args.shift if args.first.is_a?(Array)
+            [@field]
           end
 
           def extract_label_and_mutate_args!(args)
-            if args.first.is_a? String
-              args.shift
-            else
-              Translate.attribute(@field, context: @search.context)
-            end
+            return args.shift if args.first.is_a?(String)
+            Translate.attribute(@field, context: @search.context)
           end
 
           def extract_options_and_mutate_args!(args)
-            if args.first.is_a? Hash
-              args.shift.with_indifferent_access
-            else
-              {}
-            end
+            return args.shift.with_indifferent_access if args.first.is_a?(Hash)
+            {}
           end
 
           def search_and_sort_params
@@ -156,11 +138,8 @@ module Ransack
 
           def sort_params
             sort_array = recursive_sort_params_build(@sort_fields)
-            if sort_array.size == 1
-              sort_array.first
-            else
-              sort_array
-            end
+            return sort_array[0] if sort_array.size == 1
+            sort_array
           end
 
           def recursive_sort_params_build(fields)
@@ -184,18 +163,14 @@ module Ransack
             end
           end
 
-          def existing_sort_direction(attr_name = @field)
-            if sort = @search.sorts.detect { |s| s && s.name == attr_name }
-              sort.dir
-            end
+          def existing_sort_direction(f = @field)
+            return unless sort = @search.sorts.detect { |s| s && s.name == f }
+            sort.dir
           end
 
           def default_sort_order(attr_name)
-            if Hash === @default_order
-              @default_order[attr_name]
-            else
-              @default_order
-            end
+            return @default_order[attr_name] if Hash === @default_order
+            @default_order
           end
 
           def order_indicator
@@ -208,21 +183,14 @@ module Ransack
           end
 
           def direction_arrow
-            if @current_dir == Constants::DESC
-              Constants::DESC_ARROW
-            else
-              Constants::ASC_ARROW
-            end
+            return Constants::DESC_ARROW if @current_dir == Constants::DESC
+            Constants::ASC_ARROW
           end
 
           def direction_text(dir)
-            if dir == Constants::DESC
-              Constants::ASC
-            else
-              Constants::DESC
-            end
+            return Constants::ASC if dir == Constants::DESC
+            Constants::DESC
           end
-
       end
     end
   end
