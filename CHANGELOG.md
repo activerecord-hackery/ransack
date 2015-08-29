@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Fixed
+
+*   Fix test '#sort_link with hide order indicator set to true' to fail properly
+    [4f65b09](https://github.com/activerecord-hackery/ransack/commit/4f65b09).
+    This spec, added in
+    [#473](https://github.com/activerecord-hackery/ransack/pull/473), tested
+    the presence of the attribute name instead of the absence of the order
+    indicators and did not fail when it should.
+
+    *Josh Hunter*, *Jon Atack*
+
 ### Added
 
 *   Add ability to globally hide sort link order indicator arrows with
@@ -9,7 +20,7 @@
     [#577](https://github.com/activerecord-hackery/ransack/issues/577), commit
     [95d4591](https://github.com/activerecord-hackery/ransack/commit/95d4591).
 
-    *Josh Hunter (@kalimi)*
+    *Josh Hunter*, *Jon Atack*
 
 
 ## Version 1.7.0 - 2015-08-20
@@ -53,8 +64,8 @@
 
     *Andrew Vit*
 
-*   Fix RSpec `its` method deprecation warning: 'Use of rspec-core's `its`
-    method is deprecated. Use the rspec-its gem instead
+*   Fix RSpec `its` method deprecation warning: "Use of rspec-core's its
+    method is deprecated. Use the rspec-its gem instead"
     ([c09aa17](https://github.com/activerecord-hackery/ransack/commit/c09aa17)).
 
 *   Fix deprecated RSpec syntax in `grouping_spec.rb`
@@ -248,7 +259,7 @@
 
     *Josh Kovach*
 
-*   Add an sort_link option to not display sort direction arrows
+*   Add an sort_link option to not display sort order indicator arrows
     ([PR #473](https://github.com/activerecord-hackery/ransack/pull/473)).
 
     *Fred Bergman*
