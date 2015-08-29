@@ -50,7 +50,7 @@ module Ransack
       private
 
         def options_for(record)
-          record.map &method(:parse_record)
+          record.map { |r| parse_record(r) }
         end
 
         def parse_record(object)
