@@ -70,7 +70,7 @@ module Ransack
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
-        :formatter => proc { |v| [nil, EMPTY] }
+        :formatter => proc { |v| [nil, ''.freeze] }
         }
       ],
       ['blank'.freeze, {
@@ -78,7 +78,7 @@ module Ransack
         :compounds => false,
         :type => :boolean,
         :validator => proc { |v| BOOLEAN_VALUES.include?(v) },
-        :formatter => proc { |v| [nil, EMPTY] }
+        :formatter => proc { |v| [nil, ''.freeze] }
         }
       ],
       ['null'.freeze, {
