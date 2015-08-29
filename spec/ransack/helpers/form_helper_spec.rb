@@ -19,13 +19,8 @@ module Ransack
       before do
         @controller = ActionView::TestCase::TestController.new
         @controller.instance_variable_set(:@_routes, router)
-        @controller.class_eval do
-          include router.url_helpers
-        end
-
-        @controller.view_context_class.class_eval do
-          include router.url_helpers
-        end
+        @controller.class_eval { include router.url_helpers }
+        @controller.view_context_class.class_eval { include router.url_helpers }
       end
 
       describe '#sort_link with default search_key' do
