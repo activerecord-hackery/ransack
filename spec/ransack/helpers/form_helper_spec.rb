@@ -339,6 +339,7 @@ module Ransack
           )
         }
         it { should match /Full Name/ }
+        it { should_not match /&#9660;|&#9650;/ }
       end
 
       describe '#sort_link with hide order indicator set to false' do
