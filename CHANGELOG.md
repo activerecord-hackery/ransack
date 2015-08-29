@@ -5,7 +5,7 @@
 ### Fixed
 
 *   Fix test '#sort_link with hide order indicator set to true' to fail properly
-    [4f65b09](https://github.com/activerecord-hackery/ransack/commit/4f65b09).
+    ([4f65b09](https://github.com/activerecord-hackery/ransack/commit/4f65b09)).
     This spec, added in
     [#473](https://github.com/activerecord-hackery/ransack/pull/473), tested
     the presence of the attribute name instead of the absence of the order
@@ -22,6 +22,15 @@
 
     *Josh Hunter*, *Jon Atack*
 
+### Changed
+
+*   Memory/speed perf improvement: Freeze strings in array global constants and
+    move from using global string constants to frozen strings
+    ([381a83c](https://github.com/activerecord-hackery/ransack/commit/381a83c)
+    and
+    [ce114ec](https://github.com/activerecord-hackery/ransack/commit/ce114ec)).
+
+    *Jon Atack*
 
 ## Version 1.7.0 - 2015-08-20
 ### Fixed
@@ -90,7 +99,7 @@
 
 *   Upgrade gemspec dependencies: MySQL2 from '0.3.14' to '0.3.18', and RSpec
     from '~> 2.14.0' to '~> 2' which loads 2.99
-    ([000cd2](https://github.com/activerecord-hackery/ransack/commit/000cd2)).
+    ([000cd22](https://github.com/activerecord-hackery/ransack/commit/000cd22)).
 
 *   Upgrade spec suite to RSpec 3 `expect` syntax backward compatible with
     RSpec 2.9
