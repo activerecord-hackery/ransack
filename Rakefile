@@ -5,7 +5,10 @@ Bundler::GemHelper.install_tasks
 
 RSpec::Core::RakeTask.new(:spec) do |rspec|
   ENV['SPEC'] = 'spec/ransack/**/*_spec.rb'
-  rspec.rspec_opts = ['--backtrace']
+  # With Rails 3, using `--backtrace` raises 'invalid option' when testing.
+  # With Rails 4 and 5 it can be uncommented to see the backtrace:
+  #
+  # rspec.rspec_opts = ['--backtrace']
 end
 
 RSpec::Core::RakeTask.new(:mongoid) do |rspec|
