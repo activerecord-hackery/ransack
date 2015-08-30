@@ -6,6 +6,7 @@ gem 'rake'
 rails = ENV['RAILS'] || '4-2-stable'
 
 if rails == 'master'
+  gem 'rack', github: 'rack/rack'
   gem 'arel', github: 'rails/arel'
   gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
 else
