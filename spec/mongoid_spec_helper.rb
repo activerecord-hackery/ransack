@@ -9,10 +9,9 @@ I18n.enforce_available_locales = false
 Time.zone = 'Eastern Time (US & Canada)'
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 
-Dir[File.expand_path('../{mongoid/helpers,mongoid/support,blueprints}/*.rb', __FILE__)]
-.each do |f|
-  require f
-end
+Dir[File.expand_path('../{mongoid/helpers,mongoid/support,blueprints}/*.rb',
+  __FILE__)]
+.each { |f| require f }
 
 Sham.define do
   name        { Faker::Name.name }
@@ -31,11 +30,11 @@ RSpec.configure do |config|
   config.alias_it_should_behave_like_to :it_has_behavior, 'has behavior'
 
   config.before(:suite) do
-    puts '=' * 80
-    connection_name = Mongoid.default_session.inspect
-    puts "Running specs against #{connection_name}, Mongoid #{
-      Mongoid::VERSION}, Moped #{Moped::VERSION} and Origin #{Origin::VERSION}..."
-    puts '=' * 80
+    message = "Running Ransack specs with #{Mongoid.default_session.inspect
+      }, Mongoid #{Mongoid::VERSION}, Moped #{Moped::VERSION
+      }, Origin #{Origin::VERSION} and Ruby #{RUBY_VERSION}"
+    line = '=' * message.length
+    puts line, message, line
     Schema.create
   end
 
