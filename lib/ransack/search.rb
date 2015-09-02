@@ -15,6 +15,9 @@ module Ransack
              :translate, :to => :base
 
     def initialize(object, params = {}, options = {})
+      if params.instance_variable_defined?(:@parameters)
+        params = params.instance_variable_get :@parameters
+      end
       if params.is_a? Hash
         params = params.dup
         params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false } }
