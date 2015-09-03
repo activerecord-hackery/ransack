@@ -82,6 +82,23 @@ module Ransack
         expect(Ransack.predicates['test_not_in_predicate'].wants_array).to eq true
       end
 
+      it 'wants an array for in/not_in predicates from a search form' do
+        dick = Person.create!(name: 'Dick')
+        Person.create!(name: 'Jane')
+
+        people = Person.ransack(
+          'c' => {
+            '0' => {
+              'v' => { '0' => { 'value' => ['Dick'] } },
+              'a' => { '0' => { 'name' => 'name' } },
+              'p' => 'in'
+            }
+          }
+        ).result
+
+        expect(people).to eq([dick])
+      end
+
       it 'explicitly does not want array for in/not_in predicates' do
         Ransack.configure do |config|
           config.add_predicate(
