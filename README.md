@@ -33,8 +33,8 @@ you're reading the documentation for the master branch with the latest features.
 
 ## Getting started
 
-Ransack is compatible with Rails 3 and 4 on Ruby 1.9 and later (Ruby 2.2
-recommended). JRuby 9 ought to work as well (see
+Ransack is compatible with Rails 3, 4 and 5 on Ruby 1.9 and later.
+JRuby 9 ought to work as well (see
 [this](https://github.com/activerecord-hackery/polyamorous/issues/17)).
 If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
 issues, you can use an earlier version of Ransack, say, up to 1.3.0.
@@ -54,6 +54,12 @@ Or, if you would like to use the latest updates, use the `master` branch:
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
+
+September 2015 update: If you are using Rails 5 (master) and need pagination
+that works with Ransack, there is an
+[updated version of the `will_paginate` gem here](https://github.com/jonatack/will_paginate).
+It is also optimized for Ruby 2.2+. To use it, in your Gemfile:
+`gem 'will_paginate', github: 'jonatack/will_paginate'`.
 
 ## Issues tracker
 
