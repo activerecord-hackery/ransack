@@ -4,6 +4,12 @@
 
 ### Fixed
 
+*   Adapt to changes in Rails 5 where AC::Parameters composes a HWIA instead of
+    inheriting from Hash starting from Rails commit rails/rails@14a3bd5. Commit
+    [ceafc05](https://github.com/activerecord-hackery/ransack/commit/ceafc05).
+
+    *Jon Atack*
+
 *   Fix test '#sort_link with hide order indicator set to true' to fail properly
     ([4f65b09](https://github.com/activerecord-hackery/ransack/commit/4f65b09)).
     This spec, added in
@@ -21,6 +27,18 @@
     [95d4591](https://github.com/activerecord-hackery/ransack/commit/95d4591).
 
     *Josh Hunter*, *Jon Atack*
+
+*   Add failing tests to facilitate work on issue
+    [#566](https://github.com/activerecord-hackery/ransack/issues/566)
+    of passing boolean values to search scopes. PR
+    [#575](https://github.com/activerecord-hackery/ransack/pull/575).
+
+    *Marcel Eeken*
+
+*   Add pt-BR translation. PR
+    [#581](https://github.com/activerecord-hackery/ransack/pull/581).
+
+    *Diego Henrique Domingues*
 
 ### Changed
 
