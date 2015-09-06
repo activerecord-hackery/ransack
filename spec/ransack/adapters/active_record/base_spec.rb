@@ -63,6 +63,19 @@ module Ransack
               expect(s.result.to_sql).to (include 'age > 18')
             end
 
+            # TODO: Implement way to pass true or false values to scopes that
+            # requires arguments
+
+            # it "passes true values to scopes", focus: true  do
+            #   s = Person.ransack('over_age' => 1)
+            #   expect(s.result.to_sql).to (include 'age > 1')
+            # end
+
+            # it "passes false values to scopes", focus: true  do
+            #   s = Person.ransack('over_age' => 0)
+            #   expect(s.result.to_sql).to (include 'age > 0')
+            # end
+
             it "chains scopes" do
               s = Person.ransack('over_age' => 18, 'active' => true)
               expect(s.result.to_sql).to (include 'age > 18')
