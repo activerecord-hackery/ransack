@@ -190,6 +190,30 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          context 'searching by underscores' do
+            # when escaping is supported right in LIKE expression without adding extra expressions
+            def self.simple_escaping?
+              case ::ActiveRecord::Base.connection.adapter_name
+                when "Mysql2", "PostgreSQL"
+                  true
+                else
+                  false
+              end
+            end
+
+            it "should search correctly if matches exist" do
+              p = Person.create!(:name => "name_with_underscore")
+              s = Person.ransack(:name_cont => "name_")
+              expect(s.result.to_a).to eq [p]
+            end if simple_escaping?
+
+            it "should return empty result if no matches" do
+              Person.create!(:name => "name_with_underscore")
+              s = Person.ransack(:name_cont => "n_")
+              expect(s.result.to_a).to eq []
+            end if simple_escaping?
+          end
+
           context "searching on an `in` predicate with a ransacker" do
             it "should function correctly when passing an array of ids" do
               s = Person.ransack(array_users_in: true)
