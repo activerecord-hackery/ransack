@@ -16,7 +16,7 @@ module Ransack
         expect { subject.result }.to_not raise_error
       end
 
-      it "escapes '%', '.' and '\\\\' in value" do
+      it "escapes '%', '.', '_' and '\\\\' in value" do
         subject.send(:"#{method}=", '%._\\')
         expect(subject.result.to_sql).to match(regexp)
       end
@@ -124,9 +124,9 @@ module Ransack
     describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
-          /"people"."name" ILIKE '%\\%\\._\\\\%'/
+          /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
         elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
-          /`people`.`name` LIKE '%\\\\%\\\\._\\\\\\\\%'/
+          /`people`.`name` LIKE '%\\\\%\\\\.\\\\_\\\\\\\\%'/
         else
          /"people"."name" LIKE '%%._\\%'/
         end) do
@@ -143,9 +143,9 @@ module Ransack
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
-          /"people"."name" NOT ILIKE '%\\%\\._\\\\%'/
+          /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
         elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
-          /`people`.`name` NOT LIKE '%\\\\%\\\\._\\\\\\\\%'/
+          /`people`.`name` NOT LIKE '%\\\\%\\\\.\\\\_\\\\\\\\%'/
         else
          /"people"."name" NOT LIKE '%%._\\%'/
         end) do
