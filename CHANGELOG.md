@@ -10,7 +10,7 @@
 
     *Jon Atack*
 
-*   Fix test '#sort_link with hide order indicator set to true' to fail properly
+*   Fix test `#sort_link with hide order indicator set to true` to fail properly
     ([4f65b09](https://github.com/activerecord-hackery/ransack/commit/4f65b09)).
     This spec, added in
     [#473](https://github.com/activerecord-hackery/ransack/pull/473), tested
@@ -49,6 +49,12 @@
     [ce114ec](https://github.com/activerecord-hackery/ransack/commit/ce114ec)).
 
     *Jon Atack*
+
+*   Escape underscore `_` wildcard characters with PostgreSQL and MySQL. PR
+    [#584](https://github.com/activerecord-hackery/ransack/issues/584).
+
+    *Igor Dobryn*
+
 
 ## Version 1.7.0 - 2015-08-20
 ### Fixed
