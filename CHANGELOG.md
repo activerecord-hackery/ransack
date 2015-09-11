@@ -19,6 +19,13 @@
 
     *Josh Hunter*, *Jon Atack*
 
+*   Revert
+    [f858dd6](https://github.com/activerecord-hackery/ransack/commit/f858dd6).
+    Fixes [#553](https://github.com/activerecord-hackery/ransack/issues/553)
+    performance regression with the SQL Server adapter.
+
+    *sschwing3*
+
 ### Added
 
 *   Add ability to globally hide sort link order indicator arrows with
