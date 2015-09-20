@@ -26,6 +26,11 @@
 
     *sschwing3*
 
+*   Fix invalid Chinese I18n locale file name by replacing "zh" with "zh-CN".
+    PR [#590](https://github.com/activerecord-hackery/ransack/pull/590).
+
+    *Ethan Yang*
+
 ### Added
 
 *   Add ability to globally hide sort link order indicator arrows with
