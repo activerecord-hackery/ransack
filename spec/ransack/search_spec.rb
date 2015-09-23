@@ -93,6 +93,17 @@ module Ransack
         expect(condition.value).to eq 'Ernie'
       end
 
+
+      it 'creates conditions for aliased attributes',
+      :if => Ransack::SUPPORTS_ATTRIBUTE_ALIAS do
+        search = Search.new(Person, full_name_eq: 'Ernie')
+        condition = search.base[:full_name_eq]
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name).to eq 'full_name'
+        expect(condition.value).to eq 'Ernie'
+      end
+
       it 'preserves default scope and conditions for associations' do
         search = Search.new(Person, published_articles_title_eq: 'Test')
         expect(search.result.to_sql).to include 'default_scope'

@@ -25,7 +25,11 @@ module Ransack
         # For overriding with a whitelist array of strings.
         #
         def ransackable_attributes(auth_object = nil)
-          column_names + _ransackers.keys
+          if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
+            column_names + _ransackers.keys + attribute_aliases.keys
+          else
+            column_names + _ransackers.keys
+          end
         end
 
         # Ransackable_associations, by default, returns the names

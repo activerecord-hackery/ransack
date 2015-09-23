@@ -27,14 +27,26 @@ module Ransack
 
       private
 
-        def get_arel_attribute
-          if ransacker
-            ransacker.attr_from(self)
-          else
-            context.table_for(parent)[attr_name]
-          end
+      def get_arel_attribute
+        if ransacker
+          ransacker.attr_from(self)
+        else
+          get_attribute
         end
+      end
 
+      def get_attribute
+        if is_alias_attribute?
+          context.table_for(parent)[context.klass.attribute_aliases[attr_name]]
+        else
+          context.table_for(parent)[attr_name]
+        end
+      end
+
+      def is_alias_attribute?
+        Ransack::SUPPORTS_ATTRIBUTE_ALIAS &&
+        context.klass.attribute_aliases.key?(attr_name)
+      end
     end
   end
 end

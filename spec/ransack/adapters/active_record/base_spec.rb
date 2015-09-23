@@ -274,6 +274,14 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          it "should translate attribute aliased column names",
+          :if => Ransack::SUPPORTS_ATTRIBUTE_ALIAS do
+            s = Person.ransack(:full_name_eq => 'Nicolas Cage')
+            expect(s.result.to_sql).to match(
+              /WHERE #{quote_table_name("people")}.#{quote_column_name("name")}/
+            )
+          end
+
           it 'allows sort by "only_sort" field' do
             s = Person.ransack(
               "s" => { "0" => { "dir" => "asc", "name" => "only_sort" } }
@@ -382,6 +390,10 @@ module Ransack
             it { should include 'only_search' }
             it { should_not include 'only_sort' }
             it { should_not include 'only_admin' }
+
+            if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
+              it { should include 'full_name' }
+            end
           end
 
           context 'with auth_object :admin' do
