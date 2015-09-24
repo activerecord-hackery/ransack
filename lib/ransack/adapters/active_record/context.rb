@@ -25,7 +25,7 @@ module Ransack
           name         = attr.arel_attribute.name.to_s
           table        = attr.arel_attribute.relation.table_name
           schema_cache = @engine.connection.schema_cache
-          unless schema_cache.table_exists?(table)
+          unless schema_cache.send(database_table_exists?, table)
             raise "No table named #{table} exists."
           end
           schema_cache.columns_hash(table)[name].type
@@ -133,6 +133,14 @@ module Ransack
         end
 
         private
+
+        def database_table_exists?
+          if ::ActiveRecord::VERSION::MAJOR >= 5
+            :data_source_exists?
+          else
+            :table_exists?
+          end
+        end
 
         def get_parent_and_attribute_name(str, parent = @base)
           attr_name = nil
