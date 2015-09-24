@@ -50,6 +50,8 @@ class Person < ActiveRecord::Base
     of_age ? where("age >= ?", 18) : where("age < ?", 18)
   }
 
+  alias_attribute :full_name, :name
+
   ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
     parent.table[:name]
   end
@@ -89,9 +91,9 @@ class Person < ActiveRecord::Base
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
-      column_names + _ransackers.keys - ['only_sort']
+      super - ['only_sort']
     else
-      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+      super - ['only_sort', 'only_admin']
     end
   end
 

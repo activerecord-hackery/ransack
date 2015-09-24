@@ -31,10 +31,17 @@ module Ransack
           if ransacker
             ransacker.attr_from(self)
           else
-            context.table_for(parent)[attr_name]
+            table    = context.table_for(parent)
+            is_alias = Ransack::SUPPORTS_ATTRIBUTE_ALIAS &&
+                       context.klass.attribute_aliases.key?(attr_name)
+
+            if is_alias
+              table[context.klass.attribute_aliases[attr_name]]
+            else
+              table[attr_name]
+            end
           end
         end
-
     end
   end
 end
