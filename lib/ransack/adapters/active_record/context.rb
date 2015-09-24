@@ -86,7 +86,7 @@ module Ransack
             "ActiveRecord 4.1 and later does not use join_associations. Use join_sources."
           end
 
-          # All dependent Arel::Join nodes used in the search query
+          # All dependent Arel::Join nodes used in the search query.
           #
           # This could otherwise be done as `@object.arel.join_sources`, except
           # that ActiveRecord's build_joins sets up its own JoinDependency.
@@ -109,7 +109,7 @@ module Ransack
 
         else
 
-          # All dependent JoinAssociation items used in the search query
+          # All dependent JoinAssociation items used in the search query.
           #
           # Deprecated: this goes away in ActiveRecord 4.1. Use join_sources.
           #
@@ -282,7 +282,7 @@ module Ransack
                 :build,
                 Polyamorous::Join.new(name, @join_type, klass),
                 parent
-               )
+                )
               found_association = @join_dependency.join_associations.last
               # Leverage the stashed association functionality in AR
               @object = @object.joins(found_association)
