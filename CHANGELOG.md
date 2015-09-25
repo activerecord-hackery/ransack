@@ -33,6 +33,13 @@
 
 ### Added
 
+*   Added support for searching on attributes that have been added to ActiveRecord 
+    models with `alias_attribute` (Rails >= 4 only). PR 
+    [#592](https://github.com/activerecord-hackery/ransack/pull/592),
+    commit [549342a](https://github.com/activerecord-hackery/ransack/commit/549342a).
+
+    *Marten Schilstra*
+
 *   Add ability to globally hide sort link order indicator arrows with
     `Ransack.configure#hide_sort_order_indicators = true`. PR
     [#577](https://github.com/activerecord-hackery/ransack/pull/577), commit
