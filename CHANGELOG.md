@@ -4,6 +4,12 @@
 
 ### Fixed
 
+*   Replace Active Record `table_exists?` API that was deprecated
+    [here](https://github.com/rails/rails/commit/152b85f) in Rails 5. Commit
+    [c9d2297](https://github.com/activerecord-hackery/ransack/commit/c9d2297).
+
+    *Jon Atack*
+
 *   Adapt to changes in Rails 5 where AC::Parameters composes a HWIA instead of
     inheriting from Hash starting from Rails commit rails/rails@14a3bd5. Commit
     [ceafc05](https://github.com/activerecord-hackery/ransack/commit/ceafc05).
@@ -33,10 +39,10 @@
 
 ### Added
 
-*   Added support for searching on attributes that have been added to ActiveRecord 
-    models with `alias_attribute` (Rails >= 4 only). PR 
-    [#592](https://github.com/activerecord-hackery/ransack/pull/592),
-    commit [549342a](https://github.com/activerecord-hackery/ransack/commit/549342a).
+*   Added support for searching on attributes that have been added to
+    Active Record models with `alias_attribute` (Rails >= 4 only). PR
+    [#592](https://github.com/activerecord-hackery/ransack/pull/592), commit
+    [549342a](https://github.com/activerecord-hackery/ransack/commit/549342a).
 
     *Marten Schilstra*
 
