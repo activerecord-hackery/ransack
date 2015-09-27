@@ -44,7 +44,22 @@ module Ransack
     end
 
     def visit_Ransack_Nodes_Sort(object)
-      object.attr.send(object.dir) if object.valid?
+      if object.valid?
+        if object.attr.is_a? Arel::Attributes::Attribute
+          object.attr.send(object.dir)
+        else
+          object.attr.expressions.map! do |attribute|
+            case object.dir
+            when 'asc'
+              Arel::Nodes::Ascending.new attribute
+            when 'desc'
+              Arel::Nodes::Descending.new attribute
+            else
+              attribute
+            end
+          end
+        end
+      end
     end
 
     def quoted?(object)
