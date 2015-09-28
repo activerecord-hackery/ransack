@@ -164,6 +164,29 @@ module Ransack
             )
           end
 
+          context 'case insensitive sorting' do
+            it 'allows sort by desc' do
+              search = Person.search(sorts: ['name_case_insensitive desc'])
+              expect(search.result.to_sql).to match /ORDER BY LOWER(.*) DESC/
+            end
+
+            it 'allows sort by asc' do
+              search = Person.search(sorts: ['name_case_insensitive asc'])
+              expect(search.result.to_sql).to match /ORDER BY LOWER(.*) ASC/
+            end
+          end
+
+          context 'regular sorting' do
+            it 'allows sort by desc' do
+              search = Person.search(sorts: ['name desc'])
+              expect(search.result.to_sql).to match /ORDER BY .* DESC/
+            end
+
+            it 'allows sort by asc' do
+              search = Person.search(sorts: ['name asc'])
+              expect(search.result.to_sql).to match /ORDER BY .* ASC/
+            end
+          end
         end
 
         describe '#ransackable_attributes' do

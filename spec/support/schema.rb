@@ -55,6 +55,10 @@ class Person < ActiveRecord::Base
       )
   end
 
+  ransacker :name_case_insensitive, type: :string do
+    arel_table[:name].lower
+  end
+
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       column_names + _ransackers.keys - ['only_sort']
