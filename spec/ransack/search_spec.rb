@@ -232,8 +232,7 @@ module Ransack
       # https://github.com/activerecord-hackery/ransack/issues/374
       #
       it 'evaluates conditions for multiple `belongs_to` associations to the
-      same table contextually',
-      if: ::ActiveRecord::VERSION::STRING.first(3) == '4.0' do
+      same table contextually' do
         s = Search.new(
           Recommendation,
           person_name_eq: 'Ernie',
@@ -241,17 +240,23 @@ module Ransack
         ).result
         expect(s).to be_an ActiveRecord::Relation
         real_query = remove_quotes_and_backticks(s.to_sql)
-        expected_query = <<-SQL
+        expected_query_exp = <<-SQL
           SELECT recommendations.* FROM recommendations
           LEFT OUTER JOIN people ON people.id = recommendations.person_id
-          LEFT OUTER JOIN people target_people_recommendations
-            ON target_people_recommendations.id = recommendations.target_person_id
-          LEFT OUTER JOIN people parents_people
-            ON parents_people.id = target_people_recommendations.parent_id
-          WHERE ((people.name = 'Ernie' AND parents_people.name = 'Test'))
-        SQL
-        .squish
-        expect(real_query).to eq expected_query
+          LEFT OUTER JOIN people (\\S+)
+             ON (\\S+).id = recommendations.target_person_id
+          LEFT OUTER JOIN people (\\S+)
+             ON (\\S+).id = (\\S+).parent_id
+           WHERE \\(+people.name = 'Ernie' AND (\\S+).name = 'Test'\\)+
+          SQL
+
+        match = Regexp.new(expected_query_exp.squish).match(real_query)
+
+        expect(match[1]).to eq match[2]
+        expect(match[1]).to eq match[5]
+        expect(match[3]).to eq match[4]
+        expect(match[3]).to eq match[6]
+        expect(match[1]).not_to eq match[3]
       end
 
       it 'evaluates compound conditions contextually' do

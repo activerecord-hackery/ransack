@@ -19,8 +19,8 @@ module Ransack
         params = params.instance_variable_get :@parameters
       end
       if params.is_a? Hash
-        params = params.dup
-        params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false } }
+        params.each { |search_expression, _| enable_shallow_search(object, search_expression) }
+        params = params.dup.delete_if { |_, v| [*v].all?{ |i| i.blank? && i != false } }
       else
         params = {}
       end
@@ -178,5 +178,56 @@ module Ransack
       attrs
     end
 
+    private
+
+    def enable_shallow_search(klass, expr)
+      scoped_attr_name = expr.is_a?(String) ? expr.dup : expr.to_s
+      Predicate.detect_and_strip_from_string!(scoped_attr_name)
+      find_or_create_assoc(klass, scoped_attr_name)
+    end
+
+    def find_or_create_assoc(klass, scoped_attr_name, parent_name = nil)
+      return scoped_attr_name, nil, parent_name if is_attr_of?(scoped_attr_name, klass)
+      Hash[klass.reflections.sort { |a, b| b<=>a }].each do |_, assoc|
+        result = find_or_create_nested_assoc_if_applicable(klass, assoc, scoped_attr_name)
+        return result if result && result[0]
+      end
+    end
+
+    def is_attr_of?(attr_name, klass)
+      klass.attribute_names.include?(attr_name)
+    end
+
+    def find_or_create_nested_assoc_if_applicable(klass, assoc, scoped_attr_name)
+      #TODO: proper support for polymorphic too; support for _or_
+      if scoped_attr_name.start_with?(assoc.name.to_s) && !assoc.options[:polymorphic] && !scoped_attr_name.include?('_or_')
+        return find_or_create_nested_assoc(klass, assoc, scoped_attr_name)
+      end
+    end
+
+    def find_or_create_nested_assoc(klass, assoc, scoped_attr_name)
+      target_name = scoped_attr_name.match(/\A#{assoc.name.to_s}_(.*)/)[1]
+      attribute_name, macro, target_name = find_or_create_assoc(assoc.klass, target_name, assoc.name)
+      assoc_to_be_created = scoped_attr_name.match(/(.*)_#{attribute_name}\Z/)[1]
+      macro = create_association_if_necessary(klass, assoc_to_be_created, macro, assoc)
+      return attribute_name, macro, target_name
+    end
+
+    def create_association_if_necessary(klass, assoc_name, macro, target_assoc)
+      macro ||= (target_assoc.macro == :has_many ? :has_many : :has_one)
+      unless klass.method_defined?(assoc_name) #assoc to be created is already present
+        source = assoc_name.match(/#{target_assoc.name}_(.*)/)[1]
+        klass.send(macro, assoc_name.to_sym, through: target_assoc.name.to_sym, source: source.to_sym)
+      end
+      macro
+    end
+
+    def class_name_for(reflection, association_name, search_expression)
+      if refle  ction.options[:polymorphic]
+        search_expression.gsub(/#{association_name}_of_(.*?)_type.*/, '\1')
+      else
+        reflection.class_name
+      end
+    end
   end
 end
