@@ -37,7 +37,7 @@ module Ransack
 
       def get_attribute
         if is_alias_attribute?
-          context.table_for(parent)[context.klass.attribute_aliases[attr_name]]
+          context.table_for(parent)[parent.base_klass.attribute_aliases[attr_name]]
         else
           context.table_for(parent)[attr_name]
         end
@@ -45,7 +45,7 @@ module Ransack
 
       def is_alias_attribute?
         Ransack::SUPPORTS_ATTRIBUTE_ALIAS &&
-        context.klass.attribute_aliases.key?(attr_name)
+        parent.base_klass.attribute_aliases.key?(attr_name)
       end
     end
   end
