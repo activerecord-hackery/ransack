@@ -38,12 +38,19 @@ module Ransack
       #
       #   <%= sort_link(@q, :name, [:name, 'kind ASC'], 'Player Name') %>
       #
-      def sort_link(search_object, attribute, *args)
+      # You can use a block as well if your link target is hard to fit into the label parameter:
+      #
+      #   <%= sort_link(@q, :name, [:name, 'kind ASC']) do %>
+      #     <strong>Player Name</strong>
+      #   <% end %>
+      #
+      def sort_link(search_object, attribute, *args, &block)
         search, routing_proxy = extract_search_and_routing_proxy(search_object)
         unless Search === search
           raise TypeError, 'First argument must be a Ransack::Search!'
         end
-        s = SortLink.new(search, attribute, args, params)
+        args.unshift(capture(&block)) if block_given?
+        s = SortLink.new(search, attribute, args, params, &block)
         link_to(s.name, url(routing_proxy, s.url_options), s.html_options(args))
       end
 
