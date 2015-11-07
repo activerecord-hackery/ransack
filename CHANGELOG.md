@@ -60,10 +60,15 @@
 
     *Marcel Eeken*
 
-*   Add pt-BR translation. PR
+*   Add Brazilian Portuguese i18n locale file (`pt-BR.yml`). PR
     [#581](https://github.com/activerecord-hackery/ransack/pull/581).
 
     *Diego Henrique Domingues*
+
+*   Add Indonesian (Bahasa) i18n locale file (`id.yml`). PR
+    [#612](https://github.com/activerecord-hackery/ransack/pull/612).
+
+    *Adam Pahlevi Baihaqi*
 
 ### Changed
 
@@ -139,7 +144,7 @@
 
     *Penn Su*
 
-*   Add German locale file (de.yml). PR
+*   Add German i18n locale file (`de.yml`). PR
     [#537](https://github.com/activerecord-hackery/ransack/pull/537).
 
     *Philipp Weissensteiner*
@@ -505,7 +510,7 @@
 
     *Pedro Chambino*
 
-*   Add `ro.yml` Romanian translation file.
+*   Add Romanian i18n locale file (`ro.yml`).
 
     *Andreas Philippi*
 
