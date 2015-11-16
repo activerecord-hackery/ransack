@@ -5,14 +5,14 @@ effective for everyone involved!
 
 Ransack is an open source project and we encourage contributions.
 
+Please do not use the issue tracker for personal support requests. Stack
+Overflow is a better place for that where a wider community can help you!
+
 ## Filing an issue
 
 Good issue reports are extremely helpful!  Please only open an issue if a bug
 is caused by Ransack, is new (has not already been reported), and can be
 reproduced from the information you provide.
-
-Please do not use the issue tracker for personal support requests. Stack
-Overflow is a better place for that where a wider community can help you!
 
 Steps:
 
