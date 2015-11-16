@@ -40,7 +40,7 @@ If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
 issues, you can use an earlier version of Ransack, say, up to 1.3.0.
 
 Ransack works out-of-the-box with Active Record and also features limited
-support for Mongoid 4.0 (without associations, further details
+support for Mongoid 4 (without associations, further details
 [below](https://github.com/activerecord-hackery/ransack#mongoid)).
 
 In your Gemfile, for the last officially released gem:
@@ -526,11 +526,10 @@ Employee.ransack({ activated: true, hired_since: '2013-01-01' })
 Employee.ransack({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
-If the `true` value is being passed via url params or by some other mechanism
-that will convert it to a string (i.e. `activated: 'true'` instead of
-`activated: true`), the true value will not be passed to the scope. If you want
-to pass a `'true'` string to the scope, you should wrap it in an array (i.e.
-`activated: ['true']`).
+In Rails 3 and 4, if the `true` value is being passed via url params or some
+other mechanism that will convert it to a string, the true value may not be
+passed to the ransackable scope unless you wrap it in an array
+(i.e. `activated: ['true']`). This is currently resolved in Rails 5 :smiley:
 
 Scopes are a recent addition to Ransack and currently have a few caveats:
 First, a scope involving child associations needs to be defined in the parent
