@@ -66,6 +66,7 @@ It is also optimized for Ruby 2.2+. To use it, in your Gemfile:
 * Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
 * File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
 * Contributions are welcome, but please do not add "+1" comments to issues or pull requests :smiley:
+* Please do not use the issue tracker for personal support requests. Stack Overflow is a better place for that where a wider community can help you!
 
 ## Usage
 
