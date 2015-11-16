@@ -117,7 +117,7 @@ def index
   @people = @q.result(distinct: true)
 end
 ```
-or without `distinct:true`, for sorting on an associated table's columns (in
+or without `distinct: true`, for sorting on an associated table's columns (in
 this example, with preloading each Person's Articles and pagination):
 
 ```ruby
