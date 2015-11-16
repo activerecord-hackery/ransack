@@ -498,7 +498,7 @@ scope accepts a value:
 
 ```ruby
 class Employee < ActiveRecord::Base
-  scope :active, ->(boolean = true) { where(active: boolean) }
+  scope :activated, ->(boolean = true) { where(active: boolean) }
   scope :salary_gt, ->(amount) { where('salary > ?', amount) }
 
   # Scopes are just syntactical sugar for class methods, which may also be used:
@@ -512,24 +512,24 @@ class Employee < ActiveRecord::Base
   def self.ransackable_scopes(auth_object = nil)
     if auth_object.try(:admin?)
       # allow admin users access to all three methods
-      %i(active hired_since salary_gt)
+      %i(activated hired_since salary_gt)
     else
-      # allow other users to search on active and hired_since only
-      %i(active hired_since)
+      # allow other users to search on `activated` and `hired_since` only
+      %i(activated hired_since)
     end
   end
 end
 
-Employee.ransack({ active: true, hired_since: '2013-01-01' })
+Employee.ransack({ activated: true, hired_since: '2013-01-01' })
 
 Employee.ransack({ salary_gt: 100_000 }, { auth_object: current_user })
 ```
 
 If the `true` value is being passed via url params or by some other mechanism
-that will convert it to a string (i.e. `active: 'true'` instead of
-`active: true`), the true value will *not* be passed to the scope. If you want
+that will convert it to a string (i.e. `activated: 'true'` instead of
+`activated: true`), the true value will not be passed to the scope. If you want
 to pass a `'true'` string to the scope, you should wrap it in an array (i.e.
-`active: ['true']`).
+`activated: ['true']`).
 
 Scopes are a recent addition to Ransack and currently have a few caveats:
 First, a scope involving child associations needs to be defined in the parent
