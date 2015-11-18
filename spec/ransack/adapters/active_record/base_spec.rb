@@ -379,34 +379,22 @@ module Ransack
             expect { s.result.first }.to_not raise_error
           end
 
-          it 'should allow search and sort passing ransacker arguments to a ransacker' do
+          it 'should allow sort passing arguments to a ransacker' do
             s = Person.ransack(
-              c: [{
-                a: {
-                  '0' => {
-                    name: 'with_passed_arguments',
-                    ransacker_args: [10, 100]
-                  }
-                },
-                p: 'cont',
-                v: ['Rails has been released']
-              }],
               s: {
                 '0' => {
-                  name: 'with_passed_arguments',
-                  dir: 'asc',
-                  ransacker_args: [10, 100]
+                  name: 'with_arguments', dir: 'desc', ransacker_args: [2, 6]
                 }
               }
             )
             expect(s.result.to_sql).to match(
-              /CHAR_LENGTH\(articles.body\) BETWEEN 10 AND 100/
-            )
+              /ORDER BY \(SELECT MAX\(articles.title\) FROM articles/
+              )
             expect(s.result.to_sql).to match(
-              /LIKE \'\%Rails has been released\%\'/
-            )
+              /WHERE articles.person_id = people.id AND LENGTH\(articles.body\)/
+              )
             expect(s.result.to_sql).to match(
-              /ORDER BY \(SELECT.*CHAR_LENGTH\(articles.body\) BETWEEN 10 AND 100/
+              /BETWEEN 2 AND 6 GROUP BY articles.person_id \) DESC/
             )
           end
         end
