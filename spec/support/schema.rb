@@ -86,6 +86,7 @@ class Person < ActiveRecord::Base
         GROUP BY articles.person_id
       )
     SQL
+    .squish
     Arel.sql(query)
   end
 
