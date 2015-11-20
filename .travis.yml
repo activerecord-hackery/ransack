@@ -5,6 +5,7 @@ language: ruby
 sudo: false
 
 rvm:
+  - 2.3
   - 2.2.3
   - 2.1
   - 2.0
@@ -35,6 +36,15 @@ env:
 
 matrix:
   include:
+    - rvm: 2.3
+      env: RAILS=master DB=mongodb
+    - rvm: 2.3
+      env: RAILS=master DB=sqlite3
+    - rvm: 2.3
+      env: RAILS=master DB=mysql
+    - rvm: 2.3
+      env: RAILS=master DB=postgres
+
     - rvm: 2.2.3
       env: RAILS=master DB=mongodb
     - rvm: 2.2.3
@@ -79,18 +89,18 @@ matrix:
     - env: RAILS=master DB=mysql
     - env: RAILS=master DB=postgres
 
-    - rvm: 2.2
+    - rvm: 2.3
       env: RAILS=3-2-stable DB=sqlite
-    - rvm: 2.2
+    - rvm: 2.3
       env: RAILS=3-2-stable DB=mysql
-    - rvm: 2.2
+    - rvm: 2.3
       env: RAILS=3-2-stable DB=postgres
 
-    - rvm: 2.2
+    - rvm: 2.3
       env: RAILS=3-1-stable DB=sqlite
-    - rvm: 2.2
+    - rvm: 2.3
       env: RAILS=3-1-stable DB=mysql
-    - rvm: 2.2
+    - rvm: 2.3
       env: RAILS=3-1-stable DB=postgres
 
 
