@@ -4,6 +4,11 @@
 
 ### Fixed
 
+*   Fix using aliased attributes in association searches, and add a failing
+    spec. PR [#602](https://github.com/activerecord-hackery/ransack/pull/602).
+
+    *Marten Schilstra*
+
 *   Replace Active Record `table_exists?` API that was deprecated
     [here](https://github.com/rails/rails/commit/152b85f) in Rails 5. Commit
     [c9d2297](https://github.com/activerecord-hackery/ransack/commit/c9d2297).
