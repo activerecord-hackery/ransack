@@ -274,12 +274,22 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
-          it 'should translate attribute aliased column names',
+          context 'attribute aliased column names',
           if: Ransack::SUPPORTS_ATTRIBUTE_ALIAS do
-            s = Person.ransack(full_name_eq: 'Nicolas Cage')
-            expect(s.result.to_sql).to match(
-              /WHERE #{quote_table_name("people")}.#{quote_column_name("name")}/
-            )
+            it 'should be translated to original column name' do
+              s = Person.ransack(full_name_eq: 'Nicolas Cage')
+              expect(s.result.to_sql).to match(
+                /WHERE #{quote_table_name("people")}.#{quote_column_name("name")}/
+              )
+            end
+
+            it 'should translate on associations' do
+              s = Person.ransack(articles_content_cont: 'Nicolas Cage')
+              expect(s.result.to_sql).to match(
+                /#{quote_table_name("articles")}.#{
+                   quote_column_name("body")} I?LIKE '%Nicolas Cage%'/
+              )
+            end
           end
 
           it 'allows sort by `only_sort` field' do
