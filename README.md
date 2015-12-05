@@ -93,22 +93,6 @@ If you're coming from MetaSearch, things to note:
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
   `Ransack#result`.
 
-  4. If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
-  avoid returning duplicate rows, even if conditions on a join would otherwise
-  result in some. It generates the same SQL as calling `uniq` on the relation.
-
-  Please note that for many databases, a sort on an associated table's columns
-  may result in invalid SQL with `distinct: true` -- in those cases, you're on
-  your own, and will need to modify the result as needed to allow these queries
-  to work.
-
-  If `distinct: true` or `uniq` is causing invalid SQL, another way to remove
-  duplicates is to call `to_a.uniq` on the collection at the end (see the next
-  section below) -- with the caveat that the de-duping is taking place in Ruby
-  instead of in SQL, which is potentially slower and uses more memory, and that
-  it may display awkwardly with pagination if the number of results is greater
-  than the page size.
-
 ####In your controller
 
 ```ruby
@@ -369,6 +353,58 @@ _ransackers_, for creating additional search functions via Arel. More
 information about `ransacker` methods can be found [here in the wiki]
 (https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
 Feel free to contribute working `ransacker` code examples to the wiki!
+
+### Problem with DISTINCT selects
+
+If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
+avoid returning duplicate rows, even if conditions on a join would otherwise
+result in some. It generates the same SQL as calling `uniq` on the relation.
+
+Please note that for many databases, a sort on an associated table's columns
+may result in invalid SQL with `distinct: true` -- in those cases, you will
+will need to modify the result as needed to allow these queries to work.
+
+For example, you could call joins and includes on the result which has the
+effect of adding those tables columns to the select statement, overcoming
+the issue, like so:
+
+```ruby
+def index
+  @q = Person.ransack(params[:q])
+  @people = @q.result(distinct: true)
+              .includes(:articles)
+              .joins(:articles)
+              .page(params[:page])
+end
+```
+
+If the above doesn't help, you can also use ActiveRecord's `select` query
+to explicitly add the columns you need, which brute force's adding the
+columns you need that your SQL engine is complaining about, you need to
+make sure you give all of the columns you care about, for example:
+
+```ruby
+def index
+  @q = Person.ransack(params[:q])
+  @people = @q.result(distinct: true)
+              .select('people.*, articles.name, articles.description')
+              .page(params[:page])
+end
+```
+
+A final way of last resort is to call `to_a.uniq` on the collection at the end
+with the caveat that the de-duping is taking place in Ruby instead of in SQL,
+which is potentially slower and uses more memory, and that it may display
+awkwardly with pagination if the number of results is greater than the page size.
+
+For example:
+
+```ruby
+def index
+  @q = Person.ransack(params[:q])
+  @people = @q.result.includes(:articles).page(params[:page]).to_a.uniq
+end
+```
 
 ### Authorization (whitelisting/blacklisting)
 
