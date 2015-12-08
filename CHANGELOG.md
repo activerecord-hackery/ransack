@@ -75,6 +75,11 @@
 
     *Adam Pahlevi Baihaqi*
 
+*   Add Japanese i18n locale file (`ja.yml`). PR
+    [#622](https://github.com/activerecord-hackery/ransack/pull/622).
+
+    *Masanobu Mizutani*
+
 ### Changed
 
 *   Memory/speed perf improvement: Freeze strings in array global constants and
