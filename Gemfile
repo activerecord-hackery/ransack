@@ -10,7 +10,7 @@ if rails == 'master'
   gem 'arel', github: 'rails/arel'
   gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
 else
-  gem 'polyamorous', '~> 1.2'
+  gem 'polyamorous', '~> 1.3'
 end
 
 gem 'pry'
