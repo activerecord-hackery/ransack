@@ -33,6 +33,14 @@ module Ransack
         end
 
         module ClassMethods
+          def _ransack_aliases
+            @_ransack_aliases ||= {}
+          end
+
+          def _ransack_aliases=(value)
+            @_ransack_aliases = value
+          end
+
           def _ransackers
             @_ransackers ||= {}
           end
@@ -49,13 +57,17 @@ module Ransack
 
           alias_method :search, :ransack
 
+          def ransack_alias(new_name, old_name)
+            self._ransack_aliases.store(new_name.to_s, old_name.to_s)
+          end
+
           def ransacker(name, opts = {}, &block)
             self._ransackers = _ransackers.merge name.to_s => Ransacker
               .new(self, name, opts, &block)
           end
 
           def all_ransackable_attributes
-            ['id'] + column_names.select { |c| c != '_id' } + _ransackers.keys
+            ['id'] + column_names.select { |c| c != '_id' } + _ransackers.keys + _ransack_aliases.keys
           end
 
           def ransackable_attributes(auth_object = nil)

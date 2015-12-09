@@ -7,7 +7,9 @@ module Ransack
           alias :search :ransack unless base.respond_to? :search
           base.class_eval do
             class_attribute :_ransackers
+            class_attribute :_ransack_aliases
             self._ransackers ||= {}
+            self._ransack_aliases ||= {}
           end
         end
 
@@ -20,15 +22,19 @@ module Ransack
             .new(self, name, opts, &block)
         end
 
+        def ransack_alias(new_name, old_name)
+          self._ransack_aliases.store(new_name.to_s, old_name.to_s)
+        end
+
         # Ransackable_attributes, by default, returns all column names
         # and any defined ransackers as an array of strings.
         # For overriding with a whitelist array of strings.
         #
         def ransackable_attributes(auth_object = nil)
           if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
-            column_names + _ransackers.keys + attribute_aliases.keys
+            column_names + _ransackers.keys + _ransack_aliases.keys + attribute_aliases.keys
           else
-            column_names + _ransackers.keys
+            column_names + _ransackers.keys + _ransack_aliases.keys
           end
         end
 

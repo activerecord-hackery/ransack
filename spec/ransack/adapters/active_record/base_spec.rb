@@ -94,6 +94,32 @@ module Ransack
           end
         end
 
+        describe '#ransack_alias' do
+          it 'translates an alias to the correct attributes' do
+            p = Person.create!(name: 'Meatloaf', email: 'babies@example.com')
+
+            s = Person.ransack(term_cont: 'atlo')
+            expect(s.result.to_a).to eq [p]
+
+            s = Person.ransack(term_cont: 'babi')
+            expect(s.result.to_a).to eq [p]
+
+            s = Person.ransack(term_cont: 'nomatch')
+            expect(s.result.to_a).to eq []
+          end
+
+          it 'also works with associations' do
+            dad = Person.create!(name: 'Birdman')
+            son = Person.create!(name: 'Weezy', parent: dad)
+
+            s = Person.ransack(daddy_eq: 'Birdman')
+            expect(s.result.to_a).to eq [son]
+
+            s = Person.ransack(daddy_eq: 'Drake')
+            expect(s.result.to_a).to eq []
+          end
+        end
+
         describe '#ransacker' do
           # For infix tests
           def self.sane_adapter?
@@ -416,6 +442,7 @@ module Ransack
             it { should include 'name' }
             it { should include 'reversed_name' }
             it { should include 'doubled_name' }
+            it { should include 'term' }
             it { should include 'only_search' }
             it { should_not include 'only_sort' }
             it { should_not include 'only_admin' }
