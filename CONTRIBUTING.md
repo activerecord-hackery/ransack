@@ -22,19 +22,25 @@ Steps:
 2. **Check if the issue has been fixed** &mdash; try to reproduce it using the
    `master` branch in the repository.
 
-3. **Isolate and report the problem** &mdash; ideally create a reduced test
-   case.
+3. **Isolate the real problem** &mdash; make sure the issue is really a bug in
+   Ransack and not in your code or another gem.
 
-When filing an issue, please provide these details:
+4. **Report the issue** by providing the link to a self-contained
+   gist like [this](https://gist.github.com/jonatack/63048bc5062a84ba9e09) or
+   [this](https://gist.github.com/jonatack/5df41a0edb53b7bad989). Please use
+   these code examples as a bug-report template for your Ransack issue!
 
-* A comprehensive list of steps to reproduce the issue :smiley: or even better, a failing spec!
-* Whether you are using Ransack through another gem like ActiveAdmin, SimpleForm, etc.
-* The versions of Ruby, Rails, Ransack and your operating system and database.
+If you do not provide a self-contained gist and would like your issue to be reviewed, do provide at a minimum:
+
+* A comprehensive list of steps to reproduce the issue, or even better, a
+  passing/failing test spec.
+* Whether you are using Ransack through another gem like ActiveAdmin,
+  SimpleForm, etc.
+* The versions of Ruby, Rails, Ransack and the database.
 * Any relevant stack traces ("Full trace" preferred).
 
-Any issue that is open for 14 days without actionable information or activity
-will be marked as "stalled" and then closed. Stalled issues can be re-opened
-if actionable information to reproduce the issue is provided.
+Issues filed without the above information or that remain open without activity
+for 14 days will be closed. They can be re-opened if actionable information to reproduce the issue is provided.
 
 ## Pull requests
 
