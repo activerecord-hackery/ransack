@@ -5,7 +5,7 @@ language: ruby
 sudo: false
 
 rvm:
-  - 2.2.3
+  - 2.2.4
   - 2.1
   - 2.0
   - 1.9
@@ -44,13 +44,13 @@ matrix:
     - rvm: 2.3.0
       env: RAILS=master DB=postgres
 
-    - rvm: 2.2.3
+    - rvm: 2.2.4
       env: RAILS=master DB=mongodb
-    - rvm: 2.2.3
+    - rvm: 2.2.4
       env: RAILS=master DB=sqlite3
-    - rvm: 2.2.3
+    - rvm: 2.2.4
       env: RAILS=master DB=mysql
-    - rvm: 2.2.3
+    - rvm: 2.2.4
       env: RAILS=master DB=postgres
 
   allow_failures:
