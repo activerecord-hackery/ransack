@@ -9,7 +9,8 @@ module Ransack
 
       class << self
         def extract(context, key, values)
-          attributes, predicate, combinator = extract_attributes_and_predicate(key, context)
+          attributes, predicate, combinator =
+            extract_values_for_condition(key, context)
 
           if attributes.size > 0 && predicate
             condition = self.new(context)
@@ -31,7 +32,7 @@ module Ransack
 
         private
 
-        def extract_attributes_and_predicate(key, context = nil)
+        def extract_values_for_condition(key, context = nil)
           str = key.dup
           name = Predicate.detect_and_strip_from_string!(str)
           predicate = Predicate.named(name)
