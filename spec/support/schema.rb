@@ -52,6 +52,9 @@ class Person < ActiveRecord::Base
 
   alias_attribute :full_name, :name
 
+  ransack_alias :term, :name_or_email
+  ransack_alias :daddy, :parent_name
+
   ransacker :reversed_name, formatter: proc { |v| v.reverse } do |parent|
     parent.table[:name]
   end

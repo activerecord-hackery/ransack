@@ -120,6 +120,10 @@ module Ransack
       end
     end
 
+    def ransackable_alias(str)
+      klass._ransack_aliases.fetch(str, str)
+    end
+
     def ransackable_attribute?(str, klass)
       klass.ransackable_attributes(auth_object).include?(str) ||
       klass.ransortable_attributes(auth_object).include?(str)

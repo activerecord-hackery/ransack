@@ -20,6 +20,8 @@ class Person
   has_many   :articles
   has_many   :comments
 
+  ransack_alias :term, :name_or_email
+
   # has_many   :authored_article_comments, :through => :articles,
              # :source => :comments, :foreign_key => :person_id
 
