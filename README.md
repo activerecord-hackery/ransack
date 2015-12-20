@@ -264,7 +264,7 @@ Article.search(params[:q])
 ```
 
 Users have reported issues of `#search` name conflicts with other gems, so
-the `#search` method alias might be deprecated in the next major version of
+the `#search` method alias will be deprecated in the next major version of
 Ransack (2.0). It's advisable to use the default `#ransack` instead.
 
 For now, if Ransack's `#search` method conflicts with the name of another
