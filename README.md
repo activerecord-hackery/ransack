@@ -346,7 +346,9 @@ symbolized association (`:department_title)`, `:employees_last_name`).
 
 ### Ransack Aliases
 
-You can customize the attribute names for your Ransack searches by using a `ransack_alias`. This is particularly useful for long attribute names that are necessary when querying associations or multiple columns.
+You can customize the attribute names for your Ransack searches by using a
+`ransack_alias`. This is particularly useful for long attribute names that are
+necessary when querying associations or multiple columns.
 
 ```ruby
 class Post < ActiveRecord::Base
@@ -357,7 +359,9 @@ class Post < ActiveRecord::Base
 end
 ```
 
-Now, rather than using `:author_first_name_or_author_last_name_cont` in your form, you can simply use `:author_cont`. This serves to produce more expressive query parameters in your URLs.
+Now, rather than using `:author_first_name_or_author_last_name_cont` in your
+form, you can simply use `:author_cont`. This serves to produce more expressive
+query parameters in your URLs.
 
 ```erb
 <%= search_form_for @q do |f| %>

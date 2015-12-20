@@ -46,7 +46,8 @@
 
 *   Added `ransack_alias` to allow users to customize the names for long
     ransack field names. PR
-    [#623](https://github.com/activerecord-hackery/ransack/pull/623), commit [e712ff1](https://github.com/activerecord-hackery/ransack/commit/e712ff1).
+    [#623](https://github.com/activerecord-hackery/ransack/pull/623), commit
+    [e712ff1](https://github.com/activerecord-hackery/ransack/commit/e712ff1).
 
     *Ray Zane*
 
