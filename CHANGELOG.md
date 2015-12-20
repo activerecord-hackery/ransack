@@ -44,6 +44,12 @@
 
 ### Added
 
+*   Added `ransack_alias` to allow users to customize the names for long
+    ransack field names. PR
+    [#623](https://github.com/activerecord-hackery/ransack/pull/623), commit [e712ff1](https://github.com/activerecord-hackery/ransack/commit/e712ff1).
+
+    *Ray Zane*
+
 *   Added support for searching on attributes that have been added to
     Active Record models with `alias_attribute` (Rails >= 4 only). PR
     [#592](https://github.com/activerecord-hackery/ransack/pull/592), commit

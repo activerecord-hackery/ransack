@@ -344,6 +344,27 @@ If you have trouble sorting on associations, try using an SQL string with the
 pluralized table (`'departments.title'`,`'employees.last_name'`) instead of the
 symbolized association (`:department_title)`, `:employees_last_name`).
 
+### Ransack Aliases
+
+You can customize the attribute names for your Ransack searches by using a `ransack_alias`. This is particularly useful for long attribute names that are necessary when querying associations or multiple columns.
+
+```ruby
+class Post < ActiveRecord::Base
+  belongs_to :author
+
+  # Abbreviate :author_first_name_or_author_last_name to :author
+  ransack_alias :author, :author_first_name_or_author_last_name
+end
+```
+
+Now, rather than using `:author_first_name_or_author_last_name_cont` in your form, you can simply use `:author_cont`. This serves to produce more expressive query parameters in your URLs.
+
+```erb
+<%= search_form_for @q do |f| %>
+  <%= f.label :author_cont %>
+  <%= f.search_field :author_cont %>
+<% end %>
+```
 
 ### Using Ransackers to add custom search functions via Arel
 
