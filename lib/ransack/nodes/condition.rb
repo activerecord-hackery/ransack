@@ -32,23 +32,34 @@ module Ransack
 
         private
 
-        def extract_values_for_condition(key, context = nil)
-          str = key.dup
-          name = Predicate.detect_and_strip_from_string!(str)
-          predicate = Predicate.named(name)
-          unless predicate || Ransack.options[:ignore_unknown_conditions]
-            raise ArgumentError, "No valid predicate for #{key}"
-          end
-          str = context.ransackable_alias(str) if context.present?
-          combinator = str.match(/_(or|and)_/) ? $1 : nil
-          if context.present? && context.attribute_method?(str)
-            attributes = [str]
-          else
-            attributes = str.split(/_and_|_or_/)
-          end
+          def extract_values_for_condition(key, context = nil)
+            str = key.dup
+            name = Predicate.detect_and_strip_from_string!(str)
+            predicate = Predicate.named(name)
 
-          [attributes, predicate, combinator]
-        end
+            unless predicate || Ransack.options[:ignore_unknown_conditions]
+              raise ArgumentError, "No valid predicate for #{key}"
+            end
+
+            if context.present?
+              str = context.ransackable_alias(str)
+            end
+
+            combinator =
+            if str.match(/_(or|and)_/)
+              $1
+            else
+              nil
+            end
+
+            if context.present? && context.attribute_method?(str)
+              attributes = [str]
+            else
+              attributes = str.split(/_and_|_or_/)
+            end
+
+            [attributes, predicate, combinator]
+          end
       end
 
       def valid?
@@ -200,15 +211,20 @@ module Ransack
           val = predicate.format(val)
           val
         end
-        predicate.wants_array ? formatted : formatted.first
+        if predicate.wants_array
+          formatted
+        else
+          formatted.first
+        end
       end
 
       def arel_predicate_for_attribute(attr)
         if predicate.arel_predicate === Proc
           values = casted_values_for_attribute(attr)
-          predicate.arel_predicate.call(
-            predicate.wants_array ? values : values.first
-            )
+          unless predicate.wants_array
+            values = values.first
+          end
+          predicate.arel_predicate.call(values)
         else
           predicate.arel_predicate
         end

@@ -32,7 +32,8 @@ module Ransack
         #
         def ransackable_attributes(auth_object = nil)
           if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
-            column_names + _ransackers.keys + _ransack_aliases.keys + attribute_aliases.keys
+            column_names + _ransackers.keys + _ransack_aliases.keys +
+            attribute_aliases.keys
           else
             column_names + _ransackers.keys + _ransack_aliases.keys
           end

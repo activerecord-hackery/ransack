@@ -67,7 +67,8 @@ module Ransack
           end
 
           def all_ransackable_attributes
-            ['id'] + column_names.select { |c| c != '_id' } + _ransackers.keys + _ransack_aliases.keys
+            ['id'] + column_names.select { |c| c != '_id' } + _ransackers.keys +
+              _ransack_aliases.keys
           end
 
           def ransackable_attributes(auth_object = nil)
@@ -85,7 +86,9 @@ module Ransack
           end
 
           def reflect_on_all_associations_all
-            reflect_on_all_associations(:belongs_to, :has_one, :has_many, :embeds_many, :embedded_in)
+            reflect_on_all_associations(
+              :belongs_to, :has_one, :has_many, :embeds_many, :embedded_in
+              )
           end
 
           # For overriding with a whitelist of symbols
@@ -128,10 +131,10 @@ module Ransack
           end
 
           def table
-            name = ::Ransack::Adapters::Mongoid::Attributes::Attribute.new(self.criteria, :name)
-            {
-              :name => name
-            }
+            name = ::Ransack::Adapters::Mongoid::Attributes::Attribute.new(
+              self.criteria, :name
+              )
+            { :name => name }
           end
 
         end
