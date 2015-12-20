@@ -1,47 +1,6 @@
 # Change Log
 
 ## Unreleased
-
-### Fixed
-
-*   Fix using aliased attributes in association searches, and add a failing
-    spec. PR [#602](https://github.com/activerecord-hackery/ransack/pull/602).
-
-    *Marten Schilstra*
-
-*   Replace Active Record `table_exists?` API that was deprecated
-    [here](https://github.com/rails/rails/commit/152b85f) in Rails 5. Commit
-    [c9d2297](https://github.com/activerecord-hackery/ransack/commit/c9d2297).
-
-    *Jon Atack*
-
-*   Adapt to changes in Rails 5 where AC::Parameters composes a HWIA instead of
-    inheriting from Hash starting from Rails commit rails/rails@14a3bd5. Commit
-    [ceafc05](https://github.com/activerecord-hackery/ransack/commit/ceafc05).
-
-    *Jon Atack*
-
-*   Fix test `#sort_link with hide order indicator set to true` to fail properly
-    ([4f65b09](https://github.com/activerecord-hackery/ransack/commit/4f65b09)).
-    This spec, added in
-    [#473](https://github.com/activerecord-hackery/ransack/pull/473), tested
-    the presence of the attribute name instead of the absence of the order
-    indicators and did not fail when it should.
-
-    *Josh Hunter*, *Jon Atack*
-
-*   Revert
-    [f858dd6](https://github.com/activerecord-hackery/ransack/commit/f858dd6).
-    Fixes [#553](https://github.com/activerecord-hackery/ransack/issues/553)
-    performance regression with the SQL Server adapter.
-
-    *sschwing3*
-
-*   Fix invalid Chinese I18n locale file name by replacing "zh" with "zh-CN".
-    PR [#590](https://github.com/activerecord-hackery/ransack/pull/590).
-
-    *Ethan Yang*
-
 ### Added
 
 *   Added `ransack_alias` to allow users to customize the names for long
@@ -87,6 +46,46 @@
 
     *Masanobu Mizutani*
 
+### Fixed
+
+*   Fix using aliased attributes in association searches, and add a failing
+    spec. PR [#602](https://github.com/activerecord-hackery/ransack/pull/602).
+
+    *Marten Schilstra*
+
+*   Replace Active Record `table_exists?` API that was deprecated
+    [here](https://github.com/rails/rails/commit/152b85f) in Rails 5. Commit
+    [c9d2297](https://github.com/activerecord-hackery/ransack/commit/c9d2297).
+
+    *Jon Atack*
+
+*   Adapt to changes in Rails 5 where AC::Parameters composes a HWIA instead of
+    inheriting from Hash starting from Rails commit rails/rails@14a3bd5. Commit
+    [ceafc05](https://github.com/activerecord-hackery/ransack/commit/ceafc05).
+
+    *Jon Atack*
+
+*   Fix test `#sort_link with hide order indicator set to true` to fail properly
+    ([4f65b09](https://github.com/activerecord-hackery/ransack/commit/4f65b09)).
+    This spec, added in
+    [#473](https://github.com/activerecord-hackery/ransack/pull/473), tested
+    the presence of the attribute name instead of the absence of the order
+    indicators and did not fail when it should.
+
+    *Josh Hunter*, *Jon Atack*
+
+*   Revert
+    [f858dd6](https://github.com/activerecord-hackery/ransack/commit/f858dd6).
+    Fixes [#553](https://github.com/activerecord-hackery/ransack/issues/553)
+    performance regression with the SQL Server adapter.
+
+    *sschwing3*
+
+*   Fix invalid Chinese I18n locale file name by replacing "zh" with "zh-CN".
+    PR [#590](https://github.com/activerecord-hackery/ransack/pull/590).
+
+    *Ethan Yang*
+
 ### Changed
 
 *   Memory/speed perf improvement: Freeze strings in array global constants and
@@ -104,6 +103,19 @@
 
 
 ## Version 1.7.0 - 2015-08-20
+### Added
+
+*   Add Mongoid support for referenced/embedded relations. PR
+    [#498](https://github.com/activerecord-hackery/ransack/pull/498).
+    TODO: Missing spec coverage! Add documentation!
+
+    *Penn Su*
+
+*   Add German i18n locale file (`de.yml`). PR
+    [#537](https://github.com/activerecord-hackery/ransack/pull/537).
+
+    *Philipp Weissensteiner*
+
 ### Fixed
 
 *   Fix
@@ -153,19 +165,6 @@
 
     *Jon Atack*
 
-### Added
-
-*   Add Mongoid support for referenced/embedded relations. PR
-    [#498](https://github.com/activerecord-hackery/ransack/pull/498).
-    TODO: Missing spec coverage! Add documentation!
-
-    *Penn Su*
-
-*   Add German i18n locale file (`de.yml`). PR
-    [#537](https://github.com/activerecord-hackery/ransack/pull/537).
-
-    *Philipp Weissensteiner*
-
 ### Changed
 
 *   Upgrade gemspec dependencies: MySQL2 from '0.3.14' to '0.3.18', and RSpec
@@ -189,10 +188,12 @@
 
 
 ## Version 1.6.6 - 2015-04-05
-### Changed
+### Added
 
-*   Upgrade Polyamorous dependency to version 1.2.0, which uses `Module#prepend`
-    instead of `alias_method` for hooking into Active Record (with Ruby 2.x).
+*   Add the Ruby version to the the header message that shows the database,
+    Active Record and Arel versions when running tests.
+
+*   Add Code Climate analysis.
 
     *Jon Atack*
 
@@ -217,12 +218,10 @@
 
     *Jon Atack*
 
-### Added
+### Changed
 
-*   Add the Ruby version to the the header message that shows the database,
-    Active Record and Arel versions when running tests.
-
-*   Add Code Climate analysis.
+*   Upgrade Polyamorous dependency to version 1.2.0, which uses `Module#prepend`
+    instead of `alias_method` for hooking into Active Record (with Ruby 2.x).
 
     *Jon Atack*
 
