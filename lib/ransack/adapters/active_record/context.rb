@@ -94,13 +94,18 @@ module Ransack
           # JoinDependency to track table aliases.
           #
           def join_sources
-            base =
-              if ::ActiveRecord::VERSION::MAJOR >= 5
-                Arel::SelectManager.new(@object.table)
-              else
-                Arel::SelectManager.new(@object.engine, @object.table)
-              end
-            joins = @join_dependency.join_constraints(@object.joins_values)
+            base, joins =
+            if ::ActiveRecord::VERSION::MAJOR >= 5
+              [
+                Arel::SelectManager.new(@object.table),
+                @join_dependency.join_constraints(@object.joins_values, @join_type)
+              ]
+            else
+              [
+                Arel::SelectManager.new(@object.engine, @object.table),
+                @join_dependency.join_constraints(@object.joins_values)
+              ]
+            end
             joins.each do |aliased_join|
               base.from(aliased_join)
             end
