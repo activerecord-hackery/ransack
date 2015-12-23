@@ -382,6 +382,20 @@ module Ransack
         it { should match /Full Name&nbsp;&#9660;/ }
       end
 
+      describe '#sort_link with a block' do
+        before do
+          Ransack.configure { |c| c.hide_sort_order_indicators = false }
+        end
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people'
+          ) { 'Block label' }
+        }
+        it { should match /Block label&nbsp;&#9660;/ }
+      end
+
       describe '#search_form_for with default format' do
         subject { @controller.view_context
           .search_form_for(Person.search) {} }
