@@ -38,7 +38,7 @@ module Ransack
       #
       #   <%= sort_link(@q, :name, [:name, 'kind ASC'], 'Player Name') %>
       #
-      # You can use a block as well if your link target is hard to fit into the label parameter:
+      #   You can also use a block:
       #
       #   <%= sort_link(@q, :name, [:name, 'kind ASC']) do %>
       #     <strong>Player Name</strong>
