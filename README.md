@@ -776,6 +776,3 @@ directly related to bug reports, pull requests, or documentation improvements.
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!
 
-## Copyright
-
-Copyright &copy; 2011-2015 [Ernie Miller](http://twitter.com/erniemiller)
