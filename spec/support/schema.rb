@@ -25,7 +25,7 @@ else
 end
 
 class Person < ActiveRecord::Base
-  if ActiveRecord::VERSION::MAJOR == 3
+  if ::ActiveRecord::VERSION::MAJOR == 3
     default_scope order('id DESC')
   else
     default_scope { order(id: :desc) }
@@ -125,7 +125,7 @@ class Article < ActiveRecord::Base
 
   alias_attribute :content, :body
 
-  if ActiveRecord::VERSION::STRING >= '3.1'
+  if ::ActiveRecord::VERSION::STRING >= '3.1'
     default_scope { where("'default_scope' = 'default_scope'") }
   else # Rails 3.0 does not accept a block
     default_scope where("'default_scope' = 'default_scope'")
