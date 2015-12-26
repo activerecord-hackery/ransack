@@ -34,7 +34,11 @@ class Person < ActiveRecord::Base
   has_many   :children, class_name: 'Person', foreign_key: :parent_id
   has_many   :articles
   if ActiveRecord::VERSION::MAJOR == 3
-    has_many :published_articles, conditions: { published: true }, class_name: "Article"
+    if RUBY_VERSION >= '2.3'
+      has_many :published_articles, class_name: "Article", conditions: "published = 't'"
+    else
+      has_many :published_articles, class_name: "Article", conditions: { published: true }
+    end
   else
     has_many :published_articles, ->{ where(published: true) }, class_name: "Article"
   end
