@@ -60,6 +60,20 @@ matrix:
     - env: RAILS=master DB=mysql
     - env: RAILS=master DB=postgres
 
+    - rvm: 2.3.0
+      env: RAILS=3-2-stable DB=sqlite
+    - rvm: 2.3.0
+      env: RAILS=3-2-stable DB=mysql
+    - rvm: 2.3.0
+      env: RAILS=3-2-stable DB=postgres
+
+    - rvm: 2.3.0
+      env: RAILS=3-1-stable DB=sqlite
+    - rvm: 2.3.0
+      env: RAILS=3-1-stable DB=mysql
+    - rvm: 2.3.0
+      env: RAILS=3-1-stable DB=postgres
+
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'
   - mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";'
