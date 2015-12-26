@@ -35,12 +35,15 @@ class Person < ActiveRecord::Base
   has_many   :articles
   if ActiveRecord::VERSION::MAJOR == 3
     if RUBY_VERSION >= '2.3'
-      has_many :published_articles, class_name: "Article", conditions: "published = 't'"
+      has_many :published_articles, class_name: "Article",
+        conditions: "published = 't'"
     else
-      has_many :published_articles, class_name: "Article", conditions: { published: true }
+      has_many :published_articles, class_name: "Article",
+        conditions: { published: true }
     end
   else
-    has_many :published_articles, ->{ where(published: true) }, class_name: "Article"
+    has_many :published_articles, ->{ where(published: true) },
+      class_name: "Article"
   end
   has_many   :comments
   has_many   :authored_article_comments, through: :articles,
