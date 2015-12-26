@@ -22,7 +22,11 @@ module Ransack
         @controller.view_context.search_form_for(@s) { |f| @f = f }
       end
 
-      it 'selects previously-entered time values with datetime_select' do
+      it 'selects previously-entered time values with datetime_select',
+        unless: (
+          RUBY_VERSION >= '2.3' &&
+          ::ActiveRecord::VERSION::STRING.first(3) < '3.2'
+          ) do
         date_values = %w(2011 1 2 03 04 05)
       # @s.created_at_eq = date_values # This works in Rails 4.x but not 3.x
         @s.created_at_eq = [2011, 1, 2, 3, 4, 5] # so we have to do this
