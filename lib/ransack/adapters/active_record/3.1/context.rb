@@ -137,7 +137,7 @@ module Ransack
         end
 
         def join_dependency(relation)
-          if relation.respond_to?(:join_dependency) # Squeel will enable this
+          if relation.respond_to?(:join_dependency) # Polyamorous enables this
             relation.join_dependency
           else
             build_join_dependency(relation)
