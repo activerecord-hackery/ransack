@@ -3,6 +3,12 @@
 ## Unreleased
 ### Added
 
+*   Added optional block argument for the `sort_link` method. PR
+    [#604](https://github.com/activerecord-hackery/ransack/pull/604), commit
+    [2e6667b](https://github.com/dalpo/ransack/commit/2e6667b).
+
+    *Andrea Dal Ponte*
+
 *   Added `ransack_alias` to allow users to customize the names for long
     ransack field names. PR
     [#623](https://github.com/activerecord-hackery/ransack/pull/623), commit
