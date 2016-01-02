@@ -213,6 +213,14 @@ Ransack.configure do |c|
 end
 ```
 
+You can also use a block if your link markup is hard to fit into the label parameter:
+
+```erb
+<%= sort_link(@q, :name) do %>
+  <strong>Player Name</strong>
+<% end %>
+```
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to
@@ -775,4 +783,3 @@ directly related to bug reports, pull requests, or documentation improvements.
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!
-
