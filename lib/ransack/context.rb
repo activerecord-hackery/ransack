@@ -58,6 +58,7 @@ module Ransack
     end
 
     def bind(object, str)
+      return nil unless str
       object.parent, object.attr_name = @bind_pairs[str]
     end
 

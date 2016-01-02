@@ -40,7 +40,7 @@ module Ransack
         @base.table_name, as: @base.aliased_table_name, type_caster: self
         )
       @bind_pairs = Hash.new do |hash, key|
-        parent, attr_name = get_parent_and_attribute_name(key.to_s)
+        parent, attr_name = get_parent_and_attribute_name(key)
         if parent && attr_name
           hash[key] = [parent, attr_name]
         end

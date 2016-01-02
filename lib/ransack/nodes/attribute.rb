@@ -16,7 +16,6 @@ module Ransack
 
       def name=(name)
         @name = name
-        context.bind(self, name) unless name.blank?
       end
 
       def valid?

@@ -32,7 +32,7 @@ module Ransack
 
       def name=(name)
         @name = name
-        context.bind(self, name) unless name.blank?
+        context.bind(self, name)
       end
 
       def dir=(dir)
