@@ -247,6 +247,10 @@ module Ransack
         "Condition <#{data}>"
       end
 
+      def negative?
+        predicate.negative?
+      end
+
       private
 
       def valid_combinator?
