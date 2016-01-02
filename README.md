@@ -221,6 +221,14 @@ Ransack.configure do |c|
 end
 ```
 
+You can also use a block if your link markup is hard to fit into the label parameter:
+
+```erb
+<%= sort_link(@q, :name) do %>
+  <strong>Player Name</strong>
+<% end %>
+```
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to
