@@ -168,6 +168,14 @@ column title or a default sort order:
 <%= sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
 
+You can use a block if the link markup is hard to fit into the label parameter:
+
+```erb
+<%= sort_link(@q, :name) do %>
+  <strong>Player Name</strong>
+<% end %>
+```
+
 With a polymorphic association, you may need to specify the name of the link
 explicitly to avoid an `uninitialized constant Model::Xxxable` error (see issue
 [#421](https://github.com/activerecord-hackery/ransack/issues/421)):
@@ -775,4 +783,3 @@ directly related to bug reports, pull requests, or documentation improvements.
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!
-
