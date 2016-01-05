@@ -86,7 +86,7 @@ module Ransack
       class SortLink
         def initialize(search, attribute, args, params)
           @search         = search
-          @params         = params.respond_to?(:to_unsafe_h) ? params.to_unsafe_h : params
+          @params         = parameters_hash(params)
           @field          = attribute.to_s
           @sort_fields    = extract_sort_fields_and_mutate_args!(args).compact
           @current_dir    = existing_sort_direction
@@ -119,6 +119,11 @@ module Ransack
         end
 
         private
+
+          def parameters_hash(params)
+            return params unless params.respond_to?(:to_unsafe_h)
+            params.to_unsafe_h
+          end
 
           def extract_sort_fields_and_mutate_args!(args)
             return args.shift if args[0].is_a?(Array)
