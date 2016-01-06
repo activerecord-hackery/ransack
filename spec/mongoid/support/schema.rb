@@ -1,6 +1,8 @@
 require 'mongoid'
 
 Mongoid.load!(File.expand_path("../mongoid.yml", __FILE__), :test)
+Mongo::Logger.logger.level = Logger::WARN if defined?(Mongo)
+Mongoid.purge!
 
 class Person
   include Mongoid::Document

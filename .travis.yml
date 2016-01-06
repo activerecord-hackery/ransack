@@ -12,12 +12,14 @@ rvm:
   - 1.9
 
 env:
-  - RAILS=4-2-stable DB=mongodb
+  - RAILS=4-2-stable DB=mongoid4
+  - RAILS=4-2-stable DB=mongoid5
   - RAILS=4-2-stable DB=sqlite3
   - RAILS=4-2-stable DB=mysql
   - RAILS=4-2-stable DB=postgres
 
-  - RAILS=4-1-stable DB=mongodb
+  - RAILS=4-1-stable DB=mongoid4
+  - RAILS=4-1-stable DB=mongoid5
   - RAILS=4-1-stable DB=sqlite3
   - RAILS=4-1-stable DB=mysql
   - RAILS=4-1-stable DB=postgres
@@ -37,7 +39,9 @@ env:
 matrix:
   include:
     - rvm: 2.3.0
-      env: RAILS=master DB=mongodb
+      env: RAILS=master DB=mongoid5
+    - rvm: 2.3.0
+      env: RAILS=master DB=mongoid4
     - rvm: 2.3.0
       env: RAILS=master DB=sqlite3
     - rvm: 2.3.0
@@ -46,7 +50,9 @@ matrix:
       env: RAILS=master DB=postgres
 
     - rvm: 2.2.4
-      env: RAILS=master DB=mongodb
+      env: RAILS=master DB=mongoid5
+    - rvm: 2.2.4
+      env: RAILS=master DB=mongoid4
     - rvm: 2.2.4
       env: RAILS=master DB=sqlite3
     - rvm: 2.2.4
@@ -55,7 +61,8 @@ matrix:
       env: RAILS=master DB=postgres
 
   allow_failures:
-    - env: RAILS=master DB=mongodb
+    - env: RAILS=master DB=mongoid5
+    - env: RAILS=master DB=mongoid4
     - env: RAILS=master DB=sqlite3
     - env: RAILS=master DB=mysql
     - env: RAILS=master DB=postgres

@@ -42,8 +42,12 @@ else
   end
 end
 
-if ENV['DB'] =~ /mongodb/
+if ENV['DB'] =~ /mongoid4/
   gem 'mongoid', '~> 4.0.0', require: false
+end
+
+if ENV['DB'] =~ /mongoid5/
+  gem 'mongoid', '~> 5.0.0', require: false
 end
 
 # Removed from Ruby 2.2 but needed for testing Rails 3.x.
