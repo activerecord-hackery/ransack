@@ -242,37 +242,41 @@ module Ransack
           .map { |join| table.create_string_join(Arel.sql(join)) }
         end
 
+        def build_or_find_association(name, parent = @base, klass = nil)
+          find_association(name, parent, klass) or build_association(name, parent, klass)
+        end
+
         if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
 
-          def build_or_find_association(name, parent = @base, klass = nil)
-            found_association = @join_dependency.join_root.children
-            .detect do |assoc|
+          def find_association(name, parent = @base, klass = nil)
+            @join_dependency.join_root.children.detect do |assoc|
               assoc.reflection.name == name &&
               (@associations_pot.nil? || @associations_pot[assoc] == parent) &&
               (!klass || assoc.reflection.klass == klass)
             end
+          end
 
-            unless found_association
-              jd = JoinDependency.new(
-                parent.base_klass,
-                Polyamorous::Join.new(name, @join_type, klass),
-                []
+          def build_association(name, parent = @base, klass = nil)
+            jd = JoinDependency.new(
+              parent.base_klass,
+              Polyamorous::Join.new(name, @join_type, klass),
+              []
+            )
+            found_association = jd.join_root.children.last
+            associations found_association, parent
+
+            # TODO maybe we dont need to push associations here, we could loop
+            # through the @associations_pot instead
+            @join_dependency.join_root.children.push found_association
+
+            # Builds the arel nodes properly for this association
+            @join_dependency.send(
+              :construct_tables!, jd.join_root, found_association
               )
-              found_association = jd.join_root.children.last
-              associations found_association, parent
 
-              # TODO maybe we dont need to push associations here, we could loop
-              # through the @associations_pot instead
-              @join_dependency.join_root.children.push found_association
+            # Leverage the stashed association functionality in AR
+            @object = @object.joins(jd)
 
-              # Builds the arel nodes properly for this association
-              @join_dependency.send(
-                :construct_tables!, jd.join_root, found_association
-                )
-
-              # Leverage the stashed association functionality in AR
-              @object = @object.joins(jd)
-            end
             found_association
           end
 
@@ -283,24 +287,26 @@ module Ransack
 
         else
 
-          def build_or_find_association(name, parent = @base, klass = nil)
+          def build_association(name, parent = @base, klass = nil)
+            @join_dependency.send(
+              :build,
+              Polyamorous::Join.new(name, @join_type, klass),
+              parent
+              )
+            found_association = @join_dependency.join_associations.last
+            # Leverage the stashed association functionality in AR
+            @object = @object.joins(found_association)
+
+            found_association
+          end
+
+          def find_association(name, parent = @base, klass = nil)
             found_association = @join_dependency.join_associations
             .detect do |assoc|
               assoc.reflection.name == name &&
               assoc.parent == parent &&
               (!klass || assoc.reflection.klass == klass)
             end
-            unless found_association
-              @join_dependency.send(
-                :build,
-                Polyamorous::Join.new(name, @join_type, klass),
-                parent
-                )
-              found_association = @join_dependency.join_associations.last
-              # Leverage the stashed association functionality in AR
-              @object = @object.joins(found_association)
-            end
-            found_association
           end
 
         end
