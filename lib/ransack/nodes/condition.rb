@@ -131,6 +131,9 @@ module Ransack
         Attribute.new(@context, name, ransacker_args).tap do |attribute|
           @context.bind(attribute, attribute.name)
           self.attributes << attribute if attribute.valid?
+          if predicate && !negative?
+            @context.lock_association(attribute.parent)
+          end
         end
       end
 
@@ -182,6 +185,10 @@ module Ransack
 
       def predicate_name=(name)
         self.predicate = Predicate.named(name)
+        unless negative?
+          attributes.each { |a| context.lock_association(a.parent) }
+        end
+        @predicate
       end
       alias :p= :predicate_name=
 

@@ -27,6 +27,8 @@ module Ransack
       @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Polyamorous::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
+      @associations_pot = {}
+      @lock_associations = []
 
       if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
         @base = @join_dependency.join_root

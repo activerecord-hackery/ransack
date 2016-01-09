@@ -24,6 +24,10 @@ module Ransack
         .include?(attr_name.split('.').last)
       end
 
+      def associated_collection?
+        parent.respond_to?(:reflection) && parent.reflection.collection?
+      end
+
       def type
         if ransacker
           return ransacker.type

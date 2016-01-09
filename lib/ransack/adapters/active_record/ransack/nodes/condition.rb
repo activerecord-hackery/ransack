@@ -3,33 +3,29 @@ module Ransack
     class Condition
 
       def arel_predicate
-        if attributes.size > 1
-          combinator_for_predicates
-        else
-          format_predicate
-        end
+        attributes.map { |attribute|
+          association = attribute.parent
+          if negative? && attribute.associated_collection?
+            query = context.build_correlated_subquery(association)
+            query.where(format_predicate(attribute).not)
+            context.remove_association(association)
+            Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+          else
+            format_predicate(attribute)
+          end
+        }.reduce(combinator_method)
       end
 
       private
 
-        def arel_predicates
-          attributes.map do |a|
-            a.attr.send(
-              arel_predicate_for_attribute(a), formatted_values_for_attribute(a)
-            )
-          end
+        def combinator_method
+          combinator === Constants::OR ? :or : :and
         end
 
-        def combinator_for_predicates
-          if combinator === Constants::AND
-            Arel::Nodes::Grouping.new(arel_predicates.inject(&:and))
-          elsif combinator === Constants::OR
-            arel_predicates.inject(&:or)
-          end
-        end
-
-        def format_predicate
-          predicate = arel_predicates.first
+        def format_predicate(attribute)
+          arel_pred = arel_predicate_for_attribute(attribute)
+          arel_values = formatted_values_for_attribute(attribute)
+          predicate = attribute.attr.public_send(arel_pred, arel_values)
           if casted_array_with_in_predicate?(predicate)
             predicate.right[0] = format_values_for(predicate.right[0])
           end

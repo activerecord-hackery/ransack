@@ -94,6 +94,76 @@ module Ransack
           end
         end
 
+        context 'negative conditions on HABTM associations' do
+          let(:medieval) { Tag.create!(name: 'Medieval') }
+          let(:fantasy)  { Tag.create!(name: 'Fantasy') }
+          let(:arthur)   { Article.create!(title: 'King Arthur') }
+          let(:marco)    { Article.create!(title: 'Marco Polo') }
+
+          before do
+            marco.tags << medieval
+            arthur.tags << medieval
+            arthur.tags << fantasy
+          end
+
+          it 'removes redundant joins from top query' do
+            s = Article.ransack(tags_name_not_eq: "Fantasy")
+            sql = s.result.to_sql
+
+            expect(sql).to_not include('LEFT OUTER JOIN')
+          end
+
+          it 'handles != for single values' do
+            s = Article.ransack(tags_name_not_eq: "Fantasy")
+            articles = s.result.to_a
+
+            expect(articles).to include marco
+            expect(articles).to_not include arthur
+          end
+
+          it 'handles NOT IN for multiple attributes' do
+            s = Article.ransack(tags_name_not_in: ["Fantasy", "Scifi"])
+            articles = s.result.to_a
+
+            expect(articles).to include marco
+            expect(articles).to_not include arthur
+          end
+        end
+
+        context 'negative conditions on self-referenced associations' do
+          let(:pop) { Person.create!(name: 'Grandpa') }
+          let(:dad) { Person.create!(name: 'Father') }
+          let(:mom) { Person.create!(name: 'Mother') }
+          let(:son) { Person.create!(name: 'Grandchild') }
+
+          before do
+            son.parent = dad
+            dad.parent = pop
+            dad.children << son
+            mom.children << son
+            pop.children << dad
+            son.save! && dad.save! && mom.save! && pop.save!
+          end
+
+          it 'handles multiple associations and aliases' do
+            s = Person.ransack(
+              c: {
+                '0' => { a: ['name'], p: 'not_eq', v: ['Father'] },
+                '1' => {
+                        a: ['children_name', 'parent_name'],
+                        p: 'not_eq', v: ['Father'], m: 'or'
+                      },
+                '2' => { a: ['children_salary'], p: 'eq', v: [nil] }
+              })
+            people = s.result
+
+            expect(people.to_a).to include son
+            expect(people.to_a).to include mom
+            expect(people.to_a).to_not include dad  # rule '0': 'name'
+            expect(people.to_a).to_not include pop  # rule '1': 'children_name'
+          end
+        end
+
         describe '#ransack_alias' do
           it 'translates an alias to the correct attributes' do
             p = Person.create!(name: 'Meatloaf', email: 'babies@example.com')

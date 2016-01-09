@@ -15,7 +15,6 @@ module Ransack
         def initialize(object, options = {})
           super
           @arel_visitor = @engine.connection.visitor
-          @associations_pot = {}
         end
 
         def relation_for(object)
@@ -137,6 +136,64 @@ module Ransack
 
         def alias_tracker
           @join_dependency.alias_tracker
+        end
+
+        def lock_association(association)
+          @lock_associations << association
+        end
+
+        if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
+          def remove_association(association)
+            return if @lock_associations.include?(association)
+            @join_dependency.join_root.children.delete_if { |stashed|
+              stashed.eql?(association)
+            }
+            @object.joins_values.delete_if { |jd|
+              jd.join_root.children.map(&:object_id) == [association.object_id]
+            }
+          end
+        else
+          def remove_association(association)
+            return if @lock_associations.include?(association)
+            @join_dependency.join_parts.delete(association)
+            @object.joins_values.delete(association)
+          end
+        end
+
+        # Build an Arel subquery that selects keys for the top query,
+        # drawn from the first join association's foreign_key.
+        #
+        # Example: for an Article that has_and_belongs_to_many Tags
+        #
+        #   context = Article.search.context
+        #   attribute = Attribute.new(context, "tags_name").tap do |a|
+        #     context.bind(a, a.name)
+        #   end
+        #   context.build_correlated_subquery(attribute.parent).to_sql
+        #
+        #   # SELECT "articles_tags"."article_id" FROM "articles_tags"
+        #   # INNER JOIN "tags" ON "tags"."id" = "articles_tags"."tag_id"
+        #   # WHERE "articles_tags"."article_id" = "articles"."id"
+        #
+        # The WHERE condition on this query makes it invalid by itself,
+        # because it is correlated to the primary key on the outer query.
+        #
+        def build_correlated_subquery(association)
+          join_constraints = extract_joins(association)
+          join_root = join_constraints.shift
+          join_table = join_root.left
+          correlated_key = join_root.right.expr.left
+          subquery = Arel::SelectManager.new(association.base_klass)
+          subquery.from(join_root.left)
+          subquery.project(correlated_key)
+          join_constraints.each do |j|
+            subquery.join_sources << Arel::Nodes::InnerJoin.new(j.left, j.right)
+          end
+          subquery.where(correlated_key.eq(primary_key))
+        end
+
+        def primary_key
+          @object.table[@object.primary_key]
         end
 
         private
@@ -282,6 +339,21 @@ module Ransack
             found_association
           end
 
+          def extract_joins(association)
+            parent = @join_dependency.join_root
+            reflection = association.reflection
+            join_constraints = association.join_constraints(
+              parent.table,
+              parent.base_klass,
+              association,
+              Arel::Nodes::OuterJoin,
+              association.tables,
+              reflection.scope_chain,
+              reflection.chain
+            )
+            join_constraints.to_a.flatten
+          end
+
         else
 
           def build_association(name, parent = @base, klass = nil)
@@ -295,6 +367,11 @@ module Ransack
             @object = @object.joins(found_association)
 
             found_association
+          end
+
+          def extract_joins(association)
+            query = Arel::SelectManager.new(association.base_klass, association.table)
+            association.join_to(query).join_sources
           end
 
           def find_association(name, parent = @base, klass = nil)
