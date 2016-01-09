@@ -9,7 +9,6 @@ module Ransack
 
         # Because the AR::Associations namespace is insane
         JoinDependency = ::ActiveRecord::Associations::JoinDependency
-        JoinPart = JoinDependency::JoinPart
 
         def initialize(object, options = {})
           super

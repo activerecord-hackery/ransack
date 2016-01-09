@@ -8,7 +8,6 @@ module Ransack
       class Context < ::Ransack::Context
         # Because the AR::Associations namespace is insane
         JoinDependency = ::ActiveRecord::Associations::JoinDependency
-        JoinPart = JoinDependency::JoinPart
 
         # Redefine a few things for ActiveRecord 3.1.
 

@@ -6,10 +6,6 @@ module Ransack
     module Mongoid
       class Context < ::Ransack::Context
 
-        # Because the AR::Associations namespace is insane
-        # JoinDependency = ::Mongoid::Associations::JoinDependency
-        # JoinPart = JoinDependency::JoinPart
-
         def initialize(object, options = {})
           super
           # @arel_visitor = @engine.connection.visitor
