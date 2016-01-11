@@ -30,9 +30,14 @@ RSpec.configure do |config|
   config.alias_it_should_behave_like_to :it_has_behavior, 'has behavior'
 
   config.before(:suite) do
-    message = "Running Ransack specs with #{Mongoid.default_session.inspect
-      }, Mongoid #{Mongoid::VERSION}, Moped #{Moped::VERSION
-      }, Origin #{Origin::VERSION} and Ruby #{RUBY_VERSION}"
+    if ENV['DB'] == 'mongoid4'
+      message = "Running Ransack specs with #{Mongoid.default_session.inspect
+        }, Mongoid #{Mongoid::VERSION}, Moped #{Moped::VERSION
+        }, Origin #{Origin::VERSION} and Ruby #{RUBY_VERSION}"
+    else
+      message = "Running Ransack specs with #{Mongoid.default_client.inspect
+        }, Mongoid #{Mongoid::VERSION}, Mongo driver #{Mongo::VERSION}"
+    end
     line = '=' * message.length
     puts line, message, line
     Schema.create

@@ -17,7 +17,7 @@ RSpec::Core::RakeTask.new(:mongoid) do |rspec|
 end
 
 task :default do
-  if ENV['DB'] =~ /mongodb/
+  if ENV['DB'] =~ /mongoid/
     Rake::Task["mongoid"].invoke
   else
     Rake::Task["spec"].invoke
