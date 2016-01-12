@@ -10,7 +10,7 @@
 
 *   Added optional block argument for the `sort_link` method. PR
     [#604](https://github.com/activerecord-hackery/ransack/pull/604), commit
-    [997b856](https://github.com/dalpo/ransack/commit/997b856).
+    [997b856](https://github.com/activerecord-hackery/ransack/commit/997b856).
 
     *Andrea Dal Ponte*
 
