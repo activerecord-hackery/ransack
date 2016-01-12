@@ -40,7 +40,7 @@ If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
 issues, you can use an earlier version of Ransack, say, up to 1.3.0.
 
 Ransack works out-of-the-box with Active Record and also features limited
-support for Mongoid 4 (without associations, further details
+support for Mongoid 4 and 5 (without associations, further details
 [below](https://github.com/activerecord-hackery/ransack#mongoid)).
 
 In your Gemfile, for the last officially released gem:

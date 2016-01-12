@@ -3,6 +3,11 @@
 ## Unreleased
 ### Added
 
+*   Support Mongoid 5. PR [#636](https://github.com/activerecord-hackery/ransack/pull/636), commit
+    [9e5faf4](https://github.com/activerecord-hackery/ransack/commit/9e5faf4).
+
+    *Josef Šimánek*
+
 *   Added optional block argument for the `sort_link` method. PR
     [#604](https://github.com/activerecord-hackery/ransack/pull/604), commit
     [997b856](https://github.com/dalpo/ransack/commit/997b856).
