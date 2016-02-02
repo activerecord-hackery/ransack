@@ -311,10 +311,11 @@ module Ransack
       end
 
       context 'view has existing parameters' do
-        before do
-          @controller.view_context.params.merge!({ exist: 'existing' })
-        end
         describe '#sort_link should not remove existing params' do
+          before do
+            @controller.view_context.params.merge!({ exist: 'existing' })
+          end
+
           subject { @controller.view_context
             .sort_link(
               Person.search(
@@ -326,6 +327,34 @@ module Ransack
             )
           }
           it { should match /exist\=existing/ }
+        end
+
+        context('using real ActionController Parameter object') do
+          describe '#sort_link should include search params' do
+            subject { @controller.view_context
+              .sort_link(
+                Person.search,
+                :name,
+              )
+            }
+            let(:params) {
+              ActionController::Parameters.new(
+                {
+                  q: { name_eq: 'TEST' },
+                  controller: 'people',
+                }
+              )
+            }
+            before do
+              @controller.instance_variable_set(:@params, params)
+            end
+            it {
+              should match(
+                /people\?q(%5B|\[)name_eq(%5D|\])=TEST&amp;q(%5B|\[)s(%5D|\])
+                =name\+asc/x,
+               )
+            }
+          end
         end
       end
 
