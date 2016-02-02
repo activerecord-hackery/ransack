@@ -97,6 +97,12 @@
 
     *Ethan Yang*
 
+*   Fix recent change to sort_links parameter_hash to account for symbol search
+    keys. Add test using real AC:Parameter object.
+    Commit [989d](https://github.com/activerecord-hackery/ransack/commit/989d)
+
+    *Ryan Wood*
+
 ### Changed
 
 *   Memory/speed perf improvement: Freeze strings in array global constants and

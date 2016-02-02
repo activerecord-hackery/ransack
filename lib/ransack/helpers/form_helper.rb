@@ -122,7 +122,7 @@ module Ransack
 
           def parameters_hash(params)
             return params unless params.respond_to?(:to_unsafe_h)
-            params.to_unsafe_h
+            params.to_unsafe_h.with_indifferent_access
           end
 
           def extract_sort_fields_and_mutate_args!(args)
