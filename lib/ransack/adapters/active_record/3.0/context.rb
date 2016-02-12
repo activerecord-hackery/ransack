@@ -7,9 +7,11 @@ module Ransack
   module Adapters
     module ActiveRecord
       class Context < ::Ransack::Context
+
         # Because the AR::Associations namespace is insane
-        JoinDependency = ::ActiveRecord::Associations::ClassMethods::JoinDependency
-        JoinBase = JoinDependency::JoinBase
+        if defined? ::ActiveRecord::Associations::ClassMethods::JoinDependency
+          JoinDependency = ::ActiveRecord::Associations::ClassMethods::JoinDependency
+        end
 
         # Redefine a few things for ActiveRecord 3.0.
 

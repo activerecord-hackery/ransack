@@ -8,7 +8,9 @@ module Ransack
       class Context < ::Ransack::Context
 
         # Because the AR::Associations namespace is insane
-        JoinDependency = ::ActiveRecord::Associations::JoinDependency
+        if defined? ::ActiveRecord::Associations::JoinDependency
+          JoinDependency = ::ActiveRecord::Associations::JoinDependency
+        end
 
         def initialize(object, options = {})
           super
