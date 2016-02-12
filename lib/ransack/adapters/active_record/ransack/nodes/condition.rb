@@ -4,15 +4,15 @@ module Ransack
 
       def arel_predicate
         if attributes.size > 1
-          combinator_for(attributes_array)
+          combinator_for_predicates
         else
-          format_predicate(attributes_array.first)
+          format_predicate
         end
       end
 
       private
 
-        def attributes_array
+        def arel_predicates
           attributes.map do |a|
             a.attr.send(
               arel_predicate_for_attribute(a), formatted_values_for_attribute(a)
@@ -20,20 +20,20 @@ module Ransack
           end
         end
 
-        def combinator_for(predicates)
+        def combinator_for_predicates
           if combinator === Constants::AND
-            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
+            Arel::Nodes::Grouping.new(arel_predicates.inject(&:and))
           elsif combinator === Constants::OR
-            predicates.inject(&:or)
+            arel_predicates.inject(&:or)
           end
         end
 
-        def format_predicate(predicate)
-          predicate.tap do
-            if casted_array_with_in_predicate?(predicate)
-              predicate.right[0] = format_values_for(predicate.right[0])
-            end
+        def format_predicate
+          predicate = arel_predicates.first
+          if casted_array_with_in_predicate?(predicate)
+            predicate.right[0] = format_values_for(predicate.right[0])
           end
+          predicate
         end
 
         def casted_array_with_in_predicate?(predicate)
