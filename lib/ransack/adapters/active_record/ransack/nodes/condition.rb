@@ -3,7 +3,11 @@ module Ransack
     class Condition
 
       def arel_predicate
-        arel_predicate_for(attributes_array)
+        if attributes.size > 1
+          combinator_for(attributes_array)
+        else
+          format_predicate(attributes_array.first)
+        end
       end
 
       private
@@ -13,14 +17,6 @@ module Ransack
             a.attr.send(
               arel_predicate_for_attribute(a), formatted_values_for_attribute(a)
             )
-          end
-        end
-
-        def arel_predicate_for(predicates)
-          if predicates.size > 1
-            combinator_for(predicates)
-          else
-            format_predicate(predicates.first)
           end
         end
 
