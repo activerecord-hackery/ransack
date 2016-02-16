@@ -15,6 +15,7 @@ module Ransack
         def initialize(object, options = {})
           super
           @arel_visitor = @engine.connection.visitor
+          @associations_pot = {}
         end
 
         def relation_for(object)
@@ -252,7 +253,7 @@ module Ransack
           def find_association(name, parent = @base, klass = nil)
             @join_dependency.join_root.children.detect do |assoc|
               assoc.reflection.name == name &&
-              (@associations_pot.nil? || @associations_pot[assoc] == parent) &&
+              (@associations_pot.empty? || @associations_pot[assoc] == parent) &&
               (!klass || assoc.reflection.klass == klass)
             end
           end
@@ -264,7 +265,7 @@ module Ransack
               []
             )
             found_association = jd.join_root.children.last
-            associations found_association, parent
+            @associations_pot[found_association] = parent
 
             # TODO maybe we dont need to push associations here, we could loop
             # through the @associations_pot instead
@@ -279,11 +280,6 @@ module Ransack
             @object = @object.joins(jd)
 
             found_association
-          end
-
-          def associations(assoc, parent)
-            @associations_pot ||= {}
-            @associations_pot[assoc] = parent
           end
 
         else
