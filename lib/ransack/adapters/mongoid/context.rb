@@ -96,6 +96,14 @@ module Ransack
           end
         end
 
+        def lock_association(association)
+          warn "lock_association is not implemented for Ransack mongoid adapter" if $DEBUG
+        end
+
+        def remove_association(association)
+          warn "remove_association is not implemented for Ransack mongoid adapter" if $DEBUG
+        end
+
       private
 
         def get_parent_and_attribute_name(str, parent = @base)
