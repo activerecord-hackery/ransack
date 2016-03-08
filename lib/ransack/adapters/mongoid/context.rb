@@ -6,10 +6,6 @@ module Ransack
     module Mongoid
       class Context < ::Ransack::Context
 
-        # Because the AR::Associations namespace is insane
-        # JoinDependency = ::Mongoid::Associations::JoinDependency
-        # JoinPart = JoinDependency::JoinPart
-
         def initialize(object, options = {})
           super
           # @arel_visitor = @engine.connection.visitor
@@ -98,6 +94,14 @@ module Ransack
           else
             raise ArgumentError, "Don't know how to klassify #{obj}"
           end
+        end
+
+        def lock_association(association)
+          warn "lock_association is not implemented for Ransack mongoid adapter" if $DEBUG
+        end
+
+        def remove_association(association)
+          warn "remove_association is not implemented for Ransack mongoid adapter" if $DEBUG
         end
 
       private

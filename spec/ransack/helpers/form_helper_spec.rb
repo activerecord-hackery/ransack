@@ -312,7 +312,7 @@ module Ransack
 
       context 'view has existing parameters' do
         before do
-          @controller.view_context.params.merge!({ exist: 'existing' })
+          @controller.view_context.params[:exist] = 'existing'
         end
         describe '#sort_link should not remove existing params' do
           subject { @controller.view_context

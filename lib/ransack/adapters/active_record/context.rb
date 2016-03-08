@@ -8,8 +8,9 @@ module Ransack
       class Context < ::Ransack::Context
 
         # Because the AR::Associations namespace is insane
-        JoinDependency = ::ActiveRecord::Associations::JoinDependency
-        JoinPart = JoinDependency::JoinPart
+        if defined? ::ActiveRecord::Associations::JoinDependency
+          JoinDependency = ::ActiveRecord::Associations::JoinDependency
+        end
 
         def initialize(object, options = {})
           super
@@ -137,6 +138,64 @@ module Ransack
           @join_dependency.alias_tracker
         end
 
+        def lock_association(association)
+          @lock_associations << association
+        end
+
+        if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
+          def remove_association(association)
+            return if @lock_associations.include?(association)
+            @join_dependency.join_root.children.delete_if { |stashed|
+              stashed.eql?(association)
+            }
+            @object.joins_values.delete_if { |jd|
+              jd.join_root.children.map(&:object_id) == [association.object_id]
+            }
+          end
+        else
+          def remove_association(association)
+            return if @lock_associations.include?(association)
+            @join_dependency.join_parts.delete(association)
+            @object.joins_values.delete(association)
+          end
+        end
+
+        # Build an Arel subquery that selects keys for the top query,
+        # drawn from the first join association's foreign_key.
+        #
+        # Example: for an Article that has_and_belongs_to_many Tags
+        #
+        #   context = Article.search.context
+        #   attribute = Attribute.new(context, "tags_name").tap do |a|
+        #     context.bind(a, a.name)
+        #   end
+        #   context.build_correlated_subquery(attribute.parent).to_sql
+        #
+        #   # SELECT "articles_tags"."article_id" FROM "articles_tags"
+        #   # INNER JOIN "tags" ON "tags"."id" = "articles_tags"."tag_id"
+        #   # WHERE "articles_tags"."article_id" = "articles"."id"
+        #
+        # The WHERE condition on this query makes it invalid by itself,
+        # because it is correlated to the primary key on the outer query.
+        #
+        def build_correlated_subquery(association)
+          join_constraints = extract_joins(association)
+          join_root = join_constraints.shift
+          join_table = join_root.left
+          correlated_key = join_root.right.expr.left
+          subquery = Arel::SelectManager.new(association.base_klass)
+          subquery.from(join_root.left)
+          subquery.project(correlated_key)
+          join_constraints.each do |j|
+            subquery.join_sources << Arel::Nodes::InnerJoin.new(j.left, j.right)
+          end
+          subquery.where(correlated_key.eq(primary_key))
+        end
+
+        def primary_key
+          @object.table[@object.primary_key]
+        end
+
         private
 
         def database_table_exists?
@@ -242,65 +301,86 @@ module Ransack
           .map { |join| table.create_string_join(Arel.sql(join)) }
         end
 
+        def build_or_find_association(name, parent = @base, klass = nil)
+          find_association(name, parent, klass) or build_association(name, parent, klass)
+        end
+
         if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
 
-          def build_or_find_association(name, parent = @base, klass = nil)
-            found_association = @join_dependency.join_root.children
-            .detect do |assoc|
+          def find_association(name, parent = @base, klass = nil)
+            @join_dependency.join_root.children.detect do |assoc|
               assoc.reflection.name == name &&
-              (@associations_pot.nil? || @associations_pot[assoc] == parent) &&
+              (@associations_pot.empty? || @associations_pot[assoc] == parent) &&
               (!klass || assoc.reflection.klass == klass)
             end
+          end
 
-            unless found_association
-              jd = JoinDependency.new(
-                parent.base_klass,
-                Polyamorous::Join.new(name, @join_type, klass),
-                []
+          def build_association(name, parent = @base, klass = nil)
+            jd = JoinDependency.new(
+              parent.base_klass,
+              Polyamorous::Join.new(name, @join_type, klass),
+              []
+            )
+            found_association = jd.join_root.children.last
+            @associations_pot[found_association] = parent
+
+            # TODO maybe we dont need to push associations here, we could loop
+            # through the @associations_pot instead
+            @join_dependency.join_root.children.push found_association
+
+            # Builds the arel nodes properly for this association
+            @join_dependency.send(
+              :construct_tables!, jd.join_root, found_association
               )
-              found_association = jd.join_root.children.last
-              associations found_association, parent
 
-              # TODO maybe we dont need to push associations here, we could loop
-              # through the @associations_pot instead
-              @join_dependency.join_root.children.push found_association
+            # Leverage the stashed association functionality in AR
+            @object = @object.joins(jd)
 
-              # Builds the arel nodes properly for this association
-              @join_dependency.send(
-                :construct_tables!, jd.join_root, found_association
-                )
-
-              # Leverage the stashed association functionality in AR
-              @object = @object.joins(jd)
-            end
             found_association
           end
 
-          def associations(assoc, parent)
-            @associations_pot ||= {}
-            @associations_pot[assoc] = parent
+          def extract_joins(association)
+            parent = @join_dependency.join_root
+            reflection = association.reflection
+            join_constraints = association.join_constraints(
+              parent.table,
+              parent.base_klass,
+              association,
+              Arel::Nodes::OuterJoin,
+              association.tables,
+              reflection.scope_chain,
+              reflection.chain
+            )
+            join_constraints.to_a.flatten
           end
 
         else
 
-          def build_or_find_association(name, parent = @base, klass = nil)
+          def build_association(name, parent = @base, klass = nil)
+            @join_dependency.send(
+              :build,
+              Polyamorous::Join.new(name, @join_type, klass),
+              parent
+              )
+            found_association = @join_dependency.join_associations.last
+            # Leverage the stashed association functionality in AR
+            @object = @object.joins(found_association)
+
+            found_association
+          end
+
+          def extract_joins(association)
+            query = Arel::SelectManager.new(association.base_klass, association.table)
+            association.join_to(query).join_sources
+          end
+
+          def find_association(name, parent = @base, klass = nil)
             found_association = @join_dependency.join_associations
             .detect do |assoc|
               assoc.reflection.name == name &&
               assoc.parent == parent &&
               (!klass || assoc.reflection.klass == klass)
             end
-            unless found_association
-              @join_dependency.send(
-                :build,
-                Polyamorous::Join.new(name, @join_type, klass),
-                parent
-                )
-              found_association = @join_dependency.join_associations.last
-              # Leverage the stashed association functionality in AR
-              @object = @object.joins(found_association)
-            end
-            found_association
           end
 
         end

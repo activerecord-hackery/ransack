@@ -16,13 +16,16 @@ module Ransack
 
       def name=(name)
         @name = name
-        context.bind(self, name) unless name.blank?
       end
 
       def valid?
         bound? && attr &&
         context.klassify(parent).ransackable_attributes(context.auth_object)
         .include?(attr_name.split('.').last)
+      end
+
+      def associated_collection?
+        parent.respond_to?(:reflection) && parent.reflection.collection?
       end
 
       def type

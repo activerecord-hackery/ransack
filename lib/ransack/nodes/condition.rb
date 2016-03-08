@@ -79,14 +79,12 @@ module Ransack
       def attributes=(args)
         case args
         when Array
-          args.each do |attr|
-            attr = Attribute.new(@context, attr)
-            self.attributes << attr if attr.valid?
+          args.each do |name|
+            build_attribute(name)
           end
         when Hash
           args.each do |index, attrs|
-            attr = Attribute.new(@context, attrs[:name], attrs[:ransacker_args])
-            self.attributes << attr if attr.valid?
+            build_attribute(attrs[:name], attrs[:ransacker_args])
           end
         else
           raise ArgumentError,
@@ -129,9 +127,13 @@ module Ransack
       alias :m= :combinator=
       alias :m :combinator
 
-      def build_attribute(name = nil)
-        Attribute.new(@context, name).tap do |attribute|
-          self.attributes << attribute
+      def build_attribute(name = nil, ransacker_args = [])
+        Attribute.new(@context, name, ransacker_args).tap do |attribute|
+          @context.bind(attribute, attribute.name)
+          self.attributes << attribute if attribute.valid?
+          if predicate && !negative?
+            @context.lock_association(attribute.parent)
+          end
         end
       end
 
@@ -183,6 +185,10 @@ module Ransack
 
       def predicate_name=(name)
         self.predicate = Predicate.named(name)
+        unless negative?
+          attributes.each { |a| context.lock_association(a.parent) }
+        end
+        @predicate
       end
       alias :p= :predicate_name=
 
@@ -246,6 +252,10 @@ module Ransack
         .map { |v| "#{v[0]}: #{v[1]}" }
         .join(', '.freeze)
         "Condition <#{data}>"
+      end
+
+      def negative?
+        predicate.negative?
       end
 
       private

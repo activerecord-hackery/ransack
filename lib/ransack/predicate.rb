@@ -74,5 +74,9 @@ module Ransack
       vals.any? { |v| validator.call(type ? v.cast(type) : v.value) }
     end
 
+    def negative?
+      @name.include?("not_".freeze)
+    end
+
   end
 end

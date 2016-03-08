@@ -3,41 +3,33 @@ module Ransack
     class Condition
 
       def arel_predicate
-        arel_predicate_for(attributes_array)
+        attributes.map { |attribute|
+          association = attribute.parent
+          if negative? && attribute.associated_collection?
+            query = context.build_correlated_subquery(association)
+            query.where(format_predicate(attribute).not)
+            context.remove_association(association)
+            Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+          else
+            format_predicate(attribute)
+          end
+        }.reduce(combinator_method)
       end
 
       private
 
-        def attributes_array
-          attributes.map do |a|
-            a.attr.send(
-              arel_predicate_for_attribute(a), formatted_values_for_attribute(a)
-            )
-          end
+        def combinator_method
+          combinator === Constants::OR ? :or : :and
         end
 
-        def arel_predicate_for(predicates)
-          if predicates.size > 1
-            combinator_for(predicates)
-          else
-            format_predicate(predicates.first)
+        def format_predicate(attribute)
+          arel_pred = arel_predicate_for_attribute(attribute)
+          arel_values = formatted_values_for_attribute(attribute)
+          predicate = attribute.attr.public_send(arel_pred, arel_values)
+          if casted_array_with_in_predicate?(predicate)
+            predicate.right[0] = format_values_for(predicate.right[0])
           end
-        end
-
-        def combinator_for(predicates)
-          if combinator === Constants::AND
-            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
-          elsif combinator === Constants::OR
-            predicates.inject(&:or)
-          end
-        end
-
-        def format_predicate(predicate)
-          predicate.tap do
-            if casted_array_with_in_predicate?(predicate)
-              predicate.right[0] = format_values_for(predicate.right[0])
-            end
-          end
+          predicate
         end
 
         def casted_array_with_in_predicate?(predicate)

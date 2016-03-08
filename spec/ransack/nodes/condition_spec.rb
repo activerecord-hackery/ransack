@@ -29,6 +29,15 @@ module Ransack
         specify { expect(subject.values.size).to eq(2) }
       end
 
+      describe '#negative?' do
+        let(:context) { Context.for(Person) }
+        let(:eq)      { Condition.extract(context, 'name_eq', 'A') }
+        let(:not_eq)  { Condition.extract(context, 'name_not_eq', 'A') }
+
+        specify { expect(not_eq.negative?).to be true }
+        specify { expect(eq.negative?).to be false }
+      end
+
       context 'with an invalid predicate' do
         subject {
           Condition.extract(
