@@ -9,15 +9,13 @@
     *Josef Šimánek*
 
 *   Added optional block argument for the `sort_link` method. PR
-    [#604](https://github.com/activerecord-hackery/ransack/pull/604), commit
-    [997b856](https://github.com/activerecord-hackery/ransack/commit/997b856).
+    [#604](https://github.com/activerecord-hackery/ransack/pull/604).
 
     *Andrea Dal Ponte*
 
 *   Added `ransack_alias` to allow users to customize the names for long
     ransack field names. PR
-    [#623](https://github.com/activerecord-hackery/ransack/pull/623), commit
-    [e712ff1](https://github.com/activerecord-hackery/ransack/commit/e712ff1).
+    [#623](https://github.com/activerecord-hackery/ransack/pull/623).
 
     *Ray Zane*
 
