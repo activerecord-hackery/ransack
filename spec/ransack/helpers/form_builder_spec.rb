@@ -7,9 +7,6 @@ module Ransack
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people, :comments, :notes
-        ActiveSupport::Deprecation.silence do
-          get ':controller(/:action(/:id(.:format)))'
-        end
       end
 
       include router.url_helpers

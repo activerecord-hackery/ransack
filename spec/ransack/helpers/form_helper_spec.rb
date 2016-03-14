@@ -10,9 +10,6 @@ module Ransack
         namespace :admin do
           resources :comments
         end
-        ActiveSupport::Deprecation.silence do
-          get ':controller(/:action(/:id(.:format)))'
-        end
       end
 
       include router.url_helpers
