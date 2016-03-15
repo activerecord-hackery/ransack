@@ -33,6 +33,12 @@
 
     *Josh Hunter*, *Jon Atack*
 
+*   Add test for ActionController:Parameter object params in sort_link to ensure
+    Ransack is handling the Rails 5 changes correctly. Follow-up to
+    [#644](https://github.com/activerecord-hackery/ransack/pull/644).
+
+    *Ryan Wood*
+
 *   Add failing tests to facilitate work on issue
     [#566](https://github.com/activerecord-hackery/ransack/issues/566)
     of passing boolean values to search scopes. PR
