@@ -20,7 +20,9 @@ module Ransack
 
           context 'with scopes' do
             before do
-              Person.stub :ransackable_scopes => [:active, :over_age]
+              allow(Person)
+              .to receive(:ransackable_scopes)
+              .and_return([:active, :over_age])
             end
 
             it "applies true scopes" do
