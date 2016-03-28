@@ -67,6 +67,12 @@ matrix:
     - env: RAILS=master DB=mongoid5
     - env: RAILS=master DB=mongoid4
 
+    - env: RAILS=4-2-stable DB=mongoid5
+    - env: RAILS=4-2-stable DB=mongoid4
+
+    - env: RAILS=4-1-stable DB=mongoid5
+    - env: RAILS=4-1-stable DB=mongoid4
+
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'
   - mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";'
