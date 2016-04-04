@@ -1,8 +1,7 @@
 require 'active_support/core_ext'
-
 require 'ransack/configuration'
-
 require 'ransack/adapters'
+
 Ransack::Adapters.require_constants
 
 module Ransack
@@ -30,7 +29,6 @@ require 'ransack/search'
 require 'ransack/ransacker'
 require 'ransack/helpers'
 require 'action_controller'
-
 require 'ransack/translate'
 
 Ransack::Adapters.require_adapter

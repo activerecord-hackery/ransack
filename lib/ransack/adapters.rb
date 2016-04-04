@@ -7,6 +7,7 @@ module Ransack
         :mongoid => defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
       }
     end
+
     def self.require_constants
       require 'ransack/adapters/mongoid/ransack/constants' if current_adapters[:mongoid]
       require 'ransack/adapters/active_record/ransack/constants' if current_adapters[:active_record]
