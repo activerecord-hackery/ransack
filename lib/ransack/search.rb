@@ -1,6 +1,6 @@
 require 'ransack/nodes'
 require 'ransack/context'
-Ransack::Adapters.require_search
+Ransack::Adapters.object_mapper.require_search
 require 'ransack/naming'
 
 module Ransack
