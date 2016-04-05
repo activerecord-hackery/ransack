@@ -1,63 +1,60 @@
 module Ransack
   module Adapters
 
-    # TODO: Refactor to remove conditionals
-
-    def self.current_adapters
-      @current_adapters ||= {
-        :active_record => defined?(::ActiveRecord::Base),
-        :mongoid => defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
-      }
+    def self.object_mapper
+      @object_mapper ||= instantiate_object_mapper
     end
 
-    def self.require_constants
-      if current_adapters[:mongoid]
-        require 'ransack/adapters/mongoid/ransack/constants'
+    def self.instantiate_object_mapper
+      if defined?(::ActiveRecord::Base)
+        ActiveRecordAdapter.new
+      elsif defined?(::Mongoid)
+        MongoidAdapter.new
       end
+    end
 
-      if current_adapters[:active_record]
+    class ActiveRecordAdapter
+      def require_constants
         require 'ransack/adapters/active_record/ransack/constants'
       end
-    end
 
-    def self.require_adapter
-      if current_adapters[:active_record]
+      def require_adapter
         require 'ransack/adapters/active_record/ransack/translate'
         require 'ransack/adapters/active_record'
       end
 
-      if current_adapters[:mongoid]
-        require 'ransack/adapters/mongoid/ransack/translate'
-        require 'ransack/adapters/mongoid'
-      end
-    end
-
-    def self.require_context
-      if current_adapters[:active_record]
+      def require_context
         require 'ransack/adapters/active_record/ransack/visitor'
       end
 
-      if current_adapters[:mongoid]
-        require 'ransack/adapters/mongoid/ransack/visitor'
-      end
-    end
-
-    def self.require_nodes
-      if current_adapters[:active_record]
+      def require_nodes
         require 'ransack/adapters/active_record/ransack/nodes/condition'
       end
 
-      if current_adapters[:mongoid]
-        require 'ransack/adapters/mongoid/ransack/nodes/condition'
+      def require_search
+        require 'ransack/adapters/active_record/ransack/context'
       end
     end
 
-    def self.require_search
-      if current_adapters[:active_record]
-        require 'ransack/adapters/active_record/ransack/context'
+    class MongoidAdapter
+      def require_constants
+        require 'ransack/adapters/mongoid/ransack/constants'
       end
 
-      if current_adapters[:mongoid]
+      def require_adapter
+        require 'ransack/adapters/mongoid/ransack/translate'
+        require 'ransack/adapters/mongoid'
+      end
+
+      def require_context
+        require 'ransack/adapters/mongoid/ransack/visitor'
+      end
+
+      def require_nodes
+        require 'ransack/adapters/mongoid/ransack/nodes/condition'
+      end
+
+      def require_search
         require 'ransack/adapters/mongoid/ransack/context'
       end
     end

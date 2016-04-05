@@ -2,7 +2,7 @@ require 'active_support/core_ext'
 require 'ransack/configuration'
 require 'ransack/adapters'
 
-Ransack::Adapters.require_constants
+Ransack::Adapters.object_mapper.require_constants
 
 module Ransack
   extend Configuration
@@ -31,6 +31,6 @@ require 'ransack/helpers'
 require 'action_controller'
 require 'ransack/translate'
 
-Ransack::Adapters.require_adapter
+Ransack::Adapters.object_mapper.require_adapter
 
 ActionController::Base.helper Ransack::Helpers::FormHelper

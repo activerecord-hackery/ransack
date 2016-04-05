@@ -746,16 +746,10 @@ called on a `ransack` search returns a `Mongoid::Criteria` object:
   @people = @q.result.active.order_by(updated_at: -1).limit(10)
 ```
 
-_NOTE: Ransack currently works with either Active Record or Mongoid, but not
+NOTE: Ransack currently works with either Active Record or Mongoid, but not
 both in the same application. If both are present, Ransack will default to
-Active Record only. Here is the code containing the logic:_
-
-```ruby
-  @current_adapters ||= {
-    :active_record => defined?(::ActiveRecord::Base),
-    :mongoid => defined?(::Mongoid) && !defined?(::ActiveRecord::Base)
-  }
-```
+Active Record only. The logic is contained in
+`Ransack::Adapters#instantiate_object_mapper` should you need to override it.
 
 ## Semantic Versioning
 

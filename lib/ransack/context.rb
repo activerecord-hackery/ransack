@@ -1,5 +1,5 @@
 require 'ransack/visitor'
-Ransack::Adapters.require_context
+Ransack::Adapters.object_mapper.require_context
 
 module Ransack
   class Context
