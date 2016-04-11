@@ -89,6 +89,11 @@
 
     *Josh Hunter*, *Jon Atack*
 
+*   Fix rspec-mocks `stub` deprecation warnings when running the tests. Commit
+    [600892e](https://github.com/activerecord-hackery/ransack/commit/600892e).
+
+    *Jon Atack*
+
 *   Revert
     [f858dd6](https://github.com/activerecord-hackery/ransack/commit/f858dd6).
     Fixes [#553](https://github.com/activerecord-hackery/ransack/issues/553)
