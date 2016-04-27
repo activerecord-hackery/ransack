@@ -44,7 +44,7 @@ module Ransack
             self.conditions << condition if condition.valid?
           end
         end
-        self.conditions.uniq!
+        remove_duplicate_conditions!
       end
       alias :c= :conditions=
 
@@ -194,6 +194,17 @@ module Ransack
         string = str.split(/\(/).first
         Predicate.detect_and_strip_from_string!(string)
         string
+      end
+
+      def remove_duplicate_conditions!
+        # If self.conditions.uniq! is called without passing a block, then
+        # conditions differing only by ransacker_args within attributes are
+        # wrongly considered equal and are removed.
+        self.conditions.uniq! do |c|
+          c.attributes.map { |a| [a.name, a.ransacker_args] }.flatten +
+          [c.predicate.name] +
+          c.values.map { |v| v.value }
+        end
       end
     end
   end
