@@ -50,6 +50,40 @@ module Ransack
         end
       end
 
+      describe '#conditions=' do
+        let(:conditions) do
+          {
+            "0"=>{
+              "a"=>{"0"=>{"name"=>"name", "ransacker_args"=>""}}, "p"=>"cont", "v"=>{"0"=>{"value"=>"John"}}
+            },
+            "1"=>{
+              "a"=>{"0"=>{"name"=>"name", "ransacker_args"=>""}}, "p"=>"cont", "v"=>{"0"=>{"value"=>"John"}}
+            }
+          }
+        end
+
+        before { subject.conditions = conditions }
+
+        it 'removes duplicates' do
+          expect(subject.conditions.count).to eq 1
+        end
+
+        context 'when conditions differ only by ransacker_args' do
+          let(:conditions) do
+            {
+              "0"=>{
+                "a"=>{"0"=>{"name"=>"with_arguments", "ransacker_args"=>[1,2]}}, "p"=>"eq", "v"=>{"0"=>{"value"=>"10"}}
+              },
+              "1"=>{
+                "a"=>{"0"=>{"name"=>"with_arguments", "ransacker_args"=>[3,4]}}, "p"=>"eq", "v"=>{"0"=>{"value"=>"10"}}
+              }
+            }
+          end
+          it "doesn't consider them duplicates" do
+            expect(subject.conditions.count).to eq 2
+          end
+        end
+      end
     end
   end
 end
