@@ -439,6 +439,24 @@ module Ransack
       end
     end
 
+    describe '#respond_to?' do
+      before do
+        @s = Search.new(Person)
+      end
+
+      it 'won\'t respond to invalid attributes' do
+        expect(@s.respond_to?(:blah)).to be false
+      end
+
+      it 'will respond to valid attributes' do
+        expect(@s.respond_to?(:name_eq)).to be true
+      end
+
+      it 'will respond to a search\'s own methods' do
+        expect(@s.respond_to?(:result)).to be true
+      end
+    end
+
     describe '#method_missing' do
       before do
         @s = Search.new(Person)

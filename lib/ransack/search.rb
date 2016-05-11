@@ -91,6 +91,10 @@ module Ransack
       Nodes::Sort.new(@context).build(opts)
     end
 
+    def respond_to?(method_id)
+      super || base.respond_to?(method_id)
+    end
+
     def method_missing(method_id, *args)
       method_name = method_id.to_s
       getter_name = method_name.sub(/=$/, ''.freeze)
