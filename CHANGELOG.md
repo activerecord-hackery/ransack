@@ -46,6 +46,11 @@
 
     *Marcel Eeken*
 
+*   Add Danish i18n locale file (`da.yml`). PR
+    [#663](https://github.com/activerecord-hackery/ransack/pull/663).
+
+    *Kasper Johansen*
+
 *   Add Brazilian Portuguese i18n locale file (`pt-BR.yml`). PR
     [#581](https://github.com/activerecord-hackery/ransack/pull/581).
 
@@ -62,6 +67,16 @@
     *Masanobu Mizutani*
 
 ### Fixed
+
+*   Respect negative conditions for collection associations and fix Mongoid
+    compat. PR [#645](https://github.com/activerecord-hackery/ransack/pull/645).
+
+    *Andrew Vit*
+
+*   Ensure conditions differing only by ransacker_args aren't filtered out.
+    PR [#665](https://github.com/activerecord-hackery/ransack/pull/665).
+
+    *Andrew Porterfield*
 
 *   Fix using aliased attributes in association searches, and add a failing
     spec. PR [#602](https://github.com/activerecord-hackery/ransack/pull/602).
@@ -121,6 +136,10 @@
 
     *Igor Dobryn*
 
+*   Refactor `Ransack::Adapters` from conditionals to classes
+    ([94a404c](https://github.com/activerecord-hackery/ransack/commit/94a404c)).
+
+    *Jon Atack*
 
 ## Version 1.7.0 - 2015-08-20
 ### Added
