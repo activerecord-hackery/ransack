@@ -50,7 +50,7 @@ module Ransack
           raise TypeError, 'First argument must be a Ransack::Search!'
         end
         args.unshift(capture(&block)) if block_given?
-        s = SortLink.new(search, attribute, args, params, &block)
+        s = SortLink.new(search, attribute, args, search_params(search), &block)
         link_to(s.name, url(routing_proxy, s.url_options), s.html_options(args))
       end
 
@@ -73,6 +73,14 @@ module Ransack
         def extract_search_and_routing_proxy(search)
           return [search[1], search[0]] if search.is_a?(Array)
           [search, nil]
+        end
+
+        def search_params(search)
+          begin
+            params.permit(search.context.search_key)
+          rescue
+            params
+          end
         end
 
         def url(routing_proxy, options_for_url)
