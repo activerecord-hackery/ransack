@@ -378,6 +378,35 @@ query parameters in your URLs.
 <% end %>
 ```
 
+### Search Matchers
+
+List of all possible predicates
+
+* `*_eq` - equal
+* `*_not_eq` - not equal
+* `*_match` - matches with `LIKE`, e.g. `q[email_matches]=%@gmail.com`
+* Also: `*_does_not_match`, `*_matches_any`, `*_matches_all`, `*_does_not_match_any`, `*_does_not_match_all`
+* `*_lt` - less then
+* `*_lteq` - less then or equal
+* `*_gt` - greater than
+* `*_gteq` - greater than or equal
+* `*_present` - not null and not empty, e.g. `q[name_present]=1` (SQL: `col is not null AND col != ''`)
+* `*_bank` - is null or empty. (SQL: `col is null OR col = ''`)
+* `*_null`, `*_not_null` - is null, is not null
+* `*_in` - match any values in array, e.g. `q[name_in][]=Alice&q[name_in][]=Bob`
+* `*_not_in` - match none of values in array
+* `*_lt_any`, `*_lteq_any`, `*_gt_any`, `*_gteq_any` - Compare to list of values, at least positive. (SQL: `col > value1 OR col > value2`)
+* `*_matches_any`, `*_does_not_match_any` - same as above but with `LIKE`
+* `*_lt_all`, `*_lteq_all`, `*_gt_all`, `*_gteq_all` - Compare to list of values, all positive. (SQL: `col > value1 AND col > value2`)
+* `*_matches_all`, `*_does_not_match_all` - same as above but with `LIKE`
+* `*_not_eq_all` - none of values in a set
+* `*_start`, `*_not_start`, `*_start_any`, `*_start_all`, `*_not_start_any`, `*_not_start_all` - start with, (SQL: `col LIKE 'value%'`)
+* `*_end`, `*_not_end`, `*_end_any`, `*_end_all`, `*_not_end_any`, `*_not_end_all` - end with, (SQL: `col LIKE '%value'`)
+* `*_cont`, `*_cont_any`, `*_cont_all`, `*_not_cont`, `*_not_cont_any`, `*_not_cont_all` - contains value, using `LIKE`
+* `*_true`, `*_false` - is true and is false
+
+(See full list: https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/locale/en.yml#L15)
+
 ### Using Ransackers to add custom search functions via Arel
 
 The main premise behind Ransack is to provide access to
