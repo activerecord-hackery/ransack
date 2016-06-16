@@ -66,5 +66,5 @@ pt-BR:
       'false': "é falso"
       present: "está presente"
       blank: "está em branco"
-      'null': "é nullo"
+      'null': "é nulo"
       not_null: "não é nulo"
