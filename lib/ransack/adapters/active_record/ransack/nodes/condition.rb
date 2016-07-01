@@ -26,17 +26,23 @@ module Ransack
           arel_pred = arel_predicate_for_attribute(attribute)
           arel_values = formatted_values_for_attribute(attribute)
           predicate = attribute.attr.public_send(arel_pred, arel_values)
-          if casted_array_with_in_predicate?(predicate)
-            predicate.right[0] = format_values_for(predicate.right[0])
+
+          if in_predicate?(predicate)
+            predicate.right = predicate.right.map do |predicate|
+              casted_array?(predicate) ? format_values_for(predicate) : predicate
+            end
           end
+
           predicate
         end
 
-        def casted_array_with_in_predicate?(predicate)
+        def in_predicate?(predicate)
           return unless defined?(Arel::Nodes::Casted)
-          predicate.class == Arel::Nodes::In &&
-          predicate.right[0].respond_to?(:val) &&
-          predicate.right[0].val.is_a?(Array)
+          predicate.class == Arel::Nodes::In
+        end
+
+        def casted_array?(predicate)
+          predicate.respond_to?(:val) && predicate.val.is_a?(Array)
         end
 
         def format_values_for(predicate)

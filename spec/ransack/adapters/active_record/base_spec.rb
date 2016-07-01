@@ -314,8 +314,8 @@ module Ransack
 
           context 'searching on an `in` predicate with a ransacker' do
             it 'should function correctly when passing an array of ids' do
-              s = Person.ransack(array_users_in: true)
-              expect(s.result.count).to be > 0
+              s = Person.ransack(array_users_in: [1, 2])
+              expect(s.result.count).to be 2
             end
 
             it 'should function correctly when passing an array of strings' do
