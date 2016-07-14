@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '4-2-stable'
+rails = ENV['RAILS'] || '5-0-stable'
 
 if rails == 'master'
   gem 'rack', github: 'rack/rack'
