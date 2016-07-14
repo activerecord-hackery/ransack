@@ -501,8 +501,6 @@ In an `Article` model, add the following `ransackable_attributes` class method
 
 ```ruby
 class Article < ActiveRecord::Base
-
-
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       # whitelist all attributes for admin
@@ -512,9 +510,8 @@ class Article < ActiveRecord::Base
       super & %w(title body)
     end
   end
-  
+
   private_class_method :ransackable_attributes
-  
 end
 ```
 
@@ -522,7 +519,6 @@ Here is example code for the `articles_controller`:
 
 ```ruby
 class ArticlesController < ApplicationController
-
   def index
     @q = Article.ransack(params[:q], auth_object: set_ransack_auth_object)
     @articles = @q.result
@@ -588,9 +584,8 @@ class Employee < ActiveRecord::Base
       %i(activated hired_since)
     end
   end
-  
+
   private_class_method :ransackable_scopes
-  
 end
 
 Employee.ransack({ activated: true, hired_since: '2013-01-01' })
