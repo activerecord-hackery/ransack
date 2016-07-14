@@ -49,7 +49,7 @@ In your Gemfile, for the last officially released gem:
 gem 'ransack'
 ```
 
-Or, if you would like to use the latest updates, use the `master` branch:
+For Rails 5, or if you would like to use the latest updates, use the `master` branch:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
