@@ -502,7 +502,6 @@ In an `Article` model, add the following `ransackable_attributes` class method
 ```ruby
 class Article < ActiveRecord::Base
 
-  private
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
@@ -513,6 +512,9 @@ class Article < ActiveRecord::Base
       super & %w(title body)
     end
   end
+  
+  private_class_method :ransackable_attributes
+  
 end
 ```
 
@@ -577,8 +579,6 @@ class Employee < ActiveRecord::Base
     where('start_date >= ?', date)
   end
 
-  private
-
   def self.ransackable_scopes(auth_object = nil)
     if auth_object.try(:admin?)
       # allow admin users access to all three methods
@@ -588,6 +588,9 @@ class Employee < ActiveRecord::Base
       %i(activated hired_since)
     end
   end
+  
+  private_class_method :ransackable_scopes
+  
 end
 
 Employee.ransack({ activated: true, hired_since: '2013-01-01' })
