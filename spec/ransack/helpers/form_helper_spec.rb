@@ -329,18 +329,14 @@ module Ransack
           it { should match /exist\=existing/ }
         end
 
-        context 'using real ActionController Parameter object',
-          if: ::ActiveRecord::VERSION::MAJOR > 4 do
+        context 'using a real ActionController::Parameter object',
+          if: ::ActiveRecord::VERSION::MAJOR > 3 do
 
-          describe '#sort_link should include search params' do
-
+          describe '#sort_link should include search params with symbol q:' do
             subject { @controller.view_context.sort_link(Person.search, :name) }
-
-            let(:params) {
-              ActionController::Parameters
-              .new({ 'q' => { name_eq: 'TEST' }, controller: 'people' })
-            }
-
+            let(:params) { ActionController::Parameters.new(
+              { :q => { name_eq: 'TEST' }, controller: 'people' }
+              ) }
             before { @controller.instance_variable_set(:@params, params) }
 
             it {
@@ -351,6 +347,21 @@ module Ransack
             }
           end
 
+          describe "#sort_link should include search params with string 'q'" do
+            subject { @controller.view_context.sort_link(Person.search, :name) }
+            let(:params) {
+              ActionController::Parameters.new(
+                { 'q' => { name_eq: 'Test2' }, controller: 'people' }
+                ) }
+            before { @controller.instance_variable_set(:@params, params) }
+
+            it {
+              should match(
+                /people\?q(%5B|\[)name_eq(%5D|\])=Test2&amp;q(%5B|\[)s(%5D|\])
+                =name\+asc/x,
+              )
+            }
+          end
         end
       end
 
