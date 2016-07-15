@@ -29,7 +29,7 @@ instead.
 If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (1.7.0).](https://github.com/activerecord-hackery/ransack/tree/v1.7.0)
+[View documentation for the last release (1.8.0).](https://github.com/activerecord-hackery/ransack/tree/v1.8.0)
 
 ## Getting started
 
@@ -49,7 +49,8 @@ In your Gemfile, for the last officially released gem:
 gem 'ransack'
 ```
 
-For Rails 5, or if you would like to use the latest updates, use the `master` branch:
+If you would like to use the latest updates (recommended), use the `master`
+branch:
 
 ```ruby
 gem 'ransack', github: 'activerecord-hackery/ransack'
