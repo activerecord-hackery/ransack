@@ -332,7 +332,7 @@ module Ransack
         context 'using a real ActionController::Parameter object',
           if: ::ActiveRecord::VERSION::MAJOR > 3 do
 
-          describe '#sort_link should include search params with symbol q:' do
+          describe 'with symbol q:, #sort_link should include search params' do
             subject { @controller.view_context.sort_link(Person.search, :name) }
             let(:params) { ActionController::Parameters.new(
               { :q => { name_eq: 'TEST' }, controller: 'people' }
@@ -347,7 +347,7 @@ module Ransack
             }
           end
 
-          describe "#sort_link should include search params with string 'q'" do
+          describe "with string 'q', #sort_link should include search params" do
             subject { @controller.view_context.sort_link(Person.search, :name) }
             let(:params) {
               ActionController::Parameters.new(
