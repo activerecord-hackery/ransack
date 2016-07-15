@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 1.8.0 - 2016-07-14
 ### Added
 
 *   Support Mongoid 5. PR [#636](https://github.com/activerecord-hackery/ransack/pull/636), commit
@@ -46,6 +46,11 @@
 
     *Marcel Eeken*
 
+*   Add Taiwanese Hokkien/Mandarin i18n locale file (`zh-TW.yml`). PR
+    [#674](https://github.com/activerecord-hackery/ransack/pull/674).
+
+    *Sibevin Wang*
+
 *   Add Danish i18n locale file (`da.yml`). PR
     [#663](https://github.com/activerecord-hackery/ransack/pull/663).
 
@@ -67,6 +72,12 @@
     *Masanobu Mizutani*
 
 ### Fixed
+
+*   In `FormHelper::SortLink#parameters_hash`, convert `params#to_unsafe_h`
+    only if Rails 5, and add tests. Commit
+    [14e66ca](https://github.com/activerecord-hackery/ransack/commit/14e66ca).
+
+    *Jon Atack*
 
 *   Respect negative conditions for collection associations and fix Mongoid
     compat. PR [#645](https://github.com/activerecord-hackery/ransack/pull/645).
@@ -124,7 +135,7 @@
 ### Changed
 
 *   Memory/speed perf improvement: Freeze strings in array global constants and
-    move from using global string constants to frozen strings
+    partially move from using global string constants to frozen strings
     ([381a83c](https://github.com/activerecord-hackery/ransack/commit/381a83c)
     and
     [ce114ec](https://github.com/activerecord-hackery/ransack/commit/ce114ec)).
