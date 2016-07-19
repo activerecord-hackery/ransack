@@ -176,8 +176,8 @@ module Ransack
 
       def sort_array
         [
-          [Constants::ASC,  object.translate(Constants::ASC)],
-          [Constants::DESC, object.translate(Constants::DESC)]
+          ['asc'.freeze,  object.translate('asc'.freeze)],
+          ['desc'.freeze, object.translate('desc'.freeze)]
         ]
       end
 
