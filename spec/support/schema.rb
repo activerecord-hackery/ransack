@@ -66,13 +66,23 @@ class Person < ActiveRecord::Base
     parent.table[:name]
   end
 
-  ransacker :array_users,
+  ransacker :array_people_ids,
+    formatter: proc { |v| Person.first(2).map(&:id) } do |parent|
+    parent.table[:id]
+  end
+
+  ransacker :array_where_people_ids,
     formatter: proc { |v| Person.where(id: v).map(&:id) } do |parent|
     parent.table[:id]
   end
 
-  ransacker :array_names,
+  ransacker :array_people_names,
     formatter: proc { |v| Person.first(2).map { |p| p.id.to_s } } do |parent|
+    parent.table[:name]
+  end
+
+  ransacker :array_where_people_names,
+    formatter: proc { |v| Person.where(id: v).map { |p| p.id.to_s } } do |parent|
     parent.table[:name]
   end
 

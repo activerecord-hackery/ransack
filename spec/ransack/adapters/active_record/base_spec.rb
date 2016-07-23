@@ -314,14 +314,26 @@ module Ransack
 
           context 'searching on an `in` predicate with a ransacker' do
             it 'should function correctly when passing an array of ids' do
-              s = Person.ransack(array_users_in: [1, 2])
-              expect(s.result.count).to be 2
+              s = Person.ransack(array_people_ids_in: true)
+              expect(s.result.count).to be > 0
+
+              s = Person.ransack(array_where_people_ids_in: [1, '2', 3])
+              expect(s.result.count).to be 3
+              expect(s.result.map(&:id)).to eq [3, 2, 1]
             end
 
             it 'should function correctly when passing an array of strings' do
-              Person.create!(name: Person.first.id.to_s)
-              s = Person.ransack(array_names_in: true)
+              a, b = Person.first.id.to_s, Person.second.id.to_s
+
+              Person.create!(name: a)
+              s = Person.ransack(array_people_names_in: true)
               expect(s.result.count).to be > 0
+              s = Person.ransack(array_where_people_names_in: a)
+              expect(s.result.count).to be 1
+
+              Person.create!(name: b)
+              s = Person.ransack(array_where_people_names_in: [a, b])
+              expect(s.result.count).to be 2
             end
 
             it 'should function correctly with an Arel SqlLiteral' do
