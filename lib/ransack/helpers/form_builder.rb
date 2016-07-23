@@ -176,9 +176,9 @@ module Ransack
 
       def sort_array
         [
-          ['asc'.freeze,  object.translate('asc'.freeze)],
-          ['desc'.freeze, object.translate('desc'.freeze)]
-        ]
+          ['asc'.freeze,  object.translate('asc'.freeze)].freeze,
+          ['desc'.freeze, object.translate('desc'.freeze)].freeze
+        ].freeze
       end
 
       def combinator_choices
