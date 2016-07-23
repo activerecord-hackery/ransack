@@ -67,7 +67,7 @@ class Person < ActiveRecord::Base
   end
 
   ransacker :array_users,
-    formatter: proc { |v| Person.first(2).map(&:id) } do |parent|
+    formatter: proc { |v| Person.where(id: v).map(&:id) } do |parent|
     parent.table[:id]
   end
 
