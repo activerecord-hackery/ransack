@@ -97,6 +97,14 @@ module Ransack
           @default_order  = @options.delete :default_order
         end
 
+        def up_arrow
+          '&#9660;'.freeze
+        end
+
+        def down_arrow
+          '&#9650;'.freeze
+        end
+
         def name
           [ERB::Util.h(@label_text), order_indicator]
           .compact
@@ -190,19 +198,15 @@ module Ransack
 
           def order_indicator
             return if @hide_indicator || no_sort_direction_specified?
-            direction_arrow
+            if @current_dir == 'desc'.freeze
+              up_arrow
+            else
+              down_arrow
+            end
           end
 
           def no_sort_direction_specified?(dir = @current_dir)
             !['asc'.freeze, 'desc'.freeze].freeze.include?(dir)
-          end
-
-          def direction_arrow
-            if @current_dir == 'desc'.freeze
-              '&#9660;'.freeze
-            else
-              '&#9650;'.freeze
-            end
           end
 
           def direction_text(dir)
