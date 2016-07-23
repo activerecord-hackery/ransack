@@ -198,8 +198,11 @@ module Ransack
           end
 
           def direction_arrow
-            return Constants::DESC_ARROW if @current_dir == 'desc'.freeze
-            Constants::ASC_ARROW
+            if @current_dir == 'desc'.freeze
+              '&#9660;'.freeze
+            else
+              '&#9650;'.freeze
+            end
           end
 
           def direction_text(dir)

@@ -1,8 +1,5 @@
 module Ransack
   module Constants
-    ASC_ARROW           = '&#9650;'.freeze
-    DESC_ARROW          = '&#9660;'.freeze
-
     OR                  = 'or'.freeze
     AND                 = 'and'.freeze
 
