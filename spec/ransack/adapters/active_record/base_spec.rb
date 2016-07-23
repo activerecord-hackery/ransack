@@ -323,7 +323,7 @@ module Ransack
             end
 
             it 'should function correctly when passing an array of strings' do
-              a, b = Person.first.id.to_s, Person.second.id.to_s
+              a, b = Person.select(:id).order(:id).limit(2).map { |a| a.id.to_s }
 
               Person.create!(name: a)
               s = Person.ransack(array_people_names_in: true)
