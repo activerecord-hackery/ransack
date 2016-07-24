@@ -26,11 +26,12 @@ end
 
 desc "Open an irb session with Ransack and the sample data used in specs"
 task :console do
-  require 'irb'
-  require 'irb/completion'
-  require 'console'
+  require 'rspec'
+  require File.expand_path('../spec/spec_helper.rb', __FILE__)
+  require File.expand_path('../spec/console.rb', __FILE__)
+  require File.expand_path('../spec/support/schema.rb', __FILE__)
   ARGV.clear
-  IRB.start
+  Pry.start
 end
 
 desc "Open an irb session with Ransack, Mongoid and the sample data used in specs"
