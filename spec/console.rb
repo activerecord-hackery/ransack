@@ -3,6 +3,7 @@ require 'machinist/active_record'
 require 'sham'
 require 'faker'
 require 'ransack'
+require 'pry'
 
 Dir[File.expand_path('../../spec/{helpers,support,blueprints}/*.rb', __FILE__)]
 .each do |f|
@@ -16,6 +17,10 @@ Sham.define do
   salary   { |index| 30000 + (index * 1000) }
   tag_name { Faker::Lorem.words(3).join(' ') }
   note     { Faker::Lorem.words(7).join(' ') }
+  only_admin  { Faker::Lorem.words(3).join(' ') }
+  only_search { Faker::Lorem.words(3).join(' ') }
+  only_sort   { Faker::Lorem.words(3).join(' ') }
+  notable_id  { |id| id }
 end
 
 Schema.create
