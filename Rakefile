@@ -26,6 +26,7 @@ end
 
 desc "Open an irb session with Ransack and the sample data used in specs"
 task :console do
+  require 'pry'
   require File.expand_path('../spec/console.rb', __FILE__)
   ARGV.clear
   Pry.start
