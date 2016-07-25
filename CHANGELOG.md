@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased
+### Fixed
+
+*   Fixed returned value of `Ransack::Nodes::Condition#format_predicate`. PR
+    [#692](https://github.com/activerecord-hackery/ransack/pull/692).
+
+    *Masahiro Saito*
+
 ## Version 1.8.0 - 2016-07-14
 ### Added
 
