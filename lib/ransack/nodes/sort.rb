@@ -38,7 +38,7 @@ module Ransack
       def dir=(dir)
         dir = dir.downcase if dir
         @dir =
-          if ['asc'.freeze, 'desc'.freeze].freeze.include?(dir)
+          if dir == 'asc'.freeze || dir == 'desc'.freeze
             dir
           else
             'asc'.freeze

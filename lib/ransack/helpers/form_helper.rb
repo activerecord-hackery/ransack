@@ -206,7 +206,7 @@ module Ransack
           end
 
           def no_sort_direction_specified?(dir = @current_dir)
-            !['asc'.freeze, 'desc'.freeze].freeze.include?(dir)
+            dir != 'asc'.freeze && dir != 'desc'.freeze
           end
 
           def direction_text(dir)
