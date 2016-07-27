@@ -3,10 +3,36 @@
 ## Unreleased
 ### Fixed
 
-*   Fixed returned value of `Ransack::Nodes::Condition#format_predicate`. PR
+*   Fix `rake console` to run a command-line console with ransack + seed data.
+    Commits
+    [2cc781e](https://github.com/activerecord-hackery/ransack/commit/2cc781e),
+    [f2e85ad](https://github.com/activerecord-hackery/ransack/commit/f2e85ad),
+    [6a059ba](https://github.com/activerecord-hackery/ransack/commit/6a059ba).
+
+    *Jon Atack*
+
+*   Fix returned value of `Ransack::Nodes::Condition#format_predicate`. PR
     [#692](https://github.com/activerecord-hackery/ransack/pull/692).
 
     *Masahiro Saito*
+
+*   Better test coverage on passing arrays to ransackers. Commit
+    [98df2c5](https://github.com/activerecord-hackery/ransack/commit/98df2c5).
+
+    *Jon Atack*
+
+*   Fix missing Ransack::Constants::ASC constant. Commit
+    [aece23c](https://github.com/activerecord-hackery/ransack/commit/aece23c).
+
+    *Jon Atack*
+
+### Changed
+
+*   Replace arrow constants with frozen strings in public methods. Commits
+    [c0dff33](https://github.com/activerecord-hackery/ransack/commit/c0dff33),
+    [e489ca7](https://github.com/activerecord-hackery/ransack/commit/e489ca7).
+
+    *Jon Atack*
 
 ## Version 1.8.0 - 2016-07-14
 ### Added
@@ -16,18 +42,18 @@
 
     *Josef Šimánek*
 
-*   Added optional block argument for the `sort_link` method. PR
+*   Add optional block argument for the `sort_link` method. PR
     [#604](https://github.com/activerecord-hackery/ransack/pull/604).
 
     *Andrea Dal Ponte*
 
-*   Added `ransack_alias` to allow users to customize the names for long
+*   Add `ransack_alias` to allow users to customize the names for long
     ransack field names. PR
     [#623](https://github.com/activerecord-hackery/ransack/pull/623).
 
     *Ray Zane*
 
-*   Added support for searching on attributes that have been added to
+*   Add support for searching on attributes that have been added to
     Active Record models with `alias_attribute` (Rails >= 4 only). PR
     [#592](https://github.com/activerecord-hackery/ransack/pull/592), commit
     [549342a](https://github.com/activerecord-hackery/ransack/commit/549342a).
