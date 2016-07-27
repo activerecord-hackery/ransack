@@ -46,12 +46,20 @@ module Ransack
       #
       def sort_link(search_object, attribute, *args, &block)
         search, routing_proxy = extract_search_and_routing_proxy(search_object)
-        unless Search === search
-          raise TypeError, 'First argument must be a Ransack::Search!'
-        end
+        raise TypeError, 'First argument must be a Ransack::Search!' unless Search === search
         args.unshift(capture(&block)) if block_given?
-        s = SortLink.new(search, attribute, args, params, &block)
+        s = SortLink.new(search, attribute, args, search_params(search), &block)
         link_to(s.name, url(routing_proxy, s.url_options), s.html_options(args))
+      end
+
+      # +sort_url+
+      # <%= sort_url(@q, :created_at, default_order: :desc) %>
+      #
+      def sort_url(search_object, attribute, *args)
+        search, routing_proxy = extract_search_and_routing_proxy(search_object)
+        raise TypeError, 'First argument must be a Ransack::Search!' unless Search === search
+        s = SortLink.new(search, attribute, args, search_params(search))
+        url(routing_proxy, s.url_options)
       end
 
       private
@@ -73,6 +81,14 @@ module Ransack
         def extract_search_and_routing_proxy(search)
           return [search[1], search[0]] if search.is_a?(Array)
           [search, nil]
+        end
+
+        def search_params(search)
+          begin
+            params.permit.tap {|whitelisted| whitelisted[search.context.search_key] = params[search.context.search_key] }
+          rescue
+            params
+          end
         end
 
         def url(routing_proxy, options_for_url)

@@ -221,6 +221,23 @@ Ransack.configure do |c|
 end
 ```
 
+####`sort_url` is return only url of `sort_link`
+
+It can be used like `sort_link`.
+
+```erb
+<%= sort_url(@q, :name, default_order: :desc) %>
+```
+
+```erb
+<%= sort_url(@q, :last_name, [:last_name, 'first_name asc']) %>
+```
+
+```erb
+<%= sort_url(@q, :last_name, %i(last_name first_name),
+  default_order: { last_name: 'asc', first_name: 'desc' }) %>
+```
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to
