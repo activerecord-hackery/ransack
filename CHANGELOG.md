@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 1.8.1 - 2016-07-27
 ### Fixed
 
 *   Fix `rake console` to run a command-line console with ransack + seed data.
