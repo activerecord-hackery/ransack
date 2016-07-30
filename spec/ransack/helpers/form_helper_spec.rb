@@ -45,31 +45,28 @@ module Ransack
 
       describe '#sort_url with default search_key' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search(sorts: ['name desc'])],
-                          :name,
-                          controller: 'people'
-                      )
+          .sort_url(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people'
+          )
         }
         it {
           should match(
-                     if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-                       /people\?q%5Bs%5D=name\+asc/
-                     else
-                       /people\?q(%5B|\[)s(%5D|\])=name\+asc/
-                     end
-                 )
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D=name\+asc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])=name\+asc/
+            end
+          )
         }
       end
 
       describe '#sort_link with default search_key defined as symbol' do
         subject { @controller.view_context
           .sort_link(
-            Person.search(
-              { sorts: ['name desc'] }, search_key: :people_search
-              ),
-            :name,
-            controller: 'people'
+            Person.search({ sorts: ['name desc'] }, search_key: :people_search),
+            :name, controller: 'people'
           )
         }
         it {
@@ -85,26 +82,23 @@ module Ransack
 
       describe '#sort_url with default search_key defined as symbol' do
         subject { @controller.view_context
-                      .sort_url(
-                          Person.search(
-                              { sorts: ['name desc'] }, search_key: :people_search
-                          ),
-                          :name,
-                          controller: 'people'
-                      )
+          .sort_url(
+            Person.search({ sorts: ['name desc'] }, search_key: :people_search),
+            :name, controller: 'people'
+          )
         }
         it {
           should match(
-                     if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-                       /people\?people_search%5Bs%5D=name\+asc/
-                     else
-                       /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/
-                     end
-                 )
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?people_search%5Bs%5D=name\+asc/
+            else
+              /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/
+            end
+          )
         }
       end
 
-      describe '#sort_link desc through association table defined as a symbol' do
+      describe '#sort_link desc through association table defined as symbol' do
         subject { @controller.view_context
           .sort_link(
             Person.search({ sorts: 'comments_body asc' }),
@@ -125,22 +119,22 @@ module Ransack
         it { should match /Body&nbsp;&#9650;/ }
       end
 
-      describe '#sort_url desc through association table defined as a symbol' do
+      describe '#sort_url desc through association table defined as symbol' do
         subject { @controller.view_context
-                      .sort_url(
-                          Person.search({ sorts: 'comments_body asc' }),
-                          :comments_body,
-                          controller: 'people'
-                      )
+          .sort_url(
+            Person.search({ sorts: 'comments_body asc' }),
+            :comments_body,
+            controller: 'people'
+          )
         }
         it {
           should match(
-                     if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-                       /people\?q%5Bs%5D=comments.body\+desc/
-                     else
-                       /people\?q(%5B|\[)s(%5D|\])=comments.body\+desc/
-                     end
-                 )
+            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
+              /people\?q%5Bs%5D=comments.body\+desc/
+            else
+              /people\?q(%5B|\[)s(%5D|\])=comments.body\+desc/
+            end
+          )
         }
       end
 
@@ -167,11 +161,11 @@ module Ransack
 
       describe '#sort_url through association table defined as a string' do
         subject { @controller.view_context
-                      .sort_url(
-                          Person.search({ sorts: 'comments.body desc' }),
-                          'comments.body',
-                          controller: 'people'
-                      )
+          .sort_url(
+            Person.search({ sorts: 'comments.body desc' }),
+            'comments.body',
+            controller: 'people'
+          )
         }
         it {
           should match(
@@ -189,11 +183,10 @@ module Ransack
         specify {
           expect { @controller.view_context
             .sort_link(
-              Person.search(
-                @controller.view_context.params[:q]),
-                :name,
-                controller: 'people'
-              )
+              Person.search(@controller.view_context.params[:q]),
+              :name,
+              controller: 'people'
+            )
           }.not_to raise_error
         }
       end
@@ -202,12 +195,11 @@ module Ransack
         before { @controller.view_context.params[:q] = '' }
         specify {
           expect { @controller.view_context
-                       .sort_url(
-                           Person.search(
-                               @controller.view_context.params[:q]),
-                           :name,
-                           controller: 'people'
-                       )
+            .sort_url(
+              Person.search(@controller.view_context.params[:q]),
+              :name,
+              controller: 'people'
+            )
           }.not_to raise_error
         }
       end
@@ -247,12 +239,12 @@ module Ransack
 
       describe '#sort_url with default_order defined with a string key' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search()],
-                          :name,
-                          controller: 'people',
-                          default_order: 'desc'
-                      )
+          .sort_url(
+            [:main_app, Person.search()],
+            :name,
+            controller: 'people',
+            default_order: 'desc'
+          )
         }
         it { should_not match /default_order/ }
       end
@@ -266,8 +258,7 @@ module Ransack
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link desc/ }
@@ -277,14 +268,13 @@ module Ransack
       describe '#sort_url with multiple search_keys defined as an array' do
         subject { @controller.view_context
           .sort_url(
-              [:main_app, Person.search(sorts: ['name desc', 'email asc'])],
-              :name, [:name, 'email DESC'],
-              controller: 'people'
+            [:main_app, Person.search(sorts: ['name desc', 'email asc'])],
+            :name, [:name, 'email DESC'],
+            controller: 'people'
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match( /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -298,8 +288,7 @@ module Ransack
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(         /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link desc/ }
@@ -308,16 +297,15 @@ module Ransack
 
       describe '#sort_url with multiple search_keys does not break on nil values & ignores them' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search(sorts: ['name desc', nil, 'email', nil])],
-                          :name, [nil, :name, nil, 'email DESC', nil],
-                          controller: 'people'
-                      )
+          .sort_url(
+            [:main_app, Person.search(sorts: ['name desc', nil, 'email', nil])],
+            :name, [nil, :name, nil, 'email DESC', nil],
+            controller: 'people'
+          )
         }
         it {
-          should match(
-                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-                 )
+          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          )
         }
       end
 
@@ -342,8 +330,7 @@ module Ransack
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(          /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link desc/ }
@@ -352,16 +339,15 @@ module Ransack
 
       describe '#sort_url with multiple search_keys should flip multiple fields specified without a direction' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search(sorts: ['name desc', 'email asc'])],
-                          :name, [:name, :email],
-                          controller: 'people'
-                      )
+          .sort_url(
+            [:main_app, Person.search(sorts: ['name desc', 'email asc'])],
+            :name, [:name, :email],
+            controller: 'people'
+          )
         }
         it {
-          should match(
-                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-                 )
+          should match(                /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          )
         }
       end
 
@@ -375,8 +361,7 @@ module Ransack
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link/ }
@@ -385,17 +370,16 @@ module Ransack
 
       describe '#sort_url with multiple search_keys and default_order specified as a string' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search()],
-                          :name, [:name, :email],
-                          controller: 'people',
-                          default_order: 'desc'
-                      )
+          .sort_url(
+            [:main_app, Person.search()],
+            :name, [:name, :email],
+            controller: 'people',
+            default_order: 'desc'
+          )
         }
         it {
-          should match(
-                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-                 )
+          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          )
         }
       end
 
@@ -409,8 +393,7 @@ module Ransack
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link/ }
@@ -419,17 +402,16 @@ module Ransack
 
       describe '#sort_url with multiple search_keys and default_order specified as a symbol' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search()],
-                          :name, [:name, :email],
-                          controller: 'people',
-                          default_order: :desc
-                      )
+          .sort_url(
+            [:main_app, Person.search()],
+            :name, [:name, :email],
+            controller: 'people',
+            default_order: :desc
+          )
         }
         it {
-          should match(
-                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
-                 )
+          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          )
         }
       end
 
@@ -443,8 +425,7 @@ module Ransack
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
+          should match(      /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
           )
         }
         it { should match /sort_link/ }
@@ -453,17 +434,16 @@ module Ransack
 
       describe '#sort_url with multiple search_keys should allow multiple default_orders to be specified' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search()],
-                          :name, [:name, :email],
-                          controller: 'people',
-                          default_order: { name: 'desc', email: 'asc' }
-                      )
+          .sort_url(
+            [:main_app, Person.search()],
+            :name, [:name, :email],
+            controller: 'people',
+            default_order: { name: 'desc', email: 'asc' }
+          )
         }
         it {
-          should match(
-                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
-                 )
+          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
+          )
         }
       end
 
@@ -477,8 +457,7 @@ module Ransack
           )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(  /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link/ }
@@ -487,16 +466,15 @@ module Ransack
 
       describe '#sort_url with multiple search_keys with multiple default_orders should not override a specified order' do
         subject { @controller.view_context
-                      .sort_url(
-                          [:main_app, Person.search()],
-                          :name, [:name, 'email desc'],
-                          controller: 'people',
-                          default_order: { name: 'desc', email: 'asc' }
-                      )
+          .sort_url(
+            [:main_app, Person.search()],
+            :name, [:name, 'email desc'],
+            controller: 'people',
+            default_order: { name: 'desc', email: 'asc' }
+          )
         }
         it {
-          should match(
-            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(        /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -524,11 +502,11 @@ module Ransack
 
       describe "#sort_url on polymorphic association should preserve association model name case" do
         subject { @controller.view_context
-                      .sort_link(
-                          [:main_app, Note.search()],
-                          :notable_of_Person_type_name, "Notable",
-                          controller: 'notes'
-                      )
+          .sort_link(
+            [:main_app, Note.search()],
+            :notable_of_Person_type_name, "Notable",
+            controller: 'notes'
+          )
         }
         it {
           should match(
@@ -567,12 +545,12 @@ module Ransack
 
           subject {
             @controller.view_context.sort_url(
-                Person.search(
-                    { sorts: ['name desc'] },
-                    search_key: 'people_search'
-                ),
-                :name,
-                controller: 'people'
+              Person.search(
+                { sorts: ['name desc'] },
+                search_key: 'people_search'
+              ),
+              :name,
+              controller: 'people'
             )
           }
 
@@ -600,15 +578,15 @@ module Ransack
           describe 'with symbol q:, #sort_url should include search params' do
             subject { @controller.view_context.sort_url(Person.search, :name) }
             let(:params) { ActionController::Parameters.new(
-                { :q => { name_eq: 'TEST' }, controller: 'people' }
-            ) }
+              { :q => { name_eq: 'TEST' }, controller: 'people' }
+              ) }
             before { @controller.instance_variable_set(:@params, params) }
 
             it {
               should match(
-                         /people\?q(%5B|\[)name_eq(%5D|\])=TEST&q(%5B|\[)s(%5D|\])
+                /people\?q(%5B|\[)name_eq(%5D|\])=TEST&q(%5B|\[)s(%5D|\])
                 =name\+asc/x,
-                     )
+              )
             }
           end
 
@@ -632,15 +610,15 @@ module Ransack
             subject { @controller.view_context.sort_url(Person.search, :name) }
             let(:params) {
               ActionController::Parameters.new(
-                  { 'q' => { name_eq: 'Test2' }, controller: 'people' }
-              ) }
+                { 'q' => { name_eq: 'Test2' }, controller: 'people' }
+                ) }
             before { @controller.instance_variable_set(:@params, params) }
 
             it {
               should match(
-                         /people\?q(%5B|\[)name_eq(%5D|\])=Test2&q(%5B|\[)s(%5D|\])
+                /people\?q(%5B|\[)name_eq(%5D|\])=Test2&q(%5B|\[)s(%5D|\])
                 =name\+asc/x,
-                     )
+              )
             }
           end
         end
