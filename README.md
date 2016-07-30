@@ -221,9 +221,9 @@ Ransack.configure do |c|
 end
 ```
 
-####`sort_url` is return only url of `sort_link`
+####Ransack's `sort_url` helper is like a `sort_link` but returns only the url
 
-It can be used like `sort_link`.
+`sort_url` has the same API as `sort_link`:
 
 ```erb
 <%= sort_url(@q, :name, default_order: :desc) %>
