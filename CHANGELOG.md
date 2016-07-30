@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased
+### Added
+
+*   Add `sort_url` view helper that returns only the url of a `sort_link`. PR
+    [#706](https://github.com/activerecord-hackery/ransack/pull/706).
+
+    *amatotsuji*
+
 ## Version 1.8.1 - 2016-07-27
 ### Fixed
 
