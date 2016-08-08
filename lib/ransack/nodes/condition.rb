@@ -127,10 +127,29 @@ module Ransack
       alias :m= :combinator=
       alias :m :combinator
 
+
+      # == build_attribute
+      #
+      #  This method was originally called from Nodes::Grouping#new_condition
+      #  only, without arguments, without #valid? checking, to build a new
+      #  grouping condition.
+      #
+      #  After refactoring in 235eae3, it is now called from 2 places:
+      #
+      #  1. Nodes::Condition#attributes=, with +name+ argument passed or +name+
+      #     and +ransacker_args+. Attributes are included only if #valid?.
+      #
+      #  2. Nodes::Grouping#new_condition without arguments. In this case, the
+      #     #valid? conditional needs to be bypassed, otherwise nothing is
+      #     built. The `name.nil?` conditional below currently does this.
+      #
+      #  TODO: Add test coverage for this behavior and ensure that `name.nil?`
+      #  isn't fixing issue #702 by introducing untested regressions.
+      #
       def build_attribute(name = nil, ransacker_args = [])
         Attribute.new(@context, name, ransacker_args).tap do |attribute|
           @context.bind(attribute, attribute.name)
-          self.attributes << attribute if attribute.valid?
+          self.attributes << attribute if name.nil? || attribute.valid?
           if predicate && !negative?
             @context.lock_association(attribute.parent)
           end
