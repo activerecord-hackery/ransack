@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 1.8.2 - 2016-08-08
 ### Fixed
 
 *   Fix empty attribute_fields regression in advanced search mode introduced by
