@@ -72,8 +72,16 @@ Here's a quick guide:
 
    The test suite runs by default with SQLite3. To run the test suite with PostgreSQL or MySQL, use:
 
-        $ DB=postgresql bundle exec rake spec (`DB=pg` & `DB=postgres` work too)
+        $ DB=pg bundle exec rake spec (`DB=postgres` & `DB=postgresql` work too)
         $ DB=mysql bundle exec rake spec
+
+   To run only the tests in a particular file: `rspec <path/to/filename>`
+
+        $ rspec spec/ransack/search_spec.rb
+
+   To run a single test in that file: `rspec <path/to/filename> -e "test name"`
+
+        $ rspec spec/ransack/search_spec.rb -e "accepts a context option"
 
 5. Hack away! Please use Ruby features that are compatible down to Ruby 1.9.
    Since version 1.5, Ransack no longer maintains Ruby 1.8 compatibility.
