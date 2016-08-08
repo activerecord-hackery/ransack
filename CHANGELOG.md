@@ -1,6 +1,16 @@
 # Change Log
 
 ## Unreleased
+### Fixed
+
+*   Fix empty attribute_fields regression in advanced search mode introduced by
+    [235eae3](https://github.com/activerecord-hackery/ransack/commit/235eae3).
+    Closes
+    [#701](https://github.com/activerecord-hackery/ransack/issues/701). Commit
+    [2839acf](https://github.com/activerecord-hackery/ransack/commit/2839acf).
+
+    *Jon Atack, Jay Dorsey, Stefan Haslinger, Igor Kasyanchuk*
+
 ### Added
 
 *   Add `sort_url` view helper that returns only the url of a `sort_link`. PR
