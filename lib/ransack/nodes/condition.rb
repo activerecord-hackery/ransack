@@ -144,7 +144,7 @@ module Ransack
       #     built. The `name.nil?` conditional below currently does this.
       #
       #  TODO: Add test coverage for this behavior and ensure that `name.nil?`
-      #  isn't fixing issue #702 by introducing untested regressions.
+      #  isn't fixing issue #701 by introducing untested regressions.
       #
       def build_attribute(name = nil, ransacker_args = [])
         Attribute.new(@context, name, ransacker_args).tap do |attribute|
