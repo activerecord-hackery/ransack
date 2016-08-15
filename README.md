@@ -17,10 +17,11 @@ While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
 and backwards compatibility is not a design goal.
 
-Ransack enables the creation of
-[both simple and advanced search forms](https://ransack-demo-rails5.herokuapp.com/users/advanced_search)
-for your Ruby on Rails application (
-[demo source code here](https://github.com/activerecord-hackery/ransack_demo)).
+Ransack enables the creation of both
+[simple](http://ransack-demo.herokuapp.com) and
+[advanced](http://ransack-demo.herokuapp.com/users/advanced_search) search forms
+for your Ruby on Rails application
+([demo source code here](https://github.com/activerecord-hackery/ransack_demo)).
 If you're looking for something that simplifies query generation at the model
 or controller layer, you're probably not looking for Ransack (or MetaSearch,
 for that matter). Try [Squeel](https://github.com/activerecord-hackery/squeel)
@@ -275,7 +276,8 @@ end
 
 Once you've done so, you can make use of the helpers in [Ransack::Helpers::FormBuilder](lib/ransack/helpers/form_builder.rb) to
 construct much more complex search forms, such as the one on the
-[demo app](https://ransack-demo-rails5.herokuapp.com) (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
+[demo app](http://ransack-demo.herokuapp.com/users/advanced_search)
+(source code [here](https://github.com/activerecord-hackery/ransack_demo)).
 
 ### Ransack #search method
 
