@@ -749,9 +749,8 @@ en:
 
 ## Mongoid
 
-Ransack now works with Mongoid in the same way as Active Record, except that
-with Mongoid, associations are not currently supported. A demo app may be found
-[here](http://ransack-mongodb-demo.herokuapp.com/) and the demo source code is
+Ransack works with Mongoid in the same way as Active Record, except that with
+Mongoid, associations are not currently supported. Demo source code may be found
 [here](https://github.com/Zhomart/ransack-mongodb-demo). A `result` method
 called on a `ransack` search returns a `Mongoid::Criteria` object:
 
