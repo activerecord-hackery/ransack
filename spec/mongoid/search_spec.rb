@@ -433,7 +433,6 @@ module Ransack
       end
 
       context 'with joins' do
-        before { pending 'not implemented for mongoid' }
         it 'allows chaining to access nested conditions' do
           @s.groupings = [
             { :m => 'or', :name_eq => 'Ernie', :children_name_eq => 'Ernie' }

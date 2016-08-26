@@ -274,8 +274,6 @@ module Ransack
         end
 
         describe '#ransackable_associations' do
-          before { pending "not implemented for mongoid" }
-
           subject { Person.ransackable_associations }
 
           it { should include 'parent' }
