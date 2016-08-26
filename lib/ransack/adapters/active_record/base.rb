@@ -23,7 +23,8 @@ module Ransack
         end
 
         def ransack_alias(new_name, old_name)
-          self._ransack_aliases.store(new_name.to_s, old_name.to_s)
+          self._ransack_aliases = _ransack_aliases.merge new_name.to_s =>
+            old_name.to_s
         end
 
         # Ransackable_attributes, by default, returns all column names

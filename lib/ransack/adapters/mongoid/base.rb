@@ -8,6 +8,10 @@ module Ransack
         extend ActiveSupport::Concern
 
         included do
+          class_attribute :_ransackers
+          class_attribute :_ransack_aliases
+          self._ransackers ||= {}
+          self._ransack_aliases ||= {}
         end
 
         class ColumnWrapper < SimpleDelegator
@@ -33,22 +37,6 @@ module Ransack
         end
 
         module ClassMethods
-          def _ransack_aliases
-            @_ransack_aliases ||= {}
-          end
-
-          def _ransack_aliases=(value)
-            @_ransack_aliases = value
-          end
-
-          def _ransackers
-            @_ransackers ||= {}
-          end
-
-          def _ransackers=(value)
-            @_ransackers = value
-          end
-
           def ransack(params = {}, options = {})
             params = params.presence || {}
             Search.new(self, params ? params.delete_if {
@@ -58,7 +46,8 @@ module Ransack
           alias_method :search, :ransack
 
           def ransack_alias(new_name, old_name)
-            self._ransack_aliases.store(new_name.to_s, old_name.to_s)
+            self._ransack_aliases = _ransack_aliases.merge new_name.to_s =>
+              old_name.to_s
           end
 
           def ransacker(name, opts = {}, &block)
