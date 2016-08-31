@@ -127,6 +127,9 @@ class Person < ActiveRecord::Base
   end
 end
 
+class Musician < Person
+end
+
 class Article < ActiveRecord::Base
   belongs_to :person
   has_many :comments

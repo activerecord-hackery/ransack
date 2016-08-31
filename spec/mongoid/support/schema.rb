@@ -63,6 +63,9 @@ class Person
   end
 end
 
+class Musician < Person
+end
+
 class Article
   include Mongoid::Document
 

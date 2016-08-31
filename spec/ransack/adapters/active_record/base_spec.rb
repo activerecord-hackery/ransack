@@ -190,6 +190,27 @@ module Ransack
             s = Person.ransack(daddy_eq: 'Drake')
             expect(s.result.to_a).to eq []
           end
+
+          it 'makes aliases available to subclasses' do
+            yngwie = Musician.create!(name: 'Yngwie Malmsteen')
+
+            musicians = Musician.ransack(term_cont: 'ngw').result
+            expect(musicians).to eq([yngwie])
+          end
+
+          it 'handles naming collisions gracefully' do
+            frank = Person.create!(name: 'Frank Stallone')
+
+            people = Person.ransack(term_cont: 'allon').result
+            expect(people).to eq([frank])
+
+            Class.new(Article) do
+              ransack_alias :term, :title
+            end
+
+            people = Person.ransack(term_cont: 'allon').result
+            expect(people).to eq([frank])
+          end
         end
 
         describe '#ransacker' do
