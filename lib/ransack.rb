@@ -7,13 +7,6 @@ Ransack::Adapters.object_mapper.require_constants
 module Ransack
   extend Configuration
   class UntraversableAssociationError < StandardError; end;
-
-  SUPPORTS_ATTRIBUTE_ALIAS =
-  begin
-    ActiveRecord::Base.respond_to?(:attribute_aliases)
-  rescue NameError
-    false
-  end
 end
 
 Ransack.configure do |config|
