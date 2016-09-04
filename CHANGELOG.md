@@ -1,5 +1,34 @@
 # Change Log
 
+## Unreleased
+### Fixed
+
+*   Use class attributes properly so that inheritance is respected.
+    PR [#717](https://github.com/activerecord-hackery/ransack/pull/717).
+    This fixes two bugs:
+
+    1. In the Mongoid adapter, subclasses were not properly inheriting their
+       parents' Ransack aliases because each class defined its own set of
+       aliases.
+
+    2. In the Active Record adapter, Ransack aliases were defined in such a way
+       that the parent's (and grandparent's, etc.) aliases were overwritten by
+       the child, meaning that all aliases were ultimately kept on
+       `ActiveRecord::Base`. This had the unfortunate effect of enforcing
+       uniqueness of Ransack alias names across all models rather than per
+       model. Depending on the load order of models, earlier definitions of an
+       alias in other models were clobbered.
+
+    *Steve Richert (laserlemon)*
+
+*   Use `ActiveSupport.on_load` hooks to include Ransack in Active Record,
+    avoiding autoloading the constant too soon. PR
+    [#719](https://github.com/activerecord-hackery/ransack/pull/719). Reference:
+    [This comment in rails#23589]
+    (https://github.com/rails/rails/issues/23589#issuecomment-229247727).
+
+    *Yuji Yaginuma (y-yagi)*
+
 ## Version 1.8.2 - 2016-08-08
 ### Fixed
 
