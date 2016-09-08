@@ -405,7 +405,7 @@ List of all possible predicates
 * `*_cont`, `*_cont_any`, `*_cont_all`, `*_not_cont`, `*_not_cont_any`, `*_not_cont_all` - contains value, using `LIKE`
 * `*_true`, `*_false` - is true and is false
 
-(See full list: https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/locale/en.yml#L15)
+(See full list: https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/locale/en.yml#L15 and [wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching))
 
 ### Using Ransackers to add custom search functions via Arel
 
