@@ -11,3 +11,5 @@ when /^3\.2\./
 else
   require 'ransack/adapters/mongoid/context'
 end
+
+Ransack::SUPPORTS_ATTRIBUTE_ALIAS = false
