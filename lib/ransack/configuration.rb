@@ -77,10 +77,10 @@ module Ransack
       self.options[:ignore_unknown_conditions] = boolean
     end
 
-    # Ransack's default arrows are html-code snippets found options at the
-    # top of this file. Arrows may be anything wrapped in quotation marks.
-    # Both arrows or a single arrow may be globally overridden in an
-    # initializer file like `config/initializers/ransack.rb` as follows:
+    # Ransack's default indicator arrows are html-code snippets. These
+    # arrows may be replaced by anything wrapped in quotation marks. Both
+    # or just one arrow may be globally overridden in an initializer file
+    # like `config/initializers/ransack.rb` as follows:
     #
     # Ransack.configure do |config|
     #   # Set the up_arrow as an icon, set the down arrow as unicode

@@ -213,8 +213,18 @@ The sort link may be displayed without the order indicator arrow by passing
 <%= sort_link(@q, :name, hide_indicator: true) %>
 ```
 
-Alternatively, all sort links may be displayed without the order indicator arrow
-by adding this to an initializer file like `config/initializers/ransack.rb`:
+These indicator arrows may also be customized by setting them in an initializer file like `config/initializers/ransack.rb`:
+
+```ruby
+Ransack.configure do |c|
+  c.custom_arrows = {
+    up_arrow: '<i class="custom-up-arrow-icon"></i>',
+    down_arrow: 'U+02193'
+  }
+end
+```
+
+Alternatively, all sort links may be displayed without the order indicator arrows:
 
 ```ruby
 Ransack.configure do |c|
