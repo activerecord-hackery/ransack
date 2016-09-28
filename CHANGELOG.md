@@ -1,6 +1,13 @@
 # Change Log
 
 ## Unreleased
+
+### Added
+
+*   Add config option to customize up and down arrows used for direction indicators in the FormHelper. PR [#726](https://github.com/activerecord-hackery/ransack/pull/726)
+
+    *Garett Arrowood*
+
 ### Fixed
 
 *   Use class attributes properly so that inheritance is respected.
