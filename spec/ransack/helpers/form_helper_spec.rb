@@ -696,6 +696,10 @@ module Ransack
           Ransack.configure { |c| c.hide_sort_order_indicators = true }
         end
 
+        after do
+          Ransack.configure { |c| c.hide_sort_order_indicators = false }
+        end
+
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search(sorts: ['name desc'])],
