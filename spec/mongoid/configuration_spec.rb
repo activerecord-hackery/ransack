@@ -50,8 +50,8 @@ module Ransack
     end
 
     it 'should have default values for arrows' do
-      expect(Ransack.options[:up_arrow]).to eq '&#9660;'.freeze
-      expect(Ransack.options[:down_arrow]).to eq '&#9650;'.freeze
+      expect(Ransack.options[:up_arrow]).to eq '&#9660;'
+      expect(Ransack.options[:down_arrow]).to eq '&#9650;'
     end
 
     it 'changes default arrow strings' do
@@ -66,8 +66,8 @@ module Ransack
       end
 
       expect(Ransack.options[:up_arrow])
-      .to eq '<i class="fa fa-long-arrow-up"></i>'.freeze
-      expect(Ransack.options[:down_arrow]).to eq 'U+02193'.freeze
+      .to eq '<i class="fa fa-long-arrow-up"></i>'
+      expect(Ransack.options[:down_arrow]).to eq 'U+02193'
 
       # restore original state so we don't break other tests
       Ransack.options = before
