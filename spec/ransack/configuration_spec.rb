@@ -3,9 +3,7 @@ require 'spec_helper'
 module Ransack
   describe Configuration do
     it 'yields Ransack on configure' do
-      Ransack.configure do |config|
-        expect(config).to eq Ransack
-      end
+      Ransack.configure { |config| expect(config).to eq Ransack }
     end
 
     it 'adds predicates' do
@@ -57,21 +55,16 @@ module Ransack
     end
 
     it 'changes default arrow strings' do
-      # store original state so we can restore it later
       before = Ransack.options.clone
+      up_value, down_value = '<i class="fa fa-long-arrow-up"></i>', 'U+02193'
 
       Ransack.configure do |config|
-        config.custom_arrows = {
-          up_arrow: '<i class="fa fa-long-arrow-up"></i>',
-          down_arrow: 'U+02193'
-        }
+        config.custom_arrows = { up_arrow: up_value, down_arrow: down_value }
       end
 
-      expect(Ransack.options[:up_arrow])
-      .to eq '<i class="fa fa-long-arrow-up"></i>'
-      expect(Ransack.options[:down_arrow]).to eq 'U+02193'
+      expect(Ransack.options[:up_arrow]).to eq up_value
+      expect(Ransack.options[:down_arrow]).to eq down_value
 
-      # restore original state so we don't break other tests
       Ransack.options = before
     end
 
