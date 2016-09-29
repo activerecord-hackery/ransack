@@ -206,14 +206,10 @@ This example toggles the sort directions of both fields, by default
 initially sorting the `last_name` field by ascending order, and the
 `first_name` field by descending order.
 
-The sort link may be displayed without the order indicator arrow by passing
-`hide_indicator: true`:
 
-```erb
-<%= sort_link(@q, :name, hide_indicator: true) %>
-```
-
-These indicator arrows may also be customized by setting them in an initializer file like `config/initializers/ransack.rb`:
+The sort link order indicator arrows may be globally customized by setting a
+`custom_arrows` option in an initializer file like
+`config/initializers/ransack.rb`:
 
 ```ruby
 Ransack.configure do |c|
@@ -224,12 +220,21 @@ Ransack.configure do |c|
 end
 ```
 
-Alternatively, all sort links may be displayed without the order indicator arrows:
+All sort links may be displayed without the order indicator
+arrows by setting `hide_sort_order_indicators` to true in the initializer file.
+Note that this hides the arrows even if they were customized:
 
 ```ruby
 Ransack.configure do |c|
   c.hide_sort_order_indicators = true
 end
+```
+
+Without setting it globally, individual sort links may be displayed without
+the order indicator arrow by passing `hide_indicator: true` in the sort link:
+
+```erb
+<%= sort_link(@q, :name, hide_indicator: true) %>
 ```
 
 ####Ransack's `sort_url` helper is like a `sort_link` but returns only the url

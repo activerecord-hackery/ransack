@@ -77,15 +77,18 @@ module Ransack
       self.options[:ignore_unknown_conditions] = boolean
     end
 
-    # Ransack's default indicator arrows are html-code snippets. These
-    # arrows may be replaced by anything wrapped in quotation marks. Both
-    # or just one arrow may be globally overridden in an initializer file
+    # By default, Ransack displays sort order indicator arrows with HTML codes:
+    #
+    #   up_arrow:   '&#9660;'
+    #   down_arrow: '&#9650;'
+    #
+    # One or both defaults may be globally overridden in an initializer file
     # like `config/initializers/ransack.rb` as follows:
     #
     # Ransack.configure do |config|
-    #   # Set the up_arrow as an icon, set the down arrow as unicode
+    #   # Globally set the up arrow to an icon and the down arrow to unicode.
     #   config.custom_arrows = {
-    #     up_arrow: '<i class="fa fa-long-arrow-up"></i>',
+    #     up_arrow:   '<i class="fa fa-long-arrow-up"></i>',
     #     down_arrow: 'U+02193'
     #   }
     # end

@@ -67,7 +67,8 @@ module Ransack
         }
       end
 
-      expect(Ransack.options[:up_arrow]).to eq '<i class="fa fa-long-arrow-up"></i>'.freeze
+      expect(Ransack.options[:up_arrow])
+      .to eq '<i class="fa fa-long-arrow-up"></i>'.freeze
       expect(Ransack.options[:down_arrow]).to eq 'U+02193'.freeze
 
       # restore original state so we don't break other tests
@@ -101,8 +102,10 @@ module Ransack
           )
         end
 
-        expect(Ransack.predicates['test_in_predicate'].wants_array).to eq true
-        expect(Ransack.predicates['test_not_in_predicate'].wants_array).to eq true
+        expect(Ransack.predicates['test_in_predicate'].wants_array)
+        .to eq true
+        expect(Ransack.predicates['test_not_in_predicate'].wants_array)
+        .to eq true
       end
 
       it 'explicitly does not want array for in/not_in predicates' do
@@ -119,8 +122,10 @@ module Ransack
           )
         end
 
-        expect(Ransack.predicates['test_in_predicate_no_array'].wants_array).to eq false
-        expect(Ransack.predicates['test_not_in_predicate_no_array'].wants_array).to eq false
+        expect(Ransack.predicates['test_in_predicate_no_array'].wants_array)
+        .to eq false
+        expect(Ransack.predicates['test_not_in_predicate_no_array'].wants_array)
+        .to eq false
       end
     end
   end

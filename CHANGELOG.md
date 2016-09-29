@@ -4,7 +4,9 @@
 
 ### Added
 
-*   Add config option to customize up and down arrows used for direction indicators in the FormHelper. PR [#726](https://github.com/activerecord-hackery/ransack/pull/726)
+*   Add a config option to customize the up and down arrows used for direction
+    indicators in Ransack sort links.
+    PR [#726](https://github.com/activerecord-hackery/ransack/pull/726).
 
     *Garett Arrowood*
 
