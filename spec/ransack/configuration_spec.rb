@@ -54,7 +54,31 @@ module Ransack
       expect(Ransack.options[:down_arrow]).to eq '&#9650;'
     end
 
-    it 'changes default arrow strings' do
+    it 'changes the default value for the up arrow only' do
+      before = Ransack.options.clone
+      up_value, down_value = 'U+02193', Ransack.options[:down_arrow]
+
+      Ransack.configure { |c| c.custom_arrows = { up_arrow: up_value } }
+
+      expect(Ransack.options[:up_arrow]).to eq up_value
+      expect(Ransack.options[:down_arrow]).to eq down_value
+
+      Ransack.options = before
+    end
+
+    it 'changes the default value for the down arrow only' do
+      before = Ransack.options.clone
+      up_value, down_value = Ransack.options[:up_arrow], '<i class="down"></i>'
+
+      Ransack.configure { |c| c.custom_arrows = { down_arrow: down_value } }
+
+      expect(Ransack.options[:up_arrow]).to eq up_value
+      expect(Ransack.options[:down_arrow]).to eq down_value
+
+      Ransack.options = before
+    end
+
+    it 'changes the default value for both arrows' do
       before = Ransack.options.clone
       up_value, down_value = '<i class="fa fa-long-arrow-up"></i>', 'U+02193'
 
