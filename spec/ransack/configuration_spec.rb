@@ -51,6 +51,29 @@ module Ransack
       Ransack.options = before
     end
 
+    it 'should have default values for arrows' do
+      expect(Ransack.options[:up_arrow]).to eq '&#9660;'.freeze
+      expect(Ransack.options[:down_arrow]).to eq '&#9650;'.freeze
+    end
+
+    it 'changes default arrow strings' do
+      # store original state so we can restore it later
+      before = Ransack.options.clone
+
+      Ransack.configure do |config|
+        config.custom_arrows = {
+          up_arrow: '<i class="fa fa-long-arrow-up"></i>',
+          down_arrow: 'U+02193'
+        }
+      end
+
+      expect(Ransack.options[:up_arrow]).to eq '<i class="fa fa-long-arrow-up"></i>'.freeze
+      expect(Ransack.options[:down_arrow]).to eq 'U+02193'.freeze
+
+      # restore original state so we don't break other tests
+      Ransack.options = before
+    end
+
     it 'adds predicates that take arrays, overriding compounds' do
       Ransack.configure do |config|
         config.add_predicate(

@@ -649,6 +649,52 @@ module Ransack
         it { should match /Full Name&nbsp;&#9660;/ }
       end
 
+      describe '#sort_link with config set with custom up_arrow' do
+        before do
+          Ransack.configure do |c|
+            c.custom_arrows = { up_arrow: "\u{1F446}" }
+          end
+        end
+        after do
+          #set back to default
+          Ransack.configure do |c|
+            c.custom_arrows = { up_arrow: "&#9660;" }
+          end
+        end
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(sorts: ['name desc'])],
+            :name,
+            controller: 'people',
+            hide_indicator: false
+          )
+        }
+        it { should match /Full Name&nbsp;\u{1F446}/ }
+      end
+
+      describe '#sort_link with config set with custom down_arrow' do
+        before do
+          Ransack.configure do |c|
+            c.custom_arrows = { down_arrow: "\u{1F447}" }
+          end
+        end
+        after do
+          #set back to default
+          Ransack.configure do |c|
+            c.custom_arrows = { down_arrow: "&#9650;" }
+          end
+        end
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.search(sorts: ['name asc'])],
+            :name,
+            controller: 'people',
+            hide_indicator: false
+          )
+        }
+        it { should match /Full Name&nbsp;\u{1F447}/ }
+      end
+
       describe '#sort_link with config set to globally hide order indicators' do
         before do
           Ransack.configure { |c| c.hide_sort_order_indicators = true }

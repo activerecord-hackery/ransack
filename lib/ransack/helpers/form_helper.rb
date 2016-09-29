@@ -110,11 +110,11 @@ module Ransack
         end
 
         def up_arrow
-          '&#9660;'.freeze
+          Ransack.options[:up_arrow]
         end
 
         def down_arrow
-          '&#9650;'.freeze
+          Ransack.options[:down_arrow]
         end
 
         def name
