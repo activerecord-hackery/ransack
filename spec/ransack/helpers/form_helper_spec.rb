@@ -651,16 +651,13 @@ module Ransack
 
       describe '#sort_link with config set with custom up_arrow' do
         before do
-          Ransack.configure do |c|
-            c.custom_arrows = { up_arrow: "\u{1F446}" }
-          end
+          Ransack.configure { |c| c.custom_arrows = { up_arrow: "\u{1F446}" } }
         end
+
         after do
-          #set back to default
-          Ransack.configure do |c|
-            c.custom_arrows = { up_arrow: "&#9660;" }
-          end
+          Ransack.configure { |c| c.custom_arrows = { up_arrow: "&#9660;" } }
         end
+
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search(sorts: ['name desc'])],
@@ -669,21 +666,19 @@ module Ransack
             hide_indicator: false
           )
         }
+
         it { should match /Full Name&nbsp;\u{1F446}/ }
       end
 
       describe '#sort_link with config set with custom down_arrow' do
         before do
-          Ransack.configure do |c|
-            c.custom_arrows = { down_arrow: "\u{1F447}" }
-          end
+          Ransack.configure { |c| c.custom_arrows = { down_arrow: "\u{1F447}" } }
         end
+
         after do
-          #set back to default
-          Ransack.configure do |c|
-            c.custom_arrows = { down_arrow: "&#9650;" }
-          end
+          Ransack.configure { |c| c.custom_arrows = { down_arrow: "&#9650;" } }
         end
+
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search(sorts: ['name asc'])],
@@ -692,13 +687,15 @@ module Ransack
             hide_indicator: false
           )
         }
+
         it { should match /Full Name&nbsp;\u{1F447}/ }
       end
 
-      describe '#sort_link with config set to globally hide order indicators' do
+      describe '#sort_link with config set to hide arrows' do
         before do
           Ransack.configure { |c| c.hide_sort_order_indicators = true }
         end
+
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search(sorts: ['name desc'])],
@@ -706,13 +703,15 @@ module Ransack
             controller: 'people'
           )
         }
+
         it { should_not match /&#9660;|&#9650;/ }
       end
 
-      describe '#sort_link with config set to globally show order indicators' do
+      describe '#sort_link with config set to show arrows' do
         before do
           Ransack.configure { |c| c.hide_sort_order_indicators = false }
         end
+
         subject { @controller.view_context
           .sort_link(
             [:main_app, Person.search(sorts: ['name desc'])],
@@ -720,6 +719,7 @@ module Ransack
             controller: 'people'
           )
         }
+
         it { should match /Full Name&nbsp;&#9660;/ }
       end
 
