@@ -36,17 +36,13 @@ module Ransack
     end
 
     it 'changes default search key parameter' do
-      # store original state so we can restore it later
-      before = Ransack.options.clone
+      default = Ransack.options.clone
 
-      Ransack.configure do |config|
-        config.search_key = :query
-      end
+      Ransack.configure { |c| c.search_key = :query }
 
       expect(Ransack.options[:search_key]).to eq :query
 
-      # restore original state so we don't break other tests
-      Ransack.options = before
+      Ransack.options = default
     end
 
     it 'should have default values for arrows' do
@@ -55,35 +51,31 @@ module Ransack
     end
 
     it 'changes the default value for the up arrow only' do
-      before              = Ransack.options.clone
-      new_up_arrow        = 'U+02191'
-      previous_down_arrow = before[:down_arrow]
+      default, new_up_arrow = Ransack.options.clone, 'U+02191'
 
       Ransack.configure { |c| c.custom_arrows = { up_arrow: new_up_arrow } }
 
+      expect(Ransack.options[:down_arrow]).to eq default[:down_arrow]
       expect(Ransack.options[:up_arrow]).to eq new_up_arrow
-      expect(Ransack.options[:down_arrow]).to eq previous_down_arrow
 
-      Ransack.options = before
+      Ransack.options = default
     end
 
     it 'changes the default value for the down arrow only' do
-      before              = Ransack.options.clone
-      previous_up_arrow   = before[:up_arrow]
-      new_down_arrow      = '<i class="down"></i>'
+      default, new_down_arrow  = Ransack.options.clone, '<i class="down"></i>'
 
       Ransack.configure { |c| c.custom_arrows = { down_arrow: new_down_arrow } }
 
-      expect(Ransack.options[:up_arrow]).to eq previous_up_arrow
+      expect(Ransack.options[:up_arrow]).to eq default[:up_arrow]
       expect(Ransack.options[:down_arrow]).to eq new_down_arrow
 
-      Ransack.options = before
+      Ransack.options = default
     end
 
     it 'changes the default value for both arrows' do
-      before              = Ransack.options.clone
-      new_up_arrow        = '<i class="fa fa-long-arrow-up"></i>'
-      new_down_arrow      = 'U+02193'
+      default        = Ransack.options.clone
+      new_up_arrow   = '<i class="fa fa-long-arrow-up"></i>'
+      new_down_arrow = 'U+02193'
 
       Ransack.configure do |c|
         c.custom_arrows = { up_arrow: new_up_arrow, down_arrow: new_down_arrow }
@@ -92,14 +84,14 @@ module Ransack
       expect(Ransack.options[:up_arrow]).to eq new_up_arrow
       expect(Ransack.options[:down_arrow]).to eq new_down_arrow
 
-      Ransack.options = before
+      Ransack.options = default
     end
 
     it 'consecutive arrow customizations respect previous customizations' do
-      before = Ransack.options.clone
+      default = Ransack.options.clone
 
       Ransack.configure { |c| c.custom_arrows = { up_arrow: 'up' } }
-      expect(Ransack.options[:down_arrow]).to eq before[:down_arrow]
+      expect(Ransack.options[:down_arrow]).to eq default[:down_arrow]
 
       Ransack.configure { |c| c.custom_arrows = { down_arrow: 'DOWN' } }
       expect(Ransack.options[:up_arrow]).to eq 'up'
@@ -110,7 +102,7 @@ module Ransack
       Ransack.configure { |c| c.custom_arrows = { down_arrow: 'down arrow-2' } }
       expect(Ransack.options[:up_arrow]).to eq '<i>U-Arrow</i>'
 
-      Ransack.options = before
+      Ransack.options = default
     end
 
     it 'adds predicates that take arrays, overriding compounds' do
