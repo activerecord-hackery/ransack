@@ -55,44 +55,47 @@ module Ransack
     end
 
     it 'changes the default value for the up arrow only' do
-      before = Ransack.options.clone
-      up_value, down_value = 'U+02193', Ransack.options[:down_arrow]
+      before              = Ransack.options.clone
+      new_up_arrow        = 'U+02191'
+      previous_down_arrow = before[:down_arrow]
 
-      Ransack.configure { |c| c.custom_arrows = { up_arrow: up_value } }
+      Ransack.configure { |c| c.custom_arrows = { up_arrow: new_up_arrow } }
 
-      expect(Ransack.options[:up_arrow]).to eq up_value
-      expect(Ransack.options[:down_arrow]).to eq down_value
+      expect(Ransack.options[:up_arrow]).to eq new_up_arrow
+      expect(Ransack.options[:down_arrow]).to eq previous_down_arrow
 
       Ransack.options = before
     end
 
     it 'changes the default value for the down arrow only' do
-      before = Ransack.options.clone
-      up_value, down_value = Ransack.options[:up_arrow], '<i class="down"></i>'
+      before              = Ransack.options.clone
+      previous_up_arrow   = before[:up_arrow]
+      new_down_arrow      = '<i class="down"></i>'
 
-      Ransack.configure { |c| c.custom_arrows = { down_arrow: down_value } }
+      Ransack.configure { |c| c.custom_arrows = { down_arrow: new_down_arrow } }
 
-      expect(Ransack.options[:up_arrow]).to eq up_value
-      expect(Ransack.options[:down_arrow]).to eq down_value
+      expect(Ransack.options[:up_arrow]).to eq previous_up_arrow
+      expect(Ransack.options[:down_arrow]).to eq new_down_arrow
 
       Ransack.options = before
     end
 
     it 'changes the default value for both arrows' do
-      before = Ransack.options.clone
-      up_value, down_value = '<i class="fa fa-long-arrow-up"></i>', 'U+02193'
+      before              = Ransack.options.clone
+      new_up_arrow        = '<i class="fa fa-long-arrow-up"></i>'
+      new_down_arrow      = 'U+02193'
 
-      Ransack.configure do |config|
-        config.custom_arrows = { up_arrow: up_value, down_arrow: down_value }
+      Ransack.configure do |c|
+        c.custom_arrows = { up_arrow: new_up_arrow, down_arrow: new_down_arrow }
       end
 
-      expect(Ransack.options[:up_arrow]).to eq up_value
-      expect(Ransack.options[:down_arrow]).to eq down_value
+      expect(Ransack.options[:up_arrow]).to eq new_up_arrow
+      expect(Ransack.options[:down_arrow]).to eq new_down_arrow
 
       Ransack.options = before
     end
 
-    it 'changes one arrow while respecting the other customized arrow' do
+    it 'consecutive arrow customizations respect previous customizations' do
       before = Ransack.options.clone
 
       Ransack.configure { |c| c.custom_arrows = { up_arrow: 'up' } }
