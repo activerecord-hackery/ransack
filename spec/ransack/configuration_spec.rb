@@ -92,6 +92,24 @@ module Ransack
       Ransack.options = before
     end
 
+    it 'changes one arrow while respecting the other customized arrow' do
+      before = Ransack.options.clone
+
+      Ransack.configure { |c| c.custom_arrows = { up_arrow: 'up' } }
+      expect(Ransack.options[:down_arrow]).to eq before[:down_arrow]
+
+      Ransack.configure { |c| c.custom_arrows = { down_arrow: 'DOWN' } }
+      expect(Ransack.options[:up_arrow]).to eq 'up'
+
+      Ransack.configure { |c| c.custom_arrows = { up_arrow: '<i>U-Arrow</i>' } }
+      expect(Ransack.options[:down_arrow]).to eq 'DOWN'
+
+      Ransack.configure { |c| c.custom_arrows = { down_arrow: 'down arrow-2' } }
+      expect(Ransack.options[:up_arrow]).to eq '<i>U-Arrow</i>'
+
+      Ransack.options = before
+    end
+
     it 'adds predicates that take arrays, overriding compounds' do
       Ransack.configure do |config|
         config.add_predicate(
