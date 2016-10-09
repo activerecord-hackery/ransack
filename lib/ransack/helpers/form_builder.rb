@@ -7,7 +7,11 @@ module ActionView::Helpers::Tags
   class Base
     private
     def value(object)
-      object.send @method_name if object # use send instead of public_send
+      begin
+        object.send @method_name if object # use send instead of public_send
+      rescue
+        ''
+      end
     end
   end
 end

@@ -46,6 +46,21 @@ module Ransack
           add_scope(key, value)
         elsif !Ransack.options[:ignore_unknown_conditions]
           raise ArgumentError, "Invalid search term #{key}"
+        else
+          # Handle polymorphic search.
+          polymorphic_group = Nodes::Grouping.new(@context, Constants::OR)
+          ActiveRecord::Base.descendants.each do |model|
+            next if model.name == 'ApplicationRecord' or model.name == @context.klass.name
+            model.reflect_on_all_associations.each do |association|
+              next if association.options[:as].blank? or not key =~ /#{association.options[:as]}/
+              able = association.options[:as].to_s
+              _key = key.gsub(able, '')
+              column_name = _key.split('_').drop(1).delete_if { |x| Predicate.names.include? x }.join('_')
+              next unless model.column_names.include? column_name
+              polymorphic_group.send("#{able}_of_#{model.name}_type#{_key}=", value)
+            end
+          end
+          base.groupings << polymorphic_group
         end
       end
       self

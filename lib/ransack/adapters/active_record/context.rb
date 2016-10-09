@@ -57,7 +57,7 @@ module Ransack
                 exists = attribute_method?(
                   remainder.join(Constants::UNDERSCORE),
                   poly_class || found_assoc.klass
-                  )
+                  ) rescue nil
               end
             end
           end
