@@ -46,22 +46,8 @@ module Ransack
           add_scope(key, value)
         elsif !Ransack.options[:ignore_unknown_conditions]
           raise ArgumentError, "Invalid search term #{key}"
-        else
-          # Handle polymorphic search.
-          polymorphic_group = Nodes::Grouping.new(@context, Constants::OR)
-          polymorphic_group.tag = key # Label this grouping.
-          ActiveRecord::Base.descendants.each do |model|
-            next if model.name == 'ApplicationRecord' or model.name == @context.klass.name
-            model.reflect_on_all_associations.each do |association|
-              next if association.options[:as].blank? or not key =~ /#{association.options[:as]}/
-              able = association.options[:as].to_s
-              _key = key.gsub(able, '')
-              column_name = _key.split('_').drop(1).delete_if { |x| Predicate.names.include? x }.join('_')
-              next unless model.column_names.include? column_name
-              polymorphic_group.send("#{able}_of_#{model.name}_type#{_key}=", value)
-            end
-          end
-          base.groupings << polymorphic_group
+        elsif polymorphic_method = construct_polymorphic_parameter(key)
+          base.send("#{polymorphic_method}=", value)
         end
       end
       self
@@ -118,6 +104,8 @@ module Ransack
         else
           @scope_args[method_name]
         end
+      elsif polymorphic_method = construct_polymorphic_parameter(method_id.to_s)
+        base.send(polymorphic_method, *args)
       else
         super
       end
@@ -190,6 +178,27 @@ module Ransack
       end
 
       attrs
+    end
+
+    def construct_polymorphic_parameter(key)
+      # Handle polymorphic search. A new parameter will be created to
+      # replace the old invalid one.
+      conditions = []
+      predicate = Predicate.detect_from_string(key)
+      # Search all the models to find ones that are associated.
+      ActiveRecord::Base.descendants.each do |model|
+        next if model.name == 'ApplicationRecord'
+        next if model.name == @context.klass.name
+        model.reflect_on_all_associations.each do |association|
+          next if association.options[:as].blank?
+          next unless key =~ /#{association.options[:as]}/
+          able = association.options[:as].to_s
+          column_name = key.gsub("#{able}_", '').gsub("_#{predicate}", '')
+          next unless model.column_names.include? column_name
+          conditions << "#{able}_of_#{model.name}_type_#{column_name}"
+        end
+      end
+      "#{conditions.join('_or_')}_#{predicate}"
     end
 
   end

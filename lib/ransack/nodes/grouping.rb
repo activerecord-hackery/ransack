@@ -5,7 +5,6 @@ module Ransack
       attr_accessor :combinator
       alias :m :combinator
       alias :m= :combinator=
-      attr_accessor :tag # This can be used to label some special groupings, e.g., polymorphic search.
 
       i18n_word :condition, :and, :or
       i18n_alias :c => :condition, :n => :and, :o => :or
