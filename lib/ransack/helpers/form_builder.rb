@@ -10,7 +10,13 @@ module ActionView::Helpers::Tags
       begin
         object.send @method_name if object # use send instead of public_send
       rescue
-        ''
+        object.groupings.each do |grouping|
+          if grouping.tag == @method_name
+            # match polymorphic search field
+            return grouping.conditions.first.value
+          end
+        end
+        '' # do not raise exception TODO: Is this ok?
       end
     end
   end

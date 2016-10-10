@@ -49,6 +49,7 @@ module Ransack
         else
           # Handle polymorphic search.
           polymorphic_group = Nodes::Grouping.new(@context, Constants::OR)
+          polymorphic_group.tag = key # Label this grouping.
           ActiveRecord::Base.descendants.each do |model|
             next if model.name == 'ApplicationRecord' or model.name == @context.klass.name
             model.reflect_on_all_associations.each do |association|
