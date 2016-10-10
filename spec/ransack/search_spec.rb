@@ -76,6 +76,33 @@ module Ransack
         expect(condition.attributes.first.name)
           .to eq 'notable_of_Person_type_name'
         expect(condition.value).to eq 'Ernie'
+
+        s = Search.new(Note, notable_name_eq: 'Ernie')
+        condition = s.base[:notable_of_Person_type_name_eq]
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name)
+          .to eq 'notable_of_Person_type_name'
+        expect(condition.value).to eq 'Ernie'
+
+        s = Search.new(Note, notable_title_eq: 'Hello, world!')
+        # Only Article model should be returned.
+        condition = s.base[:notable_of_Article_type_title_eq]
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name)
+          .to eq 'notable_of_Article_type_title'
+        expect(condition.value).to eq 'Hello, world!'
+
+        s = Search.new(Note, notable_id_eq: 1)
+        condition = s.base[:notable_of_Article_type_id_or_notable_of_Person_type_id_eq]
+        expect(condition).to be_a Nodes::Condition
+        expect(condition.predicate.name).to eq 'eq'
+        expect(condition.attributes.first.name)
+          .to eq 'notable_of_Article_type_id'
+        expect(condition.attributes.last.name)
+          .to eq 'notable_of_Person_type_id'
+        expect(condition.value).to eq 1
       end
 
       it 'creates conditions for multiple polymorphic belongs_to association
