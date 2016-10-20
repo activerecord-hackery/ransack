@@ -195,10 +195,12 @@ module Ransack
           able = association.options[:as].to_s
           column_name = key.gsub("#{able}_", '').gsub("_#{predicate}", '')
           next unless model.column_names.include? column_name
+          # FIXME: For the time being, disable models under namespace.
+          next if model.name =~ /::/ or not model.name
           conditions << "#{able}_of_#{model.name}_type_#{column_name}"
         end
       end
-      "#{conditions.join('_or_')}_#{predicate}"
+      "#{conditions.join('_or_')}_#{predicate}" unless conditions.empty?
     end
 
   end
