@@ -425,8 +425,8 @@ List of all possible predicates
 * `*_not_eq` - not equal
 * `*_match` - matches with `LIKE`, e.g. `q[email_matches]=%@gmail.com`
 * Also: `*_does_not_match`, `*_matches_any`, `*_matches_all`, `*_does_not_match_any`, `*_does_not_match_all`
-* `*_lt` - less then
-* `*_lteq` - less then or equal
+* `*_lt` - less than
+* `*_lteq` - less than or equal
 * `*_gt` - greater than
 * `*_gteq` - greater than or equal
 * `*_present` - not null and not empty, e.g. `q[name_present]=1` (SQL: `col is not null AND col != ''`)
