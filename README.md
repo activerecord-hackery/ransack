@@ -7,9 +7,6 @@
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)]
 (https://codeclimate.com/github/activerecord-hackery/ransack)
 
-Ransack is currently unmaintained; please contact @jonatack or @ernie if you
-would like to be its next maintainer.
-
 Ransack is a rewrite of [MetaSearch]
 (https://github.com/activerecord-hackery/meta_search)
 created by [Ernie Miller](http://twitter.com/erniemiller)
