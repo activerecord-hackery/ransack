@@ -65,24 +65,30 @@ module Ransack
               expect(s.result.to_sql).to (include 'age > 18')
             end
 
-            # TODO: Implement a way to pass true/false values like 0 or 1 to
-            # scopes (e.g. with `in` / `not_in` predicates), without Ransack
-            # converting them to true/false boolean values instead.
-
-            # it 'passes true values to scopes', focus: true  do
-            #   s = Person.ransack('over_age' => 1)
-            #   expect(s.result.to_sql).to (include 'age > 1')
-            # end
-
-            # it 'passes false values to scopes', focus: true  do
-            #   s = Person.ransack('over_age' => 0)
-            #   expect(s.result.to_sql).to (include 'age > 0')
-            # end
-
             it 'chains scopes' do
               s = Person.ransack('over_age' => 18, 'active' => true)
               expect(s.result.to_sql).to (include 'age > 18')
               expect(s.result.to_sql).to (include 'active = 1')
+            end
+
+            context "with sanitize_custom_scope_booleans set to false" do
+              before(:all) do
+                Ransack.configure { |c| c.sanitize_custom_scope_booleans = false }
+              end
+
+              after(:all) do
+                Ransack.configure { |c| c.sanitize_custom_scope_booleans = true }
+              end
+
+              it 'passes true values to scopes' do
+                s = Person.ransack('over_age' => 1)
+                expect(s.result.to_sql).to (include 'age > 1')
+              end
+
+              it 'passes false values to scopes'  do
+                s = Person.ransack('over_age' => 0)
+                expect(s.result.to_sql).to (include 'age > 0')
+              end
             end
           end
 
