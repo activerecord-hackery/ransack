@@ -11,7 +11,8 @@ module Ransack
       :ignore_unknown_conditions => true,
       :hide_sort_order_indicators => false,
       :up_arrow => '&#9660;'.freeze,
-      :down_arrow => '&#9650;'.freeze
+      :down_arrow => '&#9650;'.freeze,
+      :sanitize_scope_args => true
     }
 
     def configure
@@ -96,6 +97,22 @@ module Ransack
     def custom_arrows=(opts = {})
       self.options[:up_arrow] = opts[:up_arrow].freeze if opts[:up_arrow]
       self.options[:down_arrow] = opts[:down_arrow].freeze if opts[:down_arrow]
+    end
+
+    # Ransack sanitizes many values in your custom scopes into booleans.
+    # [1, '1', 't', 'T', 'true', 'TRUE'] all evaluate to true.
+    # [0, '0', 'f', 'F', 'false', 'FALSE'] all evaluate to false.
+    #
+    # This default may be globally overridden in an initializer file like
+    # `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Accept my custom scope values as what they are.
+    #   config.sanitize_custom_scope_booleans = false
+    # end
+    #
+    def sanitize_custom_scope_booleans=(boolean)
+      self.options[:sanitize_scope_args] = boolean
     end
 
     # By default, Ransack displays sort order indicator arrows in sort links.
