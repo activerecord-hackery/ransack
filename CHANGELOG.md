@@ -10,6 +10,11 @@
 
     *Garett Arrowood*
 
+*   Add ability to turn off sanitization of custom scope arguments.
+    PR [#742](https://github.com/activerecord-hackery/ransack/pull/742).
+
+    *Garett Arrowood*
+
 ### Fixed
 
 *   Use class attributes properly so that inheritance is respected.

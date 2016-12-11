@@ -661,7 +661,21 @@ Employee.ransack({ salary_gt: 100_000 }, { auth_object: current_user })
 In Rails 3 and 4, if the `true` value is being passed via url params or some
 other mechanism that will convert it to a string, the true value may not be
 passed to the ransackable scope unless you wrap it in an array
-(i.e. `activated: ['true']`). This is currently resolved in Rails 5 :smiley:
+(i.e. `activated: ['true']`). Ransack will take care of changing 'true' into a
+boolean. This is currently resolved in Rails 5 :smiley:
+
+However, perhaps you have `user_id: [1]` and you do not want Ransack to convert
+1 into a boolean. (Values sanitized to booleans can be found in the
+[constants.rb](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb#L28)).
+To turn this off, and handle type conversions yourself, set
+`sanitize_custom_scope_booleans` to false in an initializer file like
+config/initializers/ransack.rb:
+
+```ruby
+Ransack.configure do |c|
+  c.sanitize_custom_scope_booleans = false
+end
+```
 
 Scopes are a recent addition to Ransack and currently have a few caveats:
 First, a scope involving child associations needs to be defined in the parent
