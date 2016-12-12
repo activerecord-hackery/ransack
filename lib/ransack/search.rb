@@ -123,12 +123,18 @@ module Ransack
     private
 
     def add_scope(key, args)
+      sanitized_args = if Ransack.options[:sanitize_scope_args]
+        sanitized_scope_args(args)
+      else
+        args
+      end
+
       if @context.scope_arity(key) == 1
         @scope_args[key] = args.is_a?(Array) ? args[0] : args
       else
-        @scope_args[key] = args.is_a?(Array) ? sanitized_scope_args(args) : args
+        @scope_args[key] = args.is_a?(Array) ? sanitized_args : args
       end
-      @context.chain_scope(key, sanitized_scope_args(args))
+      @context.chain_scope(key, sanitized_args)
     end
 
     def sanitized_scope_args(args)
