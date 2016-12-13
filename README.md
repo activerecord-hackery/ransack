@@ -298,7 +298,7 @@ construct much more complex search forms, such as the one on the
 
 ### Ransack #search method
 
-Ransack will try to to make the class method `#search` available in your
+Ransack will try to make the class method `#search` available in your
 models, but if `#search` has already been defined elsewhere, you can always use
 the default `#ransack` class method. So the following are equivalent:
 
@@ -427,7 +427,7 @@ List of all possible predicates
 * `*_gt` - greater than
 * `*_gteq` - greater than or equal
 * `*_present` - not null and not empty, e.g. `q[name_present]=1` (SQL: `col is not null AND col != ''`)
-* `*_bank` - is null or empty. (SQL: `col is null OR col = ''`)
+* `*_blank` - is null or empty. (SQL: `col is null OR col = ''`)
 * `*_null`, `*_not_null` - is null, is not null
 * `*_in` - match any values in array, e.g. `q[name_in][]=Alice&q[name_in][]=Bob`
 * `*_not_in` - match none of values in array
