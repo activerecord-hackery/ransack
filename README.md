@@ -420,7 +420,7 @@ List of all possible predicates
 
 * `*_eq` - equal
 * `*_not_eq` - not equal
-* `*_match` - matches with `LIKE`, e.g. `q[email_matches]=%@gmail.com`
+* `*_matches` - matches with `LIKE`, e.g. `q[email_matches]=%@gmail.com`
 * Also: `*_does_not_match`, `*_matches_any`, `*_matches_all`, `*_does_not_match_any`, `*_does_not_match_all`
 * `*_lt` - less than
 * `*_lteq` - less than or equal
