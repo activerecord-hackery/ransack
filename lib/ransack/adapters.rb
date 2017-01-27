@@ -10,6 +10,8 @@ module Ransack
         ActiveRecordAdapter.new
       elsif defined?(::Mongoid)
         MongoidAdapter.new
+      else
+        raise "Unsupported adapter"
       end
     end
 
