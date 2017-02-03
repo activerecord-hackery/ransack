@@ -43,10 +43,10 @@ module Ransack
       collapse_multiparameter_attributes!(params).each do |key, value|
         if ['s'.freeze, 'sorts'.freeze].freeze.include?(key)
           send("#{key}=", value)
-        elsif base.attribute_method?(key)
-          base.send("#{key}=", value)
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
+        elsif base.attribute_method?(key)
+          base.send("#{key}=", value)
         elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
           raise ArgumentError, "Invalid search term #{key}"
         end
