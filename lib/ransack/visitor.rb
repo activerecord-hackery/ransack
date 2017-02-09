@@ -41,7 +41,19 @@ module Ransack
     end
 
     def visit_Ransack_Nodes_Sort(object)
-      object.attr.send(object.dir) if object.valid?
+      # The first half of this conditional is the original implementation in
+      # Ransack, as of version 1.6.6.
+      #
+      # The second half of the conditional kicks in when the column name
+      # provided isn't found/valid. In those cases, we look for a scope on the
+      # model that will apply a custom sort. If found, we return the scope's
+      # name.
+      if object.valid?
+        object.attr.send(object.dir)
+      else
+        scope_name = :"sort_by_#{object.name}_#{object.dir}"
+        scope_name if object.context.object.respond_to?(scope_name)
+      end
     end
 
     def quoted?(object)
