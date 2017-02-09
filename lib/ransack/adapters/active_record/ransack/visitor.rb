@@ -21,11 +21,15 @@ module Ransack
     end
 
     def visit_Ransack_Nodes_Sort(object)
-      return unless object.valid?
-      if object.attr.is_a?(Arel::Attributes::Attribute)
-        object.attr.send(object.dir)
+      if object.valid?
+        if object.attr.is_a?(Arel::Attributes::Attribute)
+          object.attr.send(object.dir)
+        else
+          ordered(object)
+        end
       else
-        ordered(object)
+        scope_name = :"sort_by_#{object.name}_#{object.dir}"
+        scope_name if object.context.object.respond_to?(scope_name)
       end
     end
 

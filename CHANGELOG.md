@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+* Add support for sorting by scopes
+  PR [973](https://github.com/activerecord-hackery/ransack/pull/973)
+
+  *Diego Borges*
+
 ## Version 2.0.1 - 2018-08-18
 
 * Don't return association if table is nil
