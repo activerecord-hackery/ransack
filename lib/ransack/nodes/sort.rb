@@ -30,9 +30,9 @@ module Ransack
         .include?(attr_name)
       end
 
-      def name=(name)
-        @name = name
-        context.bind(self, name)
+      def name=name
+        @name = context.ransackable_alias(name) || name
+        context.bind(self, @name)
       end
 
       def dir=(dir)
