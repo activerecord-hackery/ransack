@@ -141,30 +141,17 @@
 
     *Marcel Eeken*
 
-*   Add Taiwanese Hokkien/Mandarin i18n locale file (`zh-TW.yml`). PR
-    [#674](https://github.com/activerecord-hackery/ransack/pull/674).
-
-    *Sibevin Wang*
-
-*   Add Danish i18n locale file (`da.yml`). PR
-    [#663](https://github.com/activerecord-hackery/ransack/pull/663).
-
-    *Kasper Johansen*
-
-*   Add Brazilian Portuguese i18n locale file (`pt-BR.yml`). PR
-    [#581](https://github.com/activerecord-hackery/ransack/pull/581).
-
-    *Diego Henrique Domingues*
-
-*   Add Indonesian (Bahasa) i18n locale file (`id.yml`). PR
-    [#612](https://github.com/activerecord-hackery/ransack/pull/612).
-
-    *Adam Pahlevi Baihaqi*
-
-*   Add Japanese i18n locale file (`ja.yml`). PR
-    [#622](https://github.com/activerecord-hackery/ransack/pull/622).
-
-    *Masanobu Mizutani*
+*   Add i18n locale files:
+  *   Taiwanese Hokkien/Mandarin (`zh-TW.yml`). PR
+    [#674](https://github.com/activerecord-hackery/ransack/pull/674). *Sibevin Wang*
+  *   Danish (`da.yml`). PR
+    [#663](https://github.com/activerecord-hackery/ransack/pull/663). *Kasper Johansen*
+  *   Brazilian Portuguese (`pt-BR.yml`). PR
+    [#581](https://github.com/activerecord-hackery/ransack/pull/581). *Diego Henrique Domingues*
+  *   Indonesian (Bahasa) (`id.yml`). PR
+    [#612](https://github.com/activerecord-hackery/ransack/pull/612). *Adam Pahlevi Baihaqi*
+  *   Japanese (`ja.yml`). PR
+    [#622](https://github.com/activerecord-hackery/ransack/pull/622). *Masanobu Mizutani*
 
 ### Fixed
 
