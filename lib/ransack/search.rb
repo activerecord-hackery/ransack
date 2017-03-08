@@ -36,6 +36,12 @@ module Ransack
       @context.evaluate(self, opts)
     end
 
+    def inspect
+      # Replace the inspect method on object's singleton class to call to_s() instead of to_a().
+      object.class_eval { alias :inspect :to_s }
+      super
+    end
+
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
         if ['s'.freeze, 'sorts'.freeze].freeze.include?(key)
