@@ -1,29 +1,15 @@
 # Ransack
 
-[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)]
-(https://travis-ci.org/activerecord-hackery/ransack)
-[![Gem Version](https://badge.fury.io/rb/ransack.svg)]
-(http://badge.fury.io/rb/ransack)
-[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)]
-(https://codeclimate.com/github/activerecord-hackery/ransack)
+[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
+[![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
+[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
 
-Ransack is a rewrite of [MetaSearch]
-(https://github.com/activerecord-hackery/meta_search)
-created by [Ernie Miller](http://twitter.com/erniemiller)
-and developed/maintained for years by
-[Jon Atack](http://twitter.com/jonatack) and
-[Ryan Bigg](http://twitter.com/ryanbigg) with the help of a great group of
-[contributors]
-(https://github.com/activerecord-hackery/ransack/graphs/contributors).
-While it supports many of the same features as MetaSearch, its underlying
-implementation differs greatly from MetaSearch,
+Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search) created by [Ernie Miller](http://twitter.com/erniemiller) and developed/maintained for years by [Jon Atack](http://twitter.com/jonatack) and
+[Ryan Bigg](http://twitter.com/ryanbigg) with the help of a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
+While it supports many of the same features as MetaSearch, its underlying implementation differs greatly from MetaSearch,
 and backwards compatibility is not a design goal.
 
-Ransack enables the creation of both
-[simple](http://ransack-demo.herokuapp.com) and
-[advanced](http://ransack-demo.herokuapp.com/users/advanced_search) search forms
-for your Ruby on Rails application
-([demo source code here](https://github.com/activerecord-hackery/ransack_demo)).
+Ransack enables the creation of both [simple](http://ransack-demo.herokuapp.com) and [advanced](http://ransack-demo.herokuapp.com/users/advanced_search) search forms for your Ruby on Rails application ([demo source code here](https://github.com/activerecord-hackery/ransack_demo)).
 If you're looking for something that simplifies query generation at the model
 or controller layer, you're probably not looking for Ransack (or MetaSearch,
 for that matter). Try [Squeel](https://github.com/activerecord-hackery/squeel)
@@ -37,14 +23,10 @@ you're reading the documentation for the master branch with the latest features.
 ## Getting started
 
 Ransack is compatible with Rails 3, 4 and 5 on Ruby 1.9 and later.
-JRuby 9 ought to work as well (see
-[this](https://github.com/activerecord-hackery/polyamorous/issues/17)).
-If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
-issues, you can use an earlier version of Ransack, say, up to 1.3.0.
+JRuby 9 ought to work as well (see [this](https://github.com/activerecord-hackery/polyamorous/issues/17)).
+If you are using Ruby 1.8 or an earlier JRuby and run into compatibility issues, you can use an earlier version of Ransack, say, up to 1.3.0.
 
-Ransack works out-of-the-box with Active Record and also features limited
-support for Mongoid 4 and 5 (without associations, further details
-[below](https://github.com/activerecord-hackery/ransack#mongoid)).
+Ransack works out-of-the-box with Active Record and also features limited support for Mongoid 4 and 5 (without associations, further details [below](https://github.com/activerecord-hackery/ransack#mongoid)).
 
 In your Gemfile, for the last officially released gem:
 
@@ -80,8 +62,7 @@ If you're coming from MetaSearch, things to note:
   1. The default param key for search params is now `:q`, instead of `:search`.
   This is primarily to shorten query strings, though advanced queries (below)
   will still run afoul of URL length limits in most browsers and require a
-  switch to HTTP POST requests. This key is [configurable]
-  (https://github.com/activerecord-hackery/ransack/wiki/Configuration).
+  switch to HTTP POST requests. This key is [configurable](https://github.com/activerecord-hackery/ransack/wiki/Configuration).
 
   2. `form_for` is now `search_form_for`, and validates that a Ransack::Search
   object is passed to it.
@@ -140,10 +121,8 @@ which are defined in
 ```
 
 `cont` (contains) and `start` (starts with) are just two of the available
-search predicates. See
-[Constants](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb)
-for a full list and the
-[wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching)
+search predicates. See [Constants](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb)
+for a full list and the [wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching)
 for more information.
 
 The `search_form_for` answer format can be set like this:
@@ -440,11 +419,8 @@ List of all possible predicates
 
 ### Using Ransackers to add custom search functions via Arel
 
-The main premise behind Ransack is to provide access to
-**Arel predicate methods**. Ransack provides special methods, called
-_ransackers_, for creating additional search functions via Arel. More
-information about `ransacker` methods can be found [here in the wiki]
-(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
+The main premise behind Ransack is to provide access to **Arel predicate methods**. Ransack provides special methods, called
+_ransackers_, for creating additional search functions via Arel. More information about `ransacker` methods can be found [here in the wiki](https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
 Feel free to contribute working `ransacker` code examples to the wiki!
 
 ### Problem with DISTINCT selects
@@ -553,9 +529,7 @@ you call the search or ransack method on your model, you can provide a value
 for an `auth_object` key in the options hash which can be used by your own
 overridden methods.
 
-Here is an example that puts all this together, adapted from
-[this blog post by Ernie Miller]
-(http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
+Here is an example that puts all this together, adapted from [this blog post by Ernie Miller](http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
 In an `Article` model, add the following `ransackable_attributes` class method
 (preferably private):
 
@@ -673,14 +647,10 @@ end
 ```
 
 Scopes are a recent addition to Ransack and currently have a few caveats:
-First, a scope involving child associations needs to be defined in the parent
-table model, not in the child model. Second, scopes with an array as an
-argument are not easily usable yet, because the array currently needs to be
-wrapped in an array to function (see
-[this issue](https://github.com/activerecord-hackery/ransack/issues/404)),
+First, a scope involving child associations needs to be defined in the parent table model, not in the child model. Second, scopes with an array as an argument are not easily usable yet, because the array currently needs to be
+wrapped in an array to function (see [this issue](https://github.com/activerecord-hackery/ransack/issues/404)),
 which is not compatible with Ransack form helpers. For this use case, it may be
-better for now to use [ransackers]
-(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead,
+better for now to use [ransackers](https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead,
 where feasible. Pull requests with solutions and tests are welcome!
 
 ### Grouping queries by OR instead of AND
