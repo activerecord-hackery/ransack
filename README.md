@@ -59,6 +59,11 @@ branch:
 gem 'ransack', github: 'activerecord-hackery/ransack'
 ```
 
+If you are using Rails 5 or master and need pagination compatible with it and
+Ransack, there is a [Rails 5 version of the `will_paginate` gem here](https://github.com/jonatack/will_paginate).
+It is also optimized for Ruby 2.2+. To use it, in your Gemfile:
+`gem 'will_paginate', github: 'jonatack/will_paginate'`.
+
 ## Issues tracker
 
 * Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
