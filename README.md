@@ -1,11 +1,8 @@
 # Ransack
 
-[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)]
-(https://travis-ci.org/activerecord-hackery/ransack)
-[![Gem Version](https://badge.fury.io/rb/ransack.svg)]
-(http://badge.fury.io/rb/ransack)
-[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)]
-(https://codeclimate.com/github/activerecord-hackery/ransack)
+[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
+[![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
+[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
 
 Ransack is a rewrite of [MetaSearch]
 (https://github.com/activerecord-hackery/meta_search)
@@ -91,7 +88,7 @@ If you're coming from MetaSearch, things to note:
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
   `Ransack#result`.
 
-####In your controller
+#### In your controller
 
 ```ruby
 def index
@@ -112,13 +109,13 @@ def index
 end
 ```
 
-####In your view
+#### In your view
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in
 [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form
+#### Ransack's `search_form_for` helper replaces `form_for` for creating the view search form
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -154,7 +151,7 @@ The `search_form_for` answer format can be set like this:
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
-####Ransack's `sort_link` helper creates table headers that are sortable links
+#### Ransack's `sort_link` helper creates table headers that are sortable links
 
 ```erb
 <%= sort_link(@q, :name) %>
@@ -234,7 +231,7 @@ the order indicator arrow by passing `hide_indicator: true` in the sort link:
 <%= sort_link(@q, :name, hide_indicator: true) %>
 ```
 
-####Ransack's `sort_url` helper is like a `sort_link` but returns only the url
+#### Ransack's `sort_url` helper is like a `sort_link` but returns only the url
 
 `sort_url` has the same API as `sort_link`:
 
