@@ -7,14 +7,12 @@
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)]
 (https://codeclimate.com/github/activerecord-hackery/ransack)
 
-Ransack is a rewrite of [MetaSearch]
-(https://github.com/activerecord-hackery/meta_search)
+Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search)
 created by [Ernie Miller](http://twitter.com/erniemiller)
 and developed/maintained for years by
 [Jon Atack](http://twitter.com/jonatack) and
 [Ryan Bigg](http://twitter.com/ryanbigg) with the help of a great group of
-[contributors]
-(https://github.com/activerecord-hackery/ransack/graphs/contributors).
+[contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
 and backwards compatibility is not a design goal.
@@ -80,8 +78,7 @@ If you're coming from MetaSearch, things to note:
   1. The default param key for search params is now `:q`, instead of `:search`.
   This is primarily to shorten query strings, though advanced queries (below)
   will still run afoul of URL length limits in most browsers and require a
-  switch to HTTP POST requests. This key is [configurable]
-  (https://github.com/activerecord-hackery/ransack/wiki/Configuration).
+  switch to HTTP POST requests. This key is [configurable](https://github.com/activerecord-hackery/ransack/wiki/Configuration).
 
   2. `form_for` is now `search_form_for`, and validates that a Ransack::Search
   object is passed to it.
@@ -91,7 +88,7 @@ If you're coming from MetaSearch, things to note:
   ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
   `Ransack#result`.
 
-####In your controller
+#### In your controller
 
 ```ruby
 def index
@@ -112,13 +109,13 @@ def index
 end
 ```
 
-####In your view
+#### In your view
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in
 [Ransack::Helpers::FormHelper](lib/ransack/helpers/form_helper.rb).
 
-####Ransack's `search_form_for` helper replaces `form_for` for creating the view search form
+#### Ransack's `search_form_for` helper replaces `form_for` for creating the view search form
 
 ```erb
 <%= search_form_for @q do |f| %>
@@ -154,7 +151,7 @@ The `search_form_for` answer format can be set like this:
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
-####Ransack's `sort_link` helper creates table headers that are sortable links
+#### Ransack's `sort_link` helper creates table headers that are sortable links
 
 ```erb
 <%= sort_link(@q, :name) %>
@@ -234,7 +231,7 @@ the order indicator arrow by passing `hide_indicator: true` in the sort link:
 <%= sort_link(@q, :name, hide_indicator: true) %>
 ```
 
-####Ransack's `sort_url` helper is like a `sort_link` but returns only the url
+#### Ransack's `sort_url` helper is like a `sort_link` but returns only the url
 
 `sort_url` has the same API as `sort_link`:
 
@@ -443,8 +440,7 @@ List of all possible predicates
 The main premise behind Ransack is to provide access to
 **Arel predicate methods**. Ransack provides special methods, called
 _ransackers_, for creating additional search functions via Arel. More
-information about `ransacker` methods can be found [here in the wiki]
-(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
+information about `ransacker` methods can be found [here in the wiki](https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers).
 Feel free to contribute working `ransacker` code examples to the wiki!
 
 ### Problem with DISTINCT selects
@@ -554,8 +550,7 @@ for an `auth_object` key in the options hash which can be used by your own
 overridden methods.
 
 Here is an example that puts all this together, adapted from
-[this blog post by Ernie Miller]
-(http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
+[this blog post by Ernie Miller](http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
 In an `Article` model, add the following `ransackable_attributes` class method
 (preferably private):
 
@@ -679,8 +674,7 @@ argument are not easily usable yet, because the array currently needs to be
 wrapped in an array to function (see
 [this issue](https://github.com/activerecord-hackery/ransack/issues/404)),
 which is not compatible with Ransack form helpers. For this use case, it may be
-better for now to use [ransackers]
-(https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead,
+better for now to use [ransackers](https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead,
 where feasible. Pull requests with solutions and tests are welcome!
 
 ### Grouping queries by OR instead of AND
