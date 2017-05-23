@@ -106,10 +106,7 @@ module Ransack
             self.values << val
           end
         when Hash
-          args.each do |index, attrs|
-            val = Value.new(@context, attrs[:value])
-            self.values << val
-          end
+          self.values = args.values.map { |a| a[:value] }.flatten
         else
           raise ArgumentError,
             "Invalid argument (#{args.class}) supplied to values="
