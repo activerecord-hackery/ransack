@@ -49,6 +49,13 @@ matrix:
     - rvm: 2.0
       env: RAILS=5-0-stable DB=postgres
 
+    - rvm: 2.0
+      env: RAILS=4-2-stable DB=sqlite3
+    - rvm: 2.0
+      env: RAILS=4-2-stable DB=mysql
+    - rvm: 2.0
+      env: RAILS=4-2-stable DB=postgres
+
   include:
     - rvm: 2.3.3
       env: RAILS=master DB=sqlite3
