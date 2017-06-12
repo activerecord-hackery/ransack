@@ -1,11 +1,8 @@
 # Ransack
 
-[![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)]
-(https://travis-ci.org/activerecord-hackery/ransack)
-[![Gem Version](https://badge.fury.io/rb/ransack.svg)]
-(http://badge.fury.io/rb/ransack)
-[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)]
-(https://codeclimate.com/github/activerecord-hackery/ransack)
+![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)
+![Gem Version](https://badge.fury.io/rb/ransack.svg)
+![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)
 
 Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search)
 created by [Ernie Miller](http://twitter.com/erniemiller)
