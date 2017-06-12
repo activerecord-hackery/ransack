@@ -329,6 +329,28 @@ module Ransack
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         expect(@s.result.to_sql).to match /#{field} IS NULL/
       end
+
+      describe 'with association qeury' do
+        it 'generates a value IS NOT NULL query' do
+          @s.comments_id_not_null = true
+          sql = @s.result.to_sql
+          parent_field = "#{quote_table_name("people")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{parent_field} IN/
+          field = "#{quote_table_name("comments")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{field} IS NOT NULL/
+          expect(sql).not_to match /AND NOT/
+        end
+
+        it 'generates a value IS NULL query when assigned false' do
+          @s.comments_id_not_null = false
+          sql = @s.result.to_sql
+          parent_field = "#{quote_table_name("people")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{parent_field} NOT IN/
+          field = "#{quote_table_name("comments")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{field} IS NULL/
+          expect(sql).to match /AND NOT/
+        end
+      end
     end
 
     describe 'present' do
