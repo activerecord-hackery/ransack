@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## Version 1.8.3 - 2017-06-15
 
 ### Added
 
