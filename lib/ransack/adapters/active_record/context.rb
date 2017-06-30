@@ -260,6 +260,8 @@ module Ransack
               :stashed_join
             when Arel::Nodes::Join
               :join_node
+            when BabySqueel::JoinExpression
+              :joining
             else
               raise 'unknown class: %s' % join.class.name
             end
