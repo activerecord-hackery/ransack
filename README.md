@@ -498,7 +498,7 @@ If you get the above error while using `distinct: true` that means that
 one of the columns that Ransack is selecting is a `json` column.
 PostgreSQL does not provide comparison operators for the `json` type.  While
 it is possible to work around this, in practice it's much better to convert those
-to `jsonb`, as [recommended by the PostgreSQL documentation](https://www.postgresql.org/docs/9.6/static/datatype-json.html)
+to `jsonb`, as [recommended by the PostgreSQL documentation](https://www.postgresql.org/docs/9.6/static/datatype-json.html).
 
 ### Authorization (whitelisting/blacklisting)
 
