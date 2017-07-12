@@ -48,6 +48,7 @@ module Ransack
     it 'should have default values for arrows' do
       expect(Ransack.options[:up_arrow]).to eq '&#9660;'
       expect(Ransack.options[:down_arrow]).to eq '&#9650;'
+      expect(Ransack.options[:default_arrow]).to eq nil
     end
 
     it 'changes the default value for the up arrow only' do
@@ -72,17 +73,31 @@ module Ransack
       Ransack.options = default
     end
 
-    it 'changes the default value for both arrows' do
+    it 'changes the default value for the default arrow only' do
+      default, new_default_arrow  = Ransack.options.clone, '<i class="default"></i>'
+
+      Ransack.configure { |c| c.custom_arrows = { default_arrow: new_default_arrow } }
+
+      expect(Ransack.options[:up_arrow]).to eq default[:up_arrow]
+      expect(Ransack.options[:down_arrow]).to eq default[:down_arrow]
+      expect(Ransack.options[:default_arrow]).to eq new_default_arrow
+
+      Ransack.options = default
+    end
+
+    it 'changes the default value for all arrows' do
       default        = Ransack.options.clone
       new_up_arrow   = '<i class="fa fa-long-arrow-up"></i>'
       new_down_arrow = 'U+02193'
+      new_default_arrow = 'defaultarrow'
 
       Ransack.configure do |c|
-        c.custom_arrows = { up_arrow: new_up_arrow, down_arrow: new_down_arrow }
+        c.custom_arrows = { up_arrow: new_up_arrow, down_arrow: new_down_arrow, default_arrow: new_default_arrow }
       end
 
       expect(Ransack.options[:up_arrow]).to eq new_up_arrow
       expect(Ransack.options[:down_arrow]).to eq new_down_arrow
+      expect(Ransack.options[:default_arrow]).to eq new_default_arrow
 
       Ransack.options = default
     end
