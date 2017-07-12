@@ -200,13 +200,18 @@ initially sorting the `last_name` field by ascending order, and the
 
 The sort link order indicator arrows may be globally customized by setting a
 `custom_arrows` option in an initializer file like
-`config/initializers/ransack.rb`:
+`config/initializers/ransack.rb`.
+
+You can also enable a `default_arrow` which is displayed on all sortable fields
+which are not currently used in the sorting. This is disabled by default so
+nothing will be displayed:
 
 ```ruby
 Ransack.configure do |c|
   c.custom_arrows = {
     up_arrow: '<i class="custom-up-arrow-icon"></i>',
-    down_arrow: 'U+02193'
+    down_arrow: 'U+02193',
+    default_arrow: '<i class="default-arrow-icon"></i>'
   }
 end
 ```
