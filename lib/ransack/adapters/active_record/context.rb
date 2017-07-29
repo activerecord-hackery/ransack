@@ -342,15 +342,25 @@ module Ransack
           def extract_joins(association)
             parent = @join_dependency.join_root
             reflection = association.reflection
-            join_constraints = association.join_constraints(
-              parent.table,
-              parent.base_klass,
-              association,
-              Arel::Nodes::OuterJoin,
-              association.tables,
-              reflection.scope_chain,
-              reflection.chain
-            )
+            join_constraints = if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_1
+                                 association.join_constraints(
+                                   parent.table,
+                                   parent.base_klass,
+                                   association,
+                                   Arel::Nodes::OuterJoin,
+                                   association.tables,
+                                   reflection.scope_chain,
+                                   reflection.chain
+                                 )
+                               else
+                                 association.join_constraints(
+                                   parent.table,
+                                   parent.base_klass,
+                                   Arel::Nodes::OuterJoin,
+                                   association.tables,
+                                   reflection.chain
+                                 )
+                               end
             join_constraints.to_a.flatten
           end
 
