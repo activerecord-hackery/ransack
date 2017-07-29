@@ -117,6 +117,10 @@ module Ransack
           Ransack.options[:down_arrow]
         end
 
+        def default_arrow
+          Ransack.options[:default_arrow]
+        end
+
         def name
           [ERB::Util.h(@label_text), order_indicator]
           .compact
@@ -209,7 +213,8 @@ module Ransack
           end
 
           def order_indicator
-            return if @hide_indicator || no_sort_direction_specified?
+            return if @hide_indicator
+            return default_arrow if no_sort_direction_specified?
             if @current_dir == 'desc'.freeze
               up_arrow
             else

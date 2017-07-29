@@ -12,6 +12,7 @@ module Ransack
       :hide_sort_order_indicators => false,
       :up_arrow => '&#9660;'.freeze,
       :down_arrow => '&#9650;'.freeze,
+      :default_arrow => nil,
       :sanitize_scope_args => true
     }
 
@@ -83,20 +84,25 @@ module Ransack
     #   up_arrow:   '&#9660;'
     #   down_arrow: '&#9650;'
     #
-    # One or both defaults may be globally overridden in an initializer file
+    # There is also a default arrow which is displayed if a column is not sorted.
+    # By default this is nil so nothing will be displayed.
+    #
+    # Any of the defaults may be globally overridden in an initializer file
     # like `config/initializers/ransack.rb` as follows:
     #
     # Ransack.configure do |config|
-    #   # Globally set the up arrow to an icon and the down arrow to unicode.
+    #   # Globally set the up arrow to an icon, and the down and default arrows to unicode.
     #   config.custom_arrows = {
     #     up_arrow:   '<i class="fa fa-long-arrow-up"></i>',
-    #     down_arrow: 'U+02193'
+    #     down_arrow: 'U+02193',
+    #     default_arrow: 'U+11047'
     #   }
     # end
     #
     def custom_arrows=(opts = {})
       self.options[:up_arrow] = opts[:up_arrow].freeze if opts[:up_arrow]
       self.options[:down_arrow] = opts[:down_arrow].freeze if opts[:down_arrow]
+      self.options[:default_arrow] = opts[:default_arrow].freeze if opts[:default_arrow]
     end
 
     # Ransack sanitizes many values in your custom scopes into booleans.
