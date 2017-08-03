@@ -36,6 +36,8 @@ module Ransack
           cast_to_float(value)
         when :decimal
           cast_to_decimal(value)
+        when :money
+          cast_to_money(value)
         else
           cast_to_string(value)
         end
@@ -95,6 +97,10 @@ module Ransack
        else
          val.to_s.to_d
        end
+      end
+      
+      def cast_to_money(val)
+        val.blank? ? nil : val.to_f.to_s
       end
 
       def inspect
