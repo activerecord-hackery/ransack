@@ -1,13 +1,15 @@
 require 'action_view'
 
-module ActionView::Helpers::Tags
-  # TODO: Find a better way to solve this issue!
-  # This patch is needed since this Rails commit:
-  # https://github.com/rails/rails/commit/c1a118a
-  class Base
-    private
-    def value(object)
-      object.send @method_name if object # use send instead of public_send
+if !Rails::VERSION::STRING.match? /^5\./
+  module ActionView::Helpers::Tags
+    # TODO: Find a better way to solve this issue!
+    # This patch is needed since this Rails commit:
+    # https://github.com/rails/rails/commit/c1a118a
+    class Base
+      private
+      def value
+        object.send @method_name if object # use send instead of public_send
+      end
     end
   end
 end
