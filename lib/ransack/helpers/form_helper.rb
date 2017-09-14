@@ -49,7 +49,7 @@ module Ransack
         unless Search === search
           raise TypeError, 'First argument must be a Ransack::Search!'
         end
-        args.unshift(capture(&block)) if block_given?
+        args[args.first.is_a?(Array) ? 1 : 0, 0] = capture(&block) if block_given?
         s = SortLink.new(search, attribute, args, params, &block)
         link_to(s.name, url(routing_proxy, s.url_options), s.html_options(args))
       end
