@@ -51,4 +51,5 @@ end
 group :test do
   # TestUnit was removed from Ruby 2.2 but still needed for testing Rails 3.x.
   gem 'test-unit', '~> 3.0' if RUBY_VERSION >= '2.2'
+  gem 'simplecov', :require => false
 end
