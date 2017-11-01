@@ -102,6 +102,15 @@ module Ransack
           end
         end
 
+        context 'negative condition where the joined association has a default scope' do
+          it 'applies the default scope' do
+            # Article has default_scope
+            s = Person.ransack(articles_title_not_eq: 'Breaking news')
+            sql = s.result.to_sql
+            expect(sql).to include "WHERE ('default_scope' = 'default_scope')"
+          end
+        end
+
         context 'negative conditions on HABTM associations' do
           let(:medieval) { Tag.create!(name: 'Medieval') }
           let(:fantasy)  { Tag.create!(name: 'Fantasy') }

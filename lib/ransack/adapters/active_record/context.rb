@@ -184,7 +184,7 @@ module Ransack
           join_table = join_root.left
           correlated_key = join_root.right.expr.left
           subquery = Arel::SelectManager.new(association.base_klass)
-          subquery.from(join_root.left)
+          subquery.from(join_table)
           subquery.project(correlated_key)
           join_constraints.each do |j|
             subquery.join_sources << Arel::Nodes::InnerJoin.new(j.left, j.right)

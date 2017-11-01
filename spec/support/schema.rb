@@ -157,12 +157,6 @@ module Namespace
   end
 end
 
-module Namespace
-  class Article < ::Article
-
-  end
-end
-
 class Comment < ActiveRecord::Base
   belongs_to :article
   belongs_to :person
