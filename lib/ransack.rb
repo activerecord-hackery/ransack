@@ -26,4 +26,6 @@ require 'ransack/translate'
 
 Ransack::Adapters.object_mapper.require_adapter
 
-ActionController::Base.helper Ransack::Helpers::FormHelper
+ActiveSupport.on_load(:action_controller) do
+  ActionController::Base.helper Ransack::Helpers::FormHelper
+end
