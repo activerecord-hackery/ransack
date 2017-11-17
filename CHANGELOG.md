@@ -1,5 +1,30 @@
 # Change Log
 
+## Version 1.8.4 - 2017-10-09
+
+### Added
+
+*   Added italian translations.
+    PR [#833](https://github.com/activerecord-hackery/ransack/pull/833).
+
+*   Add an optional default arrow for unsorted fields.
+    PR [#816](https://github.com/activerecord-hackery/ransack/pull/816/files).
+
+### Fixed
+
+*   Cast Postgres money type to float.
+    PR [#823](https://github.com/activerecord-hackery/ransack/pull/823).
+
+*   Fix the bug in sort_link, which causes the multiple fields option to be
+    ignored when block parameter is specified.
+    PR [#818](https://github.com/activerecord-hackery/ransack/pull/818).
+
+*   No need pass some arugments to JoinAssociation#join_constraints in Rails 5.1.
+    PR [#814](https://github.com/activerecord-hackery/ransack/pull/814).
+    Fixes [#807](https://github.com/activerecord-hackery/ransack/issues/807). 
+    Reference [rails/rails#28267](https://github.com/rails/rails/pull/28267)
+    and [rails/rails#27851](https://github.com/rails/rails/pull/27851).
+
 ## Version 1.8.3 - 2017-06-15
 
 ### Added
