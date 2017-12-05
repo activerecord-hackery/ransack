@@ -45,12 +45,8 @@ module Ransack
     end
 
     def chain_scope(scope, args)
-      return unless @klass.method(scope) && args != false
-      @object = if scope_arity(scope) < 1 && args == true
-                  @object.public_send(scope)
-                else
-                  @object.public_send(scope, *args)
-                end
+      return unless @klass.method(scope)
+      @object = @object.public_send(scope, *args)
     end
 
     def scope_arity(scope)
