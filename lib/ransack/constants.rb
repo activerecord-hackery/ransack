@@ -47,6 +47,7 @@ module Ransack
 
     RAILS_4_1           = '4.1'.freeze
     RAILS_5_1           = '5.1'.freeze
+    RAILS_5_2           = '5.2'.freeze
 
     RANSACK_SLASH_SEARCHES = 'ransack/searches'.freeze
     RANSACK_SLASH_SEARCHES_SLASH_SEARCH = 'ransack/searches/search'.freeze
