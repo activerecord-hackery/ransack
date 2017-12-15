@@ -24,7 +24,7 @@ module Ransack
     JOIN_NODE           = 'join_node'.freeze
 
     TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
-    FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
+    FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE', nil].to_set
     BOOLEAN_VALUES = (TRUE_VALUES + FALSE_VALUES).freeze
 
     AND_OR              = ['and'.freeze, 'or'.freeze].freeze
