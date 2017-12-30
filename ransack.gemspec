@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.name        = "ransack"
   s.version     = Ransack::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Ernie Miller", "Ryan Bigg", "Jon Atack"]
-  s.email       = ["ernie@erniemiller.org", "radarlistener@gmail.com", "jonnyatack@gmail.com"]
+  s.authors     = ["Ernie Miller", "Ryan Bigg", "Jon Atack","Sean Carroll"]
+  s.email       = ["ernie@erniemiller.org", "radarlistener@gmail.com", "jonnyatack@gmail.com","sfcarroll@gmail.com"]
   s.homepage    = "https://github.com/activerecord-hackery/ransack"
   s.summary     = %q{Object-based searching for Active Record and Mongoid (currently).}
   s.description = %q{Ransack is the successor to the MetaSearch gem. It improves and expands upon MetaSearch's functionality, but does not have a 100%-compatible API.}
@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'activerecord', '>= 3.0'
   s.add_dependency 'activesupport', '>= 3.0'
   s.add_dependency 'i18n'
-  s.add_dependency 'polyamorous', '~> 1.3'
+  s.add_dependency 'polyamorous', '~> 1.3.2'
   s.add_development_dependency 'rspec', '~> 3'
   s.add_development_dependency 'machinist', '~> 1.0.6'
   s.add_development_dependency 'faker', '~> 0.9.5'
