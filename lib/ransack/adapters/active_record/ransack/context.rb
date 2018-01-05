@@ -30,7 +30,9 @@ module Ransack
       @associations_pot = {}
       @lock_associations = []
 
-      if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
+      if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_5_2
+        @base = @join_dependency.instance_variable_get(:@join_root)
+      elsif ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
         @base = @join_dependency.join_root
         @engine = @base.base_klass.arel_engine
       else
@@ -38,9 +40,16 @@ module Ransack
         @engine = @base.arel_engine
       end
 
-      @default_table = Arel::Table.new(
-        @base.table_name, as: @base.aliased_table_name, type_caster: self
+      if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_5_2
+        @default_table = Arel::Table.new(
+          @base.table_name, as: @base.base_klass.table_name, type_caster: self
         )
+      else
+        @default_table = Arel::Table.new(
+          @base.table_name, as: @base.aliased_table_name, type_caster: self
+        )
+      end
+
       @bind_pairs = Hash.new do |hash, key|
         parent, attr_name = get_parent_and_attribute_name(key)
         if parent && attr_name
