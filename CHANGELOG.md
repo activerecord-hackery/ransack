@@ -1,5 +1,22 @@
 # Change Log
 
+## Version 1.8.6 - 2018-01-23
+
+### Added
+
+* Improve memory usage
+  PR [#820](https://github.com/activerecord-hackery/ransack/pull/820)
+
+* Bump Polyamorous version to 1.3.2
+  PR [#858](https://github.com/activerecord-hackery/ransack/pull/858)
+
+## Version 1.8.5
+
+### Added  
+
+* Added Turkish Translations
+  PR [#835](https://github.com/activerecord-hackery/ransack/issues/835).
+
 ## Version 1.8.4 - 2017-10-09
 
 ### Added
@@ -21,7 +38,7 @@
 
 *   No need pass some arugments to JoinAssociation#join_constraints in Rails 5.1.
     PR [#814](https://github.com/activerecord-hackery/ransack/pull/814).
-    Fixes [#807](https://github.com/activerecord-hackery/ransack/issues/807). 
+    Fixes [#807](https://github.com/activerecord-hackery/ransack/issues/807).
     Reference [rails/rails#28267](https://github.com/rails/rails/pull/28267)
     and [rails/rails#27851](https://github.com/rails/rails/pull/27851).
 
