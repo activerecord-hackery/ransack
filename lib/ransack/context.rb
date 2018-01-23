@@ -40,7 +40,7 @@ module Ransack
     # Convert a string representing a chain of associations and an attribute
     # into the attribute itself
     def contextualize(str)
-      parent, attr_name = @bind_pairs[str]
+      parent, attr_name = bind_pair_for(str)
       table_for(parent)[attr_name]
     end
 
@@ -59,24 +59,24 @@ module Ransack
 
     def bind(object, str)
       return nil unless str
-      object.parent, object.attr_name = @bind_pairs[str]
+      object.parent, object.attr_name = bind_pair_for(str)
     end
 
     def traverse(str, base = @base)
       str ||= ''.freeze
 
-      if (segments = str.split(/_/)).size > 0
+      if (segments = str.split(Constants::UNDERSCORE)).size > 0
         remainder = []
         found_assoc = nil
         while !found_assoc && segments.size > 0 do
           # Strip the _of_Model_type text from the association name, but hold
           # onto it in klass, for use as the next base
           assoc, klass = unpolymorphize_association(
-            segments.join('_'.freeze)
+            segments.join(Constants::UNDERSCORE)
             )
           if found_assoc = get_association(assoc, base)
             base = traverse(
-              remainder.join('_'.freeze), klass || found_assoc.klass
+              remainder.join(Constants::UNDERSCORE), klass || found_assoc.klass
               )
           end
 
@@ -93,9 +93,9 @@ module Ransack
       base = klassify(base)
       str ||= ''.freeze
       path = []
-      segments = str.split(/_/)
+      segments = str.split(Constants::UNDERSCORE)
       association_parts = []
-      if (segments = str.split(/_/)).size > 0
+      if (segments = str.split(Constants::UNDERSCORE)).size > 0
         while segments.size > 0 &&
         !base.columns_hash[segments.join(Constants::UNDERSCORE)] &&
         association_parts << segments.shift do
@@ -135,7 +135,7 @@ module Ransack
     end
 
     def ransackable_scope?(str, klass)
-      klass.ransackable_scopes(auth_object).any? { |s| s.to_s == str }
+      klass.ransackable_scopes(auth_object).any? { |s| s.to_sym == str.to_sym }
     end
 
     def searchable_attributes(str = ''.freeze)

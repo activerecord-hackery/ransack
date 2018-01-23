@@ -9,34 +9,26 @@ module Ransack
         Ransack.predicates.keys
       end
 
-      def names_by_decreasing_length
-        names.sort { |a, b| b.length <=> a.length }
-      end
-
       def named(name)
         Ransack.predicates[name.to_s]
       end
 
       def detect_and_strip_from_string!(str)
-        if p = detect_from_string(str)
-          str.sub! /_#{p}$/, ''.freeze
-          p
+        detect_from_string str, chomp: true
+      end
+
+      def detect_from_string(str, chomp: false)
+        return unless str
+
+        Ransack.predicates.sorted_names_with_underscores.each do |predicate, underscored|
+          if str.end_with? underscored
+            str.chomp! underscored if chomp
+            return predicate
+          end
         end
+
+        nil
       end
-
-      def detect_from_string(str)
-        names_by_decreasing_length.detect { |p| str.end_with?("_#{p}") }
-      end
-
-#      def name_from_attribute_name(attribute_name)
-#        names_by_decreasing_length.detect {
-#          |p| attribute_name.to_s.match(/_#{p}$/)
-#        }
-#      end
-
-#      def for_attribute_name(attribute_name)
-#        self.named(detect_from_string(attribute_name.to_s))
-#      end
 
     end
 

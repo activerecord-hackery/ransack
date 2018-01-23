@@ -24,8 +24,8 @@ module Ransack
       base_ancestors = base_class.ancestors.select {
         |x| x.respond_to?(:model_name)
       }
-      predicate = Predicate.detect_from_string(original_name)
-      attributes_str = original_name.sub(/_#{predicate}$/, ''.freeze)
+      attributes_str = original_name.dup # will be modified by ⬇
+      predicate = Predicate.detect_and_strip_from_string!(attributes_str)
       attribute_names = attributes_str.split(/_and_|_or_/)
       combinator = attributes_str.match(/_and_/) ? :and : :or
       defaults = base_ancestors.map do |klass|

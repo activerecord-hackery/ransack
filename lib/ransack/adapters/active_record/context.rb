@@ -45,7 +45,7 @@ module Ransack
           exists = false
           if ransackable_attribute?(str, klass)
             exists = true
-          elsif (segments = str.split(/_/)).size > 1
+          elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
             found_assoc = nil
             while !found_assoc && remainder.unshift(segments.pop) &&
@@ -268,7 +268,8 @@ module Ransack
           association_joins         = buckets[:association_join]
           stashed_association_joins = buckets[:stashed_join]
           join_nodes                = buckets[:join_node].uniq
-          string_joins              = buckets[:string_join].map(&:strip).uniq
+          string_joins              = buckets[:string_join].map(&:strip)
+          string_joins.uniq!
 
           join_list =
             if ::ActiveRecord::VERSION::MAJOR >= 5
@@ -295,10 +296,9 @@ module Ransack
         end
 
         def convert_join_strings_to_ast(table, joins)
+          joins.map! { |join| table.create_string_join(Arel.sql(join)) unless join.blank? }
+          joins.compact!
           joins
-          .flatten
-          .reject(&:blank?)
-          .map { |join| table.create_string_join(Arel.sql(join)) }
         end
 
         def build_or_find_association(name, parent = @base, klass = nil)

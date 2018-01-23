@@ -191,7 +191,7 @@ module Ransack
       end
 
       def strip_predicate_and_index(str)
-        string = str.split(/\(/).first
+        string = str[/(.+?)\(/, 1] || str.dup
         Predicate.detect_and_strip_from_string!(string)
         string
       end

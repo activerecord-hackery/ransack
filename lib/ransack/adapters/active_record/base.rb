@@ -32,7 +32,7 @@ module Ransack
         # For overriding with a whitelist array of strings.
         #
         def ransackable_attributes(auth_object = nil)
-          if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
+          @ransackable_attributes ||= if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
             column_names + _ransackers.keys + _ransack_aliases.keys +
             attribute_aliases.keys
           else
@@ -45,7 +45,7 @@ module Ransack
         # For overriding with a whitelist array of strings.
         #
         def ransackable_associations(auth_object = nil)
-          reflect_on_all_associations.map { |a| a.name.to_s }
+          @ransackable_associations ||= reflect_on_all_associations.map { |a| a.name.to_s }
         end
 
         # Ransortable_attributes, by default, returns the names

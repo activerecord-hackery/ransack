@@ -5,7 +5,27 @@ module Ransack
   module Configuration
 
     mattr_accessor :predicates, :options
-    self.predicates = {}
+
+    class PredicateCollection
+      attr_reader :sorted_names_with_underscores
+
+      def initialize
+        @collection = {}
+        @sorted_names_with_underscores = []
+      end
+
+      delegate :[], :keys, :has_key?, to: :@collection
+
+      def []=(key, value)
+        @sorted_names_with_underscores << [key, '_' + key]
+        @sorted_names_with_underscores.sort! { |(a, _), (b, _)| b.length <=> a.length }
+
+        @collection[key] = value
+      end
+    end
+
+    self.predicates = PredicateCollection.new
+
     self.options = {
       :search_key => :q,
       :ignore_unknown_conditions => true,

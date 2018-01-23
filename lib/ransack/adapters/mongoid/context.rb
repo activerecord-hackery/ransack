@@ -34,7 +34,7 @@ module Ransack
 
           name = '_id' if name == 'id'
 
-          t = object.klass.fields[name].try(:type) || @bind_pairs[attr.name].first.fields[name].type
+          t = object.klass.fields[name].try(:type) || bind_pair_for(attr.name).first.fields[name].type
 
           t.to_s.demodulize.underscore.to_sym
         end
@@ -61,7 +61,7 @@ module Ransack
           exists = false
           if ransackable_attribute?(str, klass)
             exists = true
-          elsif (segments = str.split(/_/)).size > 1
+          elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
             found_assoc = nil
             while !found_assoc && remainder.unshift(
@@ -111,7 +111,7 @@ module Ransack
 
           if ransackable_attribute?(str, klassify(parent))
             attr_name = str
-          elsif (segments = str.split(/_/)).size > 1
+          elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
             found_assoc = nil
             while remainder.unshift(
