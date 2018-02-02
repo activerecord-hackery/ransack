@@ -384,7 +384,7 @@ module Ransack
           end
 
           def find_association(name, parent = @base, klass = nil)
-            found_association = @join_dependency.join_associations
+            @join_dependency.join_associations
             .detect do |assoc|
               assoc.reflection.name == name &&
               assoc.parent == parent &&
