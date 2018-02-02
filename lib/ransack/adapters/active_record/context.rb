@@ -181,7 +181,6 @@ module Ransack
         def build_correlated_subquery(association)
           join_constraints = extract_joins(association)
           join_root = join_constraints.shift
-          join_table = join_root.left
           correlated_key = join_root.right.expr.left
           subquery = Arel::SelectManager.new(association.base_klass)
           subquery.from(join_root.left)
