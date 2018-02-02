@@ -104,7 +104,7 @@ module Ransack
       case ActiveRecord::Base.connection.adapter_name
       when "Mysql2".freeze, "PostgreSQL".freeze
         # Necessary for PostgreSQL and MySQL
-        unescaped.to_s.gsub(/([\\|\%|_|.])/, '\\\\\\1')
+        unescaped.to_s.gsub(/([\\%_.])/, '\\\\\\1')
       else
         unescaped
       end
