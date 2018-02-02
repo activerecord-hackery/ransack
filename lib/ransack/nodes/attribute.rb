@@ -5,7 +5,7 @@ module Ransack
 
       attr_reader :name, :ransacker_args
 
-      delegate :blank?, :present?, :==, :to => :name
+      delegate :blank?, :present?, :to => :name
       delegate :engine, :to => :context
 
       def initialize(context, name = nil, ransacker_args = [])
