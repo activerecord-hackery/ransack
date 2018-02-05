@@ -33,8 +33,8 @@ module Ransack
           predicate = attribute.attr.public_send(arel_pred, arel_values)
 
           if in_predicate?(predicate)
-            predicate.right = predicate.right.map do |predicate|
-              casted_array?(predicate) ? format_values_for(predicate) : predicate
+            predicate.right = predicate.right.map do |pr|
+              casted_array?(pr) ? format_values_for(pr) : pr
             end
           end
 

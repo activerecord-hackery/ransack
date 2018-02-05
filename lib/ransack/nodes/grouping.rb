@@ -68,7 +68,6 @@ module Ransack
       def respond_to?(method_id)
         super or begin
           method_name = method_id.to_s
-          writer = method_name.sub!(/\=$/, ''.freeze)
           attribute_method?(method_name) ? true : false
         end
       end

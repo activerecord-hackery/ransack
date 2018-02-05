@@ -243,7 +243,7 @@ module Ransack
             Translate.association(base, :context => object.context),
             collection_for_base(action, base)
           ]
-        rescue UntraversableAssociationError => e
+        rescue UntraversableAssociationError
           nil
         end
       end
