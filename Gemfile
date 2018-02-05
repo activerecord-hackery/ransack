@@ -38,6 +38,9 @@ else
   if rails == '3-0-stable'
     gem 'mysql2', '< 0.3'
   end
+  if rails == '5-2-stable'
+    gem 'mysql2', '~> 0.4.4'
+  end
 end
 
 if ENV['DB'] =~ /mongoid4/
