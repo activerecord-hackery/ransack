@@ -290,7 +290,7 @@ module Ransack
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(::ActiveRecord::Base.connection, relation.table.name, join_list)
             join_dependency = JoinDependency.new(relation.klass, relation.table, association_joins, alias_tracker)
             join_nodes.each do |join|
-              join_dependency.alias_tracker.aliases[join.left.name.downcase] = 1
+              join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
             end
           end
 
