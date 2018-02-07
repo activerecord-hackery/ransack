@@ -96,6 +96,10 @@ class Person < ActiveRecord::Base
     Arel.sql('people.id')
   end
 
+  ransacker :name_case_insensitive, type: :string do
+    arel_table[:name].lower
+  end
+
   ransacker :with_arguments, args: [:parent, :ransacker_args] do |parent, args|
     min, max = args
     query = <<-SQL
