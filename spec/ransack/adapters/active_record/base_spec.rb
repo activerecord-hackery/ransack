@@ -505,6 +505,7 @@ module Ransack
             )
           end
 
+
           it 'should allow passing ransacker arguments to a ransacker' do
             s = Person.ransack(
               c: [{
