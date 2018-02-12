@@ -25,13 +25,13 @@ module Ransack
 
         def type_for(attr)
           return nil unless attr && attr.valid?
-          name         = attr.arel_attribute.name.to_s
-          table        = attr.arel_attribute.relation.table_name
-          schema_cache = ::ActiveRecord::Base.connection.schema_cache
-          unless schema_cache.send(database_table_exists?, table)
-            raise "No table named #{table} exists."
+          name        = attr.arel_attribute.name.to_s
+          table       = attr.arel_attribute.relation.table_name
+          connection  = attr.klass.connection
+          unless connection.table_exists?(table)
+            raise "No table named #{table} exists"
           end
-          schema_cache.columns_hash(table)[name].type
+          connection.schema_cache.columns_hash(table)[name].type
         end
 
         def evaluate(search, opts = {})
