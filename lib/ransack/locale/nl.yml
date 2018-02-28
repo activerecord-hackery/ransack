@@ -35,7 +35,7 @@ nl:
       gt: "groter dan"
       gt_any: "groter dan enig"
       gt_all: "groter dan alle"
-      gteq: "groter dan or equal to"
+      gteq: "groter dan of gelijk aan"
       gteq_any: "groter dan or equal to enig"
       gteq_all: "groter dan or equal to alle"
       in: "in"
