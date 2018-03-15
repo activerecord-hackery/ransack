@@ -261,3 +261,30 @@ module Schema
     )
   end
 end
+
+module SubDB
+  class Base < ActiveRecord::Base
+    self.abstract_class = true
+    establish_connection(
+      adapter: 'sqlite3',
+      database: ':memory:'
+    )
+  end
+
+  class OperationHistory < Base
+  end
+
+  module Schema
+    def self.create
+      s = ::ActiveRecord::Schema.new
+      s.instance_variable_set(:@connection, SubDB::Base.connection)
+      s.verbose = false
+      s.define({}) do
+        create_table :operation_histories, force: true do |t|
+          t.string  :operation_type
+          t.integer :people_id
+        end
+      end
+    end
+  end
+end

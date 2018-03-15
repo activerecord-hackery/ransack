@@ -37,6 +37,7 @@ RSpec.configure do |config|
     line = '=' * message.length
     puts line, message, line
     Schema.create
+    SubDB::Schema.create
   end
 
   config.before(:all)   { Sham.reset(:before_all) }
