@@ -18,6 +18,13 @@ module Ransack
             expect(subject.object).to be_an ::ActiveRecord::Relation
           end
 
+          context "multiple database connection" do
+            it "does not raise error" do
+              expect { Person.ransack(name_cont: "test") }.not_to raise_error
+              expect { SubDB::OperationHistory.ransack(people_id_eq: 1) }.not_to raise_error
+            end
+          end
+
           context 'with scopes' do
             before do
               allow(Person)

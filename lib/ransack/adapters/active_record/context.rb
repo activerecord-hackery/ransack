@@ -27,7 +27,7 @@ module Ransack
           return nil unless attr && attr.valid?
           name         = attr.arel_attribute.name.to_s
           table        = attr.arel_attribute.relation.table_name
-          schema_cache = ::ActiveRecord::Base.connection.schema_cache
+          schema_cache = self.klass.connection.schema_cache
           unless schema_cache.send(database_table_exists?, table)
             raise "No table named #{table} exists."
           end
@@ -290,7 +290,7 @@ module Ransack
               join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
             end
           else
-            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(::ActiveRecord::Base.connection, relation.table.name, join_list)
+            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
             join_dependency = JoinDependency.new(relation.klass, relation.table, association_joins, alias_tracker)
             join_nodes.each do |join|
               join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
@@ -333,7 +333,7 @@ module Ransack
               )
               found_association = jd.join_root.children.last
             else
-              alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(::ActiveRecord::Base.connection, parent.table.name, [])
+              alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, parent.table.name, [])
               jd = JoinDependency.new(
                 parent.base_klass,
                 parent.base_klass.arel_table,
