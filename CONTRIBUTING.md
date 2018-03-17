@@ -75,6 +75,15 @@ Here's a quick guide:
         $ DB=pg bundle exec rake spec (`DB=postgres` & `DB=postgresql` work too)
         $ DB=mysql bundle exec rake spec
 
+   For Postgres and MySQL, databases are expected to exist, called 'ransack'. To create use these commands (assuming OS X and Homebrew):
+
+   ### Postgres
+       $ createdb ransack 
+
+   ### MySQL
+       $ mysql -u root
+       mysql> create database ransack;     
+
    To run only the tests in a particular file: `rspec <path/to/filename>`
 
         $ rspec spec/ransack/search_spec.rb
