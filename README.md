@@ -411,6 +411,7 @@ query parameters in your URLs.
 List of all possible predicates
 
 
+| Predicate | Description | Notes |
 | ------------- | ------------- |-------- |
 | `*_eq`  | equal  | |
 | `*_not_eq` | not equal | |
@@ -462,6 +463,7 @@ List of all possible predicates
 | `*_not_cont_all` | Does not contain all of | |
 | `*_true` | is true | |
 | `*_false` | is false | |
+
 
 (See full list: https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/locale/en.yml#L15 and [wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching))
 
