@@ -27,13 +27,11 @@ instead.
 If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (1.8.2).](https://github.com/activerecord-hackery/ransack/tree/v1.8.2)
+[View documentation for the last release (1.8.8).](https://github.com/activerecord-hackery/ransack/tree/v1.8.8)
 
 ## Getting started
 
-Ransack is compatible with Rails 3, 4 and 5 on Ruby 1.9 and later.
-JRuby 9 ought to work as well (see
-[this](https://github.com/activerecord-hackery/polyamorous/issues/17)).
+Ransack is compatible with Rails 4.2 and 5.0, 5.1 and 5.2 on Ruby 2.2 and later.
 If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
 issues, you can use an earlier version of Ransack, say, up to 1.3.0.
 
@@ -412,28 +410,58 @@ query parameters in your URLs.
 
 List of all possible predicates
 
-* `*_eq` - equal
-* `*_not_eq` - not equal
-* `*_matches` - matches with `LIKE`, e.g. `q[email_matches]=%@gmail.com`
-* Also: `*_does_not_match`, `*_matches_any`, `*_matches_all`, `*_does_not_match_any`, `*_does_not_match_all`
-* `*_lt` - less than
-* `*_lteq` - less than or equal
-* `*_gt` - greater than
-* `*_gteq` - greater than or equal
-* `*_present` - not null and not empty, e.g. `q[name_present]=1` (SQL: `col is not null AND col != ''`)
-* `*_blank` - is null or empty. (SQL: `col is null OR col = ''`)
-* `*_null`, `*_not_null` - is null, is not null
-* `*_in` - match any values in array, e.g. `q[name_in][]=Alice&q[name_in][]=Bob`
-* `*_not_in` - match none of values in array
-* `*_lt_any`, `*_lteq_any`, `*_gt_any`, `*_gteq_any` - Compare to list of values, at least positive. (SQL: `col > value1 OR col > value2`)
-* `*_matches_any`, `*_does_not_match_any` - same as above but with `LIKE`
-* `*_lt_all`, `*_lteq_all`, `*_gt_all`, `*_gteq_all` - Compare to list of values, all positive. (SQL: `col > value1 AND col > value2`)
-* `*_matches_all`, `*_does_not_match_all` - same as above but with `LIKE`
-* `*_not_eq_all` - none of values in a set
-* `*_start`, `*_not_start`, `*_start_any`, `*_start_all`, `*_not_start_any`, `*_not_start_all` - start with, (SQL: `col LIKE 'value%'`)
-* `*_end`, `*_not_end`, `*_end_any`, `*_end_all`, `*_not_end_any`, `*_not_end_all` - end with, (SQL: `col LIKE '%value'`)
-* `*_cont`, `*_cont_any`, `*_cont_all`, `*_not_cont`, `*_not_cont_any`, `*_not_cont_all` - contains value, using `LIKE`
-* `*_true`, `*_false` - is true and is false
+
+| ------------- | ------------- |-------- |
+| `*_eq`  | equal  | |
+| `*_not_eq` | not equal | |
+| `*_matches` | matches with `LIKE` | e.g. `q[email_matches]=%@gmail.com`|
+| `*_does_not_match` | does not match with `LIKE` | |
+| `*_matches_any` | Matches any | |
+| `*_matches_all` | Matches all  | |
+| `*_does_not_match_any` | Does not match any | |
+| `*_does_not_match_all` | Does not match all | |
+| `*_lt` | less than | |
+| `*_lteq` | less than or equal | |
+| `*_gt` | greater than | |
+| `*_gteq` | greater than or equal | |
+| `*_present` | not null and not empty | e.g. `q[name_present]=1` (SQL: `col is not null AND col != ''`) |
+| `*_blank` | is null or empty. | (SQL: `col is null OR col = ''`) |
+| `*_null` | is null | |
+| `*_not_null` | is not null | |
+| `*_in` | match any values in array | e.g. `q[name_in][]=Alice&q[name_in][]=Bob` |
+| `*_not_in` | match none of values in array | |
+| `*_lt_any` | Less than any |  SQL: `col < value1 OR col < value2` |
+| `*_lteq_any` | Less than or equal to any | |
+| `*_gt_any` | Greater than any | |
+| `*_gteq_any` | Greater than or equal to any | |
+| `*_matches_any` | `*_does_not_match_any` | same as above but with `LIKE` |
+| `*_lt_all` | Less than all | SQL: `col < value1 AND col < value2` |
+| `*_lteq_all` | Less than or equal to all | |
+| `*_gt_all` | Greater than all | |
+| `*_gteq_all` | Greater than or equal to all | |
+| `*_matches_all` | Matches all | same as above but with `LIKE` |
+| `*_does_not_match_all` | Does not match all | |
+| `*_not_eq_all` | none of values in a set | |
+| `*_start` | Starts with | SQL: `col LIKE 'value%'` |
+| `*_not_start` | Does not start with | |
+| `*_start_any` | Starts with any of | |
+| `*_start_all` | Starts with all of | |
+| `*_not_start_any` | Does not start with any of | |
+| `*_not_start_all` | Does not start with all of | |
+| `*_end` | Ends with | SQL: `col LIKE '%value'` |
+| `*_not_end` | Does not end with | |
+| `*_end_any` | Ends with any of | |
+| `*_end_all` | Ends with all of | |
+| `*_not_end_any` | | |
+| `*_not_end_all` | | |
+| `*_cont` | Contains value | uses `LIKE` |
+| `*_cont_any` | Contains any of | |
+| `*_cont_all` | Contains all of | |
+| `*_not_cont` | Does not contain |
+| `*_not_cont_any` | Does not contain any of | |
+| `*_not_cont_all` | Does not contain all of | |
+| `*_true` | is true | |
+| `*_false` | is false | |
 
 (See full list: https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/locale/en.yml#L15 and [wiki](https://github.com/activerecord-hackery/ransack/wiki/Basic-Searching))
 

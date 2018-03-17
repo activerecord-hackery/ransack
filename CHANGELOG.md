@@ -1,5 +1,29 @@
 # Change Log
 
+## Version 1.8.8 - 2018-03-16
+* Fix multiple database support
+  PR [#893](https://github.com/activerecord-hackery/ransack/pull/893)
+
+* Updated Dutch translations
+  PR [#887](https://github.com/activerecord-hackery/ransack/pull/887)
+
+* Fixed no method error 'asc' for Rails 4.2
+  PR [#885](https://github.com/activerecord-hackery/ransack/pull/885)
+
+
+## Version 1.8.7 - 2018-02-05
+
+* Rails 5.2 support
+  PR [#868](https://github.com/activerecord-hackery/ransack/pull/868)
+ 
+* Lock pg gem to 0.21 to support older releases
+
+* Warnings cleanup
+  PR [#867](https://github.com/activerecord-hackery/ransack/pull/867)
+
+* Wildcard escaping
+  PR [#866] 
+
 ## Version 1.8.6 - 2018-01-23
 
 ### Added
