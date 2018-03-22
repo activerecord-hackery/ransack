@@ -513,7 +513,7 @@ def index
 end
 ```
 
-Yet another mehtod to solve such problem with Postgresql is to use ActiveRecords's `.includes` in combination with `.group` instead of `distinct: true`.
+Another method to approach this when using Postgresql is to use ActiveRecords's `.includes` in combination with `.group` instead of `distinct: true`.
 
 For example:
 ```ruby
