@@ -513,6 +513,20 @@ def index
 end
 ```
 
+Yet another mehtod to solve such problem with Postgresql is to use ActiveRecords`s `.includes` in combination with `.group` instead of `distinct: true`.
+
+For example:
+```ruby
+def index
+  @q = Person.ransack(params[:q])
+  @people = @q.result
+              .group('persons.id')
+              .includes(:articles)
+              .page(params[:page])
+end
+
+```
+
 A final way of last resort is to call `to_a.uniq` on the collection at the end
 with the caveat that the de-duping is taking place in Ruby instead of in SQL,
 which is potentially slower and uses more memory, and that it may display
