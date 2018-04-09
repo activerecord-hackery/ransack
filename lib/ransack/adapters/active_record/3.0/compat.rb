@@ -16,9 +16,12 @@ end
 
 class ::ActiveRecord::Associations::ClassMethods::JoinDependency::JoinBase
   def table
-    Arel::Table.new(table_name, :as      => aliased_table_name,
-                                :engine  => active_record.arel_engine,
-                                :columns => active_record.columns)
+    Arel::Table.new(
+      table_name,
+      :as      => aliased_table_name,
+      :engine  => active_record.arel_engine,
+      :columns => active_record.columns
+      )
   end
 end
 
@@ -120,9 +123,9 @@ module Arel
       def column_cache
         @column_cache ||= Hash.new do |hash, key|
           hash[key] = Hash[
-            @engine.connection.columns(key, "#{key} Columns").map do |c|
-              [c.name, c]
-            end
+            @engine.connection
+            .columns(key, "#{key} Columns")
+            .map { |c| [c.name, c] }
           ]
         end
       end
@@ -135,16 +138,16 @@ module Arel
         "#{
           o.name
           }(#{
-          o.distinct ? 'DISTINCT ' : ''
+          o.distinct ? Ransack::Constants::DISTINCT : ''.freeze
           }#{
-          o.expressions.map { |x| visit x }.join(', ')
+          o.expressions.map { |x| visit x }.join(', '.freeze)
           })#{
-          o.alias ? " AS #{visit o.alias}" : ''
+          o.alias ? " AS #{visit o.alias}" : ''.freeze
           }"
       end
 
       def visit_Arel_Nodes_And o
-        o.children.map { |x| visit x }.join ' AND '
+        o.children.map { |x| visit x }.join(' AND '.freeze)
       end
 
       def visit_Arel_Nodes_Not o
@@ -161,7 +164,7 @@ module Arel
             quote(value, attr && column_for(attr))
           end
         }
-        .join ', '
+        .join(', '.freeze)
         })"
       end
     end

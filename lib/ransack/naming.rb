@@ -20,6 +20,10 @@ module Ransack
     def to_model
       self
     end
+
+    def model_name
+      self.class.model_name
+    end
   end
 
   class Name < String
@@ -28,16 +32,16 @@ module Ransack
     alias_method :cache_key, :collection
 
     def initialize
-      super("Search")
-      @singular = "search".freeze
-      @plural = "searches".freeze
-      @element = "search".freeze
-      @human = "Search".freeze
-      @collection = "ransack/searches".freeze
-      @partial_path = "#{@collection}/#{@element}".freeze
-      @param_key = "q".freeze
-      @route_key = "searches".freeze
-      @i18n_key = :ransack
+      super(Constants::CAP_SEARCH)
+      @singular     = Constants::SEARCH
+      @plural       = Constants::SEARCHES
+      @element      = Constants::SEARCH
+      @human        = Constants::CAP_SEARCH
+      @collection   = Constants::RANSACK_SLASH_SEARCHES
+      @partial_path = Constants::RANSACK_SLASH_SEARCHES_SLASH_SEARCH
+      @param_key    = Constants::Q
+      @route_key    = Constants::SEARCHES
+      @i18n_key     = :ransack
     end
   end
 

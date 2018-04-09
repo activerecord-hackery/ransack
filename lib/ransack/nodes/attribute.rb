@@ -3,25 +3,29 @@ module Ransack
     class Attribute < Node
       include Bindable
 
-      attr_reader :name
+      attr_reader :name, :ransacker_args
 
-      delegate :blank?, :present?, :==, :to => :name
+      delegate :blank?, :present?, :to => :name
       delegate :engine, :to => :context
 
-      def initialize(context, name = nil)
+      def initialize(context, name = nil, ransacker_args = [])
         super(context)
         self.name = name unless name.blank?
+        @ransacker_args = ransacker_args
       end
 
       def name=(name)
         @name = name
-        context.bind(self, name) unless name.blank?
       end
 
       def valid?
         bound? && attr &&
         context.klassify(parent).ransackable_attributes(context.auth_object)
-        .include?(attr_name)
+        .include?(attr_name.split('.').last)
+      end
+
+      def associated_collection?
+        parent.respond_to?(:reflection) && parent.reflection.collection?
       end
 
       def type

@@ -9,9 +9,10 @@ module Ransack
 
       class << self
         def extract(context, key, values)
-          attributes, predicate = extract_attributes_and_predicate(key)
+          attributes, predicate, combinator =
+            extract_values_for_condition(key, context)
+
           if attributes.size > 0 && predicate
-            combinator = key.match(/_(or|and)_/) ? $1 : nil
             condition = self.new(context)
             condition.build(
               :a => attributes,
@@ -31,16 +32,34 @@ module Ransack
 
         private
 
-        def extract_attributes_and_predicate(key)
-          str = key.dup
-          name = Predicate.detect_and_strip_from_string!(str)
-          predicate = Predicate.named(name)
-          unless predicate || Ransack.options[:ignore_unknown_conditions]
-            raise ArgumentError, "No valid predicate for #{key}"
+          def extract_values_for_condition(key, context = nil)
+            str = key.dup
+            name = Predicate.detect_and_strip_from_string!(str)
+            predicate = Predicate.named(name)
+
+            unless predicate || Ransack.options[:ignore_unknown_conditions]
+              raise ArgumentError, "No valid predicate for #{key}"
+            end
+
+            if context.present?
+              str = context.ransackable_alias(str)
+            end
+
+            combinator =
+            if str.match(/_(or|and)_/)
+              $1
+            else
+              nil
+            end
+
+            if context.present? && context.attribute_method?(str)
+              attributes = [str]
+            else
+              attributes = str.split(/_and_|_or_/)
+            end
+
+            [attributes, predicate, combinator]
           end
-          attributes = str.split(/_and_|_or_/)
-          [attributes, predicate]
-        end
       end
 
       def valid?
@@ -60,14 +79,12 @@ module Ransack
       def attributes=(args)
         case args
         when Array
-          args.each do |attr|
-            attr = Attribute.new(@context, attr)
-            self.attributes << attr if attr.valid?
+          args.each do |name|
+            build_attribute(name)
           end
         when Hash
           args.each do |index, attrs|
-            attr = Attribute.new(@context, attrs[:name])
-            self.attributes << attr if attr.valid?
+            build_attribute(attrs[:name], attrs[:ransacker_args])
           end
         else
           raise ArgumentError,
@@ -105,14 +122,37 @@ module Ransack
       end
 
       def combinator=(val)
-        @combinator = ['and', 'or'].detect { |v| v == val.to_s } || nil
+        @combinator = Constants::AND_OR.detect { |v| v == val.to_s } || nil
       end
       alias :m= :combinator=
       alias :m :combinator
 
-      def build_attribute(name = nil)
-        Attribute.new(@context, name).tap do |attribute|
-          self.attributes << attribute
+
+      # == build_attribute
+      #
+      #  This method was originally called from Nodes::Grouping#new_condition
+      #  only, without arguments, without #valid? checking, to build a new
+      #  grouping condition.
+      #
+      #  After refactoring in 235eae3, it is now called from 2 places:
+      #
+      #  1. Nodes::Condition#attributes=, with +name+ argument passed or +name+
+      #     and +ransacker_args+. Attributes are included only if #valid?.
+      #
+      #  2. Nodes::Grouping#new_condition without arguments. In this case, the
+      #     #valid? conditional needs to be bypassed, otherwise nothing is
+      #     built. The `name.nil?` conditional below currently does this.
+      #
+      #  TODO: Add test coverage for this behavior and ensure that `name.nil?`
+      #  isn't fixing issue #701 by introducing untested regressions.
+      #
+      def build_attribute(name = nil, ransacker_args = [])
+        Attribute.new(@context, name, ransacker_args).tap do |attribute|
+          @context.bind(attribute, attribute.name)
+          self.attributes << attribute if name.nil? || attribute.valid?
+          if predicate && !negative?
+            @context.lock_association(attribute.parent)
+          end
         end
       end
 
@@ -123,9 +163,11 @@ module Ransack
       end
 
       def value
-        predicate.wants_array ?
-          values.map { |v| v.cast(default_type) } :
+        if predicate.wants_array
+          values.map { |v| v.cast(default_type) }
+        else
           values.first.cast(default_type)
+        end
       end
 
       def build(params)
@@ -162,6 +204,10 @@ module Ransack
 
       def predicate_name=(name)
         self.predicate = Predicate.named(name)
+        unless negative?
+          attributes.each { |a| context.lock_association(a.parent) }
+        end
+        @predicate
       end
       alias :p= :predicate_name=
 
@@ -171,23 +217,7 @@ module Ransack
       alias :p :predicate_name
 
       def arel_predicate
-        predicates = attributes.map do |attr|
-          attr.attr.send(
-            arel_predicate_for_attribute(attr),
-            formatted_values_for_attribute(attr)
-          )
-        end
-
-        if predicates.size > 1
-          case combinator
-          when 'and'
-            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
-          when 'or'
-            predicates.inject(&:or)
-          end
-        else
-          predicates.first
-        end
+        raise "not implemented"
       end
 
       def validated_values
@@ -200,20 +230,26 @@ module Ransack
 
       def formatted_values_for_attribute(attr)
         formatted = casted_values_for_attribute(attr).map do |val|
-          val = attr.ransacker.formatter.call(val) if
-            attr.ransacker && attr.ransacker.formatter
+          if attr.ransacker && attr.ransacker.formatter
+            val = attr.ransacker.formatter.call(val)
+          end
           val = predicate.format(val)
           val
         end
-        predicate.wants_array ? formatted : formatted.first
+        if predicate.wants_array
+          formatted
+        else
+          formatted.first
+        end
       end
 
       def arel_predicate_for_attribute(attr)
         if predicate.arel_predicate === Proc
           values = casted_values_for_attribute(attr)
-          predicate.arel_predicate.call(
-            predicate.wants_array ? values : values.first
-            )
+          unless predicate.wants_array
+            values = values.first
+          end
+          predicate.arel_predicate.call(values)
         else
           predicate.arel_predicate
         end
@@ -226,22 +262,25 @@ module Ransack
 
       def inspect
         data = [
-          ['attributes', a.try(:map, &:name)],
-          ['predicate', p],
-          ['combinator', m],
-          ['values', v.try(:map, &:value)]
+          ['attributes'.freeze, a.try(:map, &:name)],
+          ['predicate'.freeze, p],
+          [Constants::COMBINATOR, m],
+          ['values'.freeze, v.try(:map, &:value)]
         ]
         .reject { |e| e[1].blank? }
         .map { |v| "#{v[0]}: #{v[1]}" }
-        .join(', ')
+        .join(', '.freeze)
         "Condition <#{data}>"
+      end
+
+      def negative?
+        predicate.negative?
       end
 
       private
 
       def valid_combinator?
-        attributes.size < 2 ||
-        ['and', 'or'].include?(combinator)
+        attributes.size < 2 || Constants::AND_OR.include?(combinator)
       end
 
     end

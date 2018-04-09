@@ -1,21 +1,23 @@
 require 'active_record'
 
-case ENV['DB']
-when "mysql"
+case ENV['DB'].try(:downcase)
+when 'mysql', 'mysql2'
+  # To test with MySQL: `DB=mysql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter:  'mysql2',
     database: 'ransack',
     encoding: 'utf8'
   )
-when "postgres"
+when 'pg', 'postgres', 'postgresql'
+  # To test with PostgreSQL: `DB=postgresql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter: 'postgresql',
     database: 'ransack',
-    username: 'postgres',
+  # username: 'postgres', # Uncomment the username option if you have set one
     min_messages: 'warning'
   )
 else
-  # Assume SQLite3
+  # Otherwise, assume SQLite3: `bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter: 'sqlite3',
     database: ':memory:'
@@ -23,24 +25,64 @@ else
 end
 
 class Person < ActiveRecord::Base
-  if ActiveRecord::VERSION::MAJOR == 3
+  if ::ActiveRecord::VERSION::MAJOR == 3
     default_scope order('id DESC')
   else
     default_scope { order(id: :desc) }
   end
-  belongs_to :parent, :class_name => 'Person', :foreign_key => :parent_id
-  has_many   :children, :class_name => 'Person', :foreign_key => :parent_id
+  belongs_to :parent, class_name: 'Person', foreign_key: :parent_id
+  has_many   :children, class_name: 'Person', foreign_key: :parent_id
   has_many   :articles
+  if ActiveRecord::VERSION::MAJOR == 3
+    if RUBY_VERSION >= '2.3'
+      has_many :published_articles, class_name: "Article",
+        conditions: "published = 't'"
+    else
+      has_many :published_articles, class_name: "Article",
+        conditions: { published: true }
+    end
+  else
+    has_many :published_articles, ->{ where(published: true) },
+      class_name: "Article"
+  end
   has_many   :comments
-  has_many   :authored_article_comments, :through => :articles,
-             :source => :comments, :foreign_key => :person_id
-  has_many   :notes, :as => :notable
+  has_many   :authored_article_comments, through: :articles,
+             source: :comments, foreign_key: :person_id
+  has_many   :notes, as: :notable
 
   scope :restricted,  lambda { where("restricted = 1") }
   scope :active,      lambda { where("active = 1") }
   scope :over_age,    lambda { |y| where(["age > ?", y]) }
+  scope :of_age,      lambda { |of_age|
+    of_age ? where("age >= ?", 18) : where("age < ?", 18)
+  }
 
-  ransacker :reversed_name, :formatter => proc { |v| v.reverse } do |parent|
+  alias_attribute :full_name, :name
+
+  ransack_alias :term, :name_or_email
+  ransack_alias :daddy, :parent_name
+
+  ransacker :reversed_name, formatter: proc { |v| v.reverse } do |parent|
+    parent.table[:name]
+  end
+
+  ransacker :array_people_ids,
+    formatter: proc { |v| Person.first(2).map(&:id) } do |parent|
+    parent.table[:id]
+  end
+
+  ransacker :array_where_people_ids,
+    formatter: proc { |v| Person.where(id: v).map(&:id) } do |parent|
+    parent.table[:id]
+  end
+
+  ransacker :array_people_names,
+    formatter: proc { |v| Person.first(2).map { |p| p.id.to_s } } do |parent|
+    parent.table[:name]
+  end
+
+  ransacker :array_where_people_names,
+    formatter: proc { |v| Person.where(id: v).map { |p| p.id.to_s } } do |parent|
     parent.table[:name]
   end
 
@@ -50,27 +92,35 @@ class Person < ActiveRecord::Base
       )
   end
 
-  def self.ransackable_attributes(auth_object = nil)
-    if auth_object == :admin
-      column_names + _ransackers.keys - ['only_sort']
-    else
-      column_names + _ransackers.keys - ['only_sort', 'only_admin']
-    end
+
+  ransacker :sql_literal_id do
+    Arel.sql('people.id')
   end
 
-  def self.ransortable_attributes(auth_object = nil)
-    if auth_object == :admin
-      column_names + _ransackers.keys - ['only_search']
-    else
-      column_names + _ransackers.keys - ['only_search', 'only_admin']
-    end
+  ransacker :name_case_insensitive, type: :string do
+    arel_table[:name].lower
   end
+
+  ransacker :with_arguments, args: [:parent, :ransacker_args] do |parent, args|
+    min, max = args
+    query = <<-SQL
+      (SELECT MAX(articles.title)
+         FROM articles
+        WHERE articles.person_id = people.id
+          AND LENGTH(articles.body) BETWEEN #{min} AND #{max}
+        GROUP BY articles.person_id
+      )
+    SQL
+    .squish
+    Arel.sql(query)
+  end
+
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
-      column_names + _ransackers.keys - ['only_sort']
+      super - ['only_sort']
     else
-      column_names + _ransackers.keys - ['only_sort', 'only_admin']
+      super - ['only_sort', 'only_admin']
     end
   end
 
@@ -83,11 +133,28 @@ class Person < ActiveRecord::Base
   end
 end
 
+class Musician < Person
+end
+
 class Article < ActiveRecord::Base
   belongs_to :person
   has_many :comments
   has_and_belongs_to_many :tags
-  has_many :notes, :as => :notable
+  has_many :notes, as: :notable
+
+  alias_attribute :content, :body
+
+  if ::ActiveRecord::VERSION::STRING >= '3.1'
+    default_scope { where("'default_scope' = 'default_scope'") }
+  else # Rails 3.0 does not accept a block
+    default_scope where("'default_scope' = 'default_scope'")
+  end
+end
+
+class Recommendation < ActiveRecord::Base
+  belongs_to :person
+  belongs_to :target_person, class_name: 'Person'
+  belongs_to :article
 end
 
 module Namespace
@@ -112,7 +179,7 @@ class Tag < ActiveRecord::Base
 end
 
 class Note < ActiveRecord::Base
-  belongs_to :notable, :polymorphic => true
+  belongs_to :notable, polymorphic: true
 end
 
 module Schema
@@ -120,65 +187,104 @@ module Schema
     ActiveRecord::Migration.verbose = false
 
     ActiveRecord::Schema.define do
-      create_table :people, :force => true do |t|
+      create_table :people, force: true do |t|
         t.integer  :parent_id
         t.string   :name
         t.string   :email
         t.string   :only_search
         t.string   :only_sort
         t.string   :only_admin
+        t.string   :new_start
+        t.string   :stop_end
         t.integer  :salary
+        t.date     :life_start
         t.boolean  :awesome, default: false
-        t.timestamps
+        t.boolean  :terms_and_conditions, default: false
+        t.boolean  :true_or_false, default: true
+        t.timestamps null: false
       end
 
-      create_table :articles, :force => true do |t|
-        t.integer :person_id
-        t.string  :title
-        t.text    :body
+      create_table :articles, force: true do |t|
+        t.integer  :person_id
+        t.string   :title
+        t.text     :subject_header
+        t.text     :body
+        t.boolean  :published, default: true
       end
 
-      create_table :comments, :force => true do |t|
-        t.integer :article_id
-        t.integer :person_id
-        t.text :body
+      create_table :comments, force: true do |t|
+        t.integer  :article_id
+        t.integer  :person_id
+        t.text     :body
       end
 
-      create_table :tags, :force => true do |t|
-        t.string :name
+      create_table :tags, force: true do |t|
+        t.string   :name
       end
 
-      create_table :articles_tags, :force => true, :id => false do |t|
-        t.integer :article_id
-        t.integer :tag_id
+      create_table :articles_tags, force: true, id: false do |t|
+        t.integer  :article_id
+        t.integer  :tag_id
       end
 
-      create_table :notes, :force => true do |t|
-        t.integer :notable_id
-        t.string :notable_type
-        t.string :note
+      create_table :notes, force: true do |t|
+        t.integer  :notable_id
+        t.string   :notable_type
+        t.string   :note
       end
 
+      create_table :recommendations, force: true do |t|
+        t.integer  :person_id
+        t.integer  :target_person_id
+        t.integer  :article_id
+      end
     end
 
     10.times do
       person = Person.make
-      Note.make(:notable => person)
+      Note.make(notable: person)
       3.times do
-        article = Article.make(:person => person)
+        article = Article.make(person: person)
         3.times do
           article.tags = [Tag.make, Tag.make, Tag.make]
         end
-        Note.make(:notable => article)
+        Note.make(notable: article)
         10.times do
-          Comment.make(:article => article, :person => person)
+          Comment.make(article: article, person: person)
         end
       end
     end
 
     Comment.make(
-      :body => 'First post!',
-      :article => Article.make(:title => 'Hello, world!')
-      )
+      body: 'First post!',
+      article: Article.make(title: 'Hello, world!')
+    )
+  end
+end
+
+module SubDB
+  class Base < ActiveRecord::Base
+    self.abstract_class = true
+    establish_connection(
+      adapter: 'sqlite3',
+      database: ':memory:'
+    )
+  end
+
+  class OperationHistory < Base
+  end
+
+  module Schema
+    def self.create
+      s = ::ActiveRecord::Schema.new
+      s.instance_variable_set(:@connection, SubDB::Base.connection)
+      s.verbose = false
+      s.define({}) do
+        create_table :operation_histories, force: true do |t|
+          t.string  :operation_type
+          t.integer :people_id
+        end
+      end
+    end
   end
 end

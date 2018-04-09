@@ -2,15 +2,16 @@ require 'machinist/active_record'
 require 'sham'
 require 'faker'
 require 'ransack'
+require 'pry'
+require 'simplecov'
 
+SimpleCov.start
 I18n.enforce_available_locales = false
 Time.zone = 'Eastern Time (US & Canada)'
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 
 Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)]
-.each do |f|
-  require f
-end
+.each { |f| require f }
 
 Sham.define do
   name        { Faker::Name.name }
@@ -29,12 +30,14 @@ RSpec.configure do |config|
   config.alias_it_should_behave_like_to :it_has_behavior, 'has behavior'
 
   config.before(:suite) do
-    puts '=' * 80
-    connection_name = ActiveRecord::Base.connection.adapter_name
-    puts "Running specs against #{connection_name}, ActiveRecord #{
-      ActiveRecord::VERSION::STRING} and ARel #{Arel::VERSION}..."
-    puts '=' * 80
+    message = "Running Ransack specs with #{
+      ActiveRecord::Base.connection.adapter_name
+      }, Active Record #{::ActiveRecord::VERSION::STRING}, Arel #{Arel::VERSION
+      } and Ruby #{RUBY_VERSION}"
+    line = '=' * message.length
+    puts line, message, line
     Schema.create
+    SubDB::Schema.create
   end
 
   config.before(:all)   { Sham.reset(:before_all) }

@@ -44,8 +44,7 @@ module Ransack
             self.conditions << condition if condition.valid?
           end
         end
-
-        self.conditions.uniq!
+        remove_duplicate_conditions!
       end
       alias :c= :conditions=
 
@@ -69,7 +68,6 @@ module Ransack
       def respond_to?(method_id)
         super or begin
           method_name = method_id.to_s
-          writer = method_name.sub!(/\=$/, '')
           attribute_method?(method_name) ? true : false
         end
       end
@@ -115,25 +113,29 @@ module Ransack
 
       def method_missing(method_id, *args)
         method_name = method_id.to_s
-        writer = method_name.sub!(/\=$/, '')
+        writer = method_name.sub!(/\=$/, ''.freeze)
         if attribute_method?(method_name)
-          writer ?
-            write_attribute(method_name, *args) :
+          if writer
+            write_attribute(method_name, *args)
+          else
             read_attribute(method_name)
+          end
         else
           super
         end
       end
 
       def attribute_method?(name)
-        name = strip_predicate_and_index(name)
-        case name
+        stripped_name = strip_predicate_and_index(name)
+        return true if @context.attribute_method?(stripped_name) ||
+                       @context.attribute_method?(name)
+        case stripped_name
         when /^(g|c|m|groupings|conditions|combinator)=?$/
           true
         else
-          name.split(/_and_|_or_/)
-          .select { |n| !@context.attribute_method?(n) }
-          .empty?
+          stripped_name
+          .split(/_and_|_or_/)
+          .none? { |n| !@context.attribute_method?(n) }
         end
       end
 
@@ -161,10 +163,12 @@ module Ransack
       end
 
       def inspect
-        data = [['conditions', conditions], ['combinator', combinator]]
-               .reject { |e| e[1].blank? }
-               .map { |v| "#{v[0]}: #{v[1]}" }
-               .join(', ')
+        data = [
+          ['conditions'.freeze, conditions], [Constants::COMBINATOR, combinator]
+        ]
+        .reject { |e| e[1].blank? }
+        .map { |v| "#{v[0]}: #{v[1]}" }
+        .join(', '.freeze)
         "Grouping <#{data}>"
       end
 
@@ -186,9 +190,20 @@ module Ransack
       end
 
       def strip_predicate_and_index(str)
-        string = str.split(/\(/).first
+        string = str[/(.+?)\(/, 1] || str.dup
         Predicate.detect_and_strip_from_string!(string)
         string
+      end
+
+      def remove_duplicate_conditions!
+        # If self.conditions.uniq! is called without passing a block, then
+        # conditions differing only by ransacker_args within attributes are
+        # wrongly considered equal and are removed.
+        self.conditions.uniq! do |c|
+          c.attributes.map { |a| [a.name, a.ransacker_args] }.flatten +
+          [c.predicate.name] +
+          c.values.map { |v| v.value }
+        end
       end
     end
   end

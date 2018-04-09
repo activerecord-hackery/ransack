@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 module Ransack
+  TRUE_VALUES  = [true,  1, '1', 't', 'T', 'true',  'TRUE'].to_set
+  FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
+
   describe Predicate do
 
     before do
@@ -13,26 +16,19 @@ module Ransack
         expect { subject.result }.to_not raise_error
       end
 
-      it "escapes '%', '.' and '\\\\' in value" do
+      it "escapes '%', '.', '_' and '\\\\' in value" do
         subject.send(:"#{method}=", '%._\\')
         expect(subject.result.to_sql).to match(regexp)
       end
     end
 
     describe 'eq' do
-      it 'generates an equality condition for boolean true' do
-        @s.awesome_eq = true
-        field = "#{quote_table_name("people")}.#{
-          quote_column_name("awesome")}"
-        expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_true}/
+      it 'generates an equality condition for boolean true values' do
+        test_boolean_equality_for(true)
       end
 
-      it 'generates an equality condition for boolean false' do
-        @s.awesome_eq = false
-        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
-        expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_false}/
+      it 'generates an equality condition for boolean false values' do
+        test_boolean_equality_for(false)
       end
 
       it 'does not generate a condition for nil' do
@@ -41,13 +37,96 @@ module Ransack
       end
     end
 
-    describe 'cont' do
+    describe 'lteq' do
+      it 'generates a <= condition with an integer column' do
+        val = 1000
+        @s.salary_lteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} <= #{val}/
+      end
 
+      it 'generates a <= condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_lteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} <= '#{val}'/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_lteq = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'lt' do
+      it 'generates a < condition with an integer column' do
+        val = 2000
+        @s.salary_lt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} < #{val}/
+      end
+
+      it 'generates a < condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_lt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} < '#{val}'/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_lt = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'gteq' do
+      it 'generates a >= condition with an integer column' do
+        val = 300
+        @s.salary_gteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} >= #{val}/
+      end
+
+      it 'generates a >= condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_gteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} >= '#{val}'/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_gteq = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'gt' do
+      it 'generates a > condition with an integer column' do
+        val = 400
+        @s.salary_gt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} > #{val}/
+      end
+
+      it 'generates a > condition with a string column' do
+        val = 'jane@doe.com'
+        @s.email_gt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /#{field} > '#{val}'/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.salary_gt = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
-          /"people"."name" ILIKE '%\\%\\._\\\\%'/
+          /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
         elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
-          /`people`.`name` LIKE '%\\\\%\\\\._\\\\\\\\%'/
+          /`people`.`name` LIKE '%\\\\%\\\\.\\\\_\\\\\\\\%'/
         else
          /"people"."name" LIKE '%%._\\%'/
         end) do
@@ -64,9 +143,9 @@ module Ransack
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
-          /"people"."name" NOT ILIKE '%\\%\\._\\\\%'/
+          /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
         elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
-          /`people`.`name` NOT LIKE '%\\\\%\\\\._\\\\\\\\%'/
+          /`people`.`name` NOT LIKE '%\\\\%\\\\.\\\\_\\\\\\\\%'/
         else
          /"people"."name" NOT LIKE '%%._\\%'/
         end) do
@@ -77,6 +156,150 @@ module Ransack
         @s.name_not_cont = 'ric'
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%ric%'/
+      end
+    end
+
+    describe 'start' do
+      it 'generates a LIKE query with value followed by %' do
+        @s.name_start = 'Er'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE 'Er%'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_start = 'hEy'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE 'hEy%'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_start = 'begin'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE 'begin%'/
+      end
+    end
+
+    describe 'not_start' do
+      it 'generates a NOT LIKE query with value followed by %' do
+        @s.name_not_start = 'Eri'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE 'Eri%'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_not_start = 'hEy'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE 'hEy%'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_not_start = 'begin'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE 'begin%'/
+      end
+    end
+
+    describe 'end' do
+      it 'generates a LIKE query with value preceded by %' do
+        @s.name_end = 'Miller'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%Miller'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_end = 'finish'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%finish'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_end = 'Ending'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%Ending'/
+      end
+    end
+
+    describe 'not_end' do
+      it 'generates a NOT LIKE query with value preceded by %' do
+        @s.name_not_end = 'Miller'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%Miller'/
+      end
+
+      it "works with attribute names ending with '_start'" do
+        @s.new_start_not_end = 'finish'
+        field = "#{quote_table_name("people")}.#{quote_column_name("new_start")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%finish'/
+      end
+
+      it "works with attribute names ending with '_end'" do
+        @s.stop_end_not_end = 'Ending'
+        field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
+        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%Ending'/
+      end
+    end
+
+    describe 'true' do
+      it 'generates an equality condition for boolean true' do
+        @s.awesome_true = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_true}/
+      end
+
+      it 'generates an inequality condition for boolean true' do
+        @s.awesome_true = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} != #{
+          ActiveRecord::Base.connection.quoted_true}/
+      end
+    end
+
+    describe 'not_true' do
+      it 'generates an inequality condition for boolean true' do
+        @s.awesome_not_true = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} != #{
+          ActiveRecord::Base.connection.quoted_true}/
+      end
+
+      it 'generates an equality condition for boolean true' do
+        @s.awesome_not_true = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_true}/
+      end
+    end
+
+    describe 'false' do
+      it 'generates an equality condition for boolean false' do
+        @s.awesome_false = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_false}/
+      end
+
+      it 'generates an inequality condition for boolean false' do
+        @s.awesome_false = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} != #{
+          ActiveRecord::Base.connection.quoted_false}/
+      end
+    end
+
+    describe 'not_false' do
+      it 'generates an inequality condition for boolean false' do
+        @s.awesome_not_false = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} != #{
+          ActiveRecord::Base.connection.quoted_false}/
+      end
+
+      it 'generates an equality condition for boolean false' do
+        @s.awesome_not_false = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
+        expect(@s.result.to_sql).to match /#{field} = #{
+          ActiveRecord::Base.connection.quoted_false}/
       end
     end
 
@@ -105,6 +328,28 @@ module Ransack
         @s.name_not_null = false
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         expect(@s.result.to_sql).to match /#{field} IS NULL/
+      end
+
+      describe 'with association qeury' do
+        it 'generates a value IS NOT NULL query' do
+          @s.comments_id_not_null = true
+          sql = @s.result.to_sql
+          parent_field = "#{quote_table_name("people")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{parent_field} IN/
+          field = "#{quote_table_name("comments")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{field} IS NOT NULL/
+          expect(sql).not_to match /AND NOT/
+        end
+
+        it 'generates a value IS NULL query when assigned false' do
+          @s.comments_id_not_null = false
+          sql = @s.result.to_sql
+          parent_field = "#{quote_table_name("people")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{parent_field} NOT IN/
+          field = "#{quote_table_name("comments")}.#{quote_column_name("id")}"
+          expect(sql).to match /#{field} IS NULL/
+          expect(sql).to match /AND NOT/
+        end
       end
     end
 
@@ -135,5 +380,31 @@ module Ransack
         expect(@s.result.to_sql).to match /#{field} IS NOT NULL AND #{field} != ''/
       end
     end
-  end
+
+    private
+
+      def test_boolean_equality_for(boolean_value)
+        query = expected_query(boolean_value)
+        test_values_for(boolean_value).each do |value|
+          s = Search.new(Person, awesome_eq: value)
+          expect(s.result.to_sql).to match query
+        end
+      end
+
+      def test_values_for(boolean_value)
+        case boolean_value
+        when true
+          TRUE_VALUES
+        when false
+          FALSE_VALUES
+        end
+      end
+
+      def expected_query(value, attribute = 'awesome', operator = '=')
+        field = "#{quote_table_name("people")}.#{quote_column_name(attribute)}"
+        quoted_value = ActiveRecord::Base.connection.quote(value)
+        /#{field} #{operator} #{quoted_value}/
+      end
+    end
+
 end

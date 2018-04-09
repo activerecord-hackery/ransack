@@ -7,9 +7,11 @@ module Ransack
   module Adapters
     module ActiveRecord
       class Context < ::Ransack::Context
+
         # Because the AR::Associations namespace is insane
-        JoinDependency = ::ActiveRecord::Associations::ClassMethods::JoinDependency
-        JoinBase = JoinDependency::JoinBase
+        if defined? ::ActiveRecord::Associations::ClassMethods::JoinDependency
+          JoinDependency = ::ActiveRecord::Associations::ClassMethods::JoinDependency
+        end
 
         # Redefine a few things for ActiveRecord 3.0.
 
@@ -29,8 +31,12 @@ module Ransack
             relation = relation.except(:order)
             .reorder(viz.accept(search.sorts))
           end
-          opts[:distinct] ?
-          relation.select("DISTINCT #{@klass.quoted_table_name}.*") : relation
+          if opts[:distinct]
+            relation.select(Constants::DISTINCT + @klass.quoted_table_name +
+              Constants::DOT_ASTERIX)
+          else
+            relation
+          end
         end
 
         def attribute_method?(str, klass = @klass)
@@ -38,17 +44,18 @@ module Ransack
 
           if ransackable_attribute?(str, klass)
             exists = true
-          elsif (segments = str.split(/_/)).size > 1
+          elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
             found_assoc = nil
             while !found_assoc && remainder.unshift(segments.pop) &&
               segments.size > 0 do
               assoc, poly_class = unpolymorphize_association(
-                segments.join('_')
+                segments.join(Constants::UNDERSCORE)
                 )
               if found_assoc = get_association(assoc, klass)
                 exists = attribute_method?(
-                  remainder.join('_'), poly_class || found_assoc.klass
+                  remainder.join(Constants::UNDERSCORE),
+                  poly_class || found_assoc.klass
                   )
               end
             end
@@ -68,6 +75,22 @@ module Ransack
           .type
         end
 
+        # All dependent JoinAssociation items used in the search query
+        #
+        def join_associations
+          @join_dependency.join_associations
+        end
+
+        def join_sources
+          raise NotImplementedError,
+          "ActiveRecord 3.0 does not use join_sources or support joining relations with Arel::Join nodes. Use join_associations."
+        end
+
+        def alias_tracker
+          raise NotImplementedError,
+          "ActiveRecord 3.0 does not have an alias tracker"
+        end
+
         private
 
         def get_parent_and_attribute_name(str, parent = @base)
@@ -75,18 +98,20 @@ module Ransack
 
           if ransackable_attribute?(str, klassify(parent))
             attr_name = str
-          elsif (segments = str.split(/_/)).size > 1
+          elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
             found_assoc = nil
             while remainder.unshift(segments.pop) && segments.size > 0 &&
               !found_assoc do
-              assoc, klass = unpolymorphize_association(segments.join('_'))
+              assoc, klass = unpolymorphize_association(
+                segments.join(Constants::UNDERSCORE)
+                )
               if found_assoc = get_association(assoc, parent)
                 join = build_or_find_association(
                   found_assoc.name, parent, klass
                   )
                 parent, attr_name = get_parent_and_attribute_name(
-                  remainder.join('_'), join
+                  remainder.join(Constants::UNDERSCORE), join
                   )
               end
             end
@@ -101,7 +126,7 @@ module Ransack
         end
 
         def join_dependency(relation)
-          if relation.respond_to?(:join_dependency) # Squeel will enable this
+          if relation.respond_to?(:join_dependency) # Polyamorous enables this
             relation.join_dependency
           else
             build_join_dependency(relation)
@@ -112,24 +137,25 @@ module Ransack
           buckets = relation.joins_values.group_by do |join|
             case join
             when String
-              'string_join'
+              Constants::STRING_JOIN
             when Hash, Symbol, Array
-              'association_join'
+              Constants::ASSOCIATION_JOIN
             when ::ActiveRecord::Associations::ClassMethods::JoinDependency::JoinAssociation
-              'stashed_join'
+              Constants::STASHED_JOIN
             when Arel::Nodes::Join
-              'join_node'
+              Constants::JOIN_NODE
             else
               raise 'unknown class: %s' % join.class.name
             end
           end
 
-          association_joins         = buckets['association_join'] || []
-          stashed_association_joins = buckets['stashed_join'] || []
-          join_nodes                = buckets['join_node'] || []
-          string_joins              = (buckets['string_join'] || [])
-                                      .map { |x| x.strip }
-                                      .uniq
+          association_joins = buckets[Constants::ASSOCIATION_JOIN] || []
+
+          stashed_association_joins = buckets[Constants::STASHED_JOIN] || []
+
+          join_nodes = buckets[Constants::JOIN_NODE] || []
+
+          string_joins = (buckets[Constants::STRING_JOIN] || []).map(&:strip).uniq
 
           join_list = relation.send :custom_join_sql, (string_joins + join_nodes)
 
@@ -158,8 +184,14 @@ module Ransack
               :build, Polyamorous::Join.new(name, @join_type, klass), parent
               )
             found_association = @join_dependency.join_associations.last
+
+            default_conditions = found_association.active_record.scoped.arel.constraints
+            if default_conditions.any?
+              and_default_conditions = "AND #{default_conditions.reduce(&:and).to_sql}"
+            end
+
             # Leverage the stashed association functionality in AR
-            @object = @object.joins(found_association)
+            @object = @object.joins(found_association).joins(and_default_conditions)
           end
 
           found_association

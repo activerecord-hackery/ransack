@@ -1,3 +1,3 @@
 module Ransack
-  VERSION = "1.2.3"
+  VERSION = '1.8.8'
 end

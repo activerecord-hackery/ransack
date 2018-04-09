@@ -1,0 +1,11 @@
+test:
+  clients:
+    default:
+      database: ransack_mongoid_test
+      hosts:
+        - localhost:27017
+  sessions:
+    default:
+      database: ransack_mongoid_test
+      hosts:
+        - localhost:27017
