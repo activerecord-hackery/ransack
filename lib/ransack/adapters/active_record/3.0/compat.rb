@@ -3,13 +3,7 @@ if Arel::Nodes::And < Arel::Nodes::Binary
   class Ransack::Visitor
     def visit_Ransack_Nodes_And(object)
       nodes = object.values.map { |o| accept(o) }.compact
-      return nil unless nodes.size > 0
-
-      if nodes.size > 1
-        nodes.inject(&:and)
-      else
-        nodes.first
-      end
+      nodes.inject(&:and)
     end
   end
 end
