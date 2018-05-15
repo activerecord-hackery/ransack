@@ -31,13 +31,7 @@ module Ransack
 
     def visit_or(object)
       nodes = object.values.map { |o| accept(o) }.compact
-      return nil unless nodes.size > 0
-
-      if nodes.size > 1
-        nodes.inject(&:or)
-      else
-        nodes.first
-      end
+      nodes.inject(&:or)
     end
 
     def quoted?(object)

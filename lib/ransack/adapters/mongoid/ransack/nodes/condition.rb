@@ -10,15 +10,10 @@ module Ransack
           )
         end
 
-        if predicates.size > 1
-          case combinator
-          when 'and'
-            Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
-          when 'or'
-            predicates.inject(&:or)
-          end
+        if predicates.size > 1 && combinator == 'and'
+          Arel::Nodes::Grouping.new(Arel::Nodes::And.new(predicates))
         else
-          predicates.first
+          predicates.inject(&:or)
         end
       end
 
