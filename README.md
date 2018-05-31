@@ -1,5 +1,28 @@
 # Ransack
 
+### Maintainer Wanted
+
+A note from [Sean](https://github.com/seanfcarroll).
+Ransack is a fantastic gem, and a key part of many Rails projects. It is also a core component of [ActiveAdmin](https://github.com/activeadmin/activeadmin) and generally a great way to add fairly complex search and filtering without having to resort to external services, such as Elasticsearch.
+
+In my humble opinion, Ransack can be much more, if it does a bit less. What I mean is that the API vector of Ransack is quite large, and really has been issue-driven. There are complications with Polymorphic relations, complex joins and MongoDB. It's not clear sometimes if there is a bug or not.
+
+I was hoping to lead Ransack to version 2.0, and in my opinion this would have included:
+
+- Absorbing Polyamorous
+- Splitting MongoDB support into a seperate gem
+- Dropping support for older Rails versions; strictly follow the [Rails support policy](http://guides.rubyonrails.org/maintenance_policy.html). This is important as the codebase is littered with code for de-supported Rails versions
+- Add a generator to build in Ransack with a scaffold
+- Generate tests for Ransack-enabled applications
+- Update the Wiki / docs with lots of examples of 'how-to', questions are the majority of issues on Ransack
+- Increase supported translations
+
+Unfortunately I am quite occupied at present with several projects, including [crowdAI](https://github.com/crowdAI/crowdai), and I will need to step down as a maintainer. I have also posted it [here](https://github.com/pickhardt/maintainers-wanted).
+
+If you want to step up, please contact me on gmail as **sfcarroll**
+
+
+
 [![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
