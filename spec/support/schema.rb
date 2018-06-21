@@ -29,6 +29,8 @@ class Person < ActiveRecord::Base
   belongs_to :parent, class_name: 'Person', foreign_key: :parent_id
   has_many   :children, class_name: 'Person', foreign_key: :parent_id
   has_many   :articles
+  has_many   :story_articles
+
   has_many :published_articles, ->{ where(published: true) },
       class_name: "Article"
   has_many   :comments
@@ -136,6 +138,9 @@ class Article < ActiveRecord::Base
   default_scope { where("'default_scope' = 'default_scope'") }
 end
 
+class StoryArticle < Article
+end
+
 class Recommendation < ActiveRecord::Base
   belongs_to :person
   belongs_to :target_person, class_name: 'Person'
@@ -194,6 +199,7 @@ module Schema
         t.string   :title
         t.text     :subject_header
         t.text     :body
+        t.string   :type
         t.boolean  :published, default: true
       end
 

@@ -163,7 +163,7 @@ module Ransack
         def build_correlated_subquery(association)
           join_constraints = extract_joins(association)
           join_root = join_constraints.shift
-          correlated_key = join_root.right.expr.left
+          correlated_key = extract_correlated_key(join_root)
           subquery = Arel::SelectManager.new(association.base_klass)
           subquery.from(join_root.left)
           subquery.project(correlated_key)
@@ -178,6 +178,18 @@ module Ransack
         end
 
         private
+
+        def extract_correlated_key(join_root)
+          correlated_key = join_root.right.expr.left
+
+          if correlated_key.is_a? Arel::Nodes::And
+            correlated_key = correlated_key.left.left
+          elsif correlated_key.is_a? Arel::Nodes::Equality
+            correlated_key = correlated_key.left
+          else
+            correlated_key
+          end
+        end
 
         def get_parent_and_attribute_name(str, parent = @base)
           attr_name = nil
