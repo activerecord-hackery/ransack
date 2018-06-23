@@ -44,6 +44,7 @@ RSpec.configure do |config|
   config.before(:each)  { Sham.reset(:before_each) }
 
   config.include RansackHelper
+  config.include PolyamorousHelper
 end
 
 RSpec::Matchers.define :be_like do |expected|
