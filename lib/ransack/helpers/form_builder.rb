@@ -13,7 +13,11 @@ module ActionView::Helpers::Tags
         end
       else # rails/rails#29791
         def value
-          @object.send @method_name if @object
+          if @allow_method_names_outside_object
+            object.send @method_name if object && object.respond_to?(@method_name, true)
+          else
+            object.send @method_name if object
+          end
         end
       end
     end
