@@ -5,12 +5,6 @@ gem 'rake'
 
 rails = ENV['RAILS'] || '5-0-stable'
 
-if rails == 'master'
-  gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
-else
-  gem 'polyamorous', '~> 1.3'
-end
-
 gem 'pry'
 
 # Provide timezone information on Windows
@@ -27,6 +21,9 @@ when /^v/ # A tagged version
     gem 'activemodel'
     gem 'activerecord', require: false
     gem 'actionpack'
+  end
+  if rails == 'v5.2.0'
+    gem 'mysql2', '~> 0.4.4'
   end
 else
   git 'git://github.com/rails/rails.git', :branch => rails do

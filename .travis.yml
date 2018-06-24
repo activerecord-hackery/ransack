@@ -11,6 +11,10 @@ env:
   - RAILS=5-2-stable DB=mysql
   - RAILS=5-2-stable DB=postgres
 
+  - RAILS=v5.2.0 DB=sqlite3
+  - RAILS=v5.2.0 DB=mysql
+  - RAILS=v5.2.0 DB=postgres
+
   - RAILS=5-0-stable DB=sqlite3
   - RAILS=5-0-stable DB=mysql
   - RAILS=5-0-stable DB=postgres
@@ -18,7 +22,11 @@ env:
   - RAILS=4-2-stable DB=sqlite3
   - RAILS=4-2-stable DB=mysql
   - RAILS=4-2-stable DB=postgres
-
+matrix:
+  allow_failures:
+    - env: RAILS=5-2-stable DB=sqlite3
+    - env: RAILS=5-2-stable DB=mysql
+    - env: RAILS=5-2-stable DB=postgres
 before_script:
   - mysql -e 'create database ransack collate utf8_general_ci;'
   - mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";'
