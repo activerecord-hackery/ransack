@@ -40,14 +40,6 @@ else
   end
 end
 
-if ENV['DB'] =~ /mongoid4/
-  gem 'mongoid', '~> 4.0.0', require: false
-end
-
-if ENV['DB'] =~ /mongoid5/
-  gem 'mongoid', '~> 5.0.0', require: false
-end
-
 group :test do
   # TestUnit was removed from Ruby 2.2 but still needed for testing Rails 3.x.
   gem 'test-unit', '~> 3.0' if RUBY_VERSION >= '2.2'

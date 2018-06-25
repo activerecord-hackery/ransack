@@ -875,6 +875,7 @@ en:
 
 ## Mongoid
 
+Mongoid support has been moved to its own gem at [ransack-mongoid](github.com/activerecord-hackery/ransack-mongoid).
 Ransack works with Mongoid in the same way as Active Record, except that with
 Mongoid, associations are not currently supported. Demo source code may be found
 [here](https://github.com/Zhomart/ransack-mongodb-demo). A `result` method
