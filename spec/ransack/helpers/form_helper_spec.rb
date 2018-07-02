@@ -30,15 +30,7 @@ module Ransack
             controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D=name\+asc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])=name\+asc/
-            end
-          )
-        }
+        it { should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/ }
         it { should match /sort_link desc/ }
         it { should match /Full Name&nbsp;&#9660;/ }
       end
@@ -51,15 +43,7 @@ module Ransack
             controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D=name\+asc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])=name\+asc/
-            end
-          )
-        }
+        it { should match /people\?q(%5B|\[)s(%5D|\])=name\+asc/ }
       end
 
       describe '#sort_link with default search_key defined as symbol' do
@@ -69,15 +53,7 @@ module Ransack
             :name, controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?people_search%5Bs%5D=name\+asc/
-            else
-              /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/
-            end
-          )
-        }
+        it { should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/ }
       end
 
       describe '#sort_url with default search_key defined as symbol' do
@@ -87,15 +63,7 @@ module Ransack
             :name, controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?people_search%5Bs%5D=name\+asc/
-            else
-              /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/
-            end
-          )
-        }
+        it { should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/ }
       end
 
       describe '#sort_link desc through association table defined as symbol' do
@@ -106,15 +74,7 @@ module Ransack
             controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D=comments.body\+desc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])=comments.body\+desc/
-            end
-            )
-          }
+        it { should match /people\?q(%5B|\[)s(%5D|\])=comments.body\+desc/ }
         it { should match /sort_link asc/ }
         it { should match /Body&nbsp;&#9650;/ }
       end
@@ -127,15 +87,7 @@ module Ransack
             controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D=comments.body\+desc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])=comments.body\+desc/
-            end
-          )
-        }
+        it { should match /people\?q(%5B|\[)s(%5D|\])=comments.body\+desc/ }
       end
 
       describe '#sort_link through association table defined as a string' do
@@ -146,15 +98,7 @@ module Ransack
             controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D=comments.body\+asc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])=comments.body\+asc/
-            end
-            )
-          }
+        it { should match /people\?q(%5B|\[)s(%5D|\])=comments.body\+asc/ }
         it { should match /sort_link desc/ }
         it { should match /Comments.body&nbsp;&#9660;/ }
       end
@@ -167,15 +111,7 @@ module Ransack
             controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?q%5Bs%5D=comments.body\+asc/
-            else
-              /people\?q(%5B|\[)s(%5D|\])=comments.body\+asc/
-            end
-          )
-        }
+        it { should match /people\?q(%5B|\[)s(%5D|\])=comments.body\+asc/ }
       end
 
       describe '#sort_link works even if search params are a blank string' do
@@ -214,15 +150,7 @@ module Ransack
             controller: 'people'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /people\?people_search%5Bs%5D=name\+asc/
-            else
-              /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/
-            end
-          )
-        }
+        it { should match /people\?people_search(%5B|\[)s(%5D|\])=name\+asc/ }
       end
 
       describe '#sort_link with default_order defined with a string key' do
@@ -487,15 +415,7 @@ module Ransack
             controller: 'notes'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /notes\?q%5Bs%5D=notable_of_Person_type_name\+asc/
-            else
-              /notes\?q(%5B|\[)s(%5D|\])=notable_of_Person_type_name\+asc/
-            end
-          )
-        }
+        it { should match /notes\?q(%5B|\[)s(%5D|\])=notable_of_Person_type_name\+asc/ }
         it { should match /sort_link/ }
         it { should match /Notable/ }
       end
@@ -508,15 +428,7 @@ module Ransack
             controller: 'notes'
           )
         }
-        it {
-          should match(
-            if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-              /notes\?q%5Bs%5D=notable_of_Person_type_name\+asc/
-            else
-              /notes\?q(%5B|\[)s(%5D|\])=notable_of_Person_type_name\+asc/
-            end
-          )
-        }
+        it { should match /notes\?q(%5B|\[)s(%5D|\])=notable_of_Person_type_name\+asc/ }
       end
 
       context 'view has existing parameters' do

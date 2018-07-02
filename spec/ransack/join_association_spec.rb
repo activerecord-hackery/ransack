@@ -3,12 +3,7 @@ require 'spec_helper'
 module Polyamorous
   describe JoinAssociation do
 
-    join_base, join_association_args, polymorphic =
-      if ActiveRecord::VERSION::STRING >= '4.1'
-        [:join_root, 'parent.children', 'reflection.options[:polymorphic]']
-      else
-        [:join_base, 'join_dependency, parent', 'options[:polymorphic]']
-      end
+    join_base, join_association_args, polymorphic = [:join_root, 'parent.children', 'reflection.options[:polymorphic]']
 
     let(:join_dependency) { new_join_dependency Note, {} }
     let(:reflection) { Note.reflect_on_association(:notable) }

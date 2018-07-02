@@ -21,11 +21,7 @@ module Ransack
         @controller.view_context.search_form_for(@s) { |f| @f = f }
       end
 
-      it 'selects previously-entered time values with datetime_select',
-        unless: (
-          RUBY_VERSION >= '2.3' &&
-          ::ActiveRecord::VERSION::STRING.first(3) < '3.2'
-          ) do
+      it 'selects previously-entered time values with datetime_select' do
         date_values = %w(2011 1 2 03 04 05)
       # @s.created_at_eq = date_values # This works in Rails 4.x but not 3.x
         @s.created_at_eq = [2011, 1, 2, 3, 4, 5] # so we have to do this
@@ -75,11 +71,7 @@ module Ransack
       describe '#sort_link' do
         it 'sort_link for ransack attribute' do
           sort_link = @f.sort_link :name, :controller => 'people'
-          if ActiveRecord::VERSION::STRING =~ /^3\.[1-2]\./
-            expect(sort_link).to match /people\?q%5Bs%5D=name\+asc/
-          else
-            expect(sort_link).to match /people\?q(%5B|\[)s(%5D|\])=name\+asc/
-          end
+          expect(sort_link).to match /people\?q(%5B|\[)s(%5D|\])=name\+asc/
           expect(sort_link).to match /sort_link/
           expect(sort_link).to match /Full Name<\/a>/
         end
@@ -171,11 +163,7 @@ module Ransack
         # Starting from Rails 4.2, the date_select html attributes are no longer
         # `sort`ed (for a speed gain), so the tests have to be different:
         def date_select_html(val)
-          if ::ActiveRecord::VERSION::STRING >= '4.2'
-            %(<option value="#{val}" selected="selected">#{val}</option>)
-          else
-            %(<option selected="selected" value="#{val}">#{val}</option>)
-          end
+          %(<option value="#{val}" selected="selected">#{val}</option>)
         end
 
     end

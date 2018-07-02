@@ -3,12 +3,7 @@ require 'spec_helper'
 module Polyamorous
   describe JoinDependency do
 
-    method, join_associations, join_base =
-      if ActiveRecord::VERSION::STRING >= '4.1'
-        [:instance_eval, 'join_root.drop(1)', :join_root]
-      else
-        [:send, 'join_associations', :join_base]
-      end
+    method, join_associations, join_base = :instance_eval, 'join_root.drop(1)', :join_root
 
     context 'with symbol joins' do
       subject { new_join_dependency Person, articles: :comments }
