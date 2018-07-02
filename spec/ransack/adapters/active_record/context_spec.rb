@@ -68,10 +68,8 @@ module Ransack
           end
 
           describe '#join_sources' do
-            # FIXME: fix this test for Rails 4.2 and 5.0.
             it 'returns dependent arel join nodes for all searches run against
             the context' do
-              skip "fix this test for Rails 4.2 and > 5"
               parents, children = shared_context.join_sources
               expect(children.left.name).to eq "children_people"
               expect(parents.left.name).to eq "parents_people"
