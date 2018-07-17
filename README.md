@@ -734,13 +734,26 @@ boolean. This is currently resolved in Rails 5 :smiley:
 However, perhaps you have `user_id: [1]` and you do not want Ransack to convert
 1 into a boolean. (Values sanitized to booleans can be found in the
 [constants.rb](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb#L28)).
-To turn this off, and handle type conversions yourself, set
+To turn this off globally, and handle type conversions yourself, set
 `sanitize_custom_scope_booleans` to false in an initializer file like
 config/initializers/ransack.rb:
 
 ```ruby
 Ransack.configure do |c|
   c.sanitize_custom_scope_booleans = false
+end
+```
+
+To turn this off on a per-scope basis Ransack adds the following method to 
+`ActiveRecord::Base` that you can redefine to selectively override sanitization:
+
+`ransackable_scopes_skip_sanitize_args`
+
+Add the scope you wish to bypass this behavior to ransackable_scopes_skip_sanitize_args:
+
+```ruby
+def ransackable_scopes_skip_sanitize_args
+  [:scope_to_skip_sanitize_args]
 end
 ```
 

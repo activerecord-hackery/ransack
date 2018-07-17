@@ -1,5 +1,10 @@
 # Change Log
 
+* Add the ability to skip arg sanitization on a per scope basis. Using 
+  `ransackable_scopes_skip_sanitize_args`, users can define a list of
+  scopes which will bypass parameter sanitization. This allows passing 0,
+  1, t, f, etc. to a scope as an actual parameter.
+
 ## Version 1.8.8 - 2018-03-16
 * Fix multiple database support
   PR [#893](https://github.com/activerecord-hackery/ransack/pull/893)

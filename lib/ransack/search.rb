@@ -123,7 +123,7 @@ module Ransack
     private
 
     def add_scope(key, args)
-      sanitized_args = if Ransack.options[:sanitize_scope_args]
+      sanitized_args = if Ransack.options[:sanitize_scope_args] && !@context.ransackable_scope_skip_sanitize_args?(key, @context.object)
         sanitized_scope_args(args)
       else
         args

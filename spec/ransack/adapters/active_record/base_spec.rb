@@ -97,6 +97,25 @@ module Ransack
                 expect(s.result.to_sql).to (include 'age > 0')
               end
             end
+
+            context "with ransackable_scopes_skip_sanitize_args enabled for scope" do
+              before do
+                allow(Person)
+                .to receive(:ransackable_scopes_skip_sanitize_args)
+                .and_return([:over_age])
+              end
+
+              it 'passes true values to scopes' do
+                s = Person.ransack('over_age' => 1)
+                expect(s.result.to_sql).to (include 'age > 1')
+              end
+
+              it 'passes false values to scopes'  do
+                s = Person.ransack('over_age' => 0)
+                expect(s.result.to_sql).to (include 'age > 0')
+              end
+            end
+
           end
 
           it 'does not raise exception for string :params argument' do
@@ -641,6 +660,12 @@ module Ransack
 
         describe '#ransackable_scopes' do
           subject { Person.ransackable_scopes }
+
+          it { should eq [] }
+        end
+
+        describe '#ransackable_scopes_skip_sanitize_args' do
+          subject { Person.ransackable_scopes_skip_sanitize_args }
 
           it { should eq [] }
         end
