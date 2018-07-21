@@ -425,7 +425,7 @@ List of all possible predicates
 | `*_lteq` | less than or equal | |
 | `*_gt` | greater than | |
 | `*_gteq` | greater than or equal | |
-| `*_present` | not null and not empty | e.g. `q[name_present]=1` (SQL: `col is not null AND col != ''`) |
+| `*_present` | not null and not empty | Only compatible with string columns. Example: `q[name_present]=1` (SQL: `col is not null AND col != ''`) |
 | `*_blank` | is null or empty. | (SQL: `col is null OR col = ''`) |
 | `*_null` | is null | |
 | `*_not_null` | is not null | |
