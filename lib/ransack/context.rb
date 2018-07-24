@@ -138,6 +138,10 @@ module Ransack
       klass.ransackable_scopes(auth_object).any? { |s| s.to_sym == str.to_sym }
     end
 
+    def ransackable_scope_skip_sanitize_args?(str, klass)
+      klass.ransackable_scopes_skip_sanitize_args.any? { |s| s.to_sym == str.to_sym }
+    end
+
     def searchable_attributes(str = ''.freeze)
       traverse(str).ransackable_attributes(auth_object)
     end
