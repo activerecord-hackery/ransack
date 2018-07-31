@@ -455,6 +455,16 @@ module Ransack
             end
           end
 
+          it 'sorts with different join variants' do
+            comments = [
+              Comment.create(article: Article.create(title: 'Avenger'), person: Person.create(salary: 100_000)),
+              Comment.create(article: Article.create(title: 'Avenge'), person: Person.create(salary: 50_000)),
+            ]
+            expect(Comment.ransack(article_title_cont: 'aven',s: 'person_salary desc').result).to eq(comments)
+            expect(Comment.joins(:person).ransack(s: 'person_salary desc', article_title_cont: 'aven').result).to eq(comments)
+            expect(Comment.joins(:person).ransack(article_title_cont: 'aven',s: 'person_salary desc').result).to eq(comments)
+          end
+
           it 'allows sort by `only_sort` field' do
             s = Person.ransack(
               's' => { '0' => { 'dir' => 'asc', 'name' => 'only_sort' } }
