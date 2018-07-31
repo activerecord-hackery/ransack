@@ -25,26 +25,12 @@ else
 end
 
 class Person < ActiveRecord::Base
-  if ::ActiveRecord::VERSION::MAJOR == 3
-    default_scope order('id DESC')
-  else
-    default_scope { order(id: :desc) }
-  end
+  default_scope { order(id: :desc) }
   belongs_to :parent, class_name: 'Person', foreign_key: :parent_id
   has_many   :children, class_name: 'Person', foreign_key: :parent_id
   has_many   :articles
-  if ActiveRecord::VERSION::MAJOR == 3
-    if RUBY_VERSION >= '2.3'
-      has_many :published_articles, class_name: "Article",
-        conditions: "published = 't'"
-    else
-      has_many :published_articles, class_name: "Article",
-        conditions: { published: true }
-    end
-  else
-    has_many :published_articles, ->{ where(published: true) },
+  has_many :published_articles, ->{ where(published: true) },
       class_name: "Article"
-  end
   has_many   :comments
   has_many   :authored_article_comments, through: :articles,
              source: :comments, foreign_key: :person_id
@@ -144,11 +130,7 @@ class Article < ActiveRecord::Base
 
   alias_attribute :content, :body
 
-  if ::ActiveRecord::VERSION::STRING >= '3.1'
-    default_scope { where("'default_scope' = 'default_scope'") }
-  else # Rails 3.0 does not accept a block
-    default_scope where("'default_scope' = 'default_scope'")
-  end
+  default_scope { where("'default_scope' = 'default_scope'") }
 end
 
 class Recommendation < ActiveRecord::Base

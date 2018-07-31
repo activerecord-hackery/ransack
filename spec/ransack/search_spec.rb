@@ -232,8 +232,8 @@ module Ransack
       # https://github.com/activerecord-hackery/ransack/issues/374
       #
       it 'evaluates conditions for multiple `belongs_to` associations to the
-      same table contextually',
-      if: ::ActiveRecord::VERSION::STRING.first(3) == '4.0' do
+      same table contextually' do
+        skip "Make this spec pass for Rails >5.0"
         s = Search.new(
           Recommendation,
           person_name_eq: 'Ernie',

@@ -10,8 +10,7 @@ module Ransack
         subject { Context.new(Person) }
 
 
-        it 'has an Active Record alias tracker method',
-        if: AR_version >= '3.1' do
+        it 'has an Active Record alias tracker method' do
           expect(subject.alias_tracker)
           .to be_an ::ActiveRecord::Associations::AliasTracker
         end
@@ -69,16 +68,14 @@ module Ransack
           end
 
           describe '#join_sources' do
-            # FIXME: fix this test for Rails 4.2 and 5.0.
             it 'returns dependent arel join nodes for all searches run against
-            the context', if: %w(3.1 3.2 4.0 4.1).include?(AR_version) do
+            the context' do
               parents, children = shared_context.join_sources
               expect(children.left.name).to eq "children_people"
               expect(parents.left.name).to eq "parents_people"
             end
 
-            it 'can be rejoined to execute a valid query',
-            if: AR_version >= '3.1' do
+            it 'can be rejoined to execute a valid query' do
               parents, children = shared_context.join_sources
 
               expect { Person.joins(parents).joins(children).to_a }

@@ -45,7 +45,6 @@ module Ransack
     NOT_EQ_ALL          = 'not_eq_all'.freeze
     CONT                = 'cont'.freeze
 
-    RAILS_4_1           = '4.1'.freeze
     RAILS_5_1           = '5.1'.freeze
     RAILS_5_2           = '5.2'.freeze
 

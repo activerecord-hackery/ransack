@@ -32,12 +32,9 @@ module Ransack
 
       if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_5_2
         @base = @join_dependency.instance_variable_get(:@join_root)
-      elsif ::ActiveRecord::VERSION::STRING >= Constants::RAILS_4_1
+      else
         @base = @join_dependency.join_root
         @engine = @base.base_klass.arel_engine
-      else
-        @base = @join_dependency.join_base
-        @engine = @base.arel_engine
       end
     end
 
@@ -55,10 +52,6 @@ module Ransack
         obj
       elsif obj.respond_to? :klass
         obj.klass
-      elsif obj.respond_to? :active_record  # Rails 3
-        obj.active_record
-      elsif obj.respond_to? :base_klass     # Rails 4
-        obj.base_klass
       else
         raise ArgumentError, "Don't know how to klassify #{obj.inspect}"
       end

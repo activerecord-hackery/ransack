@@ -98,7 +98,7 @@ module Ransack
          val.to_s.to_d
        end
       end
-      
+
       def cast_to_money(val)
         val.blank? ? nil : val.to_f.to_s
       end
