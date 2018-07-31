@@ -24,7 +24,7 @@ if defined?(::ActiveRecord)
   require 'polyamorous/swapping_reflection_class'
 
   ar_version = ::ActiveRecord::VERSION::STRING[0,3]
-  ar_version = ::ActiveRecord::VERSION::STRING[0,5] if ar_version == '5.2'
+  ar_version = ::ActiveRecord::VERSION::STRING[0,5] if ar_version >= '5.2'
 
   %w(join_association join_dependency).each do |file|
     require "polyamorous/activerecord_#{ar_version}_ruby_2/#{file}"

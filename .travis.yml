@@ -11,6 +11,10 @@ env:
   - RAILS=5-2-stable DB=mysql
   - RAILS=5-2-stable DB=postgres
 
+  - RAILS=v5.2.1.rc1 DB=sqlite3
+  - RAILS=v5.2.1.rc1 DB=mysql
+  - RAILS=v5.2.1.rc1 DB=postgres
+
   - RAILS=v5.2.0 DB=sqlite3
   - RAILS=v5.2.0 DB=mysql
   - RAILS=v5.2.0 DB=postgres
