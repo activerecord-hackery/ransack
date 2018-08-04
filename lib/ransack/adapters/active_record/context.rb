@@ -90,10 +90,19 @@ module Ransack
         # JoinDependency to track table aliases.
         #
         def join_sources
-          base, joins = [
-            Arel::SelectManager.new(@object.table),
-            @join_dependency.join_constraints(@object.joins_values, @join_type)
-          ]
+          base, joins =
+          if ::ActiveRecord::VERSION::STRING > Constants::RAILS_5_2_0
+            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
+            [
+              Arel::SelectManager.new(@object.table),
+              @join_dependency.join_constraints(@object.joins_values, @join_type, alias_tracker)
+            ]
+          else
+            [
+              Arel::SelectManager.new(@object.table),
+              @join_dependency.join_constraints(@object.joins_values, @join_type)
+            ]
+          end
           joins = joins.collect(&:joins).flatten if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2
           joins.each do |aliased_join|
             base.from(aliased_join)
@@ -225,14 +234,21 @@ module Ransack
 
           join_list = join_nodes + convert_join_strings_to_ast(relation.table, string_joins)
 
-          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2
+          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
             join_dependency = JoinDependency.new(relation.klass, association_joins, join_list)
+            join_nodes.each do |join|
+              join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
+            end
+          elsif ::ActiveRecord::VERSION::STRING == Constants::RAILS_5_2_0
+            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
+            join_dependency = JoinDependency.new(relation.klass, relation.table, association_joins, alias_tracker)
             join_nodes.each do |join|
               join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
             end
           else
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
-            join_dependency = JoinDependency.new(relation.klass, relation.table, association_joins, alias_tracker)
+            join_dependency = JoinDependency.new(relation.klass, relation.table, association_joins)
+            join_dependency.instance_variable_set(:@alias_tracker, alias_tracker)
             join_nodes.each do |join|
               join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
             end
@@ -259,20 +275,27 @@ module Ransack
         end
 
         def build_association(name, parent = @base, klass = nil)
-          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2
+          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
             jd = JoinDependency.new(
               parent.base_klass,
               Polyamorous::Join.new(name, @join_type, klass),
               []
             )
             found_association = jd.join_root.children.last
-          else
+          elsif ::ActiveRecord::VERSION::STRING == Constants::RAILS_5_2_0
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, parent.table.name, [])
             jd = JoinDependency.new(
               parent.base_klass,
               parent.base_klass.arel_table,
               Polyamorous::Join.new(name, @join_type, klass),
               alias_tracker
+            )
+            found_association = jd.instance_variable_get(:@join_root).children.last
+          else
+            jd = JoinDependency.new(
+              parent.base_klass,
+              parent.base_klass.arel_table,
+              Polyamorous::Join.new(name, @join_type, klass),
             )
             found_association = jd.instance_variable_get(:@join_root).children.last
           end
@@ -285,9 +308,13 @@ module Ransack
           @join_dependency.instance_variable_get(:@join_root).children.push found_association
 
           # Builds the arel nodes properly for this association
-          @join_dependency.send(
-            :construct_tables!, jd.instance_variable_get(:@join_root), found_association
+          if ::ActiveRecord::VERSION::STRING > Constants::RAILS_5_2_0
+            @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root))
+          else
+            @join_dependency.send(
+              :construct_tables!, jd.instance_variable_get(:@join_root), found_association
             )
+          end
 
           # Leverage the stashed association functionality in AR
           @object = @object.joins(jd)
@@ -308,13 +335,20 @@ module Ransack
                                  reflection.scope_chain,
                                  reflection.chain
                                )
-                             else
+                             elsif ::ActiveRecord::VERSION::STRING <= Constants::RAILS_5_2_0
                                association.join_constraints(
                                  parent.table,
                                  parent.base_klass,
                                  Arel::Nodes::OuterJoin,
                                  association.tables,
                                  reflection.chain
+                               )
+                             else
+                               association.join_constraints(
+                                 parent.table,
+                                 parent.base_klass,
+                                 Arel::Nodes::OuterJoin,
+                                 @join_dependency.instance_variable_get(:@alias_tracker)
                                )
                              end
           join_constraints.to_a.flatten

@@ -22,7 +22,7 @@ when /^v/ # A tagged version
     gem 'activerecord', require: false
     gem 'actionpack'
   end
-  if rails == 'v5.2.0'
+  if rails >= 'v5.2.0'
     gem 'mysql2', '~> 0.4.4'
   end
 else
