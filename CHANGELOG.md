@@ -1,6 +1,8 @@
 # Change Log
 
-## Version 2.0.0 - unreleased
+## Unreleased
+
+## Version 2.0.0 - 2018-08-09
 
 * Add support for Active Record 5.2.1
   PR [#938](https://github.com/activerecord-hackery/ransack/pull/938)
