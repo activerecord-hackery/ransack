@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "ransack"
 
-  s.add_dependency 'actionpack', '>= 3.0'
-  s.add_dependency 'activerecord', '>= 3.0'
-  s.add_dependency 'activesupport', '>= 3.0'
+  s.add_dependency 'actionpack', '>= 5.0'
+  s.add_dependency 'activerecord', '>= 5.0'
+  s.add_dependency 'activesupport', '>= 5.0'
   s.add_dependency 'i18n'
   s.add_development_dependency 'rspec', '~> 3'
   s.add_development_dependency 'machinist', '~> 1.0.6'
