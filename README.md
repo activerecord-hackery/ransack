@@ -27,11 +27,12 @@ instead.
 If you're viewing this at
 [github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
 you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (1.8.8).](https://github.com/activerecord-hackery/ransack/tree/v1.8.8)
+[View documentation for the last release (2.0.0).](https://github.com/activerecord-hackery/ransack/tree/v2.0.0)
 
 ## Getting started
 
-Ransack is compatible with Rails 4.2 and 5.0, 5.1 and 5.2 on Ruby 2.2 and later.
+Ransack is compatible with Rails 5.0, 5.1 and 5.2 on Ruby 2.2 and later.
+If you are using Rails <5.0 use the 1.8 line of Ransack.
 If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
 issues, you can use an earlier version of Ransack, say, up to 1.3.0.
 
