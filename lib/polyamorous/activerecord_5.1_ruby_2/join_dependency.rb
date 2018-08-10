@@ -30,24 +30,6 @@ module Polyamorous
       end
     end
 
-    def find_join_association_respecting_polymorphism(reflection, parent, klass)
-      if association = parent.children.find { |j| j.reflection == reflection }
-        unless reflection.polymorphic?
-          association
-        else
-          association if association.base_klass == klass
-        end
-      end
-    end
-
-    def build_join_association_respecting_polymorphism(reflection, parent, klass)
-      if reflection.polymorphic? && klass
-        JoinAssociation.new(reflection, self, klass)
-      else
-        JoinAssociation.new(reflection, self)
-      end
-    end
-
     # Replaces ActiveRecord::Associations::JoinDependency#join_constraints
     #
     # This internal method was changed in Rails 5.0 by commit
