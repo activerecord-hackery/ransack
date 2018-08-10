@@ -3,32 +3,30 @@ require 'spec_helper'
 module Polyamorous
   describe JoinDependency do
 
-    method, join_associations = :instance_eval, 'join_root.drop(1)'
-
     context 'with symbol joins' do
       subject { new_join_dependency Person, articles: :comments }
 
-      specify { expect(subject.send(method, join_associations).size)
+      specify { expect(subject.send(:join_root).drop(1).size)
         .to eq(2) }
-      specify { expect(subject.send(method, join_associations).map(&:join_type))
+      specify { expect(subject.send(:join_root).drop(1).map(&:join_type))
         .to be_all { Polyamorous::InnerJoin } }
     end
 
     context 'with has_many :through association' do
       subject { new_join_dependency Person, :authored_article_comments }
 
-      specify { expect(subject.send(method, join_associations).size)
+      specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 1 }
-      specify { expect(subject.send(method, join_associations).first.table_name)
+      specify { expect(subject.send(:join_root).drop(1).first.table_name)
         .to eq 'comments' }
     end
 
     context 'with outer join' do
       subject { new_join_dependency Person, new_join(:articles, :outer) }
 
-      specify { expect(subject.send(method, join_associations).size)
+      specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 1 }
-      specify { expect(subject.send(method, join_associations).first.join_type)
+      specify { expect(subject.send(:join_root).drop(1).first.join_type)
         .to eq Polyamorous::OuterJoin }
     end
 
@@ -36,22 +34,22 @@ module Polyamorous
       subject { new_join_dependency Person,
         new_join(:articles, :outer) => new_join(:comments, :outer) }
 
-      specify { expect(subject.send(method, join_associations).size)
+      specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 2 }
-      specify { expect(subject.send(method, join_associations).map(&:join_type))
+      specify { expect(subject.send(:join_root).drop(1).map(&:join_type))
         .to eq [Polyamorous::OuterJoin, Polyamorous::OuterJoin] }
-      specify { expect(subject.send(method, join_associations).map(&:join_type))
+      specify { expect(subject.send(:join_root).drop(1).map(&:join_type))
         .to be_all { Polyamorous::OuterJoin } }
     end
 
     context 'with polymorphic belongs_to join' do
       subject { new_join_dependency Note, new_join(:notable, :inner, Person) }
 
-      specify { expect(subject.send(method, join_associations).size)
+      specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 1 }
-      specify { expect(subject.send(method, join_associations).first.join_type)
+      specify { expect(subject.send(:join_root).drop(1).first.join_type)
         .to eq Polyamorous::InnerJoin }
-      specify { expect(subject.send(method, join_associations).first.table_name)
+      specify { expect(subject.send(:join_root).drop(1).first.table_name)
         .to eq 'people' }
     end
 
@@ -59,13 +57,13 @@ module Polyamorous
       subject { new_join_dependency Note,
         new_join(:notable, :inner, Person) => :comments }
 
-      specify { expect(subject.send(method, join_associations).size)
+      specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 2 }
-      specify { expect(subject.send(method, join_associations).map(&:join_type))
+      specify { expect(subject.send(:join_root).drop(1).map(&:join_type))
         .to be_all { Polyamorous::InnerJoin } }
-      specify { expect(subject.send(method, join_associations).first.table_name)
+      specify { expect(subject.send(:join_root).drop(1).first.table_name)
         .to eq 'people' }
-      specify { expect(subject.send(method, join_associations)[1].table_name)
+      specify { expect(subject.send(:join_root).drop(1)[1].table_name)
         .to eq 'comments' }
     end
 
