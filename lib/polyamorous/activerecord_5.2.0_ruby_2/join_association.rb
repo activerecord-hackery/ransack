@@ -20,13 +20,6 @@ module Polyamorous
       end
     end
 
-    # Reference: https://github.com/rails/rails/commit/9b15db5
-    # NOTE: Not sure we still need it?
-    #
-    def ==(other)
-      base_klass == other.base_klass
-    end
-
     def build_constraint(klass, table, key, foreign_table, foreign_key)
       if reflection.polymorphic?
         super(klass, table, key, foreign_table, foreign_key)
