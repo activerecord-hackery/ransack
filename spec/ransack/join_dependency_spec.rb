@@ -3,7 +3,7 @@ require 'spec_helper'
 module Polyamorous
   describe JoinDependency do
 
-    method, join_associations, join_base = :instance_eval, 'join_root.drop(1)', :join_root
+    method, join_associations = :instance_eval, 'join_root.drop(1)'
 
     context 'with symbol joins' do
       subject { new_join_dependency Person, articles: :comments }
@@ -53,15 +53,6 @@ module Polyamorous
         .to eq Polyamorous::InnerJoin }
       specify { expect(subject.send(method, join_associations).first.table_name)
         .to eq 'people' }
-
-      it 'finds a join association respecting polymorphism' do
-        parent = subject.send(join_base)
-        reflection = Note.reflect_on_association(:notable)
-
-        expect(subject.find_join_association_respecting_polymorphism(
-          reflection, parent, Person))
-          .to eq subject.send(method, join_associations).first
-      end
     end
 
     context 'with polymorphic belongs_to join and nested symbol join' do
