@@ -268,7 +268,7 @@ module Ransack
 
         def find_association(name, parent = @base, klass = nil)
           @join_dependency.instance_variable_get(:@join_root).children.detect do |assoc|
-            assoc.reflection.name == name &&
+            assoc.reflection.name == name && assoc.table &&
             (@associations_pot.empty? || @associations_pot[assoc] == parent || !@associations_pot.key?(assoc)) &&
             (!klass || assoc.reflection.klass == klass)
           end
