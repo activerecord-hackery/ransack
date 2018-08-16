@@ -316,6 +316,11 @@ module Ransack
         .to eq s.result(distinct: true).send(all_or_load)
       end
 
+      it 'evaluates joins with belongs_to join' do
+        s = Person.joins(:parent).ransack(parent_name_eq: 'Ernie').result(distinct: true)
+        expect(s).to be_an ActiveRecord::Relation
+      end
+
       private
 
         def remove_quotes_and_backticks(str)
