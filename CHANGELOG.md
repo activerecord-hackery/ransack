@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 2.0.1 - 2018-08-18
+
 * Don't return association if table is nil
   PR [952](https://github.com/activerecord-hackery/ransack/pull/952)
 
