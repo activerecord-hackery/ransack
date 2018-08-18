@@ -5,7 +5,6 @@ if defined?(::ActiveRecord)
 
     JoinDependency  = ::ActiveRecord::Associations::JoinDependency
     JoinAssociation = ::ActiveRecord::Associations::JoinDependency::JoinAssociation
-    JoinBase = ::ActiveRecord::Associations::JoinDependency::JoinBase
   end
 
   require 'polyamorous/tree_node'
@@ -22,10 +21,4 @@ if defined?(::ActiveRecord)
   Polyamorous::JoinDependency.send(:prepend, Polyamorous::JoinDependencyExtensions)
   Polyamorous::JoinDependency.singleton_class.send(:prepend, Polyamorous::JoinDependencyExtensions::ClassMethods)
   Polyamorous::JoinAssociation.send(:prepend, Polyamorous::JoinAssociationExtensions)
-
-  Polyamorous::JoinBase.class_eval do
-    if method_defined?(:active_record)
-      alias_method :base_klass, :active_record
-    end
-  end
 end
