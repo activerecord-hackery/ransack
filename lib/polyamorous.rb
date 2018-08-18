@@ -1,12 +1,7 @@
 if defined?(::ActiveRecord)
   module Polyamorous
-    if defined?(Arel::InnerJoin)
-      InnerJoin = Arel::InnerJoin
-      OuterJoin = Arel::OuterJoin
-    else
-      InnerJoin = Arel::Nodes::InnerJoin
-      OuterJoin = Arel::Nodes::OuterJoin
-    end
+    InnerJoin = Arel::Nodes::InnerJoin
+    OuterJoin = Arel::Nodes::OuterJoin
 
     JoinDependency  = ::ActiveRecord::Associations::JoinDependency
     JoinAssociation = ::ActiveRecord::Associations::JoinDependency::JoinAssociation
