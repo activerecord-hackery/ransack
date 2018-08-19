@@ -1,5 +1,4 @@
 require 'ransack/context'
-require 'ransack/adapters/active_record/compat'
 require 'polyamorous'
 
 module Ransack
