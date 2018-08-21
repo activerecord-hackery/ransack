@@ -1,22 +1,10 @@
 if defined?(::ActiveRecord)
   module Polyamorous
-    if defined?(Arel::InnerJoin)
-      InnerJoin = Arel::InnerJoin
-      OuterJoin = Arel::OuterJoin
-    else
-      InnerJoin = Arel::Nodes::InnerJoin
-      OuterJoin = Arel::Nodes::OuterJoin
-    end
+    InnerJoin = Arel::Nodes::InnerJoin
+    OuterJoin = Arel::Nodes::OuterJoin
 
-    if defined?(::ActiveRecord::Associations::JoinDependency)
-      JoinDependency  = ::ActiveRecord::Associations::JoinDependency
-      JoinAssociation = ::ActiveRecord::Associations::JoinDependency::JoinAssociation
-      JoinBase = ::ActiveRecord::Associations::JoinDependency::JoinBase
-    else
-      JoinDependency  = ::ActiveRecord::Associations::ClassMethods::JoinDependency
-      JoinAssociation = ::ActiveRecord::Associations::ClassMethods::JoinDependency::JoinAssociation
-      JoinBase = ::ActiveRecord::Associations::ClassMethods::JoinDependency::JoinBase
-    end
+    JoinDependency  = ::ActiveRecord::Associations::JoinDependency
+    JoinAssociation = ::ActiveRecord::Associations::JoinDependency::JoinAssociation
   end
 
   require 'polyamorous/tree_node'
@@ -33,10 +21,4 @@ if defined?(::ActiveRecord)
   Polyamorous::JoinDependency.send(:prepend, Polyamorous::JoinDependencyExtensions)
   Polyamorous::JoinDependency.singleton_class.send(:prepend, Polyamorous::JoinDependencyExtensions::ClassMethods)
   Polyamorous::JoinAssociation.send(:prepend, Polyamorous::JoinAssociationExtensions)
-
-  Polyamorous::JoinBase.class_eval do
-    if method_defined?(:active_record)
-      alias_method :base_klass, :active_record
-    end
-  end
 end

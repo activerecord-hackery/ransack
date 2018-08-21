@@ -483,7 +483,7 @@ avoid returning duplicate rows, even if conditions on a join would otherwise
 result in some. It generates the same SQL as calling `uniq` on the relation.
 
 Please note that for many databases, a sort on an associated table's columns
-may result in invalid SQL with `distinct: true` -- in those cases, you will
+may result in invalid SQL with `distinct: true` -- in those cases, you
 will need to modify the result as needed to allow these queries to work.
 
 For example, you could call joins and includes on the result which has the
