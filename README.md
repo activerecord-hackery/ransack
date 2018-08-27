@@ -132,6 +132,11 @@ which are defined in
 <% end %>
 ```
 
+The argument of `f.search_field` has to be in this form:
+ `attribute_name[_or_attribute_name]..._predicate` 
+ 
+where `[_or_another_attribute_name]...` means any repetition of `_or_` plus the name of the attribute.
+
 `cont` (contains) and `start` (starts with) are just two of the available
 search predicates. See
 [Constants](https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb)
