@@ -341,6 +341,30 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          it 'should work correctly when combined with another integer search' do
+            sql1 = Comment.ransack(person_id_string_eq: "32").result.to_sql
+            sql2 = Comment.ransack(article_id_eq: 1, person_id_string_eq: "32").result.to_sql
+            sql3 = Comment.ransack(person_id_string_eq: "32", article_id_eq: 1).result.to_sql
+            expect(sql1).to include "CHAR(8)) = '32'"
+            expect(sql2).to include "CHAR(8)) = '32'"
+            expect(sql3).to include "CHAR(8)) = '32'"
+
+            frank = Person.create!(name: 'Person 1')
+            tom = Person.create!(name: 'Person 2')
+            marco = frank.articles.create!(title: 'Marco Polo')
+            arthur = frank.articles.create!(title: 'King Arthur')
+            ids = [marco.id, arthur.id].join(",")
+
+            s = Person.ransack(exact_article_ids_matches: ids)
+            sql = s.result.to_sql
+            expect(s.result.to_a).to eq [frank]
+            expect(sql).to match(/LIKE '#{ids}'/)
+
+            s = Person.ransack(id_eq: 1, exact_article_ids_matches: ids)
+            sql = s.result.to_sql
+            expect(sql).to match(/LIKE '#{ids}'/)
+          end
+
           context 'searching by underscores' do
             # when escaping is supported right in LIKE expression without adding extra expressions
             def self.simple_escaping?
