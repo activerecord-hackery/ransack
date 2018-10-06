@@ -1,4 +1,4 @@
-# Ransack
+# ![Ransack](./logo/ransack-h.png "Ransack")
 
 [![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
@@ -9,7 +9,7 @@ created by [Ernie Miller](http://twitter.com/erniemiller)
 and developed/maintained for years by
 [Jon Atack](http://twitter.com/jonatack) and
 [Ryan Bigg](http://twitter.com/ryanbigg) with the help of a great group of
-[contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
+[contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors). Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).  
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
 and backwards compatibility is not a design goal.
