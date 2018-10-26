@@ -1,11 +1,47 @@
 # Change Log
 
-## Unreleased
+## Version 2.1.0 - 2018-10.-26
 
 * Add support for sorting by scopes
   PR [973](https://github.com/activerecord-hackery/ransack/pull/973)
 
   *Diego Borges*
+
+* Added a new logo for Ransack
+  PR [972](https://github.com/activerecord-hackery/ransack/pull/972)
+
+  *Anıl Kılıç*, *Greg Molnar*
+
+* Greek translations
+  PR [971](https://github.com/activerecord-hackery/ransack/pull/971)
+  PR [960](https://github.com/activerecord-hackery/ransack/pull/960)
+
+  *Sean Carroll*, *Greg Molnar*
+
+* README improvements
+  PR [963](https://github.com/activerecord-hackery/ransack/pull/963)
+
+  *tommaso1*
+
+* Bulgarian translations
+  PR [961](https://github.com/activerecord-hackery/ransack/pull/961)
+
+  *Sean Carroll*
+
+* README improvements
+  PR [956](https://github.com/activerecord-hackery/ransack/pull/956)
+
+  *Alex Konoval*
+
+* Remove lib/ransack/adapters/active_record/compat.rb
+  PR [954](https://github.com/activerecord-hackery/ransack/pull/954)
+
+  *Ryuta Kamizono*
+
+* Remove unused aliases
+  PR [953](https://github.com/activerecord-hackery/ransack/pull/953)
+
+  *Ryuta Kamizono*
 
 ## Version 2.0.1 - 2018-08-18
 
