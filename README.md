@@ -9,7 +9,7 @@ created by [Ernie Miller](http://twitter.com/erniemiller)
 and developed/maintained for years by
 [Jon Atack](http://twitter.com/jonatack) and
 [Ryan Bigg](http://twitter.com/ryanbigg) with the help of a great group of
-[contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors). Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).  
+[contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors). Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).
 While it supports many of the same features as MetaSearch, its underlying
 implementation differs greatly from MetaSearch,
 and backwards compatibility is not a design goal.
@@ -133,8 +133,8 @@ which are defined in
 ```
 
 The argument of `f.search_field` has to be in this form:
- `attribute_name[_or_attribute_name]..._predicate` 
- 
+ `attribute_name[_or_attribute_name]..._predicate`
+
 where `[_or_another_attribute_name]...` means any repetition of `_or_` plus the name of the attribute.
 
 `cont` (contains) and `start` (starts with) are just two of the available
@@ -201,6 +201,23 @@ This example toggles the sort directions of both fields, by default
 initially sorting the `last_name` field by ascending order, and the
 `first_name` field by descending order.
 
+In the case that you wish to sort by some complex value, such as the result
+of a SQL function, you may do so using scopes. In your model, define scopes
+whose names line up with the name of the virtual field you wish to sort by,
+as so:
+
+```ruby
+class Person < ActiveRecord::Base
+  scope :sort_by_reverse_name_asc, lambda { order("REVERSE(name) ASC") }
+  scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
+...
+```
+
+and you can then sort by this virtual field:
+
+```erb
+<%= sort_link(@q, :reverse_name) %>
+```
 
 The sort link order indicator arrows may be globally customized by setting a
 `custom_arrows` option in an initializer file like
@@ -727,7 +744,7 @@ Ransack.configure do |c|
 end
 ```
 
-To turn this off on a per-scope basis Ransack adds the following method to 
+To turn this off on a per-scope basis Ransack adds the following method to
 `ActiveRecord::Base` that you can redefine to selectively override sanitization:
 
 `ransackable_scopes_skip_sanitize_args`
