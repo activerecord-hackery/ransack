@@ -14,6 +14,7 @@ module Ransack
         end
 
         def ransack(params = {}, options = {})
+          ActiveSupport::Deprecation.warn("#search is deprecated and will be removed in 2.3, please use #ransack instead") if __callee__ == :search
           Search.new(self, params, options)
         end
 
