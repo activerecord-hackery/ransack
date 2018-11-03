@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
+[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/ransack/sponsors/badge.svg)](#sponsors) 
 
 Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search)
 created by [Ernie Miller](http://twitter.com/erniemiller)
@@ -933,3 +934,32 @@ directly related to bug reports, pull requests, or documentation improvements.
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!
+
+## Contributors
+
+This project exists thanks to all the people who contribute. <img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" />
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/ransack#backer)]
+
+<a href="https://opencollective.com/ransack#backers" target="_blank"><img src="https://opencollective.com/ransack/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/ransack#sponsor)]
+
+<a href="https://opencollective.com/ransack/sponsor/0/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/1/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/2/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/3/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/4/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/5/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/6/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/7/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/8/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/ransack/sponsor/9/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/9/avatar.svg"></a>
+
+
