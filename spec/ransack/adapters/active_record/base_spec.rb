@@ -584,31 +584,31 @@ module Ransack
 
           context 'case insensitive sorting' do
             it 'allows sort by desc' do
-              search = Person.search(sorts: ['name_case_insensitive desc'])
+              search = Person.ransack(sorts: ['name_case_insensitive desc'])
               expect(search.result.to_sql).to match /ORDER BY LOWER(.*) DESC/
             end
 
             it 'allows sort by asc' do
-              search = Person.search(sorts: ['name_case_insensitive asc'])
+              search = Person.ransack(sorts: ['name_case_insensitive asc'])
               expect(search.result.to_sql).to match /ORDER BY LOWER(.*) ASC/
             end
           end
 
           context 'regular sorting' do
             it 'allows sort by desc' do
-              search = Person.search(sorts: ['name desc'])
+              search = Person.ransack(sorts: ['name desc'])
               expect(search.result.to_sql).to match /ORDER BY .* DESC/
             end
 
             it 'allows sort by asc' do
-              search = Person.search(sorts: ['name asc'])
+              search = Person.ransack(sorts: ['name asc'])
               expect(search.result.to_sql).to match /ORDER BY .* ASC/
             end
           end
 
           context 'sorting by a scope' do
             it 'applies the correct scope' do
-              search = Person.search(sorts: ['reverse_name asc'])
+              search = Person.ransack(sorts: ['reverse_name asc'])
               expect(search.result.to_sql).to include("ORDER BY REVERSE(name) ASC")
             end
           end
