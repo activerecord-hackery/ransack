@@ -1,6 +1,16 @@
 # Change Log
 
-## Version 2.1.0 - 2018-10.-26
+## Unreleased
+
+## Version 2.1.1 - 2018-12-05
+
+* Add `arabic` translation
+  https://github.com/activerecord-hackery/ransack/pull/979
+
+* Deprecate #search
+  PR [975](https://github.com/activerecord-hackery/ransack/pull/975)
+
+## Version 2.1.0 - 2018-10-26
 
 * Add support for sorting by scopes
   PR [973](https://github.com/activerecord-hackery/ransack/pull/973)
