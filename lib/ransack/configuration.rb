@@ -28,7 +28,7 @@ module Ransack
 
     self.options = {
       :search_key => :q,
-      :ignore_unknown_conditions => true,
+      :ignore_unknown_conditions => false,
       :hide_sort_order_indicators => false,
       :up_arrow => '&#9660;'.freeze,
       :down_arrow => '&#9650;'.freeze,
