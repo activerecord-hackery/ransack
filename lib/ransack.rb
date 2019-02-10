@@ -1,6 +1,7 @@
 require 'active_support/core_ext'
 require 'ransack/configuration'
 require 'ransack/adapters'
+require 'polyamorous'
 
 Ransack::Adapters.object_mapper.require_constants
 
