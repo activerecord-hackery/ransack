@@ -15,9 +15,9 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.rubyforge_project = "ransack"
-  s.add_dependency 'actionpack', '>= 3.0', '<= 5.1.1'
-  s.add_dependency 'activerecord', '>= 3.0', '<= 5.1.1'
-  s.add_dependency 'activesupport', '>= 3.0', '<= 5.1.1'
+  s.add_dependency 'actionpack', '>= 3.0', '< 5.2'
+  s.add_dependency 'activerecord', '>= 3.0', '< 5.2'
+  s.add_dependency 'activesupport', '>= 3.0', '< 5.2'
   s.add_dependency 'i18n'
   s.add_development_dependency 'rspec', '~> 3'
   s.add_development_dependency 'machinist', '~> 1.0.6'
