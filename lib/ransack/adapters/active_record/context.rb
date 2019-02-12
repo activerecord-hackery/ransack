@@ -326,7 +326,6 @@ module Ransack
             found_association = jd.instance_variable_get(:@join_root).children.last
           end
 
-
           @associations_pot[found_association] = parent
 
           # TODO maybe we dont need to push associations here, we could loop
@@ -337,14 +336,11 @@ module Ransack
           if ::ActiveRecord::VERSION::STRING > Constants::RAILS_5_2_0
             @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root))
           else
-            @join_dependency.send(
-              :construct_tables!, jd.instance_variable_get(:@join_root), found_association
-            )
+            @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root), found_association)
           end
 
           # Leverage the stashed association functionality in AR
           @object = @object.joins(jd)
-
           found_association
         end
 

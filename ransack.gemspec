@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pg', '~> 0.21'
   s.add_development_dependency 'mysql2', '0.3.20'
   s.add_development_dependency 'pry', '0.10'
+  s.add_development_dependency 'byebug'
 
   s.files         = `git ls-files`.split("\n")
 

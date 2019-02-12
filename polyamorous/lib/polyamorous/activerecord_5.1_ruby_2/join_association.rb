@@ -7,8 +7,7 @@ module Polyamorous
       base.class_eval { attr_reader :join_type }
     end
 
-    def initialize(reflection, children, polymorphic_class = nil,
-                   join_type = Arel::Nodes::InnerJoin)
+    def initialize(reflection, children, polymorphic_class = nil, join_type = Arel::Nodes::InnerJoin)
       @join_type = join_type
       if polymorphic_class && ::ActiveRecord::Base > polymorphic_class
         swapping_reflection_klass(reflection, polymorphic_class) do |reflection|

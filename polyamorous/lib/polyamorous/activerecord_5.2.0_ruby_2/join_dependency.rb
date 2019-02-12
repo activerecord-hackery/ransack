@@ -38,7 +38,6 @@ module Polyamorous
     # passing an additional argument, `join_type`, to #join_constraints.
     #
     def join_constraints(outer_joins, join_type)
-      @alias_tracker = alias_tracker
       joins = join_root.children.flat_map { |child|
         if join_type == Arel::Nodes::OuterJoin
           make_polyamorous_left_outer_joins join_root, child

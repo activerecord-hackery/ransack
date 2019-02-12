@@ -19,6 +19,11 @@ if defined?(::ActiveRecord)
     require "polyamorous/activerecord_#{ar_version}_ruby_2/#{file}"
   end
 
+  if ar_version >= "5.2.0"
+    require "polyamorous/activerecord_#{ar_version}_ruby_2/reflection.rb"
+    ::ActiveRecord::Reflection::AbstractReflection.send(:prepend, Polyamorous::ReflectionExtensions)
+  end
+
   Polyamorous::JoinDependency.send(:prepend, Polyamorous::JoinDependencyExtensions)
   Polyamorous::JoinDependency.singleton_class.send(:prepend, Polyamorous::JoinDependencyExtensions::ClassMethods)
   Polyamorous::JoinAssociation.send(:prepend, Polyamorous::JoinAssociationExtensions)
