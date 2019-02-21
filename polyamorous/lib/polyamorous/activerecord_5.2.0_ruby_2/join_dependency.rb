@@ -47,7 +47,7 @@ module Polyamorous
       }
 
       joins.concat outer_joins.flat_map { |oj|
-        if join_root.match? oj.join_root
+        if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
           walk(join_root, oj.join_root)
         else
           oj.join_root.children.flat_map { |child|

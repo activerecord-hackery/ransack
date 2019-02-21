@@ -312,7 +312,7 @@ module Ransack
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, parent.table.name, [])
             jd = Polyamorous::JoinDependency.new(
               parent.base_klass,
-              parent.base_klass.arel_table,
+              parent.table,
               Polyamorous::Join.new(name, @join_type, klass),
               alias_tracker
             )
@@ -320,7 +320,7 @@ module Ransack
           else
             jd = Polyamorous::JoinDependency.new(
               parent.base_klass,
-              parent.base_klass.arel_table,
+              parent.table,
               Polyamorous::Join.new(name, @join_type, klass),
             )
             found_association = jd.instance_variable_get(:@join_root).children.last
