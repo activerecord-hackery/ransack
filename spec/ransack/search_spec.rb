@@ -227,13 +227,37 @@ module Ransack
           children_people_name_field} = 'Ernie'/
       end
 
+      it 'use appropriate table alias' do
+        skip "Make this spec pass for Rails <5.2" if ::ActiveRecord::VERSION::STRING < '5.2.0'
+        s = Search.new(Person, {
+          name_eq: "person_name_query",
+          articles_title_eq: "person_article_title_query",
+          parent_name_eq: "parent_name_query",
+          parent_articles_title_eq: 'parents_article_title_query'
+        }).result
+        real_query = remove_quotes_and_backticks(s.to_sql)
+
+        expect(real_query)
+          .to include "LEFT OUTER JOIN articles ON articles.person_id = people.id"
+        expect(real_query)
+          .to include "LEFT OUTER JOIN articles articles_people ON articles_people.person_id = parents_people.id"
+        expect(real_query)
+          .to include "people.name = 'person_name_query'"
+        expect(real_query)
+          .to include "articles.title = 'person_article_title_query'"
+        expect(real_query)
+          .to include "parents_people.name = 'parent_name_query'"
+        expect(real_query)
+          .to include "articles_people.title = 'parents_article_title_query'"
+      end
+
       # FIXME: Make this spec pass for Rails 4.1 / 4.2 / 5.0 and not just 4.0 by
       # commenting out lines 221 and 242 to run the test. Addresses issue #374.
       # https://github.com/activerecord-hackery/ransack/issues/374
       #
       it 'evaluates conditions for multiple `belongs_to` associations to the
       same table contextually' do
-        skip "Make this spec pass for Rails >5.0"
+        skip "Make this spec pass for Rails <5.2" if ::ActiveRecord::VERSION::STRING < '5.2.0'
         s = Search.new(
           Recommendation,
           person_name_eq: 'Ernie',
@@ -248,7 +272,7 @@ module Ransack
             ON target_people_recommendations.id = recommendations.target_person_id
           LEFT OUTER JOIN people parents_people
             ON parents_people.id = target_people_recommendations.parent_id
-          WHERE ((people.name = 'Ernie' AND parents_people.name = 'Test'))
+          WHERE (people.name = 'Ernie' AND parents_people.name = 'Test')
         SQL
         .squish
         expect(real_query).to eq expected_query
