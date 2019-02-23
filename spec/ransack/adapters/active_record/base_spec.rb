@@ -576,6 +576,13 @@ module Ransack
               expect(search.result.to_sql).to match /ORDER BY .* ASC/
             end
           end
+
+          context 'sorting by a scope' do
+            it 'applies the correct scope' do
+              search = Person.search(sorts: ['reverse_name asc'])
+              expect(search.result.to_sql).to include("ORDER BY REVERSE(name) ASC")
+            end
+          end
         end
 
         describe '#ransackable_attributes' do

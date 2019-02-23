@@ -1,5 +1,10 @@
 # Change Log
 
+* Add support for sorting by scopes
+  PR [973](https://github.com/activerecord-hackery/ransack/pull/973)
+
+  *Diego Borges*
+
 ## Version 1.8.9 - 2018-08-09
 
 * Locked Active Record compatibiity at 5.1.0
