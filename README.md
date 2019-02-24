@@ -218,6 +218,23 @@ This example toggles the sort directions of both fields, by default
 initially sorting the `last_name` field by ascending order, and the
 `first_name` field by descending order.
 
+In the case that you wish to sort by some complex value, such as the result
+of a SQL function, you may do so using scopes. In your model, define scopes
+whose names line up with the name of the virtual field you wish to sort by,
+as so:
+
+```ruby
+class Person < ActiveRecord::Base
+  scope :sort_by_reverse_name_asc, lambda { order("REVERSE(name) ASC") }
+  scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
+...
+```
+
+and you can then sort by this virtual field:
+
+```erb
+<%= sort_link(@q, :reverse_name) %>
+```
 
 The sort link order indicator arrows may be globally customized by setting a
 `custom_arrows` option in an initializer file like

@@ -57,6 +57,9 @@ class Person < ActiveRecord::Base
     of_age ? where("age >= ?", 18) : where("age < ?", 18)
   }
 
+  scope :sort_by_reverse_name_asc, lambda { order("REVERSE(name) ASC") }
+  scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
+
   alias_attribute :full_name, :name
 
   ransack_alias :term, :name_or_email
