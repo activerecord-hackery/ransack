@@ -102,8 +102,11 @@ module Ransack
     # replace % \ to \% \\
     def escape_wildcards(unescaped)
       case ActiveRecord::Base.connection.adapter_name
-      when "Mysql2".freeze, "PostgreSQL".freeze
-        # Necessary for PostgreSQL and MySQL
+      when "Mysql2".freeze
+        # Necessary for MySQL
+        unescaped.to_s.gsub(/([\\%_])/, '\\\\\\1')
+      when "PostgreSQL".freeze
+        # Necessary for PostgreSQL
         unescaped.to_s.gsub(/([\\%_.])/, '\\\\\\1')
       else
         unescaped
