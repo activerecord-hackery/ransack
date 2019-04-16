@@ -717,8 +717,6 @@ class Employee < ActiveRecord::Base
       %i(activated hired_since)
     end
   end
-
-  private_class_method :ransackable_scopes
 end
 
 Employee.ransack({ activated: true, hired_since: '2013-01-01' })
