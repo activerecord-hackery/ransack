@@ -4,6 +4,7 @@ require 'faker'
 require 'ransack'
 require 'pry'
 require 'simplecov'
+require 'byebug'
 
 SimpleCov.start
 I18n.enforce_available_locales = false

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+* Fix wrong table alias when using nested join. for ActiveRecord >= 5.2
+  PR [374](https://github.com/activerecord-hackery/ransack/pull/374)
+
+  *hiichan*
+
 ## Version 2.1.1 - 2018-12-05
 
 * Add `arabic` translation

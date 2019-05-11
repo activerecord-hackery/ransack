@@ -38,7 +38,6 @@ module Polyamorous
     # passing an additional argument, `join_type`, to #join_constraints.
     #
     def join_constraints(outer_joins, join_type)
-      @alias_tracker = alias_tracker
       joins = join_root.children.flat_map { |child|
         if join_type == Arel::Nodes::OuterJoin
           make_polyamorous_left_outer_joins join_root, child
@@ -48,7 +47,7 @@ module Polyamorous
       }
 
       joins.concat outer_joins.flat_map { |oj|
-        if join_root.match? oj.join_root
+        if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
           walk(join_root, oj.join_root)
         else
           oj.join_root.children.flat_map { |child|

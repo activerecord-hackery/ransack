@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '5-0-stable'
+rails = ENV['RAILS'] || '5-2-stable'
 
 gem 'pry'
 
@@ -22,9 +22,6 @@ when /^v/ # A tagged version
     gem 'activerecord', require: false
     gem 'actionpack'
   end
-  if rails >= 'v5.2.0'
-    gem 'mysql2', '~> 0.4.4'
-  end
 else
   git 'git://github.com/rails/rails.git', :branch => rails do
     gem 'activesupport'
@@ -32,13 +29,8 @@ else
     gem 'activerecord', require: false
     gem 'actionpack'
   end
-  if rails == '3-0-stable'
-    gem 'mysql2', '< 0.3'
-  end
-  if rails == '5-2-stable'
-    gem 'mysql2', '~> 0.4.4'
-  end
 end
+gem 'mysql2', '~> 0.4.4'
 
 group :test do
   # TestUnit was removed from Ruby 2.2 but still needed for testing Rails 3.x.
