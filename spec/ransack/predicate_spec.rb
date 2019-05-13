@@ -381,6 +381,20 @@ module Ransack
       end
     end
 
+    context "defining custom predicates" do
+      describe "with 'not_in' arel predicate" do
+        before do
+          Ransack.configure {|c| c.add_predicate "not_in_csv", arel_predicate: "not_in", formatter: proc { |v| v.split(",") } }
+        end
+
+        it 'generates a value IS NOT NULL query' do
+          @s.name_not_in_csv = ["a", "b"]
+          field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+          expect(@s.result.to_sql).to match /#{field} NOT IN \('a', 'b'\)/
+        end
+      end
+    end
+
     private
 
       def test_boolean_equality_for(boolean_value)
