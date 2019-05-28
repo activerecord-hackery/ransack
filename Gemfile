@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '5-2-stable'
+rails = ENV['RAILS'] || '6-0-stable'
 
 gem 'pry'
 
