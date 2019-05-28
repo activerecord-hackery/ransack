@@ -3,7 +3,11 @@ module PolyamorousHelper
     Polyamorous::JoinAssociation.new reflection, children, klass
   end
 
-  if ActiveRecord::VERSION::STRING > "5.2.0"
+  if ActiveRecord::VERSION::STRING >= "6.0.0.rc1"
+    def new_join_dependency(klass, associations = {})
+      Polyamorous::JoinDependency.new klass, klass.arel_table, associations, Polyamorous::InnerJoin
+    end
+  elsif ActiveRecord::VERSION::STRING > "5.2.0"
     def new_join_dependency(klass, associations = {})
       Polyamorous::JoinDependency.new klass, klass.arel_table, associations
     end

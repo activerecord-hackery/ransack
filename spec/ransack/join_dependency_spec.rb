@@ -79,7 +79,7 @@ module Polyamorous
     end
 
     context '#left_outer_join in Rails 5 overrides join type specified',
-            if: ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MINOR < 2 do
+            if: ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MAJOR < 6 && ActiveRecord::VERSION::MINOR < 2 do
 
       let(:join_type_class) do
         new_join_dependency(
