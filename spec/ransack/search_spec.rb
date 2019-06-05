@@ -238,9 +238,9 @@ module Ransack
         real_query = remove_quotes_and_backticks(s.to_sql)
 
         expect(real_query)
-          .to include "LEFT OUTER JOIN articles ON articles.person_id = people.id"
+          .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
         expect(real_query)
-          .to include "LEFT OUTER JOIN articles articles_people ON articles_people.person_id = parents_people.id"
+          .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
         expect(real_query)
           .to include "people.name = 'person_name_query'"
         expect(real_query)

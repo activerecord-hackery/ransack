@@ -186,6 +186,8 @@ module Ransack
             correlated_key = correlated_key.left.left
           elsif correlated_key.is_a? Arel::Nodes::Equality
             correlated_key = correlated_key.left
+          elsif correlated_key.is_a? Arel::Nodes::Grouping
+            correlated_key = join_root.right.expr.right.left
           else
             correlated_key
           end
