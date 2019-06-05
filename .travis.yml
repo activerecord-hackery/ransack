@@ -35,3 +35,4 @@ before_script:
 addons:
   code_climate:
     repo_token: 8b701c4364d51a0217105e08c06922d600cec3d9e60d546a89e3ddfe46e0664e
+  postgresql: "9.6"
