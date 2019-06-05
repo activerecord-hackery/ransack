@@ -64,26 +64,28 @@ module Ransack
 
     def traverse(str, base = @base)
       str ||= ''.freeze
-
-      if (segments = str.split(Constants::UNDERSCORE)).size > 0
+      segments = str.split(Constants::UNDERSCORE)
+      unless segments.empty?
         remainder = []
         found_assoc = nil
-        while !found_assoc && segments.size > 0 do
+        until found_assoc || segments.empty?
           # Strip the _of_Model_type text from the association name, but hold
           # onto it in klass, for use as the next base
           assoc, klass = unpolymorphize_association(
             segments.join(Constants::UNDERSCORE)
-            )
+          )
           if found_assoc = get_association(assoc, base)
             base = traverse(
               remainder.join(Constants::UNDERSCORE), klass || found_assoc.klass
-              )
+            )
           end
 
           remainder.unshift segments.pop
         end
-        raise UntraversableAssociationError,
-          "No association matches #{str}" unless found_assoc
+        unless found_assoc
+          raise(UntraversableAssociationError,
+                "No association matches #{str}")
+        end
       end
 
       klassify(base)
@@ -95,18 +97,17 @@ module Ransack
       path = []
       segments = str.split(Constants::UNDERSCORE)
       association_parts = []
-      if (segments = str.split(Constants::UNDERSCORE)).size > 0
-        while segments.size > 0 &&
-        !base.columns_hash[segments.join(Constants::UNDERSCORE)] &&
-        association_parts << segments.shift do
+      unless segments.empty?
+        while !segments.empty? &&
+              !base.columns_hash[segments.join(Constants::UNDERSCORE)] &&
+              association_parts << segments.shift
           assoc, klass = unpolymorphize_association(
             association_parts.join(Constants::UNDERSCORE)
-            )
-          if found_assoc = get_association(assoc, base)
-            path += association_parts
-            association_parts = []
-            base = klassify(klass || found_assoc)
-          end
+          )
+          next unless found_assoc = get_association(assoc, base)
+          path += association_parts
+          association_parts = []
+          base = klassify(klass || found_assoc)
         end
       end
 
@@ -127,7 +128,7 @@ module Ransack
 
     def ransackable_attribute?(str, klass)
       klass.ransackable_attributes(auth_object).include?(str) ||
-      klass.ransortable_attributes(auth_object).include?(str)
+        klass.ransortable_attributes(auth_object).include?(str)
     end
 
     def ransackable_association?(str, klass)
