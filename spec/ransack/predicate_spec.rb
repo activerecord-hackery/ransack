@@ -126,7 +126,7 @@ module Ransack
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
         elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
-          /`people`.`name` LIKE '%\\\\%\\\\.\\\\_\\\\\\\\%'/
+          /`people`.`name` LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" LIKE '%%._\\%'/
         end) do
@@ -145,7 +145,7 @@ module Ransack
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
         elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
-          /`people`.`name` NOT LIKE '%\\\\%\\\\.\\\\_\\\\\\\\%'/
+          /`people`.`name` NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" NOT LIKE '%%._\\%'/
         end) do
