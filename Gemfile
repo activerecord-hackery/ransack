@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '5-2-stable'
+rails = ENV['RAILS'] || '6-0-stable'
 
 gem 'pry'
 
@@ -30,7 +30,7 @@ else
     gem 'actionpack'
   end
 end
-gem 'mysql2', '~> 0.4.4'
+gem 'mysql2', '~> 0.5.2'
 
 group :test do
   # TestUnit was removed from Ruby 2.2 but still needed for testing Rails 3.x.
