@@ -107,9 +107,15 @@ module Ransack
           base, joins =
           if ::ActiveRecord::VERSION::STRING > Constants::RAILS_5_2_0
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
+            constraints   = if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+              @join_dependency.join_constraints(@object.joins_values, alias_tracker)
+            else
+              @join_dependency.join_constraints(@object.joins_values, @join_type, alias_tracker)
+            end
+
             [
               Arel::SelectManager.new(@object.table),
-              @join_dependency.join_constraints(@object.joins_values, @join_type, alias_tracker)
+              constraints
             ]
           else
             [
@@ -275,7 +281,11 @@ module Ransack
             end
           else
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
-            join_dependency = Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins)
+            join_dependency = if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+              Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, Arel::Nodes::OuterJoin)
+            else
+              Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins)
+            end
             join_dependency.instance_variable_set(:@alias_tracker, alias_tracker)
             join_nodes.each do |join|
               join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
@@ -303,7 +313,15 @@ module Ransack
         end
 
         def build_association(name, parent = @base, klass = nil)
-          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
+          if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+            jd = Polyamorous::JoinDependency.new(
+              parent.base_klass,
+              parent.table,
+              Polyamorous::Join.new(name, @join_type, klass),
+              @join_type
+            )
+            found_association = jd.instance_variable_get(:@join_root).children.last
+          elsif ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
             jd = Polyamorous::JoinDependency.new(
               parent.base_klass,
               Polyamorous::Join.new(name, @join_type, klass),
@@ -323,7 +341,7 @@ module Ransack
             jd = Polyamorous::JoinDependency.new(
               parent.base_klass,
               parent.table,
-              Polyamorous::Join.new(name, @join_type, klass),
+              Polyamorous::Join.new(name, @join_type, klass)
             )
             found_association = jd.instance_variable_get(:@join_root).children.last
           end
