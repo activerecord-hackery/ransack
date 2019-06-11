@@ -16,14 +16,14 @@ when /\// # A path
   gem 'activerecord', path: "#{rails}/activerecord", require: false
   gem 'actionpack', path: "#{rails}/actionpack"
 when /^v/ # A tagged version
-  git 'git://github.com/rails/rails.git', :tag => rails do
+  git 'https://github.com/rails/rails.git', :tag => rails do
     gem 'activesupport'
     gem 'activemodel'
     gem 'activerecord', require: false
     gem 'actionpack'
   end
 else
-  git 'git://github.com/rails/rails.git', :branch => rails do
+  git 'https://github.com/rails/rails.git', :branch => rails do
     gem 'activesupport'
     gem 'activemodel'
     gem 'activerecord', require: false
