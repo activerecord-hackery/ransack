@@ -281,11 +281,7 @@ module Ransack
             end
           else
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
-            join_dependency = if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
-              Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, Arel::Nodes::OuterJoin)
-            else
-              Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins)
-            end
+            join_dependency = Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins)
             join_dependency.instance_variable_set(:@alias_tracker, alias_tracker)
             join_nodes.each do |join|
               join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
