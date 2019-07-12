@@ -14,8 +14,6 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.9'
   s.license     = 'MIT'
 
-  s.rubyforge_project = "ransack"
-
   s.add_dependency 'actionpack', '>= 5.0'
   s.add_dependency 'activerecord', '>= 5.0'
   s.add_dependency 'activesupport', '>= 5.0'
