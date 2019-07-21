@@ -6,6 +6,10 @@ rvm:
   - 2.5
 
 env:
+  - DB=sqlite3
+  - DB=mysql
+  - DB=postgres
+
   - RAILS=6-0-stable DB=sqlite3
   - RAILS=6-0-stable DB=mysql
   - RAILS=6-0-stable DB=postgres
