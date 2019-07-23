@@ -32,11 +32,11 @@ you're reading the documentation for the master branch with the latest features.
 
 ## Rails 6 Support
 
-Rails 6 is right around the corner, but not yet released. Ransack supports ```6-0-stable```, but does not support release candidate versions, ```rc-x```. Full Rails 6 support will be provided after the official Rails 6 release. See [this issue](https://github.com/activerecord-hackery/ransack/issues/1032) for details.
+Rails 6 is right around the corner, but not yet released. Ransack master branch supports ```6.0.0.rc2```. Full Rails 6 support will be provided after the official Rails 6 release. See [this issue](https://github.com/activerecord-hackery/ransack/issues/1032) for details.
 
 ## Getting started
 
-Ransack is compatible with Rails 6-0-stable, 5.0, 5.1 and 5.2 on Ruby 2.2 and later.
+Ransack is compatible with Rails 6.0.0.rc2, 5.0, 5.1 and 5.2 on Ruby 2.2 and later.
 If you are using Rails <5.0 use the 1.8 line of Ransack.
 If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
 issues, you can use an earlier version of Ransack, say, up to 1.3.0.
