@@ -35,7 +35,8 @@ module Ransack
       'matches'.freeze, 'does_not_match'.freeze,
       'lt'.freeze, 'lteq'.freeze,
       'gt'.freeze, 'gteq'.freeze,
-      'in'.freeze, 'not_in'.freeze
+      'in'.freeze, 'not_in'.freeze,
+      'matches_regexp'.freeze
       ].freeze
     A_S_I               = ['a'.freeze, 's'.freeze, 'i'.freeze].freeze
 

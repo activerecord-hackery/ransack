@@ -395,6 +395,23 @@ module Ransack
       end
     end
 
+    describe 'matches_regex' do
+      it 'generates a NOT LIKE query with value preceded by %' do
+        @s.name_matches_regex = 'Miller'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+
+        if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+          expect(@s.result.to_sql).to match /#{field} I?LIKE '%Miller'/
+        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+          expect(@s.result.to_sql).to match /#{field} REGEX '%Miller'/
+        else
+          expect(@s.result.to_sql).to match /#{field} LIKE '%Miller'/
+        end
+        
+      end
+
+    end
+
     private
 
       def test_boolean_equality_for(boolean_value)
