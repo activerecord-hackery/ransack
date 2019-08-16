@@ -107,7 +107,7 @@ module Ransack
           base, joins =
           if ::ActiveRecord::VERSION::STRING > Constants::RAILS_5_2_0
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
-            constraints   = if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
               @join_dependency.join_constraints(@object.joins_values, alias_tracker)
             else
               @join_dependency.join_constraints(@object.joins_values, @join_type, alias_tracker)
@@ -281,7 +281,7 @@ module Ransack
             end
           else
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
-            join_dependency = if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+            join_dependency = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
               Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, Arel::Nodes::OuterJoin)
             else
               Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins)
@@ -313,7 +313,7 @@ module Ransack
         end
 
         def build_association(name, parent = @base, klass = nil)
-          if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+          if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
             jd = Polyamorous::JoinDependency.new(
               parent.base_klass,
               parent.table,
@@ -321,7 +321,7 @@ module Ransack
               @join_type
             )
             found_association = jd.instance_variable_get(:@join_root).children.last
-          elsif ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
+          elsif ::Gem::Version.new(::ActiveRecord::VERSION::STRING) < ::Gem::Version.new(Constants::RAILS_5_2_0)
             jd = Polyamorous::JoinDependency.new(
               parent.base_klass,
               Polyamorous::Join.new(name, @join_type, klass),
