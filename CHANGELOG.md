@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+## 2.3.0 - 2019-08-18
+
+* Arabic translations PR [979](https://github.com/activerecord-hackery/ransack/pull/979)
+
+* Rails 6 PR [1027](https://github.com/activerecord-hackery/ransack/pull/1027)
+ *vrodokanakis*
+
+* Make polyamorous a separate gem PR [1002](https://github.com/activerecord-hackery/ransack/pull/1002)
+
+* Catalan translations PR[1007](https://github.com/activerecord-hackery/ransack/pull/1007)
+ *roslavych*
+
+* Don't escape period characters with wildcard searches in mysql2 PR [1013](https://github.com/activerecord-hackery/ransack/pull/1013)
+ *daflip*
+
+* Farsi translations PR [1030](https://github.com/activerecord-hackery/ransack/pull/1030)
+
+* Finnish translations PR [1049](https://github.com/activerecord-hackery/ransack/pull/1049)
+
 * Fix wrong table alias when using nested join. for ActiveRecord >= 5.2
   PR [374](https://github.com/activerecord-hackery/ransack/pull/374)
 
