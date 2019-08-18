@@ -3,12 +3,19 @@ language: ruby
 sudo: false
 
 rvm:
-  - 2.5
+  - 2.6.0
+
+services:
+  - mysql
 
 env:
   - RAILS=6-0-stable DB=sqlite3
   - RAILS=6-0-stable DB=mysql
   - RAILS=6-0-stable DB=postgres
+
+  - RAILS=v6.0.0 DB=sqlite3
+  - RAILS=v6.0.0 DB=mysql
+  - RAILS=v6.0.0 DB=postgres
 
   - RAILS=5-2-stable DB=sqlite3
   - RAILS=5-2-stable DB=mysql
