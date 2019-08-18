@@ -18,8 +18,6 @@ Gem::Specification.new do |s|
     associations.
   }
 
-  s.rubyforge_project = "polyamorous"
-
   s.add_dependency 'activerecord', '>= 5.0'
   s.add_development_dependency 'rspec', '~> 3'
   s.add_development_dependency 'machinist', '~> 1.0.6'
