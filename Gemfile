@@ -11,9 +11,6 @@ gem 'pg', '~> 1.0'
 gem 'pry', '0.10'
 gem 'byebug'
 
-# Provide timezone information on Windows
-gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
-
 case rails
 when /\// # A path
   gem 'activesupport', path: "#{rails}/activesupport"
