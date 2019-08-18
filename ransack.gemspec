@@ -19,14 +19,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport', '>= 5.0'
   s.add_dependency 'i18n'
   s.add_dependency 'polyamorous', Ransack::VERSION.to_s
-  s.add_development_dependency 'rspec', '~> 3'
-  s.add_development_dependency 'machinist', '~> 1.0.6'
-  s.add_development_dependency 'faker', '~> 0.9.5'
-  s.add_development_dependency 'sqlite3', ::Gem::Version.new(ENV['RAILS']&.gsub(/^v/, '')) >= ::Gem::Version.new('6-0-stable') ? '~> 1.4.1' : '~> 1.3.3'
-  s.add_development_dependency 'pg', '~> 0.21'
-  s.add_development_dependency 'mysql2', '0.3.20'
-  s.add_development_dependency 'pry', '0.10'
-  s.add_development_dependency 'byebug'
 
   s.files         = `git ls-files`.split("\n")
 

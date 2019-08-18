@@ -5,7 +5,12 @@ gem 'rake'
 
 rails = ENV['RAILS'] || '6-0-stable'
 
-gem 'pry'
+gem 'faker', '~> 0.9.5'
+gem 'sqlite3', ::Gem::Version.new(ENV['RAILS']&.gsub(/^v/, '')) >= ::Gem::Version.new('6-0-stable') ? '~> 1.4.1' : '~> 1.3.3'
+gem 'pg', '~> 0.21'
+gem 'mysql2', '0.3.20'
+gem 'pry', '0.10'
+gem 'byebug'
 
 # Provide timezone information on Windows
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
@@ -33,6 +38,8 @@ end
 gem 'mysql2', '~> 0.5.2'
 
 group :test do
+  gem 'machinist', '~> 1.0.6'
+  gem 'rspec', '~> 3'
   # TestUnit was removed from Ruby 2.2 but still needed for testing Rails 3.x.
   gem 'test-unit', '~> 3.0' if RUBY_VERSION >= '2.2'
   gem 'simplecov', :require => false
