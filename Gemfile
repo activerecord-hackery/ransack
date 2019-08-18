@@ -8,7 +8,6 @@ rails = ENV['RAILS'] || '6-0-stable'
 gem 'faker', '~> 0.9.5'
 gem 'sqlite3', ::Gem::Version.new(ENV['RAILS']&.gsub(/^v/, '')) >= ::Gem::Version.new('6-0-stable') ? '~> 1.4.1' : '~> 1.3.3'
 gem 'pg', '~> 0.21'
-gem 'mysql2', '0.3.20'
 gem 'pry', '0.10'
 gem 'byebug'
 
