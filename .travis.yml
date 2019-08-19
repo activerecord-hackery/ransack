@@ -1,7 +1,5 @@
 language: ruby
 
-sudo: false
-
 rvm:
   - 2.6.3
 
@@ -39,9 +37,16 @@ matrix:
     - env: RAILS=5-2-stable DB=mysql
     - env: RAILS=5-2-stable DB=postgres
 before_script:
-  - mysql -e 'create database ransack collate utf8_general_ci;'
-  - mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";'
-  - psql -c 'create database ransack;' -U postgres
+  - if [ "$DB" = "mysql" ];
+    then
+      mysql -e 'create database ransack collate utf8_general_ci;';
+      mysql -e 'use ransack;show variables like "%character%";show variables like "%collation%";';
+    fi
+
+  - if [ "$DB" = "postgres" ];
+    then
+      psql -c 'create database ransack;' -U postgres;
+    fi
 
 addons:
   code_climate:
