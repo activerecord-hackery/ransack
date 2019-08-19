@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
-[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/ransack/sponsors/badge.svg)](#sponsors) 
+[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/ransack/sponsors/badge.svg)](#sponsors)
 
 Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search)
 created by [Ernie Miller](http://twitter.com/erniemiller)
@@ -30,13 +30,9 @@ If you're viewing this at
 you're reading the documentation for the master branch with the latest features.
 [View documentation for the last release (2.0.0).](https://github.com/activerecord-hackery/ransack/tree/v2.0.0)
 
-## Rails 6 Support
-
-Rails 6 is right around the corner, but not yet released. Ransack master branch supports ```6.0.0.rc2```. Full Rails 6 support will be provided after the official Rails 6 release. See [this issue](https://github.com/activerecord-hackery/ransack/issues/1032) for details.
-
 ## Getting started
 
-Ransack is compatible with Rails 6.0.0.rc2, 5.0, 5.1 and 5.2 on Ruby 2.2 and later.
+Ransack is compatible with Rails 6.0, 5.0, 5.1 and 5.2 on Ruby 2.2 and later.
 If you are using Rails <5.0 use the 1.8 line of Ransack.
 If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
 issues, you can use an earlier version of Ransack, say, up to 1.3.0.
