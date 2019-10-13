@@ -36,7 +36,5 @@ gem 'mysql2', '~> 0.5.2'
 group :test do
   gem 'machinist', '~> 1.0.6'
   gem 'rspec', '~> 3'
-  # TestUnit was removed from Ruby 2.2 but still needed for testing Rails 3.x.
-  gem 'test-unit', '~> 3.0' if RUBY_VERSION >= '2.2'
   gem 'simplecov', :require => false
 end
