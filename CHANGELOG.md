@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* Drop support for Active Record < 5.2.
+  PR [#1073](https://github.com/activerecord-hackery/ransack/pull/1073)
+
 ## 2.3.0 - 2019-08-18
 
 * Arabic translations PR [979](https://github.com/activerecord-hackery/ransack/pull/979)

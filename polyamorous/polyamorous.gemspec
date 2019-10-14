@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
     associations.
   }
 
-  s.add_dependency 'activerecord', '>= 5.0'
+  s.add_dependency 'activerecord', '>= 5.2'
   s.add_development_dependency 'rspec', '~> 3'
   s.add_development_dependency 'machinist', '~> 1.0.6'
   s.add_development_dependency 'faker', '~> 1.6.5'
