@@ -21,8 +21,11 @@ end
 
 require 'ransack/search'
 require 'ransack/ransacker'
-require 'ransack/helpers'
-require 'action_controller'
+
+if defined?(ActionPack)
+  require 'ransack/helpers'
+  require 'action_controller'
+end
 require 'ransack/translate'
 
 Ransack::Adapters.object_mapper.require_adapter
