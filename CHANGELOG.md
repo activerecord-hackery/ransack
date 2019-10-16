@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Drop support for Active Record < 5.2.
+* Drop support for Active Record 5.0, 5.1, and 5.2.0.
   PR [#1073](https://github.com/activerecord-hackery/ransack/pull/1073)
 
 ## 2.3.0 - 2019-08-18

@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
     associations.
   }
 
-  s.add_dependency 'activerecord', '>= 5.2'
+  s.add_dependency 'activerecord', '>= 5.2.1'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

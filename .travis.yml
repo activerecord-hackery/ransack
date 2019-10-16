@@ -23,10 +23,6 @@ env:
   - RAILS=v5.2.1 DB=mysql
   - RAILS=v5.2.1 DB=postgres
 
-  - RAILS=v5.2.0 DB=sqlite3
-  - RAILS=v5.2.0 DB=mysql
-  - RAILS=v5.2.0 DB=postgres
-
 matrix:
   allow_failures:
     - env: RAILS=5-2-stable DB=sqlite3
