@@ -21,15 +21,11 @@ end
 
 require 'ransack/search'
 require 'ransack/ransacker'
-
-if defined?(ActionPack)
-  require 'ransack/helpers'
-  require 'action_controller'
-end
 require 'ransack/translate'
 
 Ransack::Adapters.object_mapper.require_adapter
 
 ActiveSupport.on_load(:action_controller) do
+  require 'ransack/helpers'
   ActionController::Base.helper Ransack::Helpers::FormHelper
 end
