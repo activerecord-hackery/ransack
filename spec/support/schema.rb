@@ -37,6 +37,7 @@ class Person < ActiveRecord::Base
   has_many   :authored_article_comments, through: :articles,
              source: :comments, foreign_key: :person_id
   has_many   :notes, as: :notable
+  has_many   :article_notes, through: :articles, source: :item, source_type: "Note"
 
   scope :restricted,  lambda { where("restricted = 1") }
   scope :active,      lambda { where("active = 1") }
@@ -132,6 +133,7 @@ class Article < ActiveRecord::Base
   has_many :comments
   has_and_belongs_to_many :tags
   has_many :notes, as: :notable
+  belongs_to :item, polymorphic: true
 
   alias_attribute :content, :body
 

@@ -291,6 +291,14 @@ module Ransack
         expect(s.to_sql).to match /#{people_name_field} = 'Ernie'/
       end
 
+      it "evaluates polymorphic joins" do
+        s = Search.new(Person, article_notes_id_in: [1,2,3]).result
+        expect(s).to be_an ActiveRecord::Relation
+
+        notes_id_field = "#{quote_table_name("notes")}.#{quote_column_name("id")}"
+        expect(s.to_sql).to match /#{notes_id_field} IN \(1, 2, 3\)/
+      end
+
       it 'evaluates nested conditions' do
         s = Search.new(Person, children_name_eq: 'Ernie',
           g: [

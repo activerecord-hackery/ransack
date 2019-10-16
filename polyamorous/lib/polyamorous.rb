@@ -18,7 +18,7 @@ if defined?(::ActiveRecord)
     require "polyamorous/activerecord_#{ar_version}_ruby_2/#{file}"
   end
 
-  if ar_version >= "5.2.0"
+  if ar_version >= "6.0.0"
     require "polyamorous/activerecord_#{ar_version}_ruby_2/reflection.rb"
     ::ActiveRecord::Reflection::AbstractReflection.send(:prepend, Polyamorous::ReflectionExtensions)
   end
