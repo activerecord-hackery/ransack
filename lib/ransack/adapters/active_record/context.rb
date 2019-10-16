@@ -6,13 +6,6 @@ module Ransack
     module ActiveRecord
       class Context < ::Ransack::Context
 
-        def initialize(object, options = {})
-          super
-          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2
-            @arel_visitor = @engine.connection.visitor
-          end
-        end
-
         def relation_for(object)
           object.all
         end
@@ -123,7 +116,6 @@ module Ransack
               @join_dependency.join_constraints(@object.joins_values, @join_type)
             ]
           end
-          joins = joins.collect(&:joins).flatten if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2
           joins.each do |aliased_join|
             base.from(aliased_join)
           end
@@ -268,12 +260,7 @@ module Ransack
 
           join_list = join_nodes + convert_join_strings_to_ast(relation.table, string_joins)
 
-          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
-            join_dependency = Polyamorous::JoinDependency.new(relation.klass, association_joins, join_list)
-            join_nodes.each do |join|
-              join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
-            end
-          elsif ::ActiveRecord::VERSION::STRING == Constants::RAILS_5_2_0
+          if ::ActiveRecord::VERSION::STRING == Constants::RAILS_5_2_0
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
             join_dependency = Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, alias_tracker)
             join_nodes.each do |join|
@@ -321,13 +308,6 @@ module Ransack
               @join_type
             )
             found_association = jd.instance_variable_get(:@join_root).children.last
-          elsif ::Gem::Version.new(::ActiveRecord::VERSION::STRING) < ::Gem::Version.new(Constants::RAILS_5_2_0)
-            jd = Polyamorous::JoinDependency.new(
-              parent.base_klass,
-              Polyamorous::Join.new(name, @join_type, klass),
-              []
-            )
-            found_association = jd.join_root.children.last
           elsif ::ActiveRecord::VERSION::STRING == Constants::RAILS_5_2_0
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, parent.table.name, [])
             jd = Polyamorous::JoinDependency.new(
