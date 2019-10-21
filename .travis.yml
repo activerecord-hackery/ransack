@@ -25,12 +25,10 @@ env:
 
 matrix:
   allow_failures:
-    - env: RAILS=5-2-stable DB=sqlite3
-    - env: RAILS=5-2-stable DB=mysql
-    - env: RAILS=5-2-stable DB=postgres
     - env: RAILS=6-0-stable DB=sqlite3
     - env: RAILS=6-0-stable DB=mysql
     - env: RAILS=6-0-stable DB=postgres
+
 before_script:
   - if [ "$DB" = "mysql" ];
     then
