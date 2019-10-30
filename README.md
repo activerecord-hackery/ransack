@@ -34,8 +34,8 @@ you're reading the documentation for the master branch with the latest features.
 
 Ransack is compatible with Rails 6.0, 5.0, 5.1 and 5.2 on Ruby 2.3 and later.
 If you are using Rails <5.0 use the 1.8 line of Ransack.
-If you are using Ruby 1.8 or an earlier JRuby and run into compatibility
-issues, you can use an earlier version of Ransack, say, up to 1.3.0.
+If you are using Ruby 2.2 or an earlier JRuby and run into compatibility
+issues, you can use an earlier version of Ransack, say, up to 2.3.0.
 
 Ransack works out-of-the-box with Active Record and also features limited
 support for Mongoid 4 and 5 (without associations, further details
