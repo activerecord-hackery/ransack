@@ -24,12 +24,19 @@ else
   )
 end
 
+class PersonAlias < ActiveRecord::Base
+  belongs_to :person
+end
+
 class Person < ActiveRecord::Base
   default_scope { order(id: :desc) }
   belongs_to :parent, class_name: 'Person', foreign_key: :parent_id
   has_many   :children, class_name: 'Person', foreign_key: :parent_id
   has_many   :articles
   has_many   :story_articles
+  has_many   :aliases, class_name: 'PersonAlias'
+
+  ransack_alias :aka, :aliases_name
 
   has_many :published_articles, ->{ where(published: true) },
       class_name: "Article"
@@ -192,6 +199,11 @@ module Schema
         t.boolean  :terms_and_conditions, default: false
         t.boolean  :true_or_false, default: true
         t.timestamps null: false
+      end
+
+      create_table :person_aliases, force: true do |t|
+        t.integer :person_id
+        t.string :name
       end
 
       create_table :articles, force: true do |t|
