@@ -255,6 +255,12 @@ module Ransack
         end
       end
 
+      def attr_value_for_attribute(attr)
+        predicate.case_insensitive ? attr.attr.lower : attr.attr
+      rescue
+        attr.attr
+      end
+
 
       def default_type
         predicate.type || (attributes.first && attributes.first.type)

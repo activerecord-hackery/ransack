@@ -1,7 +1,7 @@
 module Ransack
   class Predicate
     attr_reader :name, :arel_predicate, :type, :formatter, :validator,
-                :compound, :wants_array
+                :compound, :wants_array, :case_insensitive
 
     class << self
 
@@ -42,6 +42,7 @@ module Ransack
       @compound = opts[:compound]
       @wants_array = opts.fetch(:wants_array,
         @compound || Constants::IN_NOT_IN.include?(@arel_predicate))
+      @case_insensitive = opts[:case_insensitive]
     end
 
     def eql?(other)
