@@ -485,6 +485,12 @@ List of all possible predicates
 | `*_not_cont` | Does not contain |
 | `*_not_cont_any` | Does not contain any of | |
 | `*_not_cont_all` | Does not contain all of | |
+| `*_i_cont` | Contains value with case insensitive | uses `LIKE` |
+| `*_i_cont_any` | Contains any of values with case insensitive | |
+| `*_i_cont_all` | Contains all of values with case insensitive | |
+| `*_not_i_cont` | Does not contain with case insensitive |
+| `*_not_i_cont_any` | Does not contain any of values with case insensitive | |
+| `*_not_i_cont_all` | Does not contain all of values with case insensitive | |
 | `*_true` | is true | |
 | `*_false` | is false | |
 
@@ -959,5 +965,3 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/ransack/sponsor/7/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/ransack/sponsor/8/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/ransack/sponsor/9/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/9/avatar.svg"></a>
-
-
