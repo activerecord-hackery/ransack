@@ -1,5 +1,3 @@
-# active_record_5.1_ruby_2/join_association.rb
-
 module Polyamorous
   module JoinAssociationExtensions
     include SwappingReflectionClass
@@ -16,15 +14,6 @@ module Polyamorous
         end
       else
         super(reflection, children)
-      end
-    end
-
-    def build_constraint(klass, table, key, foreign_table, foreign_key)
-      if reflection.polymorphic?
-        super(klass, table, key, foreign_table, foreign_key)
-          .and(foreign_table[reflection.foreign_type].eq(reflection.klass.name))
-      else
-        super(klass, table, key, foreign_table, foreign_key)
       end
     end
   end
