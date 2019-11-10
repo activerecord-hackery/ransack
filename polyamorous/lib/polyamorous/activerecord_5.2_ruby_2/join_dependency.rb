@@ -1,5 +1,3 @@
-# active_record_5.2.1_ruby_2/join_dependency.rb
-
 module Polyamorous
   module JoinDependencyExtensions
     # Replaces ActiveRecord::Associations::JoinDependency#build

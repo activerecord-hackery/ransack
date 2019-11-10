@@ -228,7 +228,6 @@ module Ransack
       end
 
       it 'use appropriate table alias' do
-        skip "Make this spec pass for Rails <5.2" if ::ActiveRecord::VERSION::STRING < '5.2.0'
         s = Search.new(Person, {
           name_eq: "person_name_query",
           articles_title_eq: "person_article_title_query",
@@ -251,13 +250,7 @@ module Ransack
           .to include "articles_people.title = 'parents_article_title_query'"
       end
 
-      # FIXME: Make this spec pass for Rails 4.1 / 4.2 / 5.0 and not just 4.0 by
-      # commenting out lines 221 and 242 to run the test. Addresses issue #374.
-      # https://github.com/activerecord-hackery/ransack/issues/374
-      #
-      it 'evaluates conditions for multiple `belongs_to` associations to the
-      same table contextually' do
-        skip "Make this spec pass for Rails <5.2" if ::ActiveRecord::VERSION::STRING < '5.2.0'
+      it 'evaluates conditions for multiple `belongs_to` associations to the same table contextually' do
         s = Search.new(
           Recommendation,
           person_name_eq: 'Ernie',

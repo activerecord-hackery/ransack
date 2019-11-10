@@ -14,9 +14,9 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.3'
   s.license     = 'MIT'
 
-  s.add_dependency 'actionpack', '>= 5.0'
-  s.add_dependency 'activerecord', '>= 5.0'
-  s.add_dependency 'activesupport', '>= 5.0'
+  s.add_dependency 'actionpack', '>= 5.2.1'
+  s.add_dependency 'activerecord', '>= 5.2.1'
+  s.add_dependency 'activesupport', '>= 5.2.1'
   s.add_dependency 'i18n'
   s.add_dependency 'polyamorous', Ransack::VERSION.to_s
 

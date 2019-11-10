@@ -19,26 +19,16 @@ env:
   - RAILS=5-2-stable DB=mysql
   - RAILS=5-2-stable DB=postgres
 
-  - RAILS=v5.2.1 DB=sqlite3
-  - RAILS=v5.2.1 DB=mysql
-  - RAILS=v5.2.1 DB=postgres
-
-  - RAILS=v5.2.0 DB=sqlite3
-  - RAILS=v5.2.0 DB=mysql
-  - RAILS=v5.2.0 DB=postgres
-
-  - RAILS=5-1-stable DB=sqlite3
-  - RAILS=5-1-stable DB=mysql
-  - RAILS=5-1-stable DB=postgres
+  - RAILS=v5.2.3 DB=sqlite3
+  - RAILS=v5.2.3 DB=mysql
+  - RAILS=v5.2.3 DB=postgres
 
 matrix:
   allow_failures:
-    - env: RAILS=5-2-stable DB=sqlite3
-    - env: RAILS=5-2-stable DB=mysql
-    - env: RAILS=5-2-stable DB=postgres
     - env: RAILS=6-0-stable DB=sqlite3
     - env: RAILS=6-0-stable DB=mysql
     - env: RAILS=6-0-stable DB=postgres
+
 before_script:
   - if [ "$DB" = "mysql" ];
     then
