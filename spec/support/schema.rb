@@ -13,7 +13,9 @@ when 'pg', 'postgres', 'postgresql'
   ActiveRecord::Base.establish_connection(
     adapter: 'postgresql',
     database: 'ransack',
-  # username: 'postgres', # Uncomment the username option if you have set one
+    username: ENV.fetch("DATABASE_USERNAME") { "postgres" },
+    password: ENV.fetch("DATABASE_PASSWORD") { "" },
+    host: ENV.fetch("DATABASE_HOST") { "localhost" },
     min_messages: 'warning'
   )
 else
