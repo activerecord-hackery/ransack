@@ -13,6 +13,16 @@ module Ransack
         formatter: proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
+      ["i_cont", {
+        arel_predicate: 'i_matches'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v)}%" }
+        }
+      ],
+      ['not_i_cont'.freeze, {
+        arel_predicate: 'does_not_i_match'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v)}%" }
+        }
+      ],
       ['start'.freeze, {
         arel_predicate: 'matches'.freeze,
         formatter: proc { |v| "#{escape_wildcards(v)}%" }
