@@ -159,6 +159,25 @@ module Ransack
       end
     end
 
+    describe 'i_cont' do
+      it_has_behavior 'wildcard escaping', :name_i_cont,
+        (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+          /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
+        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+          /LOWER(`people`.`name`) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
+        else
+         /LOWER("people"."name") LIKE '%%._\\%'/
+        end) do
+        subject { @s }
+      end
+
+      it 'generates a LIKE query with LOWER(column) and value surrounded by %' do
+        @s.name_cont = 'Ric'
+        field = "[LOWER(]?#{quote_table_name("people")}.#{quote_column_name("name")})?"
+        expect(@s.result.to_sql).to match /#{field} I?LIKE '%ric%'/
+      end
+    end
+
     describe 'start' do
       it 'generates a LIKE query with value followed by %' do
         @s.name_start = 'Er'
