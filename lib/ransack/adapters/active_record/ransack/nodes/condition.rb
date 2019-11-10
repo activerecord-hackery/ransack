@@ -30,7 +30,7 @@ module Ransack
         def format_predicate(attribute)
           arel_pred = arel_predicate_for_attribute(attribute)
           arel_values = formatted_values_for_attribute(attribute)
-          predicate = attribute.attr.public_send(arel_pred, arel_values)
+          predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
 
           if in_predicate?(predicate)
             predicate.right = predicate.right.map do |pr|
