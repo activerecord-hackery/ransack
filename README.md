@@ -757,7 +757,7 @@ To turn this off on a per-scope basis Ransack adds the following method to
 Add the scope you wish to bypass this behavior to ransackable_scopes_skip_sanitize_args:
 
 ```ruby
-def ransackable_scopes_skip_sanitize_args
+def self.ransackable_scopes_skip_sanitize_args
   [:scope_to_skip_sanitize_args]
 end
 ```
