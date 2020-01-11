@@ -5,16 +5,6 @@
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
 [![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/ransack/sponsors/badge.svg)](#sponsors)
 
-Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search)
-created by [Ernie Miller](http://twitter.com/erniemiller)
-and developed/maintained for years by
-[Jon Atack](http://twitter.com/jonatack) and
-[Ryan Bigg](http://twitter.com/ryanbigg) with the help of a great group of
-[contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors). Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).
-While it supports many of the same features as MetaSearch, its underlying
-implementation differs greatly from MetaSearch,
-and backwards compatibility is not a design goal.
-
 Ransack enables the creation of both
 [simple](http://ransack-demo.herokuapp.com) and
 [advanced](http://ransack-demo.herokuapp.com/users/advanced_search) search forms
@@ -25,21 +15,9 @@ or controller layer, you're probably not looking for Ransack (or MetaSearch,
 for that matter). Try [Squeel](https://github.com/activerecord-hackery/squeel)
 instead.
 
-If you're viewing this at
-[github.com/activerecord-hackery/ransack](https://github.com/activerecord-hackery/ransack),
-you're reading the documentation for the master branch with the latest features.
-[View documentation for the last release (2.0.0).](https://github.com/activerecord-hackery/ransack/tree/v2.0.0)
-
 ## Getting started
 
 Ransack is compatible with Rails 6.0, 5.0, 5.1 and 5.2 on Ruby 2.3 and later.
-If you are using Rails <5.0 use the 1.8 line of Ransack.
-If you are using Ruby 2.2 or an earlier JRuby and run into compatibility
-issues, you can use an earlier version of Ransack, say, up to 2.3.0.
-
-Ransack works out-of-the-box with Active Record and also features limited
-support for Mongoid 4 and 5 (without associations, further details
-[below](https://github.com/activerecord-hackery/ransack#mongoid)).
 
 In your Gemfile, for the last officially released gem:
 
@@ -928,6 +906,7 @@ In other words: `Major.Minor.Patch`.
 
 To support the project:
 
+* Consider supporting via [Open Collective](https://opencollective.com/ransack/backers/badge.svg)
 * Use Ransack in your apps, and let us know if you encounter anything that's
 broken or missing. A failing spec to demonstrate the issue is awesome. A pull
 request with passing tests is even better!
@@ -942,6 +921,21 @@ fix bugs!
 ## Contributors
 
 This project exists thanks to all the people who contribute. <img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" />
+
+Ransack is a rewrite of [MetaSearch](https://github.com/activerecord-hackery/meta_search)
+created by [Ernie Miller](http://twitter.com/erniemiller)
+and developed/maintained by:
+
+- [Greg Molnar](https://github.com/gregmolnar)
+- [Deivid Rodriguez](https://github.com/deivid-rodriguez)
+- [Sean Carroll](https://github.com/seanfcarroll)
+- [Jon Atack](http://twitter.com/jonatack)
+- [Ryan Bigg](http://twitter.com/ryanbigg)
+- a great group of [contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
+- Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).
+
+While it supports many of the same features as MetaSearch, its underlying implementation differs greatly from MetaSearch, and backwards compatibility is not a design goal.
+
 
 
 ## Backers
