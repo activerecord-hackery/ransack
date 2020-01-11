@@ -1,6 +1,10 @@
 # Change Log
 
-## 2.3.1 - 2010-01-01
+## 2.3.2 - 2020-01-11
+
+* Breakfix to bump Polyamorous
+
+## 2.3.1 - 2020-01-11
 
 * Drop support for Active Record 5.0, 5.1, and 5.2.0.
   PR [#1073](https://github.com/activerecord-hackery/ransack/pull/1073)
