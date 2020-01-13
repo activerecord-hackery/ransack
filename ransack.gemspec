@@ -19,14 +19,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'i18n'
   s.add_dependency 'polyamorous', Ransack::VERSION.to_s
 
-  s.files         = `git ls-files`.split("\n")
-
-  s.test_files    = `git ls-files -- {test,spec,features}/*`
-                    .split("\n")
-
-  s.executables   = `git ls-files -- bin/*`
-                    .split("\n")
-                    .map { |f| File.basename(f) }
+  s.files         = `git ls-files`.split("\n").reject { |f| f.match(%r{^(polyamorous/|logo/|coverage/|spec/)}) }
+  s.test_files    = `git ls-files -- spec/*`.split("\n")
 
   s.require_paths = ["lib"]
 end
