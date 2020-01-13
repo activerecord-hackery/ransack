@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'activerecord', '>= 5.2.1'
   s.add_dependency 'activesupport', '>= 5.2.1'
   s.add_dependency 'i18n'
-  s.add_dependency 'polyamorous', Ransack::VERSION.to_s
+  s.add_dependency 'polyamorous', '2.3.2'
 
   s.files         = `git ls-files`.split("\n")
 
