@@ -1,5 +1,5 @@
 require 'ransack/context'
-require 'polyamorous'
+require 'polyamorous/polyamorous'
 
 module Ransack
   module Adapters

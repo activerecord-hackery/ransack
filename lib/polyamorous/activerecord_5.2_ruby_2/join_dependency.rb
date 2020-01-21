@@ -1,5 +1,3 @@
-# active_record_6.0_ruby_2/join_dependency.rb
-
 module Polyamorous
   module JoinDependencyExtensions
     # Replaces ActiveRecord::Associations::JoinDependency#build
@@ -29,7 +27,7 @@ module Polyamorous
       end
     end
 
-    def join_constraints(joins_to_add, alias_tracker)
+    def join_constraints(joins_to_add, join_type, alias_tracker)
       @alias_tracker = alias_tracker
 
       construct_tables!(join_root)
@@ -38,9 +36,9 @@ module Polyamorous
       joins.concat joins_to_add.flat_map { |oj|
         construct_tables!(oj.join_root)
         if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
-          walk join_root, oj.join_root, oj.join_type
+          walk join_root, oj.join_root
         else
-          make_join_constraints(oj.join_root, oj.join_type)
+          make_join_constraints(oj.join_root, join_type)
         end
       }
     end
