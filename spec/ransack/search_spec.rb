@@ -272,11 +272,11 @@ module Ransack
           parent_articles_title_eq: 'parents_article_title_query'
         }).result
         real_query = remove_quotes_and_backticks(s.to_sql)
-
         expect(real_query)
-          .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
+          .to include("LEFT OUTER JOIN articles ON articles.person_id = parents_people.id AND ('default_scope' = 'default_scope')")
         expect(real_query)
-          .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
+          .to include("LEFT OUTER JOIN articles articles_people ON articles_people.person_id = people.id AND ('default_scope' = 'default_scope')")
+        
         expect(real_query)
           .to include "people.name = 'person_name_query'"
         expect(real_query)

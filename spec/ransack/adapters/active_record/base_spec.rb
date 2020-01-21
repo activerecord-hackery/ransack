@@ -143,14 +143,12 @@ module Ransack
           it 'removes redundant joins from top query' do
             s = Article.ransack(tags_name_not_eq: "Fantasy")
             sql = s.result.to_sql
-
             expect(sql).to_not include('LEFT OUTER JOIN')
           end
 
           it 'handles != for single values' do
             s = Article.ransack(tags_name_not_eq: "Fantasy")
             articles = s.result.to_a
-
             expect(articles).to include marco
             expect(articles).to_not include arthur
           end
