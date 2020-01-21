@@ -234,12 +234,21 @@ module Ransack
           parent_name_eq: "parent_name_query",
           parent_articles_title_eq: 'parents_article_title_query'
         }).result
+
         real_query = remove_quotes_and_backticks(s.to_sql)
-        expect(real_query)
-          .to include("LEFT OUTER JOIN articles ON articles.person_id = parents_people.id AND ('default_scope' = 'default_scope')")
-        expect(real_query)
-          .to include("LEFT OUTER JOIN articles articles_people ON articles_people.person_id = people.id AND ('default_scope' = 'default_scope')")
-        
+
+        if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = parents_people.id})
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = people.id})
+        else
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
+        end
+
         expect(real_query)
           .to include "people.name = 'person_name_query'"
         expect(real_query)
