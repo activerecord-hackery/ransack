@@ -1,4 +1,3 @@
-# require 'polyamorous/polyamorous.rb'
 require 'ransack/visitor'
 Ransack::Adapters.object_mapper.require_context
 

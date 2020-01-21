@@ -1,7 +1,4 @@
 require 'ransack/adapters/active_record/base'
-# require 'polyamorous/polyamorous.rb'
-
-
 
 ActiveSupport.on_load(:active_record) do
   extend Ransack::Adapters::ActiveRecord::Base
