@@ -329,11 +329,12 @@ module Ransack
             { m: 'or', comments_body_cont: 'e', articles_comments_body_cont: 'e' }
           ]
         )
-        if ActiveRecord::VERSION::MAJOR == 3
-          all_or_load, uniq_or_distinct = :all, :uniq
-        else
+
+        # if ActiveRecord::VERSION::MAJOR == 3
+        #   all_or_load, uniq_or_distinct = :all, :uniq
+        # else
           all_or_load, uniq_or_distinct = :load, :distinct
-        end
+        # end
         expect(s.result.send(all_or_load).size)
         .to eq(9000)
         expect(s.result(distinct: true).size)

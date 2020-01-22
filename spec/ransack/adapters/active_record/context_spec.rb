@@ -91,22 +91,22 @@ module Ransack
               context: shared_context)
           end
 
-          describe '#join_associations', if: AR_version <= '4.0' do
-            it 'returns dependent join associations for all searches run
-                against the context' do
-              parents, children = shared_context.join_associations
+          # describe '#join_associations', if: AR_version <= '4.0' do
+          #   it 'returns dependent join associations for all searches run
+          #       against the context' do
+          #     parents, children = shared_context.join_associations
 
-              expect(children.aliased_table_name).to eq "children_people"
-              expect(parents.aliased_table_name).to eq "parents_people"
-            end
+          #     expect(children.aliased_table_name).to eq "children_people"
+          #     expect(parents.aliased_table_name).to eq "parents_people"
+          #   end
 
-            it 'can be rejoined to execute a valid query' do
-              parents, children = shared_context.join_associations
+          #   it 'can be rejoined to execute a valid query' do
+          #     parents, children = shared_context.join_associations
 
-              expect { Person.joins(parents).joins(children).to_a }
-              .to_not raise_error
-            end
-          end
+          #     expect { Person.joins(parents).joins(children).to_a }
+          #     .to_not raise_error
+          #   end
+          # end
 
           describe '#join_sources' do
             it 'returns dependent arel join nodes for all searches run against
