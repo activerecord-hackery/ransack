@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activerecord', '>= 5.2.1'
   s.add_dependency 'activesupport', '>= 5.2.1'
-  s.add_dependency 'machinist', '~> 1.0.6'
   s.add_dependency 'i18n'
 
   s.files         = `git ls-files`.split("\n")
