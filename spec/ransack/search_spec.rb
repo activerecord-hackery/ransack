@@ -330,11 +330,7 @@ module Ransack
           ]
         )
 
-        # if ActiveRecord::VERSION::MAJOR == 3
-        #   all_or_load, uniq_or_distinct = :all, :uniq
-        # else
-          all_or_load, uniq_or_distinct = :load, :distinct
-        # end
+        all_or_load, uniq_or_distinct = :load, :distinct
         expect(s.result.send(all_or_load).size)
         .to eq(9000)
         expect(s.result(distinct: true).size)
