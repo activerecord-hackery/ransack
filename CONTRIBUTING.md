@@ -64,6 +64,9 @@ Here's a quick guide:
 2. Create a thoughtfully-named branch for your changes (`git checkout -b my-new-feature`).
 
 3. Install the development dependencies by running `bundle install`.
+   To install rails other than latest (set in Gemfile): `RAILS='5-2-stable' bundle install`
+
+        $ RAILS='5-2-stable' bundle install
 
 4. Begin by running the tests. We only take pull requests with passing tests,
    and it's great to know that you have a clean slate:
@@ -84,16 +87,18 @@ Here's a quick guide:
        $ mysql -u root
        mysql> create database ransack;     
 
-   To run only the tests in a particular file: `rspec <path/to/filename>`
+   The test suite runs by default
 
-        $ rspec spec/ransack/search_spec.rb
+   To run only the tests in a particular file: `bundle exec rspec <path/to/filename>`
 
-   To run a single test in that file: `rspec <path/to/filename> -e "test name"`
+        $ bundle exec rspec spec/ransack/search_spec.rb
 
-        $ rspec spec/ransack/search_spec.rb -e "accepts a context option"
+   To run a single test in that file: `bundle exec rspec <path/to/filename> -e "test name"`
 
-5. Hack away! Please use Ruby features that are compatible down to Ruby 1.9.
-   Since version 1.5, Ransack no longer maintains Ruby 1.8 compatibility.
+        $ bundle exec rspec spec/ransack/search_spec.rb -e "accepts a context option"
+
+5. Hack away! Please use Ruby features that are compatible down to Ruby 2.3.
+   Since version 2.3.1, Ransack no longer maintains Ruby 2.2 compatibility.
 
 6. Add tests for your changes. Only refactoring and documentation changes
    require no new tests. If you are adding functionality or fixing a bug, we
