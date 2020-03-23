@@ -164,6 +164,8 @@ end
 class Comment < ActiveRecord::Base
   belongs_to :article
   belongs_to :person
+
+  default_scope { where(disabled: false) }
 end
 
 class Tag < ActiveRecord::Base
@@ -209,6 +211,7 @@ module Schema
         t.integer  :article_id
         t.integer  :person_id
         t.text     :body
+        t.boolean  :disabled, default: false
       end
 
       create_table :tags, force: true do |t|

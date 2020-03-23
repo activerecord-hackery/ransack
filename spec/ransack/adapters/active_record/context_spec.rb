@@ -79,6 +79,25 @@ module Ransack
             expect(constraint.right.relation.name).to eql 'people'
             expect(constraint.right.name).to eql 'id'
           end
+
+          it 'build correlated subquery for multiple conditions (default scope)' do
+            search = Search.new(Person, { comments_body_not_eq: 'some_title'})
+
+            # Was
+            # SELECT "people".* FROM "people" WHERE "people"."id" NOT IN (
+            #   SELECT "comments"."disabled" FROM "comments"
+            #   WHERE "comments"."disabled" = "people"."id"
+            #     AND NOT ("comments"."body" != 'some_title')
+            # ) ORDER BY "people"."id" DESC
+            # Should Be
+            # SELECT "people".* FROM "people" WHERE "people"."id" NOT IN (
+            #   SELECT "comments"."person_id" FROM "comments"
+            #   WHERE "comments"."person_id" = "people"."id"
+            #     AND NOT ("comments"."body" != 'some_title')
+            # ) ORDER BY "people"."id" DESC
+
+            expect(search.result.to_sql).to include '"comments"."person_id" = "people"."id"'
+          end
         end
 
         describe 'sharing context across searches' do
