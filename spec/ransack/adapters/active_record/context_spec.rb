@@ -96,7 +96,7 @@ module Ransack
             #     AND NOT ("comments"."body" != 'some_title')
             # ) ORDER BY "people"."id" DESC
 
-            expect(search.result.to_sql).to include '"comments"."person_id" = "people"."id"'
+            expect(search.result.to_sql).to match /.comments.\..person_id. = .people.\..id./
           end
         end
 
