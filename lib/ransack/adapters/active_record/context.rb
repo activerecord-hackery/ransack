@@ -172,16 +172,31 @@ module Ransack
         private
 
         def extract_correlated_key(join_root)
-          correlated_key = join_root.right.expr.left
-
-          if correlated_key.is_a? Arel::Nodes::And
-            correlated_key = correlated_key.left.left
-          elsif correlated_key.is_a? Arel::Nodes::Equality
-            correlated_key = correlated_key.left
-          elsif correlated_key.is_a? Arel::Nodes::Grouping
-            correlated_key = join_root.right.expr.right.left
+          case join_root
+          when Arel::Nodes::OuterJoin
+            # one of join_root.right/join_root.left is expected to be Arel::Nodes::On
+            if join_root.right.is_a?(Arel::Nodes::On)
+              extract_correlated_key(join_root.right.expr)
+            elsif join_root.left.is_a?(Arel::Nodes::On)
+              extract_correlated_key(join_root.left.expr)
+            else
+              raise 'Ransack encountered an unexpected arel structure'
+            end
+          when Arel::Nodes::Equality
+            pk = primary_key
+            if join_root.left == pk
+              join_root.right
+            elsif join_root.right == pk
+              join_root.left
+            else
+              nil
+            end
+          when Arel::Nodes::And
+            extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
           else
-            correlated_key
+            # eg parent was Arel::Nodes::And and the evaluated side was one of
+            # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause
+            nil
           end
         end
 
