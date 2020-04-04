@@ -271,12 +271,21 @@ module Ransack
           parent_name_eq: "parent_name_query",
           parent_articles_title_eq: 'parents_article_title_query'
         }).result
+
         real_query = remove_quotes_and_backticks(s.to_sql)
 
-        expect(real_query)
-          .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
-        expect(real_query)
-          .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
+        if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) > ::Gem::Version.new(Constants::RAILS_6_0)
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = parents_people.id})
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = people.id})
+        else
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
+          expect(real_query)
+                  .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
+        end
+
         expect(real_query)
           .to include "people.name = 'person_name_query'"
         expect(real_query)
@@ -357,11 +366,8 @@ module Ransack
             { m: 'or', comments_body_cont: 'e', articles_comments_body_cont: 'e' }
           ]
         )
-        if ActiveRecord::VERSION::MAJOR == 3
-          all_or_load, uniq_or_distinct = :all, :uniq
-        else
-          all_or_load, uniq_or_distinct = :load, :distinct
-        end
+
+        all_or_load, uniq_or_distinct = :load, :distinct
         expect(s.result.send(all_or_load).size)
         .to eq(9000)
         expect(s.result(distinct: true).size)
