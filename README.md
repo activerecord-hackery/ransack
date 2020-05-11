@@ -437,13 +437,10 @@ List of all possible predicates
 | `*_lteq_any` | Less than or equal to any | |
 | `*_gt_any` | Greater than any | |
 | `*_gteq_any` | Greater than or equal to any | |
-| `*_matches_any` | `*_does_not_match_any` | same as above but with `LIKE` |
 | `*_lt_all` | Less than all | SQL: `col < value1 AND col < value2` |
 | `*_lteq_all` | Less than or equal to all | |
 | `*_gt_all` | Greater than all | |
 | `*_gteq_all` | Greater than or equal to all | |
-| `*_matches_all` | Matches all | same as above but with `LIKE` |
-| `*_does_not_match_all` | Does not match all | |
 | `*_not_eq_all` | none of values in a set | |
 | `*_start` | Starts with | SQL: `col LIKE 'value%'` |
 | `*_not_start` | Does not start with | |
