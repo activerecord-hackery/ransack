@@ -226,6 +226,19 @@ Ransack.configure do |c|
 end
 ```
 
+When you use negative predicates, and it is an association_collection, it creates
+a subquery and later removed the join with context.remove_association. If you want
+to aggregate the results, you no longer have the join association, which makes the
+statement fail. `remove_association_no_negative_assoc` is set to default true to 
+keep current functionality, but could be set to false to keep the join, so you can
+still use aggreages on the end result.
+
+```ruby
+Ransack.configure do |c|
+  c.remove_association_no_negative_assoc = false
+end
+```
+
 Without setting it globally, individual sort links may be displayed without
 the order indicator arrow by passing `hide_indicator: true` in the sort link:
 

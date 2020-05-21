@@ -296,6 +296,32 @@ module Ransack
           .to include "articles_people.title = 'parents_article_title_query'"
       end
 
+      it 'evaluates subquery with the correct primary_key when using negative predicates' do
+        s = Search.new(
+          Person,
+          articles_tags_id_not_in: [1,2]
+        ).result
+        real_query = remove_quotes_and_backticks(s.to_sql)
+        expect(real_query).to include('WHERE articles.id NOT IN (SELECT articles_tags.article_id')
+      end
+
+      it 'can use the aggreagate count by setting the config to not remove association when it is using negative predicates' do
+        Ransack.configure { |config| config.remove_association_no_negative_assoc = false }
+        s = Search.new(
+          Article,
+          comments_person_id_not_in: [1,2]
+        ).result
+        expect{ s.count('comments.id') }.to_not raise_error
+      end
+
+      it 'will break when we dont have remove_association_no_negative_assoc and aggreagate on negative predicates' do
+        s = Search.new(
+          Article,
+          comments_person_id_not_in: [1]
+        ).result
+        expect{s.count('comments.id')}.to raise_error(ActiveRecord::StatementInvalid)
+      end
+
       it 'evaluates conditions for multiple `belongs_to` associations to the same table contextually' do
         s = Search.new(
           Recommendation,

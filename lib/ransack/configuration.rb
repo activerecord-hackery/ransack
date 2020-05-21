@@ -33,6 +33,7 @@ module Ransack
       :up_arrow => '&#9660;'.freeze,
       :down_arrow => '&#9650;'.freeze,
       :default_arrow => nil,
+      :remove_association_no_negative_assoc => true,
       :sanitize_scope_args => true
     }
 
@@ -152,6 +153,19 @@ module Ransack
     #
     def hide_sort_order_indicators=(boolean)
       self.options[:hide_sort_order_indicators] = boolean
+    end
+
+    # By default, associations are removed from join dependencies when using negative predicates.
+    # The default may be globally overridden in an initializer file like
+    # `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Do not remove association from being joined when using negative predicates
+    #   config.remove_association_no_negative_assoc = false
+    # end
+    #
+    def remove_association_no_negative_assoc=(boolean)
+      self.options[:remove_association_no_negative_assoc] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)
