@@ -314,7 +314,8 @@ module Ransack
         expect{ s.count('comments.id') }.to_not raise_error
       end
 
-      it 'will break when we dont have remove_association_no_negative_assoc and aggreagate on negative predicates' do
+      it 'will break when we dont have remove_association_no_negative_assoc and aggregate on negative predicates' do
+        Ransack.configure { |config| config.remove_association_no_negative_assoc = true }
         s = Search.new(
           Article,
           comments_person_id_not_in: [1]
