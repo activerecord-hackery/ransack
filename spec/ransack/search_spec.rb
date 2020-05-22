@@ -20,6 +20,12 @@ module Ransack
         Search.new(Person, name_eq: 'foobar')
       end
 
+      it 'strip leading & trailing whitespace before building' do
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ 'name_eq' => 'foobar' })
+        Search.new(Person, name_eq: '   foobar     ')
+      end
+
       it 'removes empty suffixed conditions before building' do
         expect_any_instance_of(Search).to receive(:build).with({})
         Search.new(Person, name_eq_any: [''])
