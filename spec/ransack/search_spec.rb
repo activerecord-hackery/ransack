@@ -257,9 +257,6 @@ module Ransack
       let(:children_people_name_field) {
         "#{quote_table_name("children_people")}.#{quote_column_name("name")}"
       }
-      let(:notable_type_field) {
-        "#{quote_table_name("notes")}.#{quote_column_name("notable_type")}"
-      }
       it 'evaluates conditions contextually' do
         s = Search.new(Person, children_name_eq: 'Ernie')
         expect(s.result).to be_an ActiveRecord::Relation
@@ -331,7 +328,6 @@ module Ransack
         s = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie').result
         expect(s).to be_an ActiveRecord::Relation
         expect(s.to_sql).to match /#{people_name_field} = 'Ernie'/
-        expect(s.to_sql).to match /#{notable_type_field} = 'Person'/
       end
 
       it 'evaluates nested conditions' do
