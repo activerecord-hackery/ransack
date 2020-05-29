@@ -5,9 +5,6 @@ module Ransack
       def arel_predicate
         attributes.map { |attribute|
           association = attribute.parent
-          has_reflection = association.respond_to?(:reflection)
-          is_base_join = !has_reflection || context.klass == association.reflection.active_record
-          primary_key = is_base_join ? context.primary_key : Ransack::Context.for(association.reflection.active_record).primary_key
           if negative? && attribute.associated_collection?
             query = context.build_correlated_subquery(association)
             if Ransack::Configuration.options[:remove_association_no_negative_assoc]
@@ -15,10 +12,10 @@ module Ransack
             end
             if self.predicate_name == 'not_null' && self.value
               query.where(format_predicate(attribute))
-              Arel::Nodes::In.new(primary_key, Arel.sql(query.to_sql))
+              Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
             else
-              query.where(format_predicate(attribute).not)
-              Arel::Nodes::NotIn.new(primary_key, Arel.sql(query.to_sql))
+              query = context.klass.ransack("#{attribute.name}_#{self.predicate.name.gsub("not_", "")}" => self.value).result.select(:id)
+              Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
             end
           else
             format_predicate(attribute)
