@@ -14,7 +14,11 @@ module Ransack
               query.where(format_predicate(attribute))
               Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
             else
-              query = context.klass.ransack("#{attribute.name}_#{self.predicate.name.gsub("not_", "")}" => self.value).result.select(:id)
+              replace_gsub = ['not_', '']
+              if self.predicate_name == 'does_not_match'
+                replace_gsub = ['does_not_match', 'matches']
+              end
+              query = context.klass.ransack("#{attribute.name}_#{self.predicate.name.gsub(*replace_gsub)}" => self.value).result.select(:id)
               Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
             end
           else
