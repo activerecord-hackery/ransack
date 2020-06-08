@@ -30,6 +30,7 @@ module Ransack
         )
       @scope_args = {}
       @sorts ||= []
+      @ignore_unknown_conditions = options[:ignore_unknown_conditions] == false ? false : true
       build(params.with_indifferent_access)
     end
 
@@ -45,7 +46,7 @@ module Ransack
           base.send("#{key}=", value)
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
-        elsif !Ransack.options[:ignore_unknown_conditions]
+        elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
           raise ArgumentError, "Invalid search term #{key}"
         end
       end

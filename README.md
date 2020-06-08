@@ -670,6 +670,43 @@ Trying it out in `rails console`:
 
 That's it! Now you know how to whitelist/blacklist various elements in Ransack.
 
+### Handling unknown predicates or attributes
+
+By default, Ransack will ignore any unknown predicates or attributes:
+
+```ruby
+Article.ransack(unknown_attr_eq: 'Ernie').result.to_sql
+=> SELECT "articles".* FROM "articles"
+```
+
+Ransack may be configured to raise an error if passed an unknown predicate or
+attributes, by setting the `ignore_unknown_conditions` option to `false` in your
+Ransack initializer file at `config/initializers/ransack.rb`:
+
+```ruby
+Ransack.configure do |c|
+  # Raise errors if a query contains an unknown predicate or attribute.
+  # Default is true (do not raise error on unknown conditions).
+  c.ignore_unknown_conditions = false
+end
+```
+
+```ruby
+Article.ransack(unknown_attr_eq: 'Ernie')
+# ArgumentError (Invalid search term unknown_attr_eq)
+```
+
+As an alternative to setting a global configuration option, the `.ransack!`
+class method also raises an error if passed an unknown condition:
+
+```ruby
+Article.ransack!(unknown_attr_eq: 'Ernie')
+# ArgumentError: Invalid search term unknown_attr_eq
+```
+
+This is equivilent to the `ignore_unknown_conditions` configuration option,
+except it may be applied on a case-by-case basis.
+
 ### Using Scopes/Class Methods
 
 Continuing on from the preceding section, searching by scopes requires defining
