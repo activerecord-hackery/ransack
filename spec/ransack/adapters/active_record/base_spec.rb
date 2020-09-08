@@ -8,7 +8,6 @@ module Ransack
         subject { ::ActiveRecord::Base }
 
         it { should respond_to :ransack }
-        it { should respond_to :search }
 
         describe '#search' do
           subject { Person.ransack }

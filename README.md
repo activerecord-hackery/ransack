@@ -352,32 +352,6 @@ construct much more complex search forms, such as the one on the
 [demo app](http://ransack-demo.herokuapp.com/users/advanced_search)
 (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
 
-### Ransack #search method
-
-Ransack will try to make the class method `#search` available in your
-models, but if `#search` has already been defined elsewhere, you can always use
-the default `#ransack` class method. So the following are equivalent:
-
-```ruby
-Article.ransack(params[:q])
-Article.search(params[:q])
-```
-
-Users have reported issues of `#search` name conflicts with other gems, so
-the `#search` method alias will be deprecated in the next major version of
-Ransack (2.0). It's advisable to use the default `#ransack` instead.
-
-For now, if Ransack's `#search` method conflicts with the name of another
-method named `search` in your code or another gem, you may resolve it either by
-patching the `extended` class_method in `Ransack::Adapters::ActiveRecord::Base`
-to remove the line `alias :search :ransack unless base.respond_to? :search`, or
-by placing the following line in your Ransack initializer file at
-`config/initializers/ransack.rb`:
-
-```ruby
-Ransack::Adapters::ActiveRecord::Base.class_eval('remove_method :search')
-```
-
 ### Associations
 
 You can easily use Ransack to search for objects in `has_many` and `belongs_to`
