@@ -1,3 +1,5 @@
+branches: master
+
 language: ruby
 
 rvm:
