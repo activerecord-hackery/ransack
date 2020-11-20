@@ -19,9 +19,9 @@ env:
   - RAILS=5-2-stable DB=mysql
   - RAILS=5-2-stable DB=postgres
 
-  - RAILS=v5.2.3 DB=sqlite3
-  - RAILS=v5.2.3 DB=mysql
-  - RAILS=v5.2.3 DB=postgres
+  - RAILS=v5.2.4 DB=sqlite3
+  - RAILS=v5.2.4 DB=mysql
+  - RAILS=v5.2.4 DB=postgres
 
 before_script:
   - if [ "$DB" = "mysql" ];
