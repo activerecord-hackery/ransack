@@ -2,6 +2,9 @@
 
 * Fix for ActiveRecord 5.2.4 (note security fix in 5.2.4.2 for ActiveView's escape_javascript CVE-2020-5267 for all earlier versions)
 
+* Drop support for ActiveRecord older than 5.2.4.
+  PR [1166](https://github.com/activerecord-hackery/ransack/pull/1166)
+
 ## 2.3.2 - 2020-01-11
 
 * Breakfix to bump Polyamorous
