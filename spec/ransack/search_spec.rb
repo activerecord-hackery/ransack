@@ -268,6 +268,8 @@ module Ransack
       end
 
       it 'use appropriate table alias' do
+        skip "Rails 6 regressed here, but it's fixed in 6-0-stable since https://github.com/rails/rails/commit/f9ba52477ca288e7effa5f6794ae3df3f4e982bc" if ENV["RAILS"] == "v6.0.3"
+
         s = Search.new(Person, {
           name_eq: "person_name_query",
           articles_title_eq: "person_article_title_query",
@@ -277,17 +279,10 @@ module Ransack
 
         real_query = remove_quotes_and_backticks(s.to_sql)
 
-        if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) > ::Gem::Version.new(Constants::RAILS_6_0)
-          expect(real_query)
-                  .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = parents_people.id})
-          expect(real_query)
-                  .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = people.id})
-        else
-          expect(real_query)
-                  .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
-          expect(real_query)
-                  .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
-        end
+        expect(real_query)
+                .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
+        expect(real_query)
+                .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
 
         expect(real_query)
           .to include "people.name = 'person_name_query'"
