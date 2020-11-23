@@ -54,7 +54,9 @@ module Polyamorous
     def table_aliases_for(parent, node)
       node.reflection.chain.map { |reflection|
         alias_tracker.aliased_table_for(reflection.klass.arel_table) do
-          table_alias_for(reflection, parent, reflection != node.reflection)
+          root = reflection == node.reflection
+          name = reflection.alias_candidate(parent.table_name)
+          root ? name : "#{name}_join"
         end
       }
     end
