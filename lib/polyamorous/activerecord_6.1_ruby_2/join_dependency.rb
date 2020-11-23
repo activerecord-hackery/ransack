@@ -30,6 +30,7 @@ module Polyamorous
 
     def join_constraints(joins_to_add, alias_tracker)
       @alias_tracker = alias_tracker
+      @joined_tables = {}
 
       joins = make_join_constraints(join_root, join_type)
 
