@@ -28,9 +28,14 @@ module Polyamorous
       end
     end
 
-    def join_constraints(joins_to_add, alias_tracker)
+    def join_constraints(joins_to_add, alias_tracker, references)
       @alias_tracker = alias_tracker
       @joined_tables = {}
+      @references = {}
+
+      references.each do |table_name|
+        @references[table_name.to_sym] = table_name if table_name.is_a?(String)
+      end
 
       joins = make_join_constraints(join_root, join_type)
 

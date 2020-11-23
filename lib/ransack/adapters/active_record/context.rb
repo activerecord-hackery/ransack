@@ -99,7 +99,9 @@ module Ransack
         def join_sources
           base, joins = begin
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
-            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
+            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1_ALPHA)
+              @join_dependency.join_constraints(@object.joins_values, alias_tracker, @object.references_values)
+            elsif ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
               @join_dependency.join_constraints(@object.joins_values, alias_tracker)
             else
               @join_dependency.join_constraints(@object.joins_values, @join_type, alias_tracker)
