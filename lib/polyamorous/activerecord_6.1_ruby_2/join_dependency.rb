@@ -52,11 +52,9 @@ module Polyamorous
 
     def table_aliases_for(parent, node)
       node.reflection.chain.map { |reflection|
-        alias_tracker.aliased_table_for(
-          reflection.table_name,
-          table_alias_for(reflection, parent, reflection != node.reflection),
-          reflection.klass.type_caster
-        )
+        alias_tracker.aliased_table_for(reflection.klass.arel_table) do
+          table_alias_for(reflection, parent, reflection != node.reflection)
+        end
       }
     end
 
