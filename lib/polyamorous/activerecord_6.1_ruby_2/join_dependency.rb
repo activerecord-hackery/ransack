@@ -31,11 +31,9 @@ module Polyamorous
     def join_constraints(joins_to_add, alias_tracker)
       @alias_tracker = alias_tracker
 
-      construct_tables!(join_root)
       joins = make_join_constraints(join_root, join_type)
 
       joins.concat joins_to_add.flat_map { |oj|
-        construct_tables!(oj.join_root)
         if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
           walk join_root, oj.join_root, oj.join_type
         else
@@ -44,7 +42,23 @@ module Polyamorous
       }
     end
 
+    def construct_tables_for_association!(join_root, association)
+      tables = table_aliases_for(join_root, association)
+      association.table = tables.first
+      tables
+    end
+
     private
+
+    def table_aliases_for(parent, node)
+      node.reflection.chain.map { |reflection|
+        alias_tracker.aliased_table_for(
+          reflection.table_name,
+          table_alias_for(reflection, parent, reflection != node.reflection),
+          reflection.klass.type_caster
+        )
+      }
+    end
 
     module ClassMethods
       # Prepended before ActiveRecord::Associations::JoinDependency#walk_tree

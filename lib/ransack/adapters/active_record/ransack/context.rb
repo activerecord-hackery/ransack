@@ -28,6 +28,7 @@ module Ransack
       @join_type = options[:join_type] || Polyamorous::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @associations_pot = {}
+      @tables_pot = {}
       @lock_associations = []
 
       @base = @join_dependency.instance_variable_get(:@join_root)
