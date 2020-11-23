@@ -21,12 +21,18 @@ module Polyamorous
     # given block, uses the ones passed
     def join_constraints_with_tables(foreign_table, foreign_klass, join_type, alias_tracker, tables)
       joins = []
-      @table = tables.first
+      chain = []
+
+      reflection.chain.each.with_index do |reflection, i|
+        table = tables[i]
+
+        @table ||= table
+        chain << [reflection, table]
+      end
 
       # The chain starts with the target table, but we want to end with it here (makes
       # more sense in this context), so we reverse
-      reflection.chain.reverse_each.with_index(1) do |reflection, i|
-        table = tables[-i]
+      chain.reverse_each do |reflection, table|
         klass = reflection.klass
 
         join_scope = reflection.join_scope(table, foreign_table, foreign_klass)
