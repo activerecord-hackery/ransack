@@ -45,13 +45,6 @@ module Polyamorous
     end
 
     private
-      def make_constraints(parent, child, join_type = Arel::Nodes::OuterJoin)
-        foreign_table = parent.table
-        foreign_klass = parent.base_klass
-        join_type = child.join_type || join_type if join_type == Arel::Nodes::InnerJoin
-        joins = child.join_constraints(foreign_table, foreign_klass, join_type, alias_tracker)
-        joins.concat child.children.flat_map { |c| make_constraints(child, c, join_type) }
-     end
 
     module ClassMethods
       # Prepended before ActiveRecord::Associations::JoinDependency#walk_tree
