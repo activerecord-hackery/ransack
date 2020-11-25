@@ -265,10 +265,12 @@ module Ransack
           # end
 
           it 'creates ransack attributes' do
+            person = Person.create!(name: 'Aric Smith')
+
             s = Person.ransack(reversed_name_eq: 'htimS cirA')
             expect(s.result.size).to eq(1)
 
-            expect(s.result.first).to eq Person.where(name: 'Aric Smith').first
+            expect(s.result.first).to eq person
           end
 
           it 'can be accessed through associations' do

@@ -1,5 +1,9 @@
 # ![Ransack](./logo/ransack-h.png "Ransack")
 
+**MAINTAINER WANTED** 
+
+Please see the [Maintainer wanted issue](https://github.com/activerecord-hackery/ransack/issues/1159) if you are interested.
+
 [![Build Status](https://travis-ci.org/activerecord-hackery/ransack.svg)](https://travis-ci.org/activerecord-hackery/ransack)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
@@ -460,7 +464,7 @@ List of all possible predicates
 | `*_not_cont` | Does not contain |
 | `*_not_cont_any` | Does not contain any of | |
 | `*_not_cont_all` | Does not contain all of | |
-| `*_i_cont` | Contains value with case insensitive | uses `LIKE` |
+| `*_i_cont` | Contains value with case insensitive | uses `ILIKE` |
 | `*_i_cont_any` | Contains any of values with case insensitive | |
 | `*_i_cont_all` | Contains all of values with case insensitive | |
 | `*_not_i_cont` | Does not contain with case insensitive |
