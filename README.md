@@ -21,7 +21,7 @@ instead.
 
 ## Getting started
 
-Ransack is compatible with Rails 6.0, 5.0, 5.1 and 5.2 on Ruby 2.3 and later.
+Ransack is supported for Rails 6.1, 6.0, 5.2 on Ruby 2.6.6 and later.
 
 In your Gemfile, for the last officially released gem:
 
