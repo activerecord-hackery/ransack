@@ -99,7 +99,9 @@ module Ransack
         def join_sources
           base, joins = begin
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
-            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
+            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1_ALPHA)
+              @join_dependency.join_constraints(@object.joins_values, alias_tracker, @object.references_values)
+            elsif ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
               @join_dependency.join_constraints(@object.joins_values, alias_tracker)
             else
               @join_dependency.join_constraints(@object.joins_values, @join_type, alias_tracker)
@@ -325,7 +327,11 @@ module Ransack
           @join_dependency.instance_variable_get(:@join_root).children.push found_association
 
           # Builds the arel nodes properly for this association
-          @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root))
+          if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1_ALPHA)
+            @tables_pot[found_association] = @join_dependency.construct_tables_for_association!(jd.instance_variable_get(:@join_root), found_association)
+          else
+            @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root))
+          end
 
           # Leverage the stashed association functionality in AR
           @object = @object.joins(jd)
@@ -335,12 +341,22 @@ module Ransack
         def extract_joins(association)
           parent = @join_dependency.instance_variable_get(:@join_root)
           reflection = association.reflection
-          join_constraints = association.join_constraints(
+          join_constraints = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1_ALPHA)
+                               association.join_constraints_with_tables(
+                                 parent.table,
+                                 parent.base_klass,
+                                 Arel::Nodes::OuterJoin,
+                                 @join_dependency.instance_variable_get(:@alias_tracker),
+                                 @tables_pot[association]
+                               )
+                             else
+                               association.join_constraints(
                                  parent.table,
                                  parent.base_klass,
                                  Arel::Nodes::OuterJoin,
                                  @join_dependency.instance_variable_get(:@alias_tracker)
                                )
+                             end
           join_constraints.to_a.flatten
         end
       end

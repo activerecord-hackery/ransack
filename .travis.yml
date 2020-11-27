@@ -9,6 +9,10 @@ services:
   - mysql
 
 env:
+  - RAILS=v6.1.0.rc1 DB=sqlite3
+  - RAILS=v6.1.0.rc1 DB=mysql
+  - RAILS=v6.1.0.rc1 DB=postgres
+
   - RAILS=v6.0.3 DB=sqlite3
   - RAILS=v6.0.3 DB=mysql
   - RAILS=v6.0.3 DB=postgres
