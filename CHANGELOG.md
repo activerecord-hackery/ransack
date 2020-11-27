@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.4.0 - 2020-11-27
+
+*
+  PR []()
+
 * Support ActiveRecord 6.1.0.rc1.
   PR [1172](https://github.com/activerecord-hackery/ransack/pull/1172)
 
