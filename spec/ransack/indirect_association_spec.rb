@@ -8,7 +8,8 @@ module Ransack
           result = ProviderCalendar.
                   ransack({ "account_email_cont" => "account1", "user_email_eq" => "user2@somedomain.com" }).
                   result.
-                  map(&:provider_id)
+                  map(&:provider_id).
+                  sort
 
           expect(result).to eq(["account1_user2@mail.com", "aksshkdhak@whatever.provider.com"])
         end
@@ -19,7 +20,8 @@ module Ransack
           result = ProviderCalendar.
                    ransack({ "user_email_eq" => "user2@somedomain.com", "account_email_cont" => "account1" }).
                    result.
-                   map(&:provider_id)
+                   map(&:provider_id).
+                   sort
 
           expect(result).to eq(["account1_user2@mail.com", "aksshkdhak@whatever.provider.com"])
         end
