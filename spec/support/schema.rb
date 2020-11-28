@@ -178,6 +178,34 @@ class Note < ActiveRecord::Base
   belongs_to :notable, polymorphic: true
 end
 
+class User < ActiveRecord::Base
+  has_many :accounts,
+           class_name: "ProviderAccount"
+  has_many :contacts,
+           class_name: "ProviderContact",
+           through:    :accounts,
+           source:     :contacts
+  has_many :calendars,
+           class_name: "ProviderCalendar",
+           through:    :accounts,
+           source:     :calendars
+end
+
+class ProviderAccount < ActiveRecord::Base
+  belongs_to :user
+
+  has_many :calendars, class_name: "ProviderCalendar"
+end
+
+class ProviderCalendar < ActiveRecord::Base
+  belongs_to :account,
+             class_name:  "ProviderAccount",
+             foreign_key: "provider_account_id",
+             inverse_of:  :calendars
+
+  has_one :user, through: :account
+end
+
 module Schema
   def self.create
     ActiveRecord::Migration.verbose = false
@@ -236,6 +264,25 @@ module Schema
         t.integer  :target_person_id
         t.integer  :article_id
       end
+
+      create_table "users", force: :cascade do |t|
+        t.string "email", default: "", null: false
+        t.index ["email"], name: "idx_users_on_email", unique: true
+      end
+
+      create_table "provider_accounts", force: :cascade do |t|
+        t.bigint "user_id", null: false
+        t.string "email", null: false
+        t.index ["email"], name: "idx_p_accounts_on_email"
+        t.index ["user_id"], name: "idx_p_accounts_on_user_id"
+      end
+
+      create_table "provider_calendars", force: :cascade do |t|
+        t.bigint "provider_account_id", null: false
+        t.string "provider_id", null: false
+        t.index ["provider_account_id", "provider_id"], name: "idx_p_calendars_on_p_account_id_and_p_id", unique: true
+        t.index ["provider_account_id"], name: "idx_p_calendars_on_p_account_id"
+      end
     end
 
     10.times do
@@ -257,6 +304,21 @@ module Schema
       body: 'First post!',
       article: Article.make(title: 'Hello, world!')
     )
+
+    user1 = User.create!(email: "user1@somedomain.com")
+    user2 = User.create!(email: "user2@somedomain.com")
+    user1_acct1 = ProviderAccount.create!(user: user1, email: "account1_user1@mail.com")
+    user1_acct2 = ProviderAccount.create!(user: user1, email: "account2_user1@mail.com")
+    user2_acct1 = ProviderAccount.create!(user: user2, email: "account1_user2@mail.com")
+    user2_acct2 = ProviderAccount.create!(user: user2, email: "account2_user2@mail.com")
+    ProviderCalendar.create!(account: user1_acct1, provider_id: "account1_user1@mail.com")
+    ProviderCalendar.create!(account: user1_acct1, provider_id: "something_else@whatever.provider.com")
+    ProviderCalendar.create!(account: user1_acct2, provider_id: "account2_user1@mail.com")
+    ProviderCalendar.create!(account: user1_acct2, provider_id: "blahblahblah@whatever.provider.com")
+    ProviderCalendar.create!(account: user2_acct1, provider_id: "account1_user2@mail.com")
+    ProviderCalendar.create!(account: user2_acct1, provider_id: "aksshkdhak@whatever.provider.com")
+    ProviderCalendar.create!(account: user2_acct2, provider_id: "account2_user2@mail.com")
+    ProviderCalendar.create!(account: user2_acct2, provider_id: "noisenoisenoise@whatever.provider.com")
   end
 end
 
