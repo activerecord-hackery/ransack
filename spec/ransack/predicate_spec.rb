@@ -419,6 +419,22 @@ module Ransack
       end
     end
 
+    describe 'in' do
+      it %q[generates a value IN query] do
+        @s.name_in = Array.new(3) { Faker::Name.name }
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        sql_array = sql_array_string(@s.name_in)
+        expect(@s.result.to_sql).to match /#{field} IN \(#{sql_array}\)/
+      end
+
+      it %q[generates a value NOT IN query] do
+        @s.name_not_in = Array.new(3) { Faker::Name.name }
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        sql_array = sql_array_string(@s.name_not_in)
+        expect(@s.result.to_sql).to match /#{field} NOT IN \(#{sql_array}\)/
+      end
+    end
+
     context "defining custom predicates" do
       describe "with 'not_in' arel predicate" do
         before do
