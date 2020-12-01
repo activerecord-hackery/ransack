@@ -16,6 +16,9 @@ jobs:
           - 6-0-stable
           - 5-2-stable
           - v5.2.4
+        ruby:
+          - 2.7.2
+          - 2.6.6
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -24,7 +27,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: ${{ matrix.ruby }}
       - name: Install dependencies
         run: bundle install
       - name: Run tests
@@ -41,6 +44,9 @@ jobs:
           - 6-0-stable
           - 5-2-stable
           - v5.2.4
+        ruby:
+          - 2.7.2
+          - 2.6.6
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -51,7 +57,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: ${{ matrix.ruby }}
       - name: Startup MySQL
         run: |
           sudo systemctl start mysql.service
@@ -75,6 +81,9 @@ jobs:
           - 6-0-stable
           - 5-2-stable
           - v5.2.4
+        ruby:
+          - 2.7.2
+          - 2.6.6
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
@@ -101,7 +110,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: ${{ matrix.ruby }}
       - name: Setup databases
         run: |
           psql -h localhost -p 5432 -W postgres -c 'create database ransack;' -U postgres;
