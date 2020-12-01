@@ -6,6 +6,8 @@ when 'mysql', 'mysql2'
   ActiveRecord::Base.establish_connection(
     adapter:  'mysql2',
     database: 'ransack',
+    username: ENV.fetch("MYSQL_USERNAME") { "root" },
+    password: ENV.fetch("MYSQL_PASSWORD") { "" },
     encoding: 'utf8'
   )
 when 'pg', 'postgres', 'postgresql'

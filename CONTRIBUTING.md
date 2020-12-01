@@ -115,9 +115,6 @@ Here's a quick guide:
         $ git config --global user.email "contributor@example.com"
 
 10. Commit your changes (`git commit -am 'Add feature/fix bug/improve docs'`).
-   If your pull request only contains documentation changes, please remember
-   to add `[skip ci]` to the beginning of your commit message so the Travis
-   test suite doesn't :runner: needlessly.
 
 11. If necessary, rebase your commits into logical chunks, without errors. To
    interactively rebase and cherry-pick from, say, the last 10 commits:
