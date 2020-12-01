@@ -426,9 +426,10 @@ module Ransack
         end
 
         it 'generates a value IS NOT NULL query' do
-          @s.name_not_in_csv = ["a", "b"]
+          @s.name_not_in_csv = %w[a b]
           field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-          expect(@s.result.to_sql).to match /#{field} NOT IN \('a', 'b'\)/
+          sql_array = sql_array_string(@s.name_not_in_csv)
+          expect(@s.result.to_sql).to match /#{field} NOT IN \(#{sql_array}\)/
         end
       end
     end
