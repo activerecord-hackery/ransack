@@ -457,6 +457,10 @@ module Ransack
         quoted_value = ActiveRecord::Base.connection.quote(value)
         /#{field} #{operator} #{quoted_value}/
       end
+
+      def sql_array_string(array)
+        array.join("', '").prepend("'") << ("'")
+      end
     end
 
 end
