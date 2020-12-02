@@ -1,9 +1,5 @@
 # ![Ransack](./logo/ransack-h.png "Ransack")
 
-**MAINTAINER WANTED** 
-
-Please see the [Maintainer wanted issue](https://github.com/activerecord-hackery/ransack/issues/1159) if you are interested.
-
 [![Build Status](https://github.com/activerecord-hackery/ransack/workflows/test/badge.svg)](https://github.com/activerecord-hackery/ransack/actions)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
