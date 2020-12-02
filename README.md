@@ -891,12 +891,6 @@ both in the same application. If both are present, Ransack will default to
 Active Record only. The logic is contained in
 `Ransack::Adapters#instantiate_object_mapper` should you need to override it.
 
-## Security contact information
-
-Please use the Tidelift security contact to [report a security
-vulnerability](https://tidelift.com/security).  Tidelift will coordinate the fix
-and disclosure.
-
 ## Semantic Versioning
 
 Ransack attempts to follow semantic versioning in the format of `x.y.z`, where:
