@@ -250,6 +250,20 @@ the order indicator arrow by passing `hide_indicator: true` in the sort link:
   default_order: { last_name: 'asc', first_name: 'desc' }) %>
 ```
 
+#### PostgreSQL's sort option
+
+The `NULLS FIRST` and `NULLS LAST` options can be used to determine whether nulls appear before or after non-null values in the sort ordering.
+
+You may want to configure it like this:
+
+```rb
+Ransack.configure do |c|
+  c.postgres_fields_sort_option = :nulls_first # or :nulls_last
+end
+```
+
+See this feature: https://www.postgresql.org/docs/13/queries-order.html
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to

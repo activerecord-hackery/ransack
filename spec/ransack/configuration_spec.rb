@@ -173,5 +173,15 @@ module Ransack
         .to eq false
       end
     end
+
+    it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      default = Ransack.options.clone
+
+      Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+
+      expect(Ransack.options[:postgres_fields_sort_option]).to eq :nulls_first
+
+      Ransack.options = default
+    end
   end
 end
