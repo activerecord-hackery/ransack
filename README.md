@@ -41,27 +41,14 @@ gem 'ransack', github: 'activerecord-hackery/ransack'
 
 ## Usage
 
-Ransack can be used in one of two modes, simple or advanced.
+Ransack can be used in one of two modes, simple or advanced. For
+searching/filtering not requiring complex boolean logic, Ransack's simple
+mode should meet your needs.
+
+If you're coming from MetaSearch (Ransack's predecessor), refer to the
+[Updating From MetaSearch](#updating-from-metasearch) section
 
 ### Simple Mode
-
-This mode works much like MetaSearch, for those of you who are familiar with
-it, and requires very little setup effort.
-
-If you're coming from MetaSearch, things to note:
-
-  1. The default param key for search params is now `:q`, instead of `:search`.
-  This is primarily to shorten query strings, though advanced queries (below)
-  will still run afoul of URL length limits in most browsers and require a
-  switch to HTTP POST requests. This key is [configurable](https://github.com/activerecord-hackery/ransack/wiki/Configuration).
-
-  2. `form_for` is now `search_form_for`, and validates that a Ransack::Search
-  object is passed to it.
-
-  3. Common ActiveRecord::Relation methods are no longer delegated by the
-  search object. Instead, you will get your search results (an
-  ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
-  `Ransack#result`.
 
 #### In your controller
 
@@ -81,6 +68,20 @@ def index
 
   # or use `to_a.uniq` to remove duplicates (can also be done in the view):
   @people = @q.result.includes(:articles).page(params[:page]).to_a.uniq
+end
+```
+
+##### Default search parameter
+
+Ransack uses a default `:q` param key for search params. This may be changed by
+setting the `search_key` option in a Ransack initializer file (typically
+`config/initializers/ransack.rb`):
+
+```
+Ransack.configure do |c|
+  # Change default search parameter key name.
+  # Default key name is :q
+  c.search_key = :query
 end
 ```
 
@@ -902,6 +903,28 @@ en:
       namespace_article:
         title: Old Ransack Namespaced Title
 ```
+
+### Updating From MetaSearch
+
+Ransack works much like MetaSearch, for those of you who are familiar with
+it, and requires very little setup effort.
+
+If you're coming from MetaSearch, things to note:
+
+  1. The default param key for search params is now `:q`, instead of `:search`.
+  This is primarily to shorten query strings, though advanced queries (below)
+  will still run afoul of URL length limits in most browsers and require a
+  switch to HTTP POST requests. This key is
+  [configurable](default-search-parameter) via setting the `search_key` option
+  in your Ransack intitializer file.
+
+  2. `form_for` is now `search_form_for`, and validates that a Ransack::Search
+  object is passed to it.
+
+  3. Common ActiveRecord::Relation methods are no longer delegated by the
+  search object. Instead, you will get your search results (an
+  ActiveRecord::Relation in the case of the ActiveRecord adapter) via a call to
+  `Ransack#result`.
 
 ## Mongoid
 
