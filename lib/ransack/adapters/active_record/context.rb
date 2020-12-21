@@ -42,6 +42,13 @@ module Ransack
               if scope_or_sort.is_a?(Symbol)
                 relation = relation.send(scope_or_sort)
               else
+                case Ransack.options[:postgres_fields_sort_option]
+                when :nulls_first
+                  scope_or_sort = scope_or_sort.direction == :asc ? "#{scope_or_sort.to_sql} NULLS FIRST" : "#{scope_or_sort.to_sql} NULLS LAST"
+                when :nulls_last
+                  scope_or_sort = scope_or_sort.direction == :asc ? "#{scope_or_sort.to_sql} NULLS LAST" : "#{scope_or_sort.to_sql} NULLS FIRST"
+                end
+
                 relation = relation.order(scope_or_sort)
               end
             end

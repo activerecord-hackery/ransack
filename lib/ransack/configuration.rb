@@ -33,7 +33,8 @@ module Ransack
       :up_arrow => '&#9660;'.freeze,
       :down_arrow => '&#9650;'.freeze,
       :default_arrow => nil,
-      :sanitize_scope_args => true
+      :sanitize_scope_args => true,
+      :postgres_fields_sort_option => nil
     }
 
     def configure
@@ -139,6 +140,21 @@ module Ransack
     #
     def sanitize_custom_scope_booleans=(boolean)
       self.options[:sanitize_scope_args] = boolean
+    end
+
+    # The `NULLS FIRST` and `NULLS LAST` options can be used to determine
+    # whether nulls appear before or after non-null values in the sort ordering.
+    #
+    # User may want to configure it like this:
+    #
+    # Ransack.configure do |c|
+    #   c.postgres_fields_sort_option = :nulls_first # or :nulls_last
+    # end
+    #
+    # See this feature: https://www.postgresql.org/docs/13/queries-order.html
+    #
+    def postgres_fields_sort_option=(setting)
+      self.options[:postgres_fields_sort_option] = setting
     end
 
     # By default, Ransack displays sort order indicator arrows in sort links.
