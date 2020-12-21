@@ -232,7 +232,7 @@ module Ransack
       context 'with an invalid condition' do
         subject { Search.new(Person, unknown_attr_eq: 'Ernie') }
 
-        context 'when ignore_unknown_conditions is false' do
+        context 'when ignore_unknown_conditions configuration option is false' do
           before do
             Ransack.configure { |c| c.ignore_unknown_conditions = false }
           end
@@ -240,12 +240,38 @@ module Ransack
           specify { expect { subject }.to raise_error ArgumentError }
         end
 
-        context 'when ignore_unknown_conditions is true' do
+        context 'when ignore_unknown_conditions configuration option is true' do
           before do
             Ransack.configure { |c| c.ignore_unknown_conditions = true }
           end
 
           specify { expect { subject }.not_to raise_error }
+        end
+
+        subject(:with_ignore_unknown_conditions_false) {
+          Search.new(Person,
+            { unknown_attr_eq: 'Ernie' },
+            { ignore_unknown_conditions: false }
+          )
+        }
+
+        subject(:with_ignore_unknown_conditions_true) {
+          Search.new(Person,
+            { unknown_attr_eq: 'Ernie' },
+            { ignore_unknown_conditions: true }
+          )
+        }
+
+        context 'when ignore_unknown_conditions search parameter is absent' do
+          specify { expect { subject }.not_to raise_error }
+        end
+
+        context 'when ignore_unknown_conditions search parameter is false' do
+          specify { expect { with_ignore_unknown_conditions_false }.to raise_error ArgumentError }
+        end
+
+        context 'when ignore_unknown_conditions search parameter is true' do
+          specify { expect { with_ignore_unknown_conditions_true }.not_to raise_error }
         end
       end
 

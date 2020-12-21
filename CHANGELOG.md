@@ -1,5 +1,9 @@
 # Change Log
 
+* Add `ActiveRecord::Base.ransack!` which raises error if passed unknown condition
+
+  *Aaron Lipman*
+
 ## 2.4.0 - 2020-11-27
 
 *

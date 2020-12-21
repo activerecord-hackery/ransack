@@ -122,6 +122,10 @@ module Ransack
             expect { Person.ransack('') }.to_not raise_error
           end
 
+          it 'raises exception if ransack! called with unknown condition' do
+            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error
+          end
+
           it 'does not modify the parameters' do
             params = { name_eq: '' }
             expect { Person.ransack(params) }.not_to change { params }
