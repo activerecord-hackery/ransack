@@ -49,3 +49,8 @@ group :test do
   gem 'rspec', '~> 3'
   gem 'simplecov', :require => false
 end
+
+# RuboCop 0.81.0 is the last version which supports Ruby 2.3.
+# Once Ransack required_ruby_version is bumped, RuboCop version can be bumped.
+# https://github.com/rubocop-hq/rubocop/pull/7869
+gem 'rubocop', '=0.81.0', require: false
