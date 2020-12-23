@@ -1,6 +1,7 @@
 module Ransack
   class Ransacker
 
+
     attr_reader :name, :type, :formatter, :args
 
     delegate :call, :to => :@callable
