@@ -87,7 +87,6 @@ class Person < ActiveRecord::Base
       )
   end
 
-
   ransacker :sql_literal_id do
     Arel.sql('people.id')
   end
@@ -109,7 +108,6 @@ class Person < ActiveRecord::Base
     .squish
     Arel.sql(query)
   end
-
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin

@@ -464,9 +464,9 @@ module Ransack
               Comment.create(article: Article.create(title: 'Avenger'), person: Person.create(salary: 100_000)),
               Comment.create(article: Article.create(title: 'Avenge'), person: Person.create(salary: 50_000)),
             ]
-            expect(Comment.ransack(article_title_cont: 'aven',s: 'person_salary desc').result).to eq(comments)
+            expect(Comment.ransack(article_title_cont: 'aven', s: 'person_salary desc').result).to eq(comments)
             expect(Comment.joins(:person).ransack(s: 'persons_salarydesc', article_title_cont: 'aven').result).to eq(comments)
-            expect(Comment.joins(:person).ransack(article_title_cont: 'aven',s: 'persons_salary desc').result).to eq(comments)
+            expect(Comment.joins(:person).ransack(article_title_cont: 'aven', s: 'persons_salary desc').result).to eq(comments)
           end
 
           it 'allows sort by `only_sort` field' do
@@ -544,7 +544,6 @@ module Ransack
                 quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
-
 
           it 'should allow passing ransacker arguments to a ransacker' do
             s = Person.ransack(

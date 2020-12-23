@@ -9,7 +9,6 @@ module Ransack
       describe Context do
         subject { Context.new(Person) }
 
-
         it 'has an Active Record alias tracker method' do
           expect(subject.alias_tracker)
           .to be_an ::ActiveRecord::Associations::AliasTracker
@@ -81,7 +80,7 @@ module Ransack
           end
 
           it 'build correlated subquery for multiple conditions (default scope)' do
-            search = Search.new(Person, { comments_body_not_eq: 'some_title'})
+            search = Search.new(Person, { comments_body_not_eq: 'some_title' })
 
             # Was
             # SELECT "people".* FROM "people" WHERE "people"."id" NOT IN (

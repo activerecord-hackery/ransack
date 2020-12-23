@@ -7,7 +7,7 @@ Ransack::Adapters.object_mapper.require_constants
 
 module Ransack
   extend Configuration
-  class UntraversableAssociationError < StandardError; end;
+  class UntraversableAssociationError < StandardError; end
 end
 
 Ransack.configure do |config|

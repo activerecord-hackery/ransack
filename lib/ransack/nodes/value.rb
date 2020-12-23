@@ -50,7 +50,7 @@ module Ransack
           y, m, d = *[val].flatten
           m ||= 1
           d ||= 1
-          Date.new(y,m,d) rescue nil
+          Date.new(y, m, d) rescue nil
         end
       end
 
