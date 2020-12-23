@@ -127,7 +127,6 @@ module Ransack
       alias :m= :combinator=
       alias :m :combinator
 
-
       # == build_attribute
       #
       #  This method was originally called from Nodes::Grouping#new_condition
@@ -262,7 +261,6 @@ module Ransack
       rescue
         attr.attr
       end
-
 
       def default_type
         predicate.type || (attributes.first && attributes.first.type)

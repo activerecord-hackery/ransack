@@ -45,9 +45,9 @@ module Ransack
       end
 
       def attribute_select(options = nil, html_options = nil, action = nil)
-        options = options || {}
-        html_options = html_options || {}
-        action = action || Constants::SEARCH
+        options ||= {}
+        html_options ||= {}
+        action ||= Constants::SEARCH
         default = options.delete(:default)
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)
