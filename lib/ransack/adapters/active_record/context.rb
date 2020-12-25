@@ -106,7 +106,7 @@ module Ransack
         def join_sources
           base, joins = begin
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
-            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1_ALPHA)
+            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1)
               @join_dependency.join_constraints(@object.joins_values, alias_tracker, @object.references_values)
             elsif ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
               @join_dependency.join_constraints(@object.joins_values, alias_tracker)
@@ -334,7 +334,7 @@ module Ransack
           @join_dependency.instance_variable_get(:@join_root).children.push found_association
 
           # Builds the arel nodes properly for this association
-          if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1_ALPHA)
+          if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1)
             @tables_pot[found_association] = @join_dependency.construct_tables_for_association!(jd.instance_variable_get(:@join_root), found_association)
           else
             @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root))
@@ -348,7 +348,7 @@ module Ransack
         def extract_joins(association)
           parent = @join_dependency.instance_variable_get(:@join_root)
           reflection = association.reflection
-          join_constraints = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1_ALPHA)
+          join_constraints = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1)
                                association.join_constraints_with_tables(
                                  parent.table,
                                  parent.base_klass,
