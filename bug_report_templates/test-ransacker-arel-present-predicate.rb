@@ -10,14 +10,13 @@ unless File.exist?('Gemfile')
     source 'https://rubygems.org'
 
     # Rails master
-    gem 'rails', github: 'rails/rails'
+    gem 'rails', github: 'rails/rails', branch: '6-1-stable'
 
     # Rails last release
     # gem 'rails'
 
     gem 'sqlite3'
     gem 'ransack', github: 'activerecord-hackery/ransack'
-    gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
   GEMFILE
 
   system 'bundle install'
@@ -61,11 +60,11 @@ end
 
 class BugTest < Minitest::Test
   def test_ransackers
-    sql = Project.ransack({number_present: 1}).result.to_sql
+    sql = Project.ransack({ number_present: 1 }).result.to_sql
     puts sql
     assert_equal "SELECT \"projects\".* FROM \"projects\" WHERE (\"projects\".\"number\" IS NOT NULL AND \"projects\".\"number\" != '')", sql
 
-    sql = Project.ransack({name_present: 1}).result.to_sql
+    sql = Project.ransack({ name_present: 1 }).result.to_sql
     puts sql
     assert_equal "SELECT \"projects\".* FROM \"projects\" WHERE (projects.name IS NOT NULL AND projects.name != '')", sql
   end

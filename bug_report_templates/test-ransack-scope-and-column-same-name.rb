@@ -12,14 +12,13 @@ unless File.exist?('Gemfile')
     source 'https://rubygems.org'
 
     # Rails master
-    gem 'rails', github: 'rails/rails'
+    gem 'rails', github: 'rails/rails', branch: '6-1-stable'
 
     # Rails last release
     # gem 'rails'
 
     gem 'sqlite3'
     gem 'ransack', github: 'activerecord-hackery/ransack'
-    gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
   GEMFILE
 
   system 'bundle install'
@@ -65,7 +64,7 @@ class BugTest < Minitest::Test
     sql = User.ransack({ activated: true }).result.to_sql
     puts sql
     assert_equal(
-      "SELECT \"users\".* FROM \"users\" WHERE \"users\".\"active\" = 't'", sql
+      "SELECT \"users\".* FROM \"users\" WHERE \"users\".\"active\" = 1", sql
       )
   end
 
