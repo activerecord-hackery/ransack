@@ -136,3 +136,19 @@ jobs:
         run: bundle install
       - name: Run tests
         run: bundle exec rspec
+
+  bug-report-templates:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0.0
+      - name: Install dependencies
+        run: bundle install
+      - name: Run bug report templates
+        run: |
+          ruby bug_report_templates/test-ransacker-arel-present-predicate.rb
+          ruby bug_report_templates/test-ransack-scope-and-column-same-name.rb
+          rm Gemfile Gemfile.lock
