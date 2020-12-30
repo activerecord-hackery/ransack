@@ -4,6 +4,8 @@
 
   *Aaron Lipman*
 
+* Drop support for rubies under 2.5. PR #1189
+
 ## 2.4.0 - 2020-11-27
 
 *
