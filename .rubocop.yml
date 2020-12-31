@@ -1,6 +1,5 @@
 AllCops:
-  # TargetRubyVersion value is based on `required_ruby_version = '>= 2.3'` in the ransack.gemspec
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.6
 
   DisabledByDefault: true
 
@@ -29,6 +28,9 @@ Layout/SpaceInsideParens:
   Enabled: true
 
 Layout/TrailingEmptyLines:
+  Enabled: true
+
+Style/RedundantFileExtensionInRequire:
   Enabled: true
 
 Style/RedundantReturn:
