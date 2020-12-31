@@ -1,5 +1,5 @@
 require 'machinist/active_record'
-require 'polyamorous/polyamorous.rb'
+require 'polyamorous/polyamorous'
 require 'sham'
 require 'faker'
 require 'ransack'

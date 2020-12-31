@@ -30,6 +30,9 @@ Layout/SpaceInsideParens:
 Layout/TrailingEmptyLines:
   Enabled: true
 
+Style/RedundantFileExtensionInRequire:
+  Enabled: true
+
 Style/RedundantReturn:
   Enabled: true
 
