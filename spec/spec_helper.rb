@@ -17,6 +17,7 @@ I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)]
 .each { |f| require f }
 
+Faker::Config.random = Random.new(0)
 Sham.define do
   name        { Faker::Name.name }
   title       { Faker::Lorem.sentence }
