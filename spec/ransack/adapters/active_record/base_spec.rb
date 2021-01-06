@@ -585,13 +585,11 @@ module Ransack
             )
           end
 
-          context 'when fields_sort_option is set' do
-            before { Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first } }
-
-            it 'doesn\'t trigger a deprecation warning' do
-              search = Person.ransack(sorts: ['name_case_insensitive desc'])
-              expect { search.result.first }.to_not output.to_stderr
-            end
+          it 'shouldn\'t trigger a deprecation warning when fields_sort_options is set' do
+            Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+            search = Person.ransack(sorts: ['name_case_insensitive desc'])
+            expect { search.result.first }.to_not output.to_stderr
+            Ransack.configure { |c| c.postgres_fields_sort_option = nil }
           end
 
           context 'case insensitive sorting' do
