@@ -18,6 +18,10 @@ module Ransack
           Search.new(self, params, options)
         end
 
+        def ransack!(params = {}, options = {})
+          ransack(params, options.merge(ignore_unknown_conditions: false))
+        end
+
         def ransacker(name, opts = {}, &block)
           self._ransackers = _ransackers.merge name.to_s => Ransacker
             .new(self, name, opts, &block)

@@ -80,7 +80,7 @@ module Ransack
                 'a' => {
                   '0' => {
                     'name' => 'with_arguments',
-                    'ransacker_args' => [1,2]
+                    'ransacker_args' => [1, 2]
                   }
                 },
                 'p' => 'eq',
@@ -90,7 +90,7 @@ module Ransack
                 'a' => {
                   '0' => {
                     'name' => 'with_arguments',
-                    'ransacker_args' => [3,4]
+                    'ransacker_args' => [3, 4]
                   }
                 },
                 'p' => 'eq',

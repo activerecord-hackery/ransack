@@ -36,7 +36,7 @@ module Ransack
       'lt'.freeze, 'lteq'.freeze,
       'gt'.freeze, 'gteq'.freeze,
       'in'.freeze, 'not_in'.freeze
-      ].freeze
+    ].freeze
     A_S_I               = ['a'.freeze, 's'.freeze, 'i'.freeze].freeze
 
     EQ                  = 'eq'.freeze
@@ -46,9 +46,9 @@ module Ransack
     CONT                = 'cont'.freeze
 
     RAILS_6_0           = '6.0.0'.freeze
+    RAILS_6_1           = '6.1.0'.freeze
 
     RANSACK_SLASH_SEARCHES = 'ransack/searches'.freeze
     RANSACK_SLASH_SEARCHES_SLASH_SEARCH = 'ransack/searches/search'.freeze
   end
 end
-

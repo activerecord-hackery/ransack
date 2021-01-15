@@ -20,6 +20,12 @@ module Ransack
         Search.new(Person, name_eq: 'foobar')
       end
 
+      it 'strip leading & trailing whitespace before building' do
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ 'name_eq' => 'foobar' })
+        Search.new(Person, name_eq: '   foobar     ')
+      end
+
       it 'removes empty suffixed conditions before building' do
         expect_any_instance_of(Search).to receive(:build).with({})
         Search.new(Person, name_eq_any: [''])
@@ -226,7 +232,7 @@ module Ransack
       context 'with an invalid condition' do
         subject { Search.new(Person, unknown_attr_eq: 'Ernie') }
 
-        context 'when ignore_unknown_conditions is false' do
+        context 'when ignore_unknown_conditions configuration option is false' do
           before do
             Ransack.configure { |c| c.ignore_unknown_conditions = false }
           end
@@ -234,12 +240,38 @@ module Ransack
           specify { expect { subject }.to raise_error ArgumentError }
         end
 
-        context 'when ignore_unknown_conditions is true' do
+        context 'when ignore_unknown_conditions configuration option is true' do
           before do
             Ransack.configure { |c| c.ignore_unknown_conditions = true }
           end
 
           specify { expect { subject }.not_to raise_error }
+        end
+
+        subject(:with_ignore_unknown_conditions_false) {
+          Search.new(Person,
+            { unknown_attr_eq: 'Ernie' },
+            { ignore_unknown_conditions: false }
+          )
+        }
+
+        subject(:with_ignore_unknown_conditions_true) {
+          Search.new(Person,
+            { unknown_attr_eq: 'Ernie' },
+            { ignore_unknown_conditions: true }
+          )
+        }
+
+        context 'when ignore_unknown_conditions search parameter is absent' do
+          specify { expect { subject }.not_to raise_error }
+        end
+
+        context 'when ignore_unknown_conditions search parameter is false' do
+          specify { expect { with_ignore_unknown_conditions_false }.to raise_error ArgumentError }
+        end
+
+        context 'when ignore_unknown_conditions search parameter is true' do
+          specify { expect { with_ignore_unknown_conditions_true }.not_to raise_error }
         end
       end
 
@@ -257,6 +289,9 @@ module Ransack
       let(:children_people_name_field) {
         "#{quote_table_name("children_people")}.#{quote_column_name("name")}"
       }
+      let(:notable_type_field) {
+        "#{quote_table_name("notes")}.#{quote_column_name("notable_type")}"
+      }
       it 'evaluates conditions contextually' do
         s = Search.new(Person, children_name_eq: 'Ernie')
         expect(s.result).to be_an ActiveRecord::Relation
@@ -265,6 +300,8 @@ module Ransack
       end
 
       it 'use appropriate table alias' do
+        skip "Rails 6 regressed here, but it's fixed in 6-0-stable since https://github.com/rails/rails/commit/f9ba52477ca288e7effa5f6794ae3df3f4e982bc" if ENV["RAILS"] == "v6.0.3"
+
         s = Search.new(Person, {
           name_eq: "person_name_query",
           articles_title_eq: "person_article_title_query",
@@ -286,6 +323,10 @@ module Ransack
         #           .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
         # end
         pending("Previous test is breaking from Malik. How did this get merge?")
+        expect(real_query)
+                .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
+        expect(real_query)
+                .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
 
         expect(real_query)
           .to include "people.name = 'person_name_query'"
@@ -356,6 +397,7 @@ module Ransack
         s = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie').result
         expect(s).to be_an ActiveRecord::Relation
         expect(s.to_sql).to match /#{people_name_field} = 'Ernie'/
+        expect(s.to_sql).to match /#{notable_type_field} = 'Person'/
       end
 
       it 'evaluates nested conditions' do
@@ -529,6 +571,27 @@ module Ransack
       it 'overrides existing sort' do
         @s.sorts = 'id asc'
         expect(@s.result.first.id).to eq 1
+      end
+
+      it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+        default = Ransack.options.clone
+
+        s = Search.new(Person, s: 'name asc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC"
+
+        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+        s = Search.new(Person, s: 'name asc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC NULLS FIRST"
+        s = Search.new(Person, s: 'name desc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" DESC NULLS LAST"
+
+        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_last }
+        s = Search.new(Person, s: 'name asc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC NULLS LAST"
+        s = Search.new(Person, s: 'name desc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" DESC NULLS FIRST"
+
+        Ransack.options = default
       end
     end
 

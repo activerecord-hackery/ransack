@@ -30,7 +30,7 @@ module Ransack
 
       def type
         if ransacker
-          return ransacker.type
+          ransacker.type
         else
           context.type_for(self)
         end

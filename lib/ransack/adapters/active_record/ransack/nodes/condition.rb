@@ -53,12 +53,19 @@ module Ransack
         end
 
         def casted_array?(predicate)
-          predicate.respond_to?(:val) && predicate.val.is_a?(Array)
+          (predicate.respond_to?(:value) && predicate.value.is_a?(Array)) || # Rails 6.1
+            (predicate.respond_to?(:val) && predicate.val.is_a?(Array)) # Rails 5.2, 6.0
         end
 
         def format_values_for(predicate)
-          predicate.val.map do |value|
-            value.is_a?(String) ? Arel::Nodes.build_quoted(value) : value
+          value = if predicate.respond_to?(:value)
+                    predicate.value # Rails 6.1
+                  else
+                    predicate.val # Rails 5.2, 6.0
+                  end
+
+          value.map do |val|
+            val.is_a?(String) ? Arel::Nodes.build_quoted(val) : val
           end
         end
 

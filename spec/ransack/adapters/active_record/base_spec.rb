@@ -122,6 +122,10 @@ module Ransack
             expect { Person.ransack('') }.to_not raise_error
           end
 
+          it 'raises exception if ransack! called with unknown condition' do
+            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error
+          end
+
           it 'does not modify the parameters' do
             params = { name_eq: '' }
             expect { Person.ransack(params) }.not_to change { params }
@@ -265,10 +269,12 @@ module Ransack
           # end
 
           it 'creates ransack attributes' do
+            person = Person.create!(name: 'Aric Smith')
+
             s = Person.ransack(reversed_name_eq: 'htimS cirA')
             expect(s.result.size).to eq(1)
 
-            expect(s.result.first).to eq Person.where(name: 'Aric Smith').first
+            expect(s.result.first).to eq person
           end
 
           it 'can be accessed through associations' do
@@ -458,9 +464,9 @@ module Ransack
               Comment.create(article: Article.create(title: 'Avenger'), person: Person.create(salary: 100_000)),
               Comment.create(article: Article.create(title: 'Avenge'), person: Person.create(salary: 50_000)),
             ]
-            expect(Comment.ransack(article_title_cont: 'aven',s: 'person_salary desc').result).to eq(comments)
+            expect(Comment.ransack(article_title_cont: 'aven', s: 'person_salary desc').result).to eq(comments)
             expect(Comment.joins(:person).ransack(s: 'persons_salarydesc', article_title_cont: 'aven').result).to eq(comments)
-            expect(Comment.joins(:person).ransack(article_title_cont: 'aven',s: 'persons_salary desc').result).to eq(comments)
+            expect(Comment.joins(:person).ransack(article_title_cont: 'aven', s: 'persons_salary desc').result).to eq(comments)
           end
 
           it 'allows sort by `only_sort` field' do
@@ -538,7 +544,6 @@ module Ransack
                 quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
-
 
           it 'should allow passing ransacker arguments to a ransacker' do
             s = Person.ransack(

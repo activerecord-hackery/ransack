@@ -6,6 +6,8 @@ when 'mysql', 'mysql2'
   ActiveRecord::Base.establish_connection(
     adapter:  'mysql2',
     database: 'ransack',
+    username: ENV.fetch("MYSQL_USERNAME") { "root" },
+    password: ENV.fetch("MYSQL_PASSWORD") { "" },
     encoding: 'utf8'
   )
 when 'pg', 'postgres', 'postgresql'
@@ -85,7 +87,6 @@ class Person < ActiveRecord::Base
       )
   end
 
-
   ransacker :sql_literal_id do
     Arel.sql('people.id')
   end
@@ -107,7 +108,6 @@ class Person < ActiveRecord::Base
     .squish
     Arel.sql(query)
   end
-
 
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin

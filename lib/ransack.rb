@@ -1,13 +1,13 @@
 require 'active_support/core_ext'
 require 'ransack/configuration'
 require 'ransack/adapters'
-require 'polyamorous/polyamorous.rb'
+require 'polyamorous/polyamorous'
 
 Ransack::Adapters.object_mapper.require_constants
 
 module Ransack
   extend Configuration
-  class UntraversableAssociationError < StandardError; end;
+  class UntraversableAssociationError < StandardError; end
 end
 
 Ransack.configure do |config|

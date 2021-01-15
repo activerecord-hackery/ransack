@@ -14,7 +14,7 @@ rails_version = case rails
                   rails
                 end
 
-gem 'faker', '~> 0.9.5'
+gem 'faker', '~> 2.0'
 gem 'sqlite3', ::Gem::Version.new(rails_version) >= ::Gem::Version.new('6-0-stable') ? '~> 1.4.1' : '~> 1.3.3'
 gem 'pg', '~> 1.0'
 gem 'pry', '~> 0.12.2'
@@ -49,3 +49,5 @@ group :test do
   gem 'rspec', '~> 3'
   gem 'simplecov', :require => false
 end
+
+gem 'rubocop', require: false

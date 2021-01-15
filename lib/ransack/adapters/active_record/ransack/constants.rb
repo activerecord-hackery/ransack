@@ -97,7 +97,7 @@ module Ransack
         arel_predicate: proc { |v| v ? EQ : NOT_EQ },
         compounds: false,
         type: :boolean,
-        validator: proc { |v| BOOLEAN_VALUES.include?(v)},
+        validator: proc { |v| BOOLEAN_VALUES.include?(v) },
         formatter: proc { |v| nil }
         }
       ],

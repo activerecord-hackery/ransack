@@ -1,7 +1,24 @@
 # Change Log
 
+* Add `ActiveRecord::Base.ransack!` which raises error if passed unknown condition
+
+  *Aaron Lipman*
+
+* Drop support for rubies under 2.5. PR #1189
+
+## 2.4.0 - 2020-11-27
+
+*
+  PR []()
+
+* Support ActiveRecord 6.1.0.rc1.
+  PR [1172](https://github.com/activerecord-hackery/ransack/pull/1172)
+
 * Fix for ActiveRecord 5.2.4 (note security fix in 5.2.4.2 for ActiveView's escape_javascript CVE-2020-5267 for all earlier versions)
 * Fix issue where negative predicates with associated_collection does not use the correct primary key for subquery.
+
+* Drop support for ActiveRecord older than 5.2.4.
+  PR [1166](https://github.com/activerecord-hackery/ransack/pull/1166)
 
 ## 2.3.2 - 2020-01-11
 

@@ -422,7 +422,7 @@ module Ransack
     context "defining custom predicates" do
       describe "with 'not_in' arel predicate" do
         before do
-          Ransack.configure {|c| c.add_predicate "not_in_csv", arel_predicate: "not_in", formatter: proc { |v| v.split(",") } }
+          Ransack.configure { |c| c.add_predicate "not_in_csv", arel_predicate: "not_in", formatter: proc { |v| v.split(",") } }
         end
 
         it 'generates a value IS NOT NULL query' do
