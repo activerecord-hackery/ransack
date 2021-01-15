@@ -341,7 +341,7 @@ module Ransack
       it 'evaluates subquery with the correct primary_key when using negative predicates' do
         s = Search.new(
           Person,
-          articles_tags_id_not_in: [1,2]
+          articles_tags_id_not_in: [1, 2]
         ).result
         real_query = remove_quotes_and_backticks(s.to_sql)
         expect(real_query).to include('WHERE people.id NOT IN (SELECT people.id')
@@ -351,7 +351,7 @@ module Ransack
         Ransack.configure { |config| config.remove_association_no_negative_assoc = false }
         s = Search.new(
           Article,
-          comments_person_id_not_in: [1,2]
+          comments_person_id_not_in: [1, 2]
         ).result
         expect{ s.count('comments.id') }.to_not raise_error
       end
@@ -362,7 +362,7 @@ module Ransack
           Article,
           comments_person_id_not_in: [1]
         ).result
-        expect{s.count('comments.id')}.to raise_error(ActiveRecord::StatementInvalid)
+        expect{ s.count('comments.id') }.to raise_error(ActiveRecord::StatementInvalid)
       end
 
       it 'evaluates conditions for multiple `belongs_to` associations to the same table contextually' do
