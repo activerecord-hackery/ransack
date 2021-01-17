@@ -16,7 +16,7 @@ jobs:
           - 2.6.6
     env:
       DB: sqlite3
-      RAILS: master
+      RAILS: main
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby
@@ -39,7 +39,7 @@ jobs:
           - 2.6.6
     env:
       DB: mysql
-      RAILS: master
+      RAILS: main
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: root
     steps:
@@ -71,7 +71,7 @@ jobs:
           - 2.6.6
     env:
       DB: postgres
-      RAILS: master
+      RAILS: main
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: 127.0.0.1
