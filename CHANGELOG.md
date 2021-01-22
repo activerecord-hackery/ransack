@@ -1,15 +1,14 @@
 # Change Log
 
+* Drop support for rubies under 2.5. PR #1189
+
+## 2.4.1 - 2020-12-21
+
 * Add `ActiveRecord::Base.ransack!` which raises error if passed unknown condition
 
   *Aaron Lipman*
 
-* Drop support for rubies under 2.5. PR #1189
-
 ## 2.4.0 - 2020-11-27
-
-*
-  PR []()
 
 * Support ActiveRecord 6.1.0.rc1.
   PR [1172](https://github.com/activerecord-hackery/ransack/pull/1172)
