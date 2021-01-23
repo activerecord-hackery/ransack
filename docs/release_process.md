@@ -13,4 +13,4 @@ rake build
 rake release
 ```
 
-![Create a Release](../img/create_release.png)
+![Create a Release](img/create_release.png)
