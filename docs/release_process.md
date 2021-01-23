@@ -1,0 +1,16 @@
+## Release Process
+
+*For maintainers of Ransack.*
+
+To release a new version of Ransack and publish it to RubyGems, take the following steps:
+
+- Create a new release, marked `Prerelease`.
+- Update the versions file to the new release, commit and push to `master`.
+- From the terminal, run the following commands
+
+```bash
+rake build
+rake release
+```
+
+![Create a Release](../img/create_release.png)
