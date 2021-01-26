@@ -123,7 +123,7 @@ module Ransack
           end
 
           it 'raises exception if ransack! called with unknown condition' do
-            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error
+            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(ArgumentError)
           end
 
           it 'does not modify the parameters' do
