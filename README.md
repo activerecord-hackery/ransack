@@ -265,6 +265,35 @@ end
 
 See this feature: https://www.postgresql.org/docs/13/queries-order.html
 
+#### Case Insensitive Sorting in PostgreSQL
+
+In order to request PostgresSQL to do a case insensitive sort for all string columns of a model at once, Ransack can be extended by using this approach:
+
+```ruby
+module RansackObject
+
+  def self.included(base)
+    base.columns.each do |column|
+      if column.type == :string
+        base.ransacker column.name.to_sym, type: :string do
+          Arel.sql("lower(#{base.table_name}.#{column.name})")
+        end
+      end
+    end
+  end
+end
+```
+
+```ruby
+class UserWithManyAttributes < ActiveRecord::Base
+  include RansackObject
+end
+```
+
+If this approach is taken, it is advisible to [add a functional index](https://www.postgresql.org/docs/13/citext.html).
+
+This was originally asked in [a Ransack issue](https://github.com/activerecord-hackery/ransack/issues/1201) and a solution was found on [Stack Overflow](https://stackoverflow.com/a/34677378). 
+
 ### Advanced Mode
 
 "Advanced" searches (ab)use Rails' nested attributes functionality in order to
