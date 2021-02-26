@@ -15,10 +15,11 @@ module Ransack
              :translate, :to => :base
 
     def initialize(object, params = {}, options = {})
+      strip_whitespace = options.fetch(:strip_whitespace, Ransack.options[:strip_whitespace])
       params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
       if params.is_a? Hash
         params = params.dup
-        params = params.transform_values { |v| v.is_a?(String) ? v.strip : v }
+        params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
         params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false } }
       else
         params = {}

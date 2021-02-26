@@ -34,7 +34,8 @@ module Ransack
       :down_arrow => '&#9650;'.freeze,
       :default_arrow => nil,
       :sanitize_scope_args => true,
-      :postgres_fields_sort_option => nil
+      :postgres_fields_sort_option => nil,
+      :strip_whitespace => true
     }
 
     def configure
@@ -168,6 +169,19 @@ module Ransack
     #
     def hide_sort_order_indicators=(boolean)
       self.options[:hide_sort_order_indicators] = boolean
+    end
+
+    # By default, Ransack displays strips all whitespace when searching for a string.
+    # The default may be globally changed in an initializer file like
+    # `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Enable whitespace stripping for string searches
+    #   config.strip_whitespace = true
+    # end
+    #
+    def strip_whitespace=(boolean)
+      self.options[:strip_whitespace] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

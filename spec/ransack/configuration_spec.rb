@@ -45,6 +45,20 @@ module Ransack
       Ransack.options = default
     end
 
+    it 'should have default value for strip_whitespace' do
+      expect(Ransack.options[:strip_whitespace]).to eq true
+    end
+
+    it 'changes default search key parameter' do
+      default = Ransack.options.clone
+
+      Ransack.configure { |c| c.strip_whitespace = false }
+
+      expect(Ransack.options[:strip_whitespace]).to eq false
+
+      Ransack.options = default
+    end
+
     it 'should have default values for arrows' do
       expect(Ransack.options[:up_arrow]).to eq '&#9660;'
       expect(Ransack.options[:down_arrow]).to eq '&#9650;'
