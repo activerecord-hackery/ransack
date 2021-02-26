@@ -71,17 +71,32 @@ def index
 end
 ```
 
-##### Default search parameter
+##### Default search options
+
+**Search parameter**
 
 Ransack uses a default `:q` param key for search params. This may be changed by
 setting the `search_key` option in a Ransack initializer file (typically
 `config/initializers/ransack.rb`):
 
-```
+```ruby
 Ransack.configure do |c|
   # Change default search parameter key name.
   # Default key name is :q
   c.search_key = :query
+end
+```
+
+**String search**
+
+After version 2.4.0 when searching a string query Ransack by default strips all whitespace around the query string.
+This may be disabled by setting the `strip_whitespace` option in a Ransack initializer file:
+
+```ruby
+Ransack.configure do |c|
+  # Change whitespace stripping behaviour.
+  # Default is true
+  c.strip_whitespace = false
 end
 ```
 

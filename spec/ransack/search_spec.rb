@@ -20,10 +20,42 @@ module Ransack
         Search.new(Person, name_eq: 'foobar')
       end
 
-      it 'strip leading & trailing whitespace before building' do
-        expect_any_instance_of(Search).to receive(:build)
-        .with({ 'name_eq' => 'foobar' })
-        Search.new(Person, name_eq: '   foobar     ')
+      context 'whitespace stripping' do
+        context 'when whitespace_strip option is true' do
+          before do
+            Ransack.configure { |c| c.strip_whitespace = true }
+          end
+
+          it 'strips leading & trailing whitespace before building' do
+            expect_any_instance_of(Search).to receive(:build)
+            .with({ 'name_eq' => 'foobar' })
+            Search.new(Person, name_eq: '   foobar     ')
+          end
+        end
+
+        context 'when whitespace_strip option is false' do
+          before do
+            Ransack.configure { |c| c.strip_whitespace = false }
+          end
+
+          it 'doesn\'t strip leading & trailing whitespace before building' do
+            expect_any_instance_of(Search).to receive(:build)
+            .with({ 'name_eq' => '   foobar     ' })
+            Search.new(Person, name_eq: '   foobar     ')
+          end
+        end
+
+        it 'strips leading & trailing whitespace when strip_whitespace search parameter is true' do
+          expect_any_instance_of(Search).to receive(:build)
+          .with({ 'name_eq' => 'foobar' })
+          Search.new(Person, { name_eq: '   foobar     ' }, { strip_whitespace: true })
+        end
+
+        it 'doesn\'t strip leading & trailing whitespace when strip_whitespace search parameter is false' do
+          expect_any_instance_of(Search).to receive(:build)
+          .with({ 'name_eq' => '   foobar     ' })
+          Search.new(Person, { name_eq: '   foobar     ' }, { strip_whitespace: false })
+        end
       end
 
       it 'removes empty suffixed conditions before building' do
