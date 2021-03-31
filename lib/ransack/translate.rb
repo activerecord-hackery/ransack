@@ -32,6 +32,7 @@ module Ransack
         defaults = base_ancestors.map do |klass|
           "ransack.attributes.#{i18n_key(klass)}.#{original_name}".to_sym
         end
+        defaults << options.delete(:default) if options[:default]
 
         translated_names = attribute_names.map do |name|
           attribute_name(context, name, options[:include_associations])
@@ -48,7 +49,6 @@ module Ransack
           defaults << "%{attributes}".freeze
         end
 
-        defaults << options.delete(:default) if options[:default]
         options.reverse_merge! count: 1, default: defaults
         I18n.translate(defaults.shift, **options.merge(interpolations))
       end
