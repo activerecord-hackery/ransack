@@ -305,7 +305,7 @@ class UserWithManyAttributes < ActiveRecord::Base
 end
 ```
 
-If this approach is taken, it is advisible to [add a functional index](https://www.postgresql.org/docs/13/citext.html).
+If this approach is taken, it is advisable to [add a functional index](https://www.postgresql.org/docs/13/citext.html).
 
 This was originally asked in [a Ransack issue](https://github.com/activerecord-hackery/ransack/issues/1201) and a solution was found on [Stack Overflow](https://stackoverflow.com/a/34677378). 
 
