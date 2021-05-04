@@ -763,7 +763,7 @@ Article.ransack!(unknown_attr_eq: 'Ernie')
 # ArgumentError: Invalid search term unknown_attr_eq
 ```
 
-This is equivilent to the `ignore_unknown_conditions` configuration option,
+This is equivalent to the `ignore_unknown_conditions` configuration option,
 except it may be applied on a case-by-case basis.
 
 ### Using Scopes/Class Methods
