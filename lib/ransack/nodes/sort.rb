@@ -31,8 +31,8 @@ module Ransack
       end
 
       def name=(name)
-        @name = name
-        context.bind(self, name)
+        @name = context.ransackable_alias(name) || name
+        context.bind(self, @name)
       end
 
       def dir=(dir)

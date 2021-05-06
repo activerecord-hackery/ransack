@@ -465,6 +465,15 @@ module Ransack
         expect(sort.dir).to eq 'desc'
       end
 
+      it 'creates sorts based on a single alias' do
+        @s.sorts = 'daddy desc'
+        expect(@s.sorts.size).to eq(1)
+        sort = @s.sorts.first
+        expect(sort).to be_a Nodes::Sort
+        expect(sort.name).to eq 'parent_name'
+        expect(sort.dir).to eq 'desc'
+      end
+
       it 'creates sorts based on a single attribute and uppercase direction' do
         @s.sorts = 'id DESC'
         expect(@s.sorts.size).to eq(1)
