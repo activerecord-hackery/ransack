@@ -78,8 +78,8 @@ module Ransack
         attrs = opts[:attributes] || 1
         vals = opts[:values] || 1
         condition = Condition.new(@context)
-        attrs.times { condition.build_attribute }
-        vals.times { condition.build_value }
+        attrs.times { condition.build_attribute(name = opts[:name]) }
+        vals.times { condition.build_value(opts[:value]) }
         condition
       end
 
