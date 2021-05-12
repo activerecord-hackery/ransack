@@ -78,6 +78,16 @@ module Ransack
               expect(s.result.to_sql).to (include 'active = 1')
             end
 
+            it 'applies scopes that define string SQL joins' do
+              allow(Article)
+                .to receive(:ransackable_scopes)
+                .and_return([:latest_comment_cont])
+
+              # Including a negative condition to test removing the scope
+              s = Search.new(Article, notes_note_not_eq: 'Test', latest_comment_cont: 'Test')
+              expect(s.result.to_sql).to include 'latest_comment'
+            end
+
             context "with sanitize_custom_scope_booleans set to false" do
               before(:all) do
                 Ransack.configure { |c| c.sanitize_custom_scope_booleans = false }

@@ -139,6 +139,7 @@ module Ransack
             stashed.eql?(association)
           }
           @object.joins_values.delete_if { |jd|
+            jd.instance_variables.include?(:@join_root) &&
             jd.instance_variable_get(:@join_root).children.map(&:object_id) == [association.object_id]
           }
         end
