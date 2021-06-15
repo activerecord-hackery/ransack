@@ -314,7 +314,11 @@ module Ransack
           end
 
           it 'should function correctly with a multi-parameter attribute' do
-            ::ActiveRecord::Base.default_timezone = :utc
+            if ::ActiveRecord::VERSION::MAJOR >= 7
+              ::ActiveRecord.default_timezone = :utc
+            else
+              ::ActiveRecord::Base.default_timezone = :utc
+            end
             Time.zone = 'UTC'
 
             date = Date.current
