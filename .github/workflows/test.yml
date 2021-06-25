@@ -12,7 +12,7 @@ jobs:
       matrix:
         rails:
           - v6.1.4
-          - v6.0.3
+          - v6.0.4
           - 6-0-stable
           - 5-2-stable
           - v5.2.4
@@ -46,7 +46,7 @@ jobs:
       matrix:
         rails:
           - v6.1.4
-          - v6.0.3
+          - v6.0.4
           - 6-0-stable
           - 5-2-stable
           - v5.2.4
@@ -89,7 +89,7 @@ jobs:
       matrix:
         rails:
           - v6.1.4
-          - v6.0.3
+          - v6.0.4
           - 6-0-stable
           - 5-2-stable
           - v5.2.4
