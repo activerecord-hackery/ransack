@@ -44,12 +44,12 @@ module Ransack
 
             it 'applies stringy boolean scopes with true value in an array' do
               s = Person.ransack('of_age' => ['true'])
-              expect(s.result.to_sql).to (include 'age >= 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{(age >= '18')} : 'age >= 18')
             end
 
             it 'applies stringy boolean scopes with false value in an array' do
               s = Person.ransack('of_age' => ['false'])
-              expect(s.result.to_sql).to (include 'age < 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age < '18'} : 'age < 18')
             end
 
             it 'ignores unlisted scopes' do
@@ -69,12 +69,12 @@ module Ransack
 
             it 'passes values to scopes' do
               s = Person.ransack('over_age' => 18)
-              expect(s.result.to_sql).to (include 'age > 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '18'} : 'age > 18')
             end
 
             it 'chains scopes' do
               s = Person.ransack('over_age' => 18, 'active' => true)
-              expect(s.result.to_sql).to (include 'age > 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '18'} : 'age > 18')
               expect(s.result.to_sql).to (include 'active = 1')
             end
 
@@ -89,12 +89,12 @@ module Ransack
 
               it 'passes true values to scopes' do
                 s = Person.ransack('over_age' => 1)
-                expect(s.result.to_sql).to (include 'age > 1')
+                expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '1'} : 'age > 1')
               end
 
               it 'passes false values to scopes'  do
                 s = Person.ransack('over_age' => 0)
-                expect(s.result.to_sql).to (include 'age > 0')
+                expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '0'} : 'age > 0')
               end
             end
 
@@ -107,12 +107,12 @@ module Ransack
 
               it 'passes true values to scopes' do
                 s = Person.ransack('over_age' => 1)
-                expect(s.result.to_sql).to (include 'age > 1')
+                expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '1'} : 'age > 1')
               end
 
               it 'passes false values to scopes'  do
                 s = Person.ransack('over_age' => 0)
-                expect(s.result.to_sql).to (include 'age > 0')
+                expect(s.result.to_sql).to (include  rails7_and_mysql ? %q{age > '0'} : 'age > 0')
               end
             end
 
@@ -690,6 +690,10 @@ module Ransack
           it { should eq [] }
         end
 
+        private
+        def rails7_and_mysql
+          ::ActiveRecord::VERSION::MAJOR >= 7 && ENV['DB'] == 'mysql'
+        end
       end
     end
   end
