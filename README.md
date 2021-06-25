@@ -282,7 +282,7 @@ See this feature: https://www.postgresql.org/docs/13/queries-order.html
 
 #### Case Insensitive Sorting in PostgreSQL
 
-In order to request PostgresSQL to do a case insensitive sort for all string columns of a model at once, Ransack can be extended by using this approach:
+In order to request PostgreSQL to do a case insensitive sort for all string columns of a model at once, Ransack can be extended by using this approach:
 
 ```ruby
 module RansackObject

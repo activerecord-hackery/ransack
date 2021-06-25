@@ -200,7 +200,7 @@
     ignored when block parameter is specified.
     PR [#818](https://github.com/activerecord-hackery/ransack/pull/818).
 
-*   No need pass some arugments to JoinAssociation#join_constraints in Rails 5.1.
+*   No need pass some arguments to JoinAssociation#join_constraints in Rails 5.1.
     PR [#814](https://github.com/activerecord-hackery/ransack/pull/814).
     Fixes [#807](https://github.com/activerecord-hackery/ransack/issues/807).
     Reference [rails/rails#28267](https://github.com/rails/rails/pull/28267)
