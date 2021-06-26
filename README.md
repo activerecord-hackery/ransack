@@ -278,6 +278,14 @@ Ransack.configure do |c|
 end
 ```
 
+To treat nulls as having the lowest or highest value respectively. To force nulls to always be first or last, use
+
+```rb
+Ransack.configure do |c|
+  c.postgres_fields_sort_option = :nulls_always_first # or :nulls_always_last
+end
+```
+
 See this feature: https://www.postgresql.org/docs/13/queries-order.html
 
 #### Case Insensitive Sorting in PostgreSQL

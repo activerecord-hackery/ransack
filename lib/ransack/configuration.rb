@@ -149,7 +149,7 @@ module Ransack
     # User may want to configure it like this:
     #
     # Ransack.configure do |c|
-    #   c.postgres_fields_sort_option = :nulls_first # or :nulls_last
+    #   c.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
     # end
     #
     # See this feature: https://www.postgresql.org/docs/13/queries-order.html

@@ -605,6 +605,18 @@ module Ransack
         s = Search.new(Person, s: 'doubled_name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS FIRST"
 
+        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_always_first }
+        s = Search.new(Person, s: 'doubled_name asc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS FIRST"
+        s = Search.new(Person, s: 'doubled_name desc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS FIRST"
+
+        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_always_last }
+        s = Search.new(Person, s: 'doubled_name asc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS LAST"
+        s = Search.new(Person, s: 'doubled_name desc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS LAST"
+
         Ransack.options = default
       end
     end
