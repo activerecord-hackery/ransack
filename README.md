@@ -475,6 +475,25 @@ query parameters in your URLs.
 <% end %>
 ```
 
+You can also use `ransack_alias` for sorting.
+
+```ruby
+class Post < ActiveRecord::Base
+  belongs_to :author
+
+  # Abbreviate :author_first_name to :author
+  ransack_alias :author, :author_first_name
+end
+```
+
+Now, you can use `:author` instead of `:author_first_name` in a `sort_link`.
+
+```erb
+<%= sort_link(@q, :author) %>
+```
+
+Note that using `:author_first_name_or_author_last_name_cont` would produce an invalid sql query. In those cases, Ransack ignores the sorting clause.
+
 ### Search Matchers
 
 List of all possible predicates

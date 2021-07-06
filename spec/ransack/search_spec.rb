@@ -483,82 +483,109 @@ module Ransack
         expect(sort.dir).to eq 'asc'
       end
 
-      it 'creates sorts based on multiple attributes/directions in array format' do
-        @s.sorts = ['id desc', { name: 'name', dir: 'asc' }]
+      it 'creates sorts based on a single alias/direction' do
+        @s.sorts = 'daddy desc'
+        expect(@s.sorts.size).to eq(1)
+        sort = @s.sorts.first
+        expect(sort).to be_a Nodes::Sort
+        expect(sort.name).to eq 'parent_name'
+        expect(sort.dir).to eq 'desc'
+      end
+
+      it 'creates sorts based on a single alias and uppercase direction' do
+        @s.sorts = 'daddy DESC'
+        expect(@s.sorts.size).to eq(1)
+        sort = @s.sorts.first
+        expect(sort).to be_a Nodes::Sort
+        expect(sort.name).to eq 'parent_name'
+        expect(sort.dir).to eq 'desc'
+      end
+
+      it 'creates sorts based on a single alias and without direction' do
+        @s.sorts = 'daddy'
+        expect(@s.sorts.size).to eq(1)
+        sort = @s.sorts.first
+        expect(sort).to be_a Nodes::Sort
+        expect(sort.name).to eq 'parent_name'
+        expect(sort.dir).to eq 'asc'
+      end
+
+      it 'creates sorts based on attributes, alias and directions in array format' do
+        @s.sorts = ['id desc', { name: 'daddy', dir: 'asc' }]
         expect(@s.sorts.size).to eq(2)
         sort1, sort2 = @s.sorts
         expect(sort1).to be_a Nodes::Sort
         expect(sort1.name).to eq 'id'
         expect(sort1.dir).to eq 'desc'
         expect(sort2).to be_a Nodes::Sort
-        expect(sort2.name).to eq 'name'
+        expect(sort2.name).to eq 'parent_name'
         expect(sort2.dir).to eq 'asc'
       end
 
-      it 'creates sorts based on multiple attributes and uppercase directions in array format' do
-        @s.sorts = ['id DESC', { name: 'name', dir: 'ASC' }]
+      it 'creates sorts based on attributes, alias and uppercase directions in array format' do
+        @s.sorts = ['id DESC', { name: 'daddy', dir: 'ASC' }]
         expect(@s.sorts.size).to eq(2)
         sort1, sort2 = @s.sorts
         expect(sort1).to be_a Nodes::Sort
         expect(sort1.name).to eq 'id'
         expect(sort1.dir).to eq 'desc'
         expect(sort2).to be_a Nodes::Sort
-        expect(sort2.name).to eq 'name'
+        expect(sort2.name).to eq 'parent_name'
         expect(sort2.dir).to eq 'asc'
       end
 
-      it 'creates sorts based on multiple attributes and different directions
+      it 'creates sorts based on attributes, alias and different directions
         in array format' do
-        @s.sorts = ['id DESC', { name: 'name', dir: nil }]
+        @s.sorts = ['id DESC', { name: 'daddy', dir: nil }]
         expect(@s.sorts.size).to eq(2)
         sort1, sort2 = @s.sorts
         expect(sort1).to be_a Nodes::Sort
         expect(sort1.name).to eq 'id'
         expect(sort1.dir).to eq 'desc'
         expect(sort2).to be_a Nodes::Sort
-        expect(sort2.name).to eq 'name'
+        expect(sort2.name).to eq 'parent_name'
         expect(sort2.dir).to eq 'asc'
       end
 
-      it 'creates sorts based on multiple attributes/directions in hash format' do
+      it 'creates sorts based on attributes, alias and directions in hash format' do
         @s.sorts = {
           '0' => { name: 'id', dir: 'desc' },
-          '1' => { name: 'name', dir: 'asc' }
+          '1' => { name: 'daddy', dir: 'asc' }
         }
         expect(@s.sorts.size).to eq(2)
         expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
         id_sort = @s.sorts.detect { |s| s.name == 'id' }
-        name_sort = @s.sorts.detect { |s| s.name == 'name' }
+        daddy_sort = @s.sorts.detect { |s| s.name == 'parent_name' }
         expect(id_sort.dir).to eq 'desc'
-        expect(name_sort.dir).to eq 'asc'
+        expect(daddy_sort.dir).to eq 'asc'
       end
 
-      it 'creates sorts based on multiple attributes and uppercase directions
+      it 'creates sorts based on attributes, alias and uppercase directions
         in hash format' do
         @s.sorts = {
           '0' => { name: 'id', dir: 'DESC' },
-          '1' => { name: 'name', dir: 'ASC' }
+          '1' => { name: 'daddy', dir: 'ASC' }
         }
         expect(@s.sorts.size).to eq(2)
         expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
         id_sort = @s.sorts.detect { |s| s.name == 'id' }
-        name_sort = @s.sorts.detect { |s| s.name == 'name' }
+        daddy_sort = @s.sorts.detect { |s| s.name == 'parent_name' }
         expect(id_sort.dir).to eq 'desc'
-        expect(name_sort.dir).to eq 'asc'
+        expect(daddy_sort.dir).to eq 'asc'
       end
 
-      it 'creates sorts based on multiple attributes and different directions
+      it 'creates sorts based on attributes, alias and different directions
         in hash format' do
         @s.sorts = {
           '0' => { name: 'id', dir: 'DESC' },
-          '1' => { name: 'name', dir: nil }
+          '1' => { name: 'daddy', dir: nil }
         }
         expect(@s.sorts.size).to eq(2)
         expect(@s.sorts).to be_all { |s| Nodes::Sort === s }
         id_sort = @s.sorts.detect { |s| s.name == 'id' }
-        name_sort = @s.sorts.detect { |s| s.name == 'name' }
+        daddy_sort = @s.sorts.detect { |s| s.name == 'parent_name' }
         expect(id_sort.dir).to eq 'desc'
-        expect(name_sort.dir).to eq 'asc'
+        expect(daddy_sort.dir).to eq 'asc'
       end
 
       it 'overrides existing sort' do
