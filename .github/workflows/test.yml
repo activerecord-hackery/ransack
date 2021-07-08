@@ -17,14 +17,14 @@ jobs:
           - 5-2-stable
           - v5.2.4
         ruby:
-          - 3.0.1
-          - 2.7.3
-          - 2.6.6
+          - 3.0.2
+          - 2.7.4
+          - 2.6.7
         exclude:
           - rails:  v5.2.4
-            ruby:   3.0.1
+            ruby:   3.0.2
           - rails:  5-2-stable
-            ruby:   3.0.1
+            ruby:   3.0.2
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -51,14 +51,14 @@ jobs:
           - 5-2-stable
           - v5.2.4
         ruby:
-          - 3.0.1
-          - 2.7.3
-          - 2.6.6
+          - 3.0.2
+          - 2.7.4
+          - 2.6.7
         exclude:
           - rails:  v5.2.4
-            ruby:   3.0.1
+            ruby:   3.0.2
           - rails:  5-2-stable
-            ruby:   3.0.1
+            ruby:   3.0.2
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -94,14 +94,14 @@ jobs:
           - 5-2-stable
           - v5.2.4
         ruby:
-          - 3.0.1
-          - 2.7.3
-          - 2.6.6
+          - 3.0.2
+          - 2.7.4
+          - 2.6.7
         exclude:
           - rails:  v5.2.4
-            ruby:   3.0.1
+            ruby:   3.0.2
           - rails:  5-2-stable
-            ruby:   3.0.1
+            ruby:   3.0.2
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
@@ -144,7 +144,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0.1
+          ruby-version: 3.0.2
       - name: Install dependencies
         run: bundle install
       - name: Run bug report templates
