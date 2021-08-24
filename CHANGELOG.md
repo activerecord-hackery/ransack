@@ -2,6 +2,9 @@
 
 * Drop support for rubies under 2.5. PR #1189
 
+* Have casted array predicates type checked to Arel::Nodes::Casted fixing non-casted array predicates.
+  PR [1246](https://github.com/activerecord-hackery/ransack/pull/1246)
+
 ## 2.4.1 - 2020-12-21
 
 * Add `ActiveRecord::Base.ransack!` which raises error if passed unknown condition
