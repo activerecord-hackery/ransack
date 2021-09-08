@@ -332,8 +332,6 @@ module Ransack
       end
 
       it 'use appropriate table alias' do
-        skip "Rails 6 regressed here, but it's fixed in 6-0-stable since https://github.com/rails/rails/commit/f9ba52477ca288e7effa5f6794ae3df3f4e982bc" if ENV["RAILS"] == "v6.0.3"
-
         s = Search.new(Person, {
           name_eq: "person_name_query",
           articles_title_eq: "person_article_title_query",
