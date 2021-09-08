@@ -3,6 +3,19 @@ require 'spec_helper'
 module Ransack
   module Nodes
     describe Condition do
+      context 'bug report #1245' do
+        it 'preserves tuple behavior' do
+          ransack_hash = {
+              m: 'and',
+              g: [
+                { title_type_in: ['["title 1", ""]'] }
+              ]
+            }
+
+          sql = Article.ransack(ransack_hash).result.to_sql
+          expect(sql).to include("IN (('title 1', ''))")
+        end
+      end
 
       context 'with an alias' do
         subject {

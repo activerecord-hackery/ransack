@@ -138,6 +138,29 @@ class Article < ActiveRecord::Base
   alias_attribute :content, :body
 
   default_scope { where("'default_scope' = 'default_scope'") }
+
+  ransacker :title_type, formatter: lambda { |tuples|
+    title, type = JSON.parse(tuples)
+    Arel::Nodes::Grouping.new(
+      [
+        Arel::Nodes.build_quoted(title),
+        Arel::Nodes.build_quoted(type)
+      ]
+    )
+  } do |_parent|
+    articles = Article.arel_table
+    Arel::Nodes::Grouping.new(
+      %i[title type].map do |field|
+        Arel::Nodes::NamedFunction.new(
+          'COALESCE',
+          [
+            Arel::Nodes::NamedFunction.new('TRIM', [articles[field]]),
+            Arel::Nodes.build_quoted('')
+          ]
+        )
+      end
+    )
+  end
 end
 
 class StoryArticle < Article
