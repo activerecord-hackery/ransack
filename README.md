@@ -11,9 +11,7 @@ Ransack enables the creation of both
 for your Ruby on Rails application
 ([demo source code here](https://github.com/activerecord-hackery/ransack_demo)).
 If you're looking for something that simplifies query generation at the model
-or controller layer, you're probably not looking for Ransack (or MetaSearch,
-for that matter). Try [Squeel](https://github.com/activerecord-hackery/squeel)
-instead.
+or controller layer, you're probably not looking for Ransack.
 
 ## Getting started
 
