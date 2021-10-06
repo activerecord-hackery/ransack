@@ -108,7 +108,7 @@ module Ransack
       alias :g= :groupings=
 
       def method_missing(method_id, *args)
-        method_name = method_id.to_s
+        method_name = method_id.to_s.dup
         writer = method_name.sub!(/\=$/, ''.freeze)
         if attribute_method?(method_name)
           if writer

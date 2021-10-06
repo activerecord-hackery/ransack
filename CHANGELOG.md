@@ -1,6 +1,58 @@
 # Change Log
 
-## Unreleased
+* Drop support for rubies under 2.5. PR #1189
+
+* Have casted array predicates type checked to Arel::Nodes::Casted fixing non-casted array predicates.
+  PR [1246](https://github.com/activerecord-hackery/ransack/pull/1246)
+
+## 2.4.1 - 2020-12-21
+
+* Add `ActiveRecord::Base.ransack!` which raises error if passed unknown condition
+
+  *Aaron Lipman*
+
+## 2.4.0 - 2020-11-27
+
+* Support ActiveRecord 6.1.0.rc1.
+  PR [1172](https://github.com/activerecord-hackery/ransack/pull/1172)
+
+* Fix for ActiveRecord 5.2.4 (note security fix in 5.2.4.2 for ActiveView's escape_javascript CVE-2020-5267 for all earlier versions)
+
+* Drop support for ActiveRecord older than 5.2.4.
+  PR [1166](https://github.com/activerecord-hackery/ransack/pull/1166)
+
+## 2.3.2 - 2020-01-11
+
+* Breakfix to bump Polyamorous
+
+## 2.3.1 - 2020-01-11
+
+* Drop support for Active Record 5.0, 5.1, and 5.2.0.
+  PR [#1073](https://github.com/activerecord-hackery/ransack/pull/1073)
+
+* Drop support for rubies under 2.3.
+  PR [#1070](https://github.com/activerecord-hackery/ransack/pull/1070)
+
+  ... and others
+
+## 2.3.0 - 2019-08-18
+
+* Arabic translations PR [979](https://github.com/activerecord-hackery/ransack/pull/979)
+
+* Rails 6 PR [1027](https://github.com/activerecord-hackery/ransack/pull/1027)
+ *vrodokanakis*
+
+* Make polyamorous a separate gem PR [1002](https://github.com/activerecord-hackery/ransack/pull/1002)
+
+* Catalan translations PR[1007](https://github.com/activerecord-hackery/ransack/pull/1007)
+ *roslavych*
+
+* Don't escape period characters with wildcard searches in mysql2 PR [1013](https://github.com/activerecord-hackery/ransack/pull/1013)
+ *daflip*
+
+* Farsi translations PR [1030](https://github.com/activerecord-hackery/ransack/pull/1030)
+
+* Finnish translations PR [1049](https://github.com/activerecord-hackery/ransack/pull/1049)
 
 * Fix wrong table alias when using nested join. for ActiveRecord >= 5.2
   PR [374](https://github.com/activerecord-hackery/ransack/pull/374)
@@ -151,7 +203,7 @@
     ignored when block parameter is specified.
     PR [#818](https://github.com/activerecord-hackery/ransack/pull/818).
 
-*   No need pass some arugments to JoinAssociation#join_constraints in Rails 5.1.
+*   No need pass some arguments to JoinAssociation#join_constraints in Rails 5.1.
     PR [#814](https://github.com/activerecord-hackery/ransack/pull/814).
     Fixes [#807](https://github.com/activerecord-hackery/ransack/issues/807).
     Reference [rails/rails#28267](https://github.com/rails/rails/pull/28267)

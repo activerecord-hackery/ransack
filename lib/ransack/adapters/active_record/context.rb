@@ -1,17 +1,10 @@
 require 'ransack/context'
-require 'polyamorous'
+require 'polyamorous/polyamorous'
 
 module Ransack
   module Adapters
     module ActiveRecord
       class Context < ::Ransack::Context
-
-        def initialize(object, options = {})
-          super
-          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2
-            @arel_visitor = @engine.connection.visitor
-          end
-        end
 
         def relation_for(object)
           object.all
@@ -49,6 +42,17 @@ module Ransack
               if scope_or_sort.is_a?(Symbol)
                 relation = relation.send(scope_or_sort)
               else
+                case Ransack.options[:postgres_fields_sort_option]
+                when :nulls_first
+                  scope_or_sort = scope_or_sort.direction == :asc ? Arel.sql("#{scope_or_sort.to_sql} NULLS FIRST") : Arel.sql("#{scope_or_sort.to_sql} NULLS LAST")
+                when :nulls_last
+                  scope_or_sort = scope_or_sort.direction == :asc ? Arel.sql("#{scope_or_sort.to_sql} NULLS LAST") : Arel.sql("#{scope_or_sort.to_sql} NULLS FIRST")
+                when :nulls_always_first
+                  scope_or_sort = Arel.sql("#{scope_or_sort.to_sql} NULLS FIRST")
+                when :nulls_always_last
+                  scope_or_sort = Arel.sql("#{scope_or_sort.to_sql} NULLS LAST")
+                end
+
                 relation = relation.order(scope_or_sort)
               end
             end
@@ -104,10 +108,11 @@ module Ransack
         # JoinDependency to track table aliases.
         #
         def join_sources
-          base, joins =
-          if ::ActiveRecord::VERSION::STRING > Constants::RAILS_5_2_0
+          base, joins = begin
             alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
-            constraints   = if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+            constraints   = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1)
+              @join_dependency.join_constraints(@object.joins_values, alias_tracker, @object.references_values)
+            elsif ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
               @join_dependency.join_constraints(@object.joins_values, alias_tracker)
             else
               @join_dependency.join_constraints(@object.joins_values, @join_type, alias_tracker)
@@ -117,13 +122,7 @@ module Ransack
               Arel::SelectManager.new(@object.table),
               constraints
             ]
-          else
-            [
-              Arel::SelectManager.new(@object.table),
-              @join_dependency.join_constraints(@object.joins_values, @join_type)
-            ]
           end
-          joins = joins.collect(&:joins).flatten if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2
           joins.each do |aliased_join|
             base.from(aliased_join)
           end
@@ -186,16 +185,31 @@ module Ransack
         private
 
         def extract_correlated_key(join_root)
-          correlated_key = join_root.right.expr.left
-
-          if correlated_key.is_a? Arel::Nodes::And
-            correlated_key = correlated_key.left.left
-          elsif correlated_key.is_a? Arel::Nodes::Equality
-            correlated_key = correlated_key.left
-          elsif correlated_key.is_a? Arel::Nodes::Grouping
-            correlated_key = join_root.right.expr.right.left
+          case join_root
+          when Arel::Nodes::OuterJoin
+            # one of join_root.right/join_root.left is expected to be Arel::Nodes::On
+            if join_root.right.is_a?(Arel::Nodes::On)
+              extract_correlated_key(join_root.right.expr)
+            elsif join_root.left.is_a?(Arel::Nodes::On)
+              extract_correlated_key(join_root.left.expr)
+            else
+              raise 'Ransack encountered an unexpected arel structure'
+            end
+          when Arel::Nodes::Equality
+            pk = primary_key
+            if join_root.left == pk
+              join_root.right
+            elsif join_root.right == pk
+              join_root.left
+            else
+              nil
+            end
+          when Arel::Nodes::And
+            extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
           else
-            correlated_key
+            # eg parent was Arel::Nodes::And and the evaluated side was one of
+            # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause
+            nil
           end
         end
 
@@ -268,28 +282,15 @@ module Ransack
 
           join_list = join_nodes + convert_join_strings_to_ast(relation.table, string_joins)
 
-          if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
-            join_dependency = Polyamorous::JoinDependency.new(relation.klass, association_joins, join_list)
-            join_nodes.each do |join|
-              join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
-            end
-          elsif ::ActiveRecord::VERSION::STRING == Constants::RAILS_5_2_0
-            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
-            join_dependency = Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, alias_tracker)
-            join_nodes.each do |join|
-              join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
-            end
+          alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
+          join_dependency = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
+            Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, Arel::Nodes::OuterJoin)
           else
-            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
-            join_dependency = if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
-              Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, Arel::Nodes::OuterJoin)
-            else
-              Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins)
-            end
-            join_dependency.instance_variable_set(:@alias_tracker, alias_tracker)
-            join_nodes.each do |join|
-              join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
-            end
+            Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins)
+          end
+          join_dependency.instance_variable_set(:@alias_tracker, alias_tracker)
+          join_nodes.each do |join|
+            join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
           end
           join_dependency
         end
@@ -313,28 +314,12 @@ module Ransack
         end
 
         def build_association(name, parent = @base, klass = nil)
-          if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_6_0
+          if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_0)
             jd = Polyamorous::JoinDependency.new(
               parent.base_klass,
               parent.table,
               Polyamorous::Join.new(name, @join_type, klass),
               @join_type
-            )
-            found_association = jd.instance_variable_get(:@join_root).children.last
-          elsif ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_2_0
-            jd = Polyamorous::JoinDependency.new(
-              parent.base_klass,
-              Polyamorous::Join.new(name, @join_type, klass),
-              []
-            )
-            found_association = jd.join_root.children.last
-          elsif ::ActiveRecord::VERSION::STRING == Constants::RAILS_5_2_0
-            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, parent.table.name, [])
-            jd = Polyamorous::JoinDependency.new(
-              parent.base_klass,
-              parent.table,
-              Polyamorous::Join.new(name, @join_type, klass),
-              alias_tracker
             )
             found_association = jd.instance_variable_get(:@join_root).children.last
           else
@@ -353,10 +338,10 @@ module Ransack
           @join_dependency.instance_variable_get(:@join_root).children.push found_association
 
           # Builds the arel nodes properly for this association
-          if ::ActiveRecord::VERSION::STRING > Constants::RAILS_5_2_0
-            @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root))
+          if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1)
+            @tables_pot[found_association] = @join_dependency.construct_tables_for_association!(jd.instance_variable_get(:@join_root), found_association)
           else
-            @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root), found_association)
+            @join_dependency.send(:construct_tables!, jd.instance_variable_get(:@join_root))
           end
 
           # Leverage the stashed association functionality in AR
@@ -367,23 +352,13 @@ module Ransack
         def extract_joins(association)
           parent = @join_dependency.instance_variable_get(:@join_root)
           reflection = association.reflection
-          join_constraints = if ::ActiveRecord::VERSION::STRING < Constants::RAILS_5_1
-                               association.join_constraints(
-                                 parent.table,
-                                 parent.base_klass,
-                                 association,
-                                 Arel::Nodes::OuterJoin,
-                                 association.tables,
-                                 reflection.scope_chain,
-                                 reflection.chain
-                               )
-                             elsif ::ActiveRecord::VERSION::STRING <= Constants::RAILS_5_2_0
-                               association.join_constraints(
+          join_constraints = if ::Gem::Version.new(::ActiveRecord::VERSION::STRING) >= ::Gem::Version.new(Constants::RAILS_6_1)
+                               association.join_constraints_with_tables(
                                  parent.table,
                                  parent.base_klass,
                                  Arel::Nodes::OuterJoin,
-                                 association.tables,
-                                 reflection.chain
+                                 @join_dependency.instance_variable_get(:@alias_tracker),
+                                 @tables_pot[association]
                                )
                              else
                                association.join_constraints(

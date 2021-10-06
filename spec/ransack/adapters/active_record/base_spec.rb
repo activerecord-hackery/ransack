@@ -44,12 +44,12 @@ module Ransack
 
             it 'applies stringy boolean scopes with true value in an array' do
               s = Person.ransack('of_age' => ['true'])
-              expect(s.result.to_sql).to (include 'age >= 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{(age >= '18')} : 'age >= 18')
             end
 
             it 'applies stringy boolean scopes with false value in an array' do
               s = Person.ransack('of_age' => ['false'])
-              expect(s.result.to_sql).to (include 'age < 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age < '18'} : 'age < 18')
             end
 
             it 'ignores unlisted scopes' do
@@ -69,12 +69,12 @@ module Ransack
 
             it 'passes values to scopes' do
               s = Person.ransack('over_age' => 18)
-              expect(s.result.to_sql).to (include 'age > 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '18'} : 'age > 18')
             end
 
             it 'chains scopes' do
               s = Person.ransack('over_age' => 18, 'active' => true)
-              expect(s.result.to_sql).to (include 'age > 18')
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '18'} : 'age > 18')
               expect(s.result.to_sql).to (include 'active = 1')
             end
 
@@ -89,12 +89,12 @@ module Ransack
 
               it 'passes true values to scopes' do
                 s = Person.ransack('over_age' => 1)
-                expect(s.result.to_sql).to (include 'age > 1')
+                expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '1'} : 'age > 1')
               end
 
               it 'passes false values to scopes'  do
                 s = Person.ransack('over_age' => 0)
-                expect(s.result.to_sql).to (include 'age > 0')
+                expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '0'} : 'age > 0')
               end
             end
 
@@ -107,12 +107,12 @@ module Ransack
 
               it 'passes true values to scopes' do
                 s = Person.ransack('over_age' => 1)
-                expect(s.result.to_sql).to (include 'age > 1')
+                expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '1'} : 'age > 1')
               end
 
               it 'passes false values to scopes'  do
                 s = Person.ransack('over_age' => 0)
-                expect(s.result.to_sql).to (include 'age > 0')
+                expect(s.result.to_sql).to (include  rails7_and_mysql ? %q{age > '0'} : 'age > 0')
               end
             end
 
@@ -120,6 +120,10 @@ module Ransack
 
           it 'does not raise exception for string :params argument' do
             expect { Person.ransack('') }.to_not raise_error
+          end
+
+          it 'raises exception if ransack! called with unknown condition' do
+            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(ArgumentError)
           end
 
           it 'does not modify the parameters' do
@@ -143,14 +147,12 @@ module Ransack
           it 'removes redundant joins from top query' do
             s = Article.ransack(tags_name_not_eq: "Fantasy")
             sql = s.result.to_sql
-
             expect(sql).to_not include('LEFT OUTER JOIN')
           end
 
           it 'handles != for single values' do
             s = Article.ransack(tags_name_not_eq: "Fantasy")
             articles = s.result.to_a
-
             expect(articles).to include marco
             expect(articles).to_not include arthur
           end
@@ -267,10 +269,12 @@ module Ransack
           # end
 
           it 'creates ransack attributes' do
+            person = Person.create!(name: 'Aric Smith')
+
             s = Person.ransack(reversed_name_eq: 'htimS cirA')
             expect(s.result.size).to eq(1)
 
-            expect(s.result.first).to eq Person.where(name: 'Aric Smith').first
+            expect(s.result.first).to eq person
           end
 
           it 'can be accessed through associations' do
@@ -310,7 +314,11 @@ module Ransack
           end
 
           it 'should function correctly with a multi-parameter attribute' do
-            ::ActiveRecord::Base.default_timezone = :utc
+            if ::ActiveRecord::VERSION::MAJOR >= 7
+              ::ActiveRecord.default_timezone = :utc
+            else
+              ::ActiveRecord::Base.default_timezone = :utc
+            end
             Time.zone = 'UTC'
 
             date = Date.current
@@ -460,9 +468,9 @@ module Ransack
               Comment.create(article: Article.create(title: 'Avenger'), person: Person.create(salary: 100_000)),
               Comment.create(article: Article.create(title: 'Avenge'), person: Person.create(salary: 50_000)),
             ]
-            expect(Comment.ransack(article_title_cont: 'aven',s: 'person_salary desc').result).to eq(comments)
+            expect(Comment.ransack(article_title_cont: 'aven', s: 'person_salary desc').result).to eq(comments)
             expect(Comment.joins(:person).ransack(s: 'persons_salarydesc', article_title_cont: 'aven').result).to eq(comments)
-            expect(Comment.joins(:person).ransack(article_title_cont: 'aven',s: 'persons_salary desc').result).to eq(comments)
+            expect(Comment.joins(:person).ransack(article_title_cont: 'aven', s: 'persons_salary desc').result).to eq(comments)
           end
 
           it 'allows sort by `only_sort` field' do
@@ -540,7 +548,6 @@ module Ransack
                 quote_column_name("only_admin")} = 'htimS cirA'/
             )
           end
-
 
           it 'should allow passing ransacker arguments to a ransacker' do
             s = Person.ransack(
@@ -687,6 +694,10 @@ module Ransack
           it { should eq [] }
         end
 
+        private
+        def rails7_and_mysql
+          ::ActiveRecord::VERSION::MAJOR >= 7 && ENV['DB'] == 'mysql'
+        end
       end
     end
   end

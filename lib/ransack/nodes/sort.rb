@@ -9,7 +9,7 @@ module Ransack
       class << self
         def extract(context, str)
           return unless str
-          attr, direction = str.split(/\s+/,2)
+          attr, direction = str.split(/\s+/, 2)
           self.new(context).build(name: attr, dir: direction)
         end
       end
@@ -31,8 +31,8 @@ module Ransack
       end
 
       def name=(name)
-        @name = name
-        context.bind(self, name)
+        @name = context.ransackable_alias(name) || name
+        context.bind(self, @name)
       end
 
       def dir=(dir)

@@ -127,7 +127,6 @@ module Ransack
       alias :m= :combinator=
       alias :m :combinator
 
-
       # == build_attribute
       #
       #  This method was originally called from Nodes::Grouping#new_condition
@@ -255,6 +254,13 @@ module Ransack
         end
       end
 
+      def attr_value_for_attribute(attr)
+        return attr.attr if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+
+        predicate.case_insensitive ? attr.attr.lower : attr.attr
+      rescue
+        attr.attr
+      end
 
       def default_type
         predicate.type || (attributes.first && attributes.first.type)

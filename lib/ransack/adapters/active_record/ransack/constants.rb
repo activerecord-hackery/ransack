@@ -13,6 +13,18 @@ module Ransack
         formatter: proc { |v| "%#{escape_wildcards(v)}%" }
         }
       ],
+      ['i_cont'.freeze, {
+        arel_predicate: 'matches'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v.downcase)}%" },
+        case_insensitive: true
+        }
+      ],
+      ['not_i_cont'.freeze, {
+        arel_predicate: 'does_not_match'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v.downcase)}%" },
+        case_insensitive: true
+        }
+      ],
       ['start'.freeze, {
         arel_predicate: 'matches'.freeze,
         formatter: proc { |v| "#{escape_wildcards(v)}%" }
@@ -85,7 +97,7 @@ module Ransack
         arel_predicate: proc { |v| v ? EQ : NOT_EQ },
         compounds: false,
         type: :boolean,
-        validator: proc { |v| BOOLEAN_VALUES.include?(v)},
+        validator: proc { |v| BOOLEAN_VALUES.include?(v) },
         formatter: proc { |v| nil }
         }
       ],

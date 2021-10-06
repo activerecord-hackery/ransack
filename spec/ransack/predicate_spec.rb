@@ -159,6 +159,44 @@ module Ransack
       end
     end
 
+    describe 'i_cont' do
+      it_has_behavior 'wildcard escaping', :name_i_cont,
+        (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+          /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
+        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+          /LOWER\(`people`.`name`\) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
+        else
+         /LOWER\("people"."name"\) LIKE '%%._\\%'/
+        end) do
+        subject { @s }
+      end
+
+      it 'generates a LIKE query with LOWER(column) and value surrounded by %' do
+        @s.name_i_cont = 'Ric'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /[LOWER\(]?#{field}\)? I?LIKE '%ric%'/
+      end
+    end
+
+    describe 'not_i_cont' do
+      it_has_behavior 'wildcard escaping', :name_not_i_cont,
+        (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+          /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
+        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+          /LOWER\(`people`.`name`\) NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
+        else
+         /LOWER\("people"."name"\) NOT LIKE '%%._\\%'/
+        end) do
+        subject { @s }
+      end
+
+      it 'generates a NOT LIKE query with LOWER(column) and value surrounded by %' do
+        @s.name_not_i_cont = 'Ric'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /[LOWER\(]?#{field}\)? NOT I?LIKE '%ric%'/
+      end
+    end
+
     describe 'start' do
       it 'generates a LIKE query with value followed by %' do
         @s.name_start = 'Er'
@@ -384,7 +422,7 @@ module Ransack
     context "defining custom predicates" do
       describe "with 'not_in' arel predicate" do
         before do
-          Ransack.configure {|c| c.add_predicate "not_in_csv", arel_predicate: "not_in", formatter: proc { |v| v.split(",") } }
+          Ransack.configure { |c| c.add_predicate "not_in_csv", arel_predicate: "not_in", formatter: proc { |v| v.split(",") } }
         end
 
         it 'generates a value IS NOT NULL query' do

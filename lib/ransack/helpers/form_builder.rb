@@ -7,17 +7,11 @@ module ActionView::Helpers::Tags
   class Base
     private
     if defined? ::ActiveRecord
-      if ::ActiveRecord::VERSION::STRING < '5.2'
-        def value(object)
-          object.send @method_name if object # use send instead of public_send
-        end
-      else # rails/rails#29791
-        def value
-          if @allow_method_names_outside_object
-            object.send @method_name if object && object.respond_to?(@method_name, true)
-          else
-            object.send @method_name if object
-          end
+      def value
+        if @allow_method_names_outside_object
+          object.send @method_name if object && object.respond_to?(@method_name, true)
+        else
+          object.send @method_name if object
         end
       end
     end
@@ -51,9 +45,9 @@ module Ransack
       end
 
       def attribute_select(options = nil, html_options = nil, action = nil)
-        options = options || {}
-        html_options = html_options || {}
-        action = action || Constants::SEARCH
+        options ||= {}
+        html_options ||= {}
+        action ||= Constants::SEARCH
         default = options.delete(:default)
         raise ArgumentError, formbuilder_error_message(
           "#{action}_select") unless object.respond_to?(:context)

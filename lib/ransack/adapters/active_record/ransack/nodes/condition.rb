@@ -30,7 +30,7 @@ module Ransack
         def format_predicate(attribute)
           arel_pred = arel_predicate_for_attribute(attribute)
           arel_values = formatted_values_for_attribute(attribute)
-          predicate = attribute.attr.public_send(arel_pred, arel_values)
+          predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
 
           if in_predicate?(predicate)
             predicate.right = predicate.right.map do |pr|
@@ -47,12 +47,20 @@ module Ransack
         end
 
         def casted_array?(predicate)
-          predicate.respond_to?(:val) && predicate.val.is_a?(Array)
+          value_from(predicate).is_a?(Array) && predicate.is_a?(Arel::Nodes::Casted)
+        end
+
+        def value_from(predicate)
+          if predicate.respond_to?(:value)
+            predicate.value # Rails 6.1
+          elsif predicate.respond_to?(:val)
+            predicate.val # Rails 5.2, 6.0
+          end
         end
 
         def format_values_for(predicate)
-          predicate.val.map do |value|
-            value.is_a?(String) ? Arel::Nodes.build_quoted(value) : value
+          value_from(predicate).map do |val|
+            val.is_a?(String) ? Arel::Nodes.build_quoted(val) : val
           end
         end
 

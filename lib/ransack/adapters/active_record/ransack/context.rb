@@ -28,14 +28,10 @@ module Ransack
       @join_type = options[:join_type] || Polyamorous::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @associations_pot = {}
+      @tables_pot = {}
       @lock_associations = []
 
-      if ::ActiveRecord::VERSION::STRING >= Constants::RAILS_5_2
-        @base = @join_dependency.instance_variable_get(:@join_root)
-      else
-        @base = @join_dependency.join_root
-        @engine = @base.base_klass.arel_engine
-      end
+      @base = @join_dependency.instance_variable_get(:@join_root)
     end
 
     def bind_pair_for(key)

@@ -186,7 +186,7 @@ module Ransack
           )
         }
         it {
-          should match(            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link desc/ }
@@ -202,7 +202,7 @@ module Ransack
           )
         }
         it {
-          should match( /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -216,7 +216,7 @@ module Ransack
           )
         }
         it {
-          should match(         /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link desc/ }
@@ -232,7 +232,7 @@ module Ransack
           )
         }
         it {
-          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -258,7 +258,7 @@ module Ransack
           )
         }
         it {
-          should match(          /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link desc/ }
@@ -274,7 +274,7 @@ module Ransack
           )
         }
         it {
-          should match(                /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+asc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -289,7 +289,7 @@ module Ransack
           )
         }
         it {
-          should match(            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link/ }
@@ -306,7 +306,7 @@ module Ransack
           )
         }
         it {
-          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -321,7 +321,7 @@ module Ransack
           )
         }
         it {
-          should match(            /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link/ }
@@ -338,7 +338,7 @@ module Ransack
           )
         }
         it {
-          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -353,7 +353,7 @@ module Ransack
           )
         }
         it {
-          should match(      /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
           )
         }
         it { should match /sort_link/ }
@@ -370,7 +370,7 @@ module Ransack
           )
         }
         it {
-          should match(                     /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+asc/
           )
         }
       end
@@ -385,7 +385,7 @@ module Ransack
           )
         }
         it {
-          should match(  /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&amp;q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
         it { should match /sort_link/ }
@@ -402,7 +402,7 @@ module Ransack
           )
         }
         it {
-          should match(        /people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
+          should match(/people\?q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=name\+desc&q(%5B|\[)s(%5D|\])(%5B|\[)(%5D|\])=email\+desc/
           )
         }
       end
@@ -643,13 +643,13 @@ module Ransack
         before do
           Ransack.configure do |c|
             c.hide_sort_order_indicators = false
-            c.custom_arrows = { default_arrow: "defaultarrow"}
+            c.custom_arrows = { default_arrow: "defaultarrow" }
           end
         end
 
         after do
           Ransack.configure do |c|
-            c.custom_arrows = { default_arrow: nil}
+            c.custom_arrows = { default_arrow: nil }
           end
         end
 

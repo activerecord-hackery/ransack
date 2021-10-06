@@ -45,6 +45,20 @@ module Ransack
       Ransack.options = default
     end
 
+    it 'should have default value for strip_whitespace' do
+      expect(Ransack.options[:strip_whitespace]).to eq true
+    end
+
+    it 'changes default search key parameter' do
+      default = Ransack.options.clone
+
+      Ransack.configure { |c| c.strip_whitespace = false }
+
+      expect(Ransack.options[:strip_whitespace]).to eq false
+
+      Ransack.options = default
+    end
+
     it 'should have default values for arrows' do
       expect(Ransack.options[:up_arrow]).to eq '&#9660;'
       expect(Ransack.options[:down_arrow]).to eq '&#9650;'
@@ -172,6 +186,16 @@ module Ransack
         expect(Ransack.predicates['test_not_in_predicate_no_array'].wants_array)
         .to eq false
       end
+    end
+
+    it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      default = Ransack.options.clone
+
+      Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+
+      expect(Ransack.options[:postgres_fields_sort_option]).to eq :nulls_first
+
+      Ransack.options = default
     end
   end
 end

@@ -46,13 +46,10 @@ module Ransack
     NOT_EQ_ALL          = 'not_eq_all'.freeze
     CONT                = 'cont'.freeze
 
-    RAILS_5_1           = '5.1'.freeze
-    RAILS_5_2           = '5.2'.freeze
-    RAILS_5_2_0         = '5.2.0'.freeze
-    RAILS_6_0           = '6.0.0.rc1'.freeze
+    RAILS_6_0           = '6.0.0'.freeze
+    RAILS_6_1           = '6.1.0'.freeze
 
     RANSACK_SLASH_SEARCHES = 'ransack/searches'.freeze
     RANSACK_SLASH_SEARCHES_SLASH_SEARCH = 'ransack/searches/search'.freeze
   end
 end
-

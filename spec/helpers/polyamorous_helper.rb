@@ -3,22 +3,13 @@ module PolyamorousHelper
     Polyamorous::JoinAssociation.new reflection, children, klass
   end
 
-  if ActiveRecord::VERSION::STRING >= "6.0.0.rc1"
+  if ActiveRecord.version >= ::Gem::Version.new("6.0.0.rc1")
     def new_join_dependency(klass, associations = {})
       Polyamorous::JoinDependency.new klass, klass.arel_table, associations, Polyamorous::InnerJoin
     end
-  elsif ActiveRecord::VERSION::STRING > "5.2.0"
-    def new_join_dependency(klass, associations = {})
-      Polyamorous::JoinDependency.new klass, klass.arel_table, associations
-    end
-  elsif ActiveRecord::VERSION::STRING == "5.2.0"
-    def new_join_dependency(klass, associations = {})
-      alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(klass.connection, klass.table_name, [])
-      Polyamorous::JoinDependency.new klass, klass.arel_table, associations, alias_tracker
-    end
   else
     def new_join_dependency(klass, associations = {})
-      Polyamorous::JoinDependency.new klass, associations, []
+      Polyamorous::JoinDependency.new klass, klass.arel_table, associations
     end
   end
 
