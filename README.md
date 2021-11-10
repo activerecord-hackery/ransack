@@ -63,9 +63,6 @@ this example, with preloading each Person's Articles and pagination):
 def index
   @q = Person.ransack(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
-
-  # or use `to_a.uniq` to remove duplicates (can also be done in the view):
-  @people = @q.result.includes(:articles).page(params[:page]).to_a.uniq
 end
 ```
 
