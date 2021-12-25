@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased
+
+## 2.5.0 - 2021-12-26
+
+* ActiveRecord 7.0 support
+
 * Drop support for rubies under 2.5. PR #1189
 
 * Have casted array predicates type checked to Arel::Nodes::Casted fixing non-casted array predicates.
