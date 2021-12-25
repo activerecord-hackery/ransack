@@ -15,7 +15,7 @@ or controller layer, you're probably not looking for Ransack.
 
 ## Getting started
 
-Ransack is supported for Rails 6.1, 6.0, 5.2 on Ruby 2.6.6 and later.
+Ransack is supported for Rails 7.0, 6.x, 5.2 on Ruby 2.6.6 and later.
 
 In your Gemfile, for the last officially released gem:
 
@@ -310,7 +310,7 @@ end
 
 If this approach is taken, it is advisable to [add a functional index](https://www.postgresql.org/docs/13/citext.html).
 
-This was originally asked in [a Ransack issue](https://github.com/activerecord-hackery/ransack/issues/1201) and a solution was found on [Stack Overflow](https://stackoverflow.com/a/34677378). 
+This was originally asked in [a Ransack issue](https://github.com/activerecord-hackery/ransack/issues/1201) and a solution was found on [Stack Overflow](https://stackoverflow.com/a/34677378).
 
 ### Advanced Mode
 
