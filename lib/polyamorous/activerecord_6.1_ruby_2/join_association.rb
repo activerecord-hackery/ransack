@@ -66,9 +66,5 @@ module Polyamorous
 
       joins
     end
-
-    def ==(other)
-      base_klass == other.base_klass
-    end
   end
 end
