@@ -66,8 +66,6 @@ Here's a quick guide:
 3. Install the development dependencies by running `bundle install`.
    To install rails other than latest (set in Gemfile): `RAILS='5-2-stable' bundle install`
 
-        $ RAILS='5-2-stable' bundle install
-
 4. Begin by running the tests. We only take pull requests with passing tests,
    and it's great to know that you have a clean slate:
 
