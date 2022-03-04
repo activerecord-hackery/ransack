@@ -15,7 +15,7 @@ or controller layer, you're probably not looking for Ransack.
 
 ## Getting started
 
-Ransack is supported for Rails 7.0, 6.x, 5.2 on Ruby 2.6.6 and later.
+Ransack is supported for Rails 7.0, 6.x on Ruby 2.6.6 and later.
 
 In your Gemfile, for the last officially released gem:
 
