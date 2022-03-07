@@ -726,6 +726,30 @@ module Ransack
         it { should match /Block label&nbsp;&#9660;/ }
       end
 
+      describe '#sort_link with class option' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.ransack(sorts: ['name desc'])],
+            :name,
+            class: 'people', controller: 'people'
+          )
+        }
+        it { should match /class="sort_link desc people"/ }
+      end
+
+      describe '#sort_link with class option workaround' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.ransack(sorts: ['name desc'])],
+            :name,
+            'name',
+            { controller: 'people' },
+            class: 'people'
+          )
+        }
+        it { should match /class="sort_link desc people"/ }
+      end
+
       describe '#search_form_for with default format' do
         subject { @controller.view_context
           .search_form_for(Person.ransack) {} }
