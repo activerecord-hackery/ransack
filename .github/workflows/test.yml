@@ -15,8 +15,6 @@ jobs:
           - v6.1.4
           - v6.0.4
           - 6-0-stable
-          - 5-2-stable
-          - v5.2.4
         ruby:
           - 3.0.2
           - 2.7.4
@@ -24,10 +22,6 @@ jobs:
         exclude:
           - rails:  v7.0.0
             ruby:   2.6.7
-          - rails:  v5.2.4
-            ruby:   3.0.2
-          - rails:  5-2-stable
-            ruby:   3.0.2
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -52,8 +46,6 @@ jobs:
           - v6.1.4
           - v6.0.4
           - 6-0-stable
-          - 5-2-stable
-          - v5.2.4
         ruby:
           - 3.0.2
           - 2.7.4
@@ -61,10 +53,6 @@ jobs:
         exclude:
           - rails:  v7.0.0
             ruby:   2.6.7
-          - rails:  v5.2.4
-            ruby:   3.0.2
-          - rails:  5-2-stable
-            ruby:   3.0.2
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -98,8 +86,6 @@ jobs:
           - v6.1.4
           - v6.0.4
           - 6-0-stable
-          - 5-2-stable
-          - v5.2.4
         ruby:
           - 3.0.2
           - 2.7.4
@@ -107,10 +93,6 @@ jobs:
         exclude:
           - rails:  v7.0.0
             ruby:   2.6.7
-          - rails:  v5.2.4
-            ruby:   3.0.2
-          - rails:  5-2-stable
-            ruby:   3.0.2
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}

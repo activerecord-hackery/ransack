@@ -54,7 +54,7 @@ module Ransack
           if predicate.respond_to?(:value)
             predicate.value # Rails 6.1
           elsif predicate.respond_to?(:val)
-            predicate.val # Rails 5.2, 6.0
+            predicate.val # Rails 6.0
           end
         end
 

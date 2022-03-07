@@ -469,8 +469,7 @@ module Ransack
           it { should match /exist\=existing/ }
         end
 
-        context 'using a real ActionController::Parameter object',
-          if: ::ActiveRecord::VERSION::MAJOR > 3 do
+        context 'using a real ActionController::Parameter object' do
 
           describe 'with symbol q:, #sort_link should include search params' do
             subject { @controller.view_context.sort_link(Person.ransack, :name) }
