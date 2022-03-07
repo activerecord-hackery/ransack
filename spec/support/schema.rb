@@ -199,6 +199,11 @@ class Note < ActiveRecord::Base
   belongs_to :notable, polymorphic: true
 end
 
+class Account < ActiveRecord::Base
+  belongs_to :agent_account, class_name: "Account"
+  belongs_to :trade_account, class_name: "Account"
+end
+
 module Schema
   def self.create
     ActiveRecord::Migration.verbose = false
@@ -256,6 +261,11 @@ module Schema
         t.integer  :person_id
         t.integer  :target_person_id
         t.integer  :article_id
+      end
+
+      create_table :accounts, force: true do |t|
+        t.belongs_to :agent_account
+        t.belongs_to :trade_account
       end
     end
 
