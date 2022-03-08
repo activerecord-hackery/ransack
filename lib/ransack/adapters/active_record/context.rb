@@ -205,7 +205,15 @@ module Ransack
               nil
             end
           when Arel::Nodes::And
-            extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
+            # To support nested children
+            if join_root.children.any?
+              join_root.children.each do |child|
+                eck = extract_correlated_key(child)
+                return eck unless eck.nil?
+              end
+            else
+              extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
+            end
           else
             # eg parent was Arel::Nodes::And and the evaluated side was one of
             # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause
