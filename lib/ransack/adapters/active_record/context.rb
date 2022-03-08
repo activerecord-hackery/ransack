@@ -203,11 +203,14 @@ module Ransack
             end
           when Arel::Nodes::And
             # And may have multiple children, so we need to check all, not via left/right
-            join_root.children.each do |child|
-              key = extract_correlated_key(child)
-              return key if key
+            if join_root.children.any?
+              join_root.children.each do |child|
+                key = extract_correlated_key(child)
+                return key if key
+              end
+            else
+              extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
             end
-            nil
           else
             # eg parent was Arel::Nodes::And and the evaluated side was one of
             # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause
