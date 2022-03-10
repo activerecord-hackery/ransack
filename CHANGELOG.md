@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 2.6.0 - 2022-03-08
+
+* Fix regression when joining a table with itself.
+  PR [1275](https://github.com/activerecord-hackery/ransack/pull/1276)
+
+* Drop support for ActiveRecord older than 6.0.4.
+  PR [1276](https://github.com/activerecord-hackery/ransack/pull/1276)
+
 ## 2.5.0 - 2021-12-26
 
 * ActiveRecord 7.0 support
