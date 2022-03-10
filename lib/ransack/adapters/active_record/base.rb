@@ -4,7 +4,6 @@ module Ransack
       module Base
 
         def self.extended(base)
-          alias :search :ransack unless base.respond_to? :search
           base.class_eval do
             class_attribute :_ransackers
             class_attribute :_ransack_aliases
@@ -14,7 +13,6 @@ module Ransack
         end
 
         def ransack(params = {}, options = {})
-          ActiveSupport::Deprecation.warn("#search is deprecated and will be removed in 2.3, please use #ransack instead") if __callee__ == :search
           Search.new(self, params, options)
         end
 
