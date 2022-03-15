@@ -312,6 +312,29 @@ module Ransack
         expect { Search.new(Person, params) }.not_to change { params }
       end
 
+      context "ransackable_scope" do
+        around(:each) do |example|
+          Person.define_singleton_method(:name_eq) do |name|
+            self.where(name: name)
+          end
+
+          begin
+            example.run
+          ensure
+            Person.singleton_class.undef_method :name_eq
+          end
+        end
+
+        it "is prioritized over base predicates" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:name_eq])
+
+          s = Search.new(Person, name_eq: "Johny")
+          expect(s.instance_variable_get(:@scope_args)["name_eq"]).to eq("Johny")
+          expect(s.base[:name_eq]).to be_nil
+        end
+      end
+
     end
 
     describe '#result' do
