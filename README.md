@@ -23,11 +23,10 @@ Run to install:
 bundle add ransack
 ```
 
-If you would like to use the latest updates (recommended), use the `master`
-branch:
+If you would like to use the latest updates, use the `master` branch:
 
 ```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack'
+bundle add ransack --github "activerecord-hackery/ransack"
 ```
 
 ## Issues tracker
