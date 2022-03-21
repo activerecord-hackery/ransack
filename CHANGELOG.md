@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Improve `sort_link` documentation.
+
 * Deprecate passing two trailing hashes to `sort_link`, for example:
 
   ```ruby
