@@ -735,6 +735,7 @@ module Ransack
           )
         }
         it { should match /class="sort_link desc people"/ }
+        it { should_not match /people\?class=people/ }
       end
 
       describe '#sort_link with class option workaround' do
@@ -748,6 +749,7 @@ module Ransack
           )
         }
         it { should match /class="sort_link desc people"/ }
+        it { should_not match /people\?class=people/ }
       end
 
       describe '#search_form_for with default format' do
