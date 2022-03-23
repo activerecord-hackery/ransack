@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+* Fix `:class` option to `sort_link` not being passed to the generated link
+  correctly when no additional options are passed. For example:
+
+  ```ruby
+  sort_link(@q, :bussiness_name, class: "foo")
+  ```
+
 ## 2.6.0 - 2022-03-08
 
 * Fix regression when joining a table with itself.

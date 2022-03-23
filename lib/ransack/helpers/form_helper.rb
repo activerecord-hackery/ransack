@@ -130,12 +130,17 @@ module Ransack
 
         def url_options
           @params.merge(
-            @options.merge(
+            @options.except(:class).merge(
               @search.context.search_key => search_and_sort_params))
         end
 
         def html_options(args)
-          html_options = extract_options_and_mutate_args!(args)
+          if args.empty?
+            html_options = @options
+          else
+            html_options = extract_options_and_mutate_args!(args)
+          end
+
           html_options.merge(
             class: [['sort_link'.freeze, @current_dir], html_options[:class]]
                    .compact.join(' '.freeze)
