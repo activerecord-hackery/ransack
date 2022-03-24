@@ -138,6 +138,9 @@ module Ransack
           if args.empty?
             html_options = @options
           else
+            deprecation_message = "Passing two trailing hashes to `sort_link` is deprecated, merge the trailing hashes into a single one."
+            caller_location = caller_locations(2, 2).first
+            warn "#{deprecation_message} (called at #{caller_location.path}:#{caller_location.lineno})"
             html_options = extract_options_and_mutate_args!(args)
           end
 
