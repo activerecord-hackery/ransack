@@ -17,17 +17,16 @@ or controller layer, you're probably not looking for Ransack.
 
 Ransack is supported for Rails 7.0, 6.x on Ruby 2.6.6 and later.
 
-In your Gemfile, for the last officially released gem:
+To install `ransack` and add it to your Gemfile, run
 
 ```ruby
-gem 'ransack'
+bundle add ransack
 ```
 
-If you would like to use the latest updates (recommended), use the `master`
-branch:
+If you would like to use the latest updates, use the `master` branch:
 
 ```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack'
+bundle add ransack --github "activerecord-hackery/ransack"
 ```
 
 ## Issues tracker
