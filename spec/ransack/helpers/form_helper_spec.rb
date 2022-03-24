@@ -739,17 +739,23 @@ module Ransack
       end
 
       describe '#sort_link with class option workaround' do
-        subject { @controller.view_context
-          .sort_link(
-            [:main_app, Person.ransack(sorts: ['name desc'])],
-            :name,
-            'name',
-            { controller: 'people' },
-            class: 'people'
-          )
-        }
-        it { should match /class="sort_link desc people"/ }
-        it { should_not match /people\?class=people/ }
+        it "generates a correct link and prints a deprecation" do
+          expect do
+            link = @controller.view_context
+              .sort_link(
+                [:main_app, Person.ransack(sorts: ['name desc'])],
+                :name,
+                'name',
+                { controller: 'people' },
+                class: 'people'
+              )
+
+            expect(link).to match(/class="sort_link desc people"/)
+            expect(link).not_to match(/people\?class=people/)
+          end.to output(
+            /Passing two trailing hashes to `sort_link` is deprecated, merge the trailing hashes into a single one\. \(called at #{Regexp.escape(__FILE__)}:/
+          ).to_stderr
+        end
       end
 
       describe '#search_form_for with default format' do

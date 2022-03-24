@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+* Deprecate passing two trailing hashes to `sort_link`, for example:
+
+  ```ruby
+  sort_link(@q, :bussiness_name, "bussines_name", {}, class: "foo")
+  ```
+
+  Pass a single hash with all options instead.
+
 * Fix `:class` option to `sort_link` not being passed to the generated link
   correctly when no additional options are passed. For example:
 
