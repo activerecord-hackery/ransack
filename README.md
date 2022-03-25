@@ -146,8 +146,11 @@ The `search_form_for` answer format can be set like this:
 ```erb
 <%= sort_link(@q, :name) %>
 ```
-Additional options can be passed after the column attribute, like a different
-column title or a default sort order:
+Additional options can be passed after the column parameter, like a different
+column title or a default sort order.
+
+If the first option after the column parameter is a String, it's considered a
+custom label for the link:
 
 ```erb
 <%= sort_link(@q, :name, 'Last Name', default_order: :desc) %>
@@ -169,7 +172,8 @@ explicitly to avoid an `uninitialized constant Model::Xxxable` error (see issue
 <%= sort_link(@q, :xxxable_of_Ymodel_type_some_attribute, 'Attribute Name') %>
 ```
 
-You can also sort on multiple fields by specifying an ordered array:
+If the first option after the column parameter and/or the label parameter is an
+Array, it will be used for sorting on multiple fields:
 
 ```erb
 <%= sort_link(@q, :last_name, [:last_name, 'first_name asc'], 'Last Name') %>
@@ -179,7 +183,8 @@ In the example above, clicking the link will sort by `last_name` and then
 `first_name`. Specifying the sort direction on a field in the array tells
 Ransack to _always_ sort that particular field in the specified direction.
 
-Multiple `default_order` fields may also be specified with a hash:
+Multiple `default_order` fields may also be specified with a trailing options
+Hash:
 
 ```erb
 <%= sort_link(@q, :last_name, %i(last_name first_name),
@@ -207,6 +212,9 @@ and you can then sort by this virtual field:
 ```erb
 <%= sort_link(@q, :reverse_name) %>
 ```
+
+The trailing options Hash can also be used for passing additional options to the
+generated link, like `class:`.
 
 The sort link order indicator arrows may be globally customized by setting a
 `custom_arrows` option in an initializer file like
