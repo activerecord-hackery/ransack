@@ -11,25 +11,22 @@ Ransack enables the creation of both
 for your Ruby on Rails application
 ([demo source code here](https://github.com/activerecord-hackery/ransack_demo)).
 If you're looking for something that simplifies query generation at the model
-or controller layer, you're probably not looking for Ransack (or MetaSearch,
-for that matter). Try [Squeel](https://github.com/activerecord-hackery/squeel)
-instead.
+or controller layer, you're probably not looking for Ransack.
 
 ## Getting started
 
-Ransack is supported for Rails 6.1, 6.0, 5.2 on Ruby 2.6.6 and later.
+Ransack is supported for Rails 7.0, 6.x on Ruby 2.6.6 and later.
 
-In your Gemfile, for the last officially released gem:
+To install `ransack` and add it to your Gemfile, run
 
 ```ruby
-gem 'ransack'
+bundle add ransack
 ```
 
-If you would like to use the latest updates (recommended), use the `master`
-branch:
+If you would like to use the latest updates, use the `master` branch:
 
 ```ruby
-gem 'ransack', github: 'activerecord-hackery/ransack'
+bundle add ransack --github "activerecord-hackery/ransack"
 ```
 
 ## Issues tracker
@@ -65,9 +62,6 @@ this example, with preloading each Person's Articles and pagination):
 def index
   @q = Person.ransack(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
-
-  # or use `to_a.uniq` to remove duplicates (can also be done in the view):
-  @people = @q.result.includes(:articles).page(params[:page]).to_a.uniq
 end
 ```
 
@@ -152,8 +146,11 @@ The `search_form_for` answer format can be set like this:
 ```erb
 <%= sort_link(@q, :name) %>
 ```
-Additional options can be passed after the column attribute, like a different
-column title or a default sort order:
+Additional options can be passed after the column parameter, like a different
+column title or a default sort order.
+
+If the first option after the column parameter is a String, it's considered a
+custom label for the link:
 
 ```erb
 <%= sort_link(@q, :name, 'Last Name', default_order: :desc) %>
@@ -175,7 +172,8 @@ explicitly to avoid an `uninitialized constant Model::Xxxable` error (see issue
 <%= sort_link(@q, :xxxable_of_Ymodel_type_some_attribute, 'Attribute Name') %>
 ```
 
-You can also sort on multiple fields by specifying an ordered array:
+If the first option after the column parameter and/or the label parameter is an
+Array, it will be used for sorting on multiple fields:
 
 ```erb
 <%= sort_link(@q, :last_name, [:last_name, 'first_name asc'], 'Last Name') %>
@@ -185,7 +183,8 @@ In the example above, clicking the link will sort by `last_name` and then
 `first_name`. Specifying the sort direction on a field in the array tells
 Ransack to _always_ sort that particular field in the specified direction.
 
-Multiple `default_order` fields may also be specified with a hash:
+Multiple `default_order` fields may also be specified with a trailing options
+Hash:
 
 ```erb
 <%= sort_link(@q, :last_name, %i(last_name first_name),
@@ -213,6 +212,9 @@ and you can then sort by this virtual field:
 ```erb
 <%= sort_link(@q, :reverse_name) %>
 ```
+
+The trailing options Hash can also be used for passing additional options to the
+generated link, like `class:`.
 
 The sort link order indicator arrows may be globally customized by setting a
 `custom_arrows` option in an initializer file like
@@ -278,11 +280,19 @@ Ransack.configure do |c|
 end
 ```
 
+To treat nulls as having the lowest or highest value respectively. To force nulls to always be first or last, use
+
+```rb
+Ransack.configure do |c|
+  c.postgres_fields_sort_option = :nulls_always_first # or :nulls_always_last
+end
+```
+
 See this feature: https://www.postgresql.org/docs/13/queries-order.html
 
 #### Case Insensitive Sorting in PostgreSQL
 
-In order to request PostgresSQL to do a case insensitive sort for all string columns of a model at once, Ransack can be extended by using this approach:
+In order to request PostgreSQL to do a case insensitive sort for all string columns of a model at once, Ransack can be extended by using this approach:
 
 ```ruby
 module RansackObject
@@ -307,7 +317,7 @@ end
 
 If this approach is taken, it is advisable to [add a functional index](https://www.postgresql.org/docs/13/citext.html).
 
-This was originally asked in [a Ransack issue](https://github.com/activerecord-hackery/ransack/issues/1201) and a solution was found on [Stack Overflow](https://stackoverflow.com/a/34677378). 
+This was originally asked in [a Ransack issue](https://github.com/activerecord-hackery/ransack/issues/1201) and a solution was found on [Stack Overflow](https://stackoverflow.com/a/34677378).
 
 ### Advanced Mode
 
@@ -348,32 +358,6 @@ Once you've done so, you can make use of the helpers in [Ransack::Helpers::FormB
 construct much more complex search forms, such as the one on the
 [demo app](http://ransack-demo.herokuapp.com/users/advanced_search)
 (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
-
-### Ransack #search method
-
-Ransack will try to make the class method `#search` available in your
-models, but if `#search` has already been defined elsewhere, you can always use
-the default `#ransack` class method. So the following are equivalent:
-
-```ruby
-Article.ransack(params[:q])
-Article.search(params[:q])
-```
-
-Users have reported issues of `#search` name conflicts with other gems, so
-the `#search` method alias will be deprecated in the next major version of
-Ransack (2.0). It's advisable to use the default `#ransack` instead.
-
-For now, if Ransack's `#search` method conflicts with the name of another
-method named `search` in your code or another gem, you may resolve it either by
-patching the `extended` class_method in `Ransack::Adapters::ActiveRecord::Base`
-to remove the line `alias :search :ransack unless base.respond_to? :search`, or
-by placing the following line in your Ransack initializer file at
-`config/initializers/ransack.rb`:
-
-```ruby
-Ransack::Adapters::ActiveRecord::Base.class_eval('remove_method :search')
-```
 
 ### Associations
 
@@ -466,6 +450,25 @@ query parameters in your URLs.
   <%= f.search_field :author_cont %>
 <% end %>
 ```
+
+You can also use `ransack_alias` for sorting.
+
+```ruby
+class Post < ActiveRecord::Base
+  belongs_to :author
+
+  # Abbreviate :author_first_name to :author
+  ransack_alias :author, :author_first_name
+end
+```
+
+Now, you can use `:author` instead of `:author_first_name` in a `sort_link`.
+
+```erb
+<%= sort_link(@q, :author) %>
+```
+
+Note that using `:author_first_name_or_author_last_name_cont` would produce an invalid sql query. In those cases, Ransack ignores the sorting clause.
 
 ### Search Matchers
 

@@ -469,8 +469,7 @@ module Ransack
           it { should match /exist\=existing/ }
         end
 
-        context 'using a real ActionController::Parameter object',
-          if: ::ActiveRecord::VERSION::MAJOR > 3 do
+        context 'using a real ActionController::Parameter object' do
 
           describe 'with symbol q:, #sort_link should include search params' do
             subject { @controller.view_context.sort_link(Person.ransack, :name) }
@@ -725,6 +724,38 @@ module Ransack
           ) { 'Block label' }
         }
         it { should match /Block label&nbsp;&#9660;/ }
+      end
+
+      describe '#sort_link with class option' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.ransack(sorts: ['name desc'])],
+            :name,
+            class: 'people', controller: 'people'
+          )
+        }
+        it { should match /class="sort_link desc people"/ }
+        it { should_not match /people\?class=people/ }
+      end
+
+      describe '#sort_link with class option workaround' do
+        it "generates a correct link and prints a deprecation" do
+          expect do
+            link = @controller.view_context
+              .sort_link(
+                [:main_app, Person.ransack(sorts: ['name desc'])],
+                :name,
+                'name',
+                { controller: 'people' },
+                class: 'people'
+              )
+
+            expect(link).to match(/class="sort_link desc people"/)
+            expect(link).not_to match(/people\?class=people/)
+          end.to output(
+            /Passing two trailing hashes to `sort_link` is deprecated, merge the trailing hashes into a single one\. \(called at #{Regexp.escape(__FILE__)}:/
+          ).to_stderr
+        end
       end
 
       describe '#search_form_for with default format' do

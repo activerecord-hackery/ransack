@@ -4,7 +4,6 @@ module Ransack
       module Base
 
         def self.extended(base)
-          alias :search :ransack unless base.respond_to? :search
           base.class_eval do
             class_attribute :_ransackers
             class_attribute :_ransack_aliases
@@ -14,7 +13,6 @@ module Ransack
         end
 
         def ransack(params = {}, options = {})
-          ActiveSupport::Deprecation.warn("#search is deprecated and will be removed in 2.3, please use #ransack instead") if __callee__ == :search
           Search.new(self, params, options)
         end
 
@@ -70,7 +68,7 @@ module Ransack
         end
 
         # ransack_scope_skip_sanitize_args, by default, returns an empty array.
-        # i.e. use the sanitize_scope_args setting to determin if args should be converted.
+        # i.e. use the sanitize_scope_args setting to determine if args should be converted.
         # For overriding with a list of scopes which should be passed the args as-is.
         #
         def ransackable_scopes_skip_sanitize_args
