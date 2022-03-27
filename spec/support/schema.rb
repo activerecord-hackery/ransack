@@ -138,6 +138,22 @@ class Article < ActiveRecord::Base
   alias_attribute :content, :body
 
   default_scope { where("'default_scope' = 'default_scope'") }
+  scope :latest_comment_cont, lambda { |msg|
+    join = <<-SQL
+      (LEFT OUTER JOIN (
+          SELECT
+            comments.*,
+            row_number() OVER (PARTITION BY comments.article_id ORDER BY comments.id DESC) AS rownum
+          FROM comments
+        ) AS latest_comment
+        ON latest_comment.article_id = article.id
+        AND latest_comment.rownum = 1
+      )
+    SQL
+    .squish
+
+    joins(join).where("latest_comment.body ILIKE ?", "%#{msg}%")
+  }
 
   ransacker :title_type, formatter: lambda { |tuples|
     title, type = JSON.parse(tuples)
