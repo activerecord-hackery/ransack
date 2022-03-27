@@ -35,7 +35,8 @@ module Ransack
       :default_arrow => nil,
       :remove_association_no_negative_assoc => true,
       :sanitize_scope_args => true,
-      :postgres_fields_sort_option => nil
+      :postgres_fields_sort_option => nil,
+      :strip_whitespace => true
     }
 
     def configure
@@ -149,7 +150,7 @@ module Ransack
     # User may want to configure it like this:
     #
     # Ransack.configure do |c|
-    #   c.postgres_fields_sort_option = :nulls_first # or :nulls_last
+    #   c.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
     # end
     #
     # See this feature: https://www.postgresql.org/docs/13/queries-order.html
@@ -171,6 +172,7 @@ module Ransack
       self.options[:hide_sort_order_indicators] = boolean
     end
 
+
     # By default, associations are removed from join dependencies when using negative predicates.
     # The default may be globally overridden in an initializer file like
     # `config/initializers/ransack.rb` as follows:
@@ -182,6 +184,19 @@ module Ransack
     #
     def remove_association_no_negative_assoc=(boolean)
       self.options[:remove_association_no_negative_assoc] = boolean
+    end
+
+    # By default, Ransack displays strips all whitespace when searching for a string.
+    # The default may be globally changed in an initializer file like
+    # `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Enable whitespace stripping for string searches
+    #   config.strip_whitespace = true
+    # end
+    #
+    def strip_whitespace=(boolean)
+      self.options[:strip_whitespace] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

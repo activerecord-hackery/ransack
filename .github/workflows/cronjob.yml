@@ -1,8 +1,8 @@
-name: test
+name: cronjob
 
 on:
-  push:
-  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   sqlite3:
@@ -10,21 +10,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rails:
-          - v7.0.0
-          - v6.1.4
-          - v6.0.4
-          - 6-0-stable
         ruby:
           - 3.0.2
           - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
     env:
       DB: sqlite3
-      RAILS: ${{ matrix.rails }}
+      RAILS: main
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby
@@ -41,21 +32,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rails:
-          - v7.0.0
-          - v6.1.4
-          - v6.0.4
-          - 6-0-stable
         ruby:
           - 3.0.2
           - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
     env:
       DB: mysql
-      RAILS: ${{ matrix.rails }}
+      RAILS: main
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: root
     steps:
@@ -81,21 +63,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rails:
-          - v7.0.0
-          - v6.1.4
-          - v6.0.4
-          - 6-0-stable
         ruby:
           - 3.0.2
           - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
     env:
       DB: postgres
-      RAILS: ${{ matrix.rails }}
+      RAILS: main
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: 127.0.0.1
@@ -127,19 +100,3 @@ jobs:
         run: bundle install
       - name: Run tests
         run: bundle exec rspec
-
-  bug-report-templates:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.0.2
-      - name: Install dependencies
-        run: bundle install
-      - name: Run bug report templates
-        run: |
-          ruby bug_report_templates/test-ransacker-arel-present-predicate.rb
-          ruby bug_report_templates/test-ransack-scope-and-column-same-name.rb
-          rm Gemfile Gemfile.lock

@@ -26,8 +26,8 @@ Steps:
    Ransack and not in your code or another gem.
 
 4. **Report the issue** by providing the link to a self-contained
-   gist like [this](https://gist.github.com/jonatack/63048bc5062a84ba9e09) or
-   [this](https://gist.github.com/jonatack/5df41a0edb53b7bad989). Please use
+   gist like [this](https://github.com/activerecord-hackery/ransack/blob/run_bug_report_templates/bug_report_templates/test-ransack-scope-and-column-same-name.rb) or
+   [this](https://github.com/activerecord-hackery/ransack/blob/run_bug_report_templates/bug_report_templates/test-ransacker-arel-present-predicate.rb). Please use
    these code examples as a bug-report template for your Ransack issue!
 
 If you do not provide a self-contained gist and would like your issue to be reviewed, do provide at a minimum:
@@ -64,9 +64,7 @@ Here's a quick guide:
 2. Create a thoughtfully-named branch for your changes (`git checkout -b my-new-feature`).
 
 3. Install the development dependencies by running `bundle install`.
-   To install rails other than latest (set in Gemfile): `RAILS='5-2-stable' bundle install`
-
-        $ RAILS='5-2-stable' bundle install
+   To install rails other than latest (set in Gemfile): `RAILS='6-0-stable' bundle install`
 
 4. Begin by running the tests. We only take pull requests with passing tests,
    and it's great to know that you have a clean slate:
@@ -115,6 +113,9 @@ Here's a quick guide:
         $ git config --global user.email "contributor@example.com"
 
 10. Commit your changes (`git commit -am 'Add feature/fix bug/improve docs'`).
+    If your pull request only contains documentation changes, please remember
+    to add `[skip ci]` to the beginning of your commit message so the CI
+    test suite doesn't :runner: needlessly.
 
 11. If necessary, rebase your commits into logical chunks, without errors. To
    interactively rebase and cherry-pick from, say, the last 10 commits:

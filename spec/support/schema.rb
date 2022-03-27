@@ -138,6 +138,29 @@ class Article < ActiveRecord::Base
   alias_attribute :content, :body
 
   default_scope { where("'default_scope' = 'default_scope'") }
+
+  ransacker :title_type, formatter: lambda { |tuples|
+    title, type = JSON.parse(tuples)
+    Arel::Nodes::Grouping.new(
+      [
+        Arel::Nodes.build_quoted(title),
+        Arel::Nodes.build_quoted(type)
+      ]
+    )
+  } do |_parent|
+    articles = Article.arel_table
+    Arel::Nodes::Grouping.new(
+      %i[title type].map do |field|
+        Arel::Nodes::NamedFunction.new(
+          'COALESCE',
+          [
+            Arel::Nodes::NamedFunction.new('TRIM', [articles[field]]),
+            Arel::Nodes.build_quoted('')
+          ]
+        )
+      end
+    )
+  end
 end
 
 class StoryArticle < Article
@@ -174,6 +197,11 @@ end
 
 class Note < ActiveRecord::Base
   belongs_to :notable, polymorphic: true
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :agent_account, class_name: "Account"
+  belongs_to :trade_account, class_name: "Account"
 end
 
 module Schema
@@ -233,6 +261,11 @@ module Schema
         t.integer  :person_id
         t.integer  :target_person_id
         t.integer  :article_id
+      end
+
+      create_table :accounts, force: true do |t|
+        t.belongs_to :agent_account
+        t.belongs_to :trade_account
       end
     end
 
