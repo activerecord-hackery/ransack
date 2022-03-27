@@ -7,12 +7,18 @@ module Ransack
           association = attribute.parent
           if negative? && attribute.associated_collection?
             query = context.build_correlated_subquery(association)
-            context.remove_association(association)
+            if Ransack::Configuration.options[:remove_association_no_negative_assoc]
+              context.remove_association(association)
+            end
             if self.predicate_name == 'not_null' && self.value
               query.where(format_predicate(attribute))
               Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
             else
-              query.where(format_predicate(attribute).not)
+              replace_gsub = ['not_', '']
+              if self.predicate_name == 'does_not_match'
+                replace_gsub = ['does_not_match', 'matches']
+              end
+              query = context.klass.ransack("#{attribute.name}_#{self.predicate.name.gsub(*replace_gsub)}" => self.value).result.select(:id)
               Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
             end
           else

@@ -29,6 +29,8 @@
 
 ## 2.5.0 - 2021-12-26
 
+* Fix for ActiveRecord 5.2.4 (note security fix in 5.2.4.2 for ActiveView's escape_javascript CVE-2020-5267 for all earlier versions)
+* Fix issue where negative predicates with associated_collection does not use the correct primary key for subquery.
 * Document release process by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1199, https://github.com/activerecord-hackery/ransack/pull/1200.
 * Support Rails 7 by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1205, https://github.com/activerecord-hackery/ransack/pull/1209, https://github.com/activerecord-hackery/ransack/pull/1234, https://github.com/activerecord-hackery/ransack/pull/1230, https://github.com/activerecord-hackery/ransack/pull/1266
 * Fix for `ActiveRecord::UnknownAttributeReference` in ransack by @TechnologyHypofriend in https://github.com/activerecord-hackery/ransack/pull/1207
