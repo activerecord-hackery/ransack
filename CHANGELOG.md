@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Improve `sort_link` documentation.
+  PR [1290](https://github.com/activerecord-hackery/ransack/pull/1290)
 
 * Deprecate passing two trailing hashes to `sort_link`, for example:
 
@@ -11,6 +12,7 @@
   ```
 
   Pass a single hash with all options instead.
+  PR [1289](https://github.com/activerecord-hackery/ransack/pull/1289)
 
 * Fix `:class` option to `sort_link` not being passed to the generated link
   correctly when no additional options are passed. For example:
@@ -18,6 +20,8 @@
   ```ruby
   sort_link(@q, :bussiness_name, class: "foo")
   ```
+
+  PR [1288](https://github.com/activerecord-hackery/ransack/pull/1288)
 
 ## 2.6.0 - 2022-03-08
 
