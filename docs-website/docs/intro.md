@@ -23,11 +23,17 @@ gem 'ransack'
 
 ### Bleeding edge
 
-If you would like to use the latest updates not yet published to RubyGems, use the `master` branch:
+If you would like to use the latest updates not yet published to RubyGems, use the `main` branch:
 
 ```jsx title='Gemfile'
-gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'master'
+gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 ```
+
+### Demo application
+
+The [Ransack Demo application](https://github.com/activerecord-hackery/ransack_demo) shows how to create [simple](http://ransack-demo.herokuapp.com) and
+[advanced](http://ransack-demo.herokuapp.com/users/advanced_search) search forms for your Ruby on Rails application.
+
 
 ## Issues tracker
 
