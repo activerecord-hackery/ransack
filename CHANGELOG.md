@@ -4,6 +4,9 @@
 
 ## 3.0.0 - 2022-03-30
 
+* Move documentation into Docusaurus.
+  PR [1291](https://github.com/activerecord-hackery/ransack/pull/1291)
+
 * [BREAKING CHANGE] Remove deprecated `#search` method.
   PR [1147](https://github.com/activerecord-hackery/ransack/pull/1147)
 
