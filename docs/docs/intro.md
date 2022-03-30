@@ -1,10 +1,7 @@
-# ![Ransack](./docs-website/static/logo/ransack-h.png "Ransack")
-
-[![Build Status](https://github.com/activerecord-hackery/ransack/workflows/test/badge.svg)](https://github.com/activerecord-hackery/ransack/actions)
-[![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
-[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
-[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/ransack/sponsors/badge.svg)](#sponsors)
-
+---
+sidebar_position: 1
+slug: '/'
+---
 
 # Introduction
 
@@ -32,9 +29,11 @@ If you would like to use the latest updates not yet published to RubyGems, use t
 gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 ```
 
-### Documentation
+### Demo application
 
-There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site.
+The [Ransack Demo application](https://github.com/activerecord-hackery/ransack_demo) shows how to create [simple](http://ransack-demo.herokuapp.com) and
+[advanced](http://ransack-demo.herokuapp.com/users/advanced_search) search forms for your Ruby on Rails application.
+
 
 ## Issues tracker
 
