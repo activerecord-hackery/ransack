@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.name        = "ransack"
   s.version     = Ransack::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Ernie Miller", "Ryan Bigg", "Jon Atack", "Sean Carroll"]
+  s.authors     = ["Ernie Miller", "Ryan Bigg", "Jon Atack", "Sean Carroll", "David Rodríguez"]
   s.email       = ["ernie@erniemiller.org", "radarlistener@gmail.com", "jonnyatack@gmail.com", "sfcarroll@gmail.com"]
   s.homepage    = "https://github.com/activerecord-hackery/ransack"
   s.summary     = %q{Object-based searching for Active Record and Mongoid (currently).}
