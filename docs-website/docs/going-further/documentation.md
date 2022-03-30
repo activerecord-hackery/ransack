@@ -13,3 +13,19 @@ Make sure you have `npm` installed, then:
 cd docs-website
 npm run start
 ```
+
+### Build
+
+Build the assets before commiting changes.
+
+```
+cd docs-website
+npm run build
+```
+
+### Test locally
+
+```
+cd docs-website
+npm run serve
+```

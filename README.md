@@ -26,15 +26,15 @@ gem 'ransack'
 
 ### Bleeding edge
 
-If you would like to use the latest updates not yet published to RubyGems, use the `master` branch:
+If you would like to use the latest updates not yet published to RubyGems, use the `main` branch:
 
 ```jsx title='Gemfile'
-gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'master'
+gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 ```
 
 ### Documentation
 
-There is extensive documentation on Ransack, which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site.
+There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site.
 
 ## Issues tracker
 

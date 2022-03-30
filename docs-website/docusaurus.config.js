@@ -15,6 +15,7 @@ const config = {
   favicon: 'img/favicon.ico',
   organizationName: 'activerecord-hackery',
   projectName: 'ransack',
+  trailingSlash: false,
 
   presets: [
     [
@@ -69,7 +70,7 @@ const config = {
             items: [
               {
                 label: 'Documentation',
-                to: '/docs/intro',
+                to: '/',
               },
             ],
           },
