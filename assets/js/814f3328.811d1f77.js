@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[535],{5641:function(s){s.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Ransack 3.0.0","permalink":"/ransack/blog/ransack-3-0-0"}]}')}}]);
