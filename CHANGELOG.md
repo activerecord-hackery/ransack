@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+* [BREAKING CHANGE] Remove deprecated `#search` method.
+  PR [1147](https://github.com/activerecord-hackery/ransack/pull/1147)
+
+* Allow scopes that define string SQL joins.
+  PR [1225](https://github.com/activerecord-hackery/ransack/pull/1225)
+
 * Improve `sort_link` documentation.
   PR [1290](https://github.com/activerecord-hackery/ransack/pull/1290)
 
@@ -22,6 +28,9 @@
   ```
 
   PR [1288](https://github.com/activerecord-hackery/ransack/pull/1288)
+
+* Evaluate `ransackable_scopes` before attributes when building the query.
+  PR [759](https://github.com/activerecord-hackery/ransack/pull/759)
 
 ## 2.6.0 - 2022-03-08
 
