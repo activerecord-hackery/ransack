@@ -8,8 +8,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Ransack documentation',
   tagline: 'Object-based searching',
-  url: 'https://github.com/activerecord-hackery/ransack',
-  baseUrl: '/docs-website/',
+  url: 'https://activerecord-hackery.github.io',
+  baseUrl: '/ransack/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
