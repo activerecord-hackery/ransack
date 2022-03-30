@@ -2,7 +2,19 @@
 
 ## Unreleased
 
+## 3.0.0 - 2022-03-30
+
+* Move documentation into Docusaurus.
+  PR [1291](https://github.com/activerecord-hackery/ransack/pull/1291)
+
+* [BREAKING CHANGE] Remove deprecated `#search` method.
+  PR [1147](https://github.com/activerecord-hackery/ransack/pull/1147)
+
+* Allow scopes that define string SQL joins.
+  PR [1225](https://github.com/activerecord-hackery/ransack/pull/1225)
+
 * Improve `sort_link` documentation.
+  PR [1290](https://github.com/activerecord-hackery/ransack/pull/1290)
 
 * Deprecate passing two trailing hashes to `sort_link`, for example:
 
@@ -11,6 +23,7 @@
   ```
 
   Pass a single hash with all options instead.
+  PR [1289](https://github.com/activerecord-hackery/ransack/pull/1289)
 
 * Fix `:class` option to `sort_link` not being passed to the generated link
   correctly when no additional options are passed. For example:
@@ -18,6 +31,11 @@
   ```ruby
   sort_link(@q, :bussiness_name, class: "foo")
   ```
+
+  PR [1288](https://github.com/activerecord-hackery/ransack/pull/1288)
+
+* Evaluate `ransackable_scopes` before attributes when building the query.
+  PR [759](https://github.com/activerecord-hackery/ransack/pull/759)
 
 ## 2.6.0 - 2022-03-08
 
