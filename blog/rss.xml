@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Ransack documentation Blog</title>
+        <link>https://activerecord-hackery.github.io/ransack/blog</link>
+        <description>Ransack documentation Blog</description>
+        <lastBuildDate>Sun, 27 Mar 2022 00:00:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <language>en</language>
+        <item>
+            <title><![CDATA[Ransack 3.0.0]]></title>
+            <link>https://activerecord-hackery.github.io/ransack/blog/ransack-3-0-0</link>
+            <guid>ransack-3-0-0</guid>
+            <pubDate>Sun, 27 Mar 2022 00:00:00 GMT</pubDate>
+            <description><![CDATA[Ransack has been a part of many Rubyists toolboxes for years and 3.0.0 is a major release. We have a number of new features and one breaking change. As part of 3.0.0, we decided to launch this documentation website, merging in the Wiki and the content from the README.]]></description>
+            <content:encoded><![CDATA[<p>Ransack has been a part of many Rubyists toolboxes for years and 3.0.0 is a major release. We have a number of new features and one breaking change. As part of 3.0.0, we decided to launch this documentation website, merging in the Wiki and the content from the README.</p><p>With 3.0.0 we are hoping to re-energise the community, we need help on closing out old issues, refactoring the codebase and even some design work.</p><p>I also wanted to let you know that Ernie Miller (creator of Ransack) has decided to leave the project completely, he has this message for the community:</p><blockquote><p>While my own personal development efforts have been spent elsewhere as of late, I'm keenly aware of how many people still depend on some of the software I originally wrote all those years ago.</p></blockquote><blockquote><p>That's why I'm grateful to be able to step away from the ActiveRecord Hackery organization (and, specifically, maintenance of Ransack) without impacting those users. I'm thankful that Sean, David, Greg, and others will continue to support users, and wish them the best as they move forward without me!</p></blockquote><p>Please join me in thanking Ernie for bringing Ransack to life, I personally think it is one of the most amazing Rails libraries out there.</p>]]></content:encoded>
+            <category>ransack</category>
+            <category>release</category>
+        </item>
+    </channel>
+</rss>
