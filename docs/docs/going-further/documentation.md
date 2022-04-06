@@ -7,12 +7,24 @@ Ransack uses [Docusaurus](https://docusaurus.io/) for documentation. To contribu
 
 ### Local Development
 
+Switch to docs folder
+
 ```
 cd docs
-yarn start
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Install docusaurus and other dependencies
+
+```
+yarn install
+```
+
+
+Start a local development server and open up a browser window. Most changes are reflected live without having to restart the server.
+
+```
+yarn start
+```
 
 ### Build
 
