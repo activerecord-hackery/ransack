@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+* Fix `:data` option to `sort_link` being incorrectly appended to the generated
+  link query parameters.
+  PR [1301](https://github.com/activerecord-hackery/ransack/pull/1301)
+
 ## 3.0.0 - 2022-03-30
 
 * Move documentation into Docusaurus.
