@@ -6,6 +6,18 @@
   link query parameters.
   PR [1301](https://github.com/activerecord-hackery/ransack/pull/1301)
 
+* Fix "Edit this page" links in documentation site
+  PR [1303](https://github.com/activerecord-hackery/ransack/pull/1303)
+
+* Auto deploy documentation site after merging PRs
+  PR [1302](https://github.com/activerecord-hackery/ransack/pull/1302)
+
+* Add list of former wiki contributors to documentation site
+  PR [1300](https://github.com/activerecord-hackery/ransack/pull/1300)
+
+* Reduce gem package size
+  PR [1297](https://github.com/activerecord-hackery/ransack/pull/1297)
+
 ## 3.0.0 - 2022-03-30
 
 * Move documentation into Docusaurus.
