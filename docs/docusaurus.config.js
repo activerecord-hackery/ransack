@@ -25,12 +25,11 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/activerecord-hackery/ransack/docs/docs/',
+          editUrl: 'https://github.com/activerecord-hackery/ransack/edit/main/docs/',
         },
         blog: {
           showReadingTime: true,
-          editUrl:
-            'https://github.com/activerecord-hackery/ransack/docs/blog/',
+          editUrl: 'https://github.com/activerecord-hackery/ransack/edit/main/blog/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
