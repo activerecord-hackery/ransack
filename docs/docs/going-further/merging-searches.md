@@ -38,4 +38,4 @@ WHERE (
 ORDER BY "people"."id" DESC
 ```
 
-Admittedly this is not as simple as it should be, but it's workable for now. (Implementing #417 could make this more straightforward.)
+Admittedly this is not as simple as it should be, but it's workable for now. (Implementing [issue 417](https://github.com/activerecord-hackery/ransack/issues/417) could make this more straightforward.)
