@@ -1,6 +1,6 @@
 ---
 title: Wiki Contributors
-sidebar_position: 12
+sidebar_position: 20
 ---
 
 Ransack previously had documentation contained in a GitHub Wiki, and this content has been merged into this documentation website. The following long list of _amazing_ people all made contributions to the Wiki:
