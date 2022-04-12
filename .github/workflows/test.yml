@@ -18,10 +18,6 @@ jobs:
         ruby:
           - 3.0.2
           - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -49,10 +45,6 @@ jobs:
         ruby:
           - 3.0.2
           - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -89,10 +81,6 @@ jobs:
         ruby:
           - 3.0.2
           - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
