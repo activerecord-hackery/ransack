@@ -86,11 +86,12 @@ Option `c` is used to match substrings. This is useful when you don't care for t
 
 In Option D we allow the user to select a list of valid tags and then search againt them. We use the plural name here.
 
-```
+```erb
 <div class='form-group'>
   <%= f.label :projects_name, 'Project' %>
   <%= f.select :projects_name_in, ActsAsTaggableOn::Tag.distinct.order(:name).pluck(:name) %>
 </div>
+```
 
 ## Multitenancy 
 
