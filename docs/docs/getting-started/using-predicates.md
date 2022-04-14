@@ -23,7 +23,7 @@ You can also combine predicates for OR queries:
 The syntax for `OR` queries on an associated model is not immediately obvious, but makes sense. Assuming a `User` `has_one` `Account` and the `Account` has `attributes` `foo` and `bar`:
 
 ```ruby
->> User.ransack(account_foo_or_account_bar: 'val').result.to_sql
+>> User.ransack(account_foo_or_account_bar_cont: 'val').result.to_sql
 => SELECT "users".* FROM "users" INNER JOIN accounts ON accounts.user_id = users.id WHERE ("accounts.foo LIKE '%val%' OR accounts.bar LIKE '%val%')
 ```
 
