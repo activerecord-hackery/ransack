@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## 3.1.0 - 2022-04-21
+
+* Fix predicate name in "Using Predicates" documentation page.
+  PR [1313](https://github.com/activerecord-hackery/ransack/pull/1313)
+
+* Drop Ruby 2.6 support.
+  PR [1311](https://github.com/activerecord-hackery/ransack/pull/1311)
+
+* Allow Ransack to be used with Rails 7.1.0.alpha.
+  PR [1309](https://github.com/activerecord-hackery/ransack/pull/1309)
+
+* Put contributor list last in documentation site.
+  PR [1308](https://github.com/activerecord-hackery/ransack/pull/1308)
+
+* Add `acts-as-taggable-on` and polymorphic searches to documentation.
+  PR [1306](https://github.com/activerecord-hackery/ransack/pull/1306)
+  PR [1312](https://github.com/activerecord-hackery/ransack/pull/1312)
+
+* Add full link to issue about merging searches to documentation.
+  PR [1305](https://github.com/activerecord-hackery/ransack/pull/1305)
+
 ## 3.0.1 - 2022-04-08
 
 * Fix `:data` option to `sort_link` being incorrectly appended to the generated
