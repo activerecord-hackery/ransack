@@ -53,8 +53,8 @@ module Ransack
         def value_from(predicate)
           if predicate.respond_to?(:value)
             predicate.value # Rails 6.1
-          elsif predicate.respond_to?(:val)
-            predicate.val # Rails 6.0
+          else
+            predicate.val
           end
         end
 
