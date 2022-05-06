@@ -770,6 +770,18 @@ module Ransack
         it { should_not match /people\?data%5Bturbo_action%5D=advance/ }
       end
 
+      describe "#sort_link with host option" do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.ransack(sorts: ['name desc'])],
+            :name,
+            host: 'foo', controller: 'people'
+          )
+        }
+        it { should match /href="\/people\?q/ }
+        it { should_not match /href=".*foo/ }
+      end
+
       describe '#search_form_for with default format' do
         subject { @controller.view_context
           .search_form_for(Person.ransack) {} }
