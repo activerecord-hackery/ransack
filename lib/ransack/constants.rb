@@ -45,8 +45,6 @@ module Ransack
     NOT_EQ_ALL          = 'not_eq_all'.freeze
     CONT                = 'cont'.freeze
 
-    RAILS_6_1           = '6.1.0'.freeze
-
     RANSACK_SLASH_SEARCHES = 'ransack/searches'.freeze
     RANSACK_SLASH_SEARCHES_SLASH_SEARCH = 'ransack/searches/search'.freeze
   end

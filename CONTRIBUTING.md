@@ -64,7 +64,7 @@ Here's a quick guide:
 2. Create a thoughtfully-named branch for your changes (`git checkout -b my-new-feature`).
 
 3. Install the development dependencies by running `bundle install`.
-   To install rails other than latest (set in Gemfile): `RAILS='6-0-stable' bundle install`
+   To install rails other than latest (set in Gemfile): `RAILS='6-1-stable' bundle install`
 
 4. Begin by running the tests. We only take pull requests with passing tests,
    and it's great to know that you have a clean slate:

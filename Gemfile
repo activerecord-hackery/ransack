@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '6-0-stable'
+rails = ENV['RAILS'] || '6-1-stable'
 
 rails_version = case rails
                 when /\// # A path
@@ -15,7 +15,7 @@ rails_version = case rails
                 end
 
 gem 'faker', '~> 2.0'
-gem 'sqlite3', ::Gem::Version.new(rails_version == 'main' ? '6.2.0.alpha' : rails_version) >= ::Gem::Version.new('6-0-stable') ? '~> 1.4.1' : '~> 1.3.3'
+gem 'sqlite3', '~> 1.4.1'
 gem 'pg', '~> 1.0'
 gem 'pry', '~> 0.12.2'
 gem 'byebug'
