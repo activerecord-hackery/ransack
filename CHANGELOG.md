@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 3.2.0 - 2022-05-08
+
+* Drop Rails 6.0 support.
+  PR [1318](https://github.com/activerecord-hackery/ransack/pull/1318)
+
+* Exclude "host" from params sent to url generator.
+  PR [1319](https://github.com/activerecord-hackery/ransack/pull/1319)
+
 ## 3.1.0 - 2022-04-21
 
 * Fix predicate name in "Using Predicates" documentation page.
