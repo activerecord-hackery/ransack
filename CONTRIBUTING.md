@@ -20,14 +20,14 @@ Steps:
    reported.
 
 2. **Check if the issue has been fixed** &mdash; try to reproduce it using the
-   `master` branch in the repository.
+   `main` branch in the repository.
 
 3. **Isolate the real problem** &mdash; make sure the issue is really a bug in
    Ransack and not in your code or another gem.
 
 4. **Report the issue** by providing the link to a self-contained
-   gist like [this](https://github.com/activerecord-hackery/ransack/blob/run_bug_report_templates/bug_report_templates/test-ransack-scope-and-column-same-name.rb) or
-   [this](https://github.com/activerecord-hackery/ransack/blob/run_bug_report_templates/bug_report_templates/test-ransacker-arel-present-predicate.rb). Please use
+   gist like [this](https://github.com/activerecord-hackery/ransack/blob/main/bug_report_templates/test-ransack-scope-and-column-same-name.rb) or
+   [this](https://github.com/activerecord-hackery/ransack/blob/main/bug_report_templates/test-ransacker-arel-present-predicate.rb). Please use
    these code examples as a bug-report template for your Ransack issue!
 
 If you do not provide a self-contained gist and would like your issue to be reviewed, do provide at a minimum:
@@ -123,7 +123,7 @@ Here's a quick guide:
 
 12. Push the branch up to your fork on GitHub
    (`git push origin my-new-feature`) and from GitHub submit a pull request to
-   Ransack's `master` branch.
+   Ransack's `main` branch.
 
 At this point you're waiting on us. We like to at least comment on, if not
 accept, pull requests within three business days (and, typically, one business
