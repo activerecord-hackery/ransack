@@ -26,8 +26,8 @@ Steps:
    Ransack and not in your code or another gem.
 
 4. **Report the issue** by providing the link to a self-contained
-   gist like [this](https://github.com/activerecord-hackery/ransack/blob/run_bug_report_templates/bug_report_templates/test-ransack-scope-and-column-same-name.rb) or
-   [this](https://github.com/activerecord-hackery/ransack/blob/run_bug_report_templates/bug_report_templates/test-ransacker-arel-present-predicate.rb). Please use
+   gist like [this](https://github.com/activerecord-hackery/ransack/blob/main/bug_report_templates/test-ransack-scope-and-column-same-name.rb) or
+   [this](https://github.com/activerecord-hackery/ransack/blob/main/bug_report_templates/test-ransacker-arel-present-predicate.rb). Please use
    these code examples as a bug-report template for your Ransack issue!
 
 If you do not provide a self-contained gist and would like your issue to be reviewed, do provide at a minimum:
