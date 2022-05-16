@@ -8,7 +8,7 @@
   PR [1318](https://github.com/activerecord-hackery/ransack/pull/1318)
 
 * Exclude "host" from params sent to url generator.
-  PR [1319](https://github.com/activerecord-hackery/ransack/pull/1319)
+  PR [1317](https://github.com/activerecord-hackery/ransack/pull/1317)
 
 ## 3.1.0 - 2022-04-21
 
