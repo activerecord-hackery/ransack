@@ -9,7 +9,7 @@ title: Sorting
 
 You can add a form to capture sorting and filtering options together.
 
-```jsx
+```erb
 <div class="filters" id="filtersSidebar">
   <header class="filters-header">
     <div class="filters-header-content">

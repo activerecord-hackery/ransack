@@ -7,7 +7,7 @@ Exporting to CSV
 
 Example downloading a csv file preserving ransack search, based on [this gist](https://gist.github.com/pama/adff25ed1f4b796ce088ea362a08e1c5)
 
-```jsx title='index.html.erb'
+```ruby title='index.html.erb'
 <h1>Users</h1>
 
 <%= search_form_for @q, url: dashboard_index_path do |f| %>
@@ -30,7 +30,7 @@ Example downloading a csv file preserving ransack search, based on [this gist](h
 <% end %>
 ```
 
-```jsx title='user.rb'
+```ruby title='user.rb'
 require 'csv'
 
 class User < ApplicationRecord
