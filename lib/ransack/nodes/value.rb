@@ -26,7 +26,7 @@ module Ransack
         case type
         when :date
           cast_to_date(value)
-        when :datetime, :timestamp, :time
+        when :datetime, :timestamp, :time, :timestamptz
           cast_to_time(value)
         when :boolean
           cast_to_boolean(value)
