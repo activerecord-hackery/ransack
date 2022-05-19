@@ -36,7 +36,6 @@ setting the `search_key` option in a Ransack initializer file (typically
 `config/initializers/ransack.rb`):
 
 ```ruby
-puts "Hello, World"
 Ransack.configure do |c|
   # Change default search parameter key name.
   # Default key name is :q
