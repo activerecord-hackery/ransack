@@ -17,7 +17,7 @@ Ransack is supported for Rails 7.0, 6.x on Ruby 2.6.6 and later.
 
 To install `ransack` and add it to your Gemfile, run
 
-```jsx title='Gemfile'
+```ruby title='Gemfile'
 gem 'ransack'
 ```
 
@@ -25,7 +25,7 @@ gem 'ransack'
 
 If you would like to use the latest updates not yet published to RubyGems, use the `main` branch:
 
-```jsx title='Gemfile'
+```ruby title='Gemfile'
 gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 ```
 

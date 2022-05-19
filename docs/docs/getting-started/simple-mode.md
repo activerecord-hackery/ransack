@@ -11,7 +11,7 @@ mode should meet your needs.
 
 ## In your controller
 
-```jsx
+```ruby
 def index
   @q = Person.ransack(params[:q])
   @people = @q.result(distinct: true)
@@ -20,7 +20,7 @@ end
 or without `distinct: true`, for sorting on an associated table's columns (in
 this example, with preloading each Person's Articles and pagination):
 
-```jsx
+```ruby
 def index
   @q = Person.ransack(params[:q])
   @people = @q.result.includes(:articles).page(params[:page])
@@ -35,7 +35,7 @@ Ransack uses a default `:q` param key for search params. This may be changed by
 setting the `search_key` option in a Ransack initializer file (typically
 `config/initializers/ransack.rb`):
 
-```jsx
+```ruby
 Ransack.configure do |c|
   # Change default search parameter key name.
   # Default key name is :q
@@ -48,7 +48,7 @@ end
 After version 2.4.0 when searching a string query Ransack by default strips all whitespace around the query string.
 This may be disabled by setting the `strip_whitespace` option in a Ransack initializer file:
 
-```jsx
+```ruby
 Ransack.configure do |c|
   # Change whitespace stripping behaviour.
   # Default is true
@@ -66,7 +66,7 @@ which are defined in
 
 Ransack's `search_form_for` helper replaces `form_for` for creating the view search form
 
-```jsx
+```erb
 <%= search_form_for @q do |f| %>
 
   # Search if the name field contains...
@@ -95,7 +95,7 @@ search predicates.
 
 The `search_form_for` answer format can be set like this:
 
-```jsx
+```erb
 <%= search_form_for(@q, format: :pdf) do |f| %>
 
 <%= search_form_for(@q, format: :json) do |f| %>
@@ -105,7 +105,7 @@ The `search_form_for` answer format can be set like this:
 
 Ransack's `sort_link` helper creates table headers that are sortable links
 
-```jsx
+```erb
 <%= sort_link(@q, :name) %>
 ```
 Additional options can be passed after the column parameter, like a different
@@ -114,13 +114,13 @@ column title or a default sort order.
 If the first option after the column parameter is a String, it's considered a
 custom label for the link:
 
-```jsx
+```erb
 <%= sort_link(@q, :name, 'Last Name', default_order: :desc) %>
 ```
 
 You can use a block if the link markup is hard to fit into the label parameter:
 
-```jsx
+```erb
 <%= sort_link(@q, :name) do %>
   <strong>Player Name</strong>
 <% end %>
@@ -130,14 +130,14 @@ With a polymorphic association, you may need to specify the name of the link
 explicitly to avoid an `uninitialized constant Model::Xxxable` error (see issue
 [#421](https://github.com/activerecord-hackery/ransack/issues/421)):
 
-```jsx
+```erb
 <%= sort_link(@q, :xxxable_of_Ymodel_type_some_attribute, 'Attribute Name') %>
 ```
 
 If the first option after the column parameter and/or the label parameter is an
 Array, it will be used for sorting on multiple fields:
 
-```jsx
+```erb
 <%= sort_link(@q, :last_name, [:last_name, 'first_name asc'], 'Last Name') %>
 ```
 
@@ -148,7 +148,7 @@ Ransack to _always_ sort that particular field in the specified direction.
 Multiple `default_order` fields may also be specified with a trailing options
 Hash:
 
-```jsx
+```erb
 <%= sort_link(@q, :last_name, %i(last_name first_name),
   default_order: { last_name: 'asc', first_name: 'desc' }) %>
 ```
@@ -162,7 +162,7 @@ of a SQL function, you may do so using scopes. In your model, define scopes
 whose names line up with the name of the virtual field you wish to sort by,
 as so:
 
-```jsx
+```ruby
 class Person < ActiveRecord::Base
   scope :sort_by_reverse_name_asc, lambda { order("REVERSE(name) ASC") }
   scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
@@ -171,7 +171,7 @@ class Person < ActiveRecord::Base
 
 and you can then sort by this virtual field:
 
-```jsx
+```erb
 <%= sort_link(@q, :reverse_name) %>
 ```
 
@@ -186,7 +186,7 @@ You can also enable a `default_arrow` which is displayed on all sortable fields
 which are not currently used in the sorting. This is disabled by default so
 nothing will be displayed:
 
-```jsx
+```ruby
 Ransack.configure do |c|
   c.custom_arrows = {
     up_arrow: '<i class="custom-up-arrow-icon"></i>',
@@ -200,7 +200,7 @@ All sort links may be displayed without the order indicator
 arrows by setting `hide_sort_order_indicators` to true in the initializer file.
 Note that this hides the arrows even if they were customized:
 
-```jsx
+```ruby
 Ransack.configure do |c|
   c.hide_sort_order_indicators = true
 end
@@ -209,7 +209,7 @@ end
 Without setting it globally, individual sort links may be displayed without
 the order indicator arrow by passing `hide_indicator: true` in the sort link:
 
-```jsx
+```erb
 <%= sort_link(@q, :name, hide_indicator: true) %>
 ```
 
@@ -219,15 +219,15 @@ Ransack's `sort_url` helper is like a `sort_link` but returns only the url
 
 `sort_url` has the same API as `sort_link`:
 
-```jsx
+```erb
 <%= sort_url(@q, :name, default_order: :desc) %>
 ```
 
-```jsx
+```erb
 <%= sort_url(@q, :last_name, [:last_name, 'first_name asc']) %>
 ```
 
-```jsx
+```erb
 <%= sort_url(@q, :last_name, %i(last_name first_name),
   default_order: { last_name: 'asc', first_name: 'desc' }) %>
 ```
@@ -238,7 +238,7 @@ The `NULLS FIRST` and `NULLS LAST` options can be used to determine whether null
 
 You may want to configure it like this:
 
-```jsx
+```ruby
 Ransack.configure do |c|
   c.postgres_fields_sort_option = :nulls_first # or :nulls_last
 end
@@ -246,7 +246,7 @@ end
 
 To treat nulls as having the lowest or highest value respectively. To force nulls to always be first or last, use
 
-```jsx
+```ruby
 Ransack.configure do |c|
   c.postgres_fields_sort_option = :nulls_always_first # or :nulls_always_last
 end
@@ -258,7 +258,7 @@ See this feature: https://www.postgresql.org/docs/13/queries-order.html
 
 In order to request PostgreSQL to do a case insensitive sort for all string columns of a model at once, Ransack can be extended by using this approach:
 
-```jsx
+```ruby
 module RansackObject
 
   def self.included(base)
@@ -273,7 +273,7 @@ module RansackObject
 end
 ```
 
-```jsx
+```ruby
 class UserWithManyAttributes < ActiveRecord::Base
   include RansackObject
 end

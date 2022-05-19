@@ -14,7 +14,7 @@ chances are you might want to search on tagged fields. Follow the instructions t
 
 You can call the tagging field anything you like, it just needs to be plural. No migration is needed as this is stored in the internal ActsAsTaggable tables (`tags` and `taggings`).
 
-```rb
+```ruby
 class Task < ApplicationRecord
   acts_as_taggable_on :projects
 end
@@ -26,7 +26,7 @@ Add a field to strong params in the controller. Use the singular name with `_lis
 
 `app/controllers/tasks_controller.rb`
 
-```rb
+```ruby
 def strong_params
   params
     .require(:tasks)
@@ -37,7 +37,7 @@ def strong_params
 
 We need to `send` the tag fieldname to our model, also using the singular naming.
 
-```
+```erb
 <div class='form-group'>
   <%= f.label :project_list %>
   <%= f.text_field :project_list, value: @task.send(:project_list).to_s %>
@@ -50,7 +50,7 @@ Now we can collect our data via the form, with tags separated by commas.
 
 Imagine you have the following two instances of `Task`:
 
-```rb
+```ruby
 { id: 1, name: 'Clean up my room',        projects: [ 'Home', 'Personal' ] }
 { id: 2, name: 'Complete math exercises', projects: [ 'Homework', 'Study' ] }
 ```
@@ -97,7 +97,7 @@ In Option D we allow the user to select a list of valid tags and then search aga
 
 ActsAsTaggableOn allows scoping of tags based on another field on the model. Suppose we have a `language` field on the model, as an effective second level key. We would adjust our model to look like this:
 
-```rb
+```ruby
 class Task < ApplicationRecord
   acts_as_taggable_on :projects
   acts_as_taggable_tenant :language
@@ -106,7 +106,7 @@ end
 
 The Ransack search is then filtered using the `for_tenant` method
 
-```
+```erb
 <div class='form-group'>
   <%= f.label :projects_name, 'Project' %>
   <%= f.select :projects_name_in, ActsAsTaggableOn::Tag.for_tenant('fr').distinct.order(:name).pluck(:name) %>
