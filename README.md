@@ -24,7 +24,7 @@ Ransack is supported for Rails 7.0, 6.x on Ruby 2.6.6 and later.
 
 To install `ransack` and add it to your Gemfile, run
 
-```jsx title='Gemfile'
+```ruby title='Gemfile'
 gem 'ransack'
 ```
 
@@ -32,7 +32,7 @@ gem 'ransack'
 
 If you would like to use the latest updates not yet published to RubyGems, use the `main` branch:
 
-```jsx title='Gemfile'
+```ruby title='Gemfile'
 gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 ```
 
@@ -42,7 +42,7 @@ There is [extensive documentation on Ransack](https://activerecord-hackery.githu
 
 ## Issues tracker
 
-* Before filing an issue, please read the [Contributing Guide](https://github.com/activerecord-hackery/ransack/CONTRIBUTING.md).
+* Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
 * File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
 * Please consider adding a branch with a failing spec describing the problem.
 * Contributions are welcome. :smiley:
@@ -58,7 +58,7 @@ To support the project:
 broken or missing. A failing spec to demonstrate the issue is awesome. A pull
 request with passing tests is even better!
 * Before filing an issue or pull request, be sure to read and follow the
-[Contributing Guide](https://github.com/activerecord-hackery/ransack/CONTRIBUTING.md).
+[Contributing Guide](CONTRIBUTING.md).
 * Please use Stack Overflow or other sites for questions or discussion not
 directly related to bug reports, pull requests, or documentation improvements.
 * Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
