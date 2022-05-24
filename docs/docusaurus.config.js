@@ -15,7 +15,7 @@ const config = {
   favicon: 'img/favicon.ico',
   organizationName: 'activerecord-hackery',
   projectName: 'ransack',
-  trailingSlash: false,
+  trailingSlash: true,
 
   presets: [
     [
@@ -103,6 +103,18 @@ const config = {
         additionalLanguages: ['ruby', 'erb'],
       },
     }),
+
+  themes: [
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        // `hashed` is recommended as long-term-cache of index file is possible.
+        hashed: true,
+        // needs to be the same as routeBasePath in @docusaurus/preset-classic config
+        docsRouteBasePath: '/'
+      },
+    ]
+  ]
 };
 
 module.exports = config;
