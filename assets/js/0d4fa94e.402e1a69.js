@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs_website=self.webpackChunkdocs_website||[]).push([[3245],{4045:function(e){e.exports=JSON.parse('{"label":"release","permalink":"/ransack/blog/tags/release","allTagsPath":"/ransack/blog/tags","count":1}')}}]);
