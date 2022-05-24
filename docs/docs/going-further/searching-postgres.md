@@ -13,7 +13,7 @@ See [this issue](https://github.com/activerecord-hackery/ransack/issues/321) for
 
 ### Using a fixed key
 
-See here for searching on a fixed key in a JSONB column: https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers#3-search-on-a-fixed-key-in-a-jsonb--hstore-column
+See here for searching on a fixed key in a JSONB column: https://activerecord-hackery.github.io/ransack/going-further/ransackers/#postgres-columns
 
 ### Using the JSONB contains operator
 
