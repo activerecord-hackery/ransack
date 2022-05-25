@@ -354,7 +354,7 @@ argument are not easily usable yet, because the array currently needs to be
 wrapped in an array to function (see
 [this issue](https://github.com/activerecord-hackery/ransack/issues/404)),
 which is not compatible with Ransack form helpers. For this use case, it may be
-better for now to use [ransackers](https://github.com/activerecord-hackery/ransack/wiki/Using-Ransackers) instead,
+better for now to use [ransackers](https://activerecord-hackery.github.io/ransack/going-further/ransackers) instead,
 where feasible. Pull requests with solutions and tests are welcome!
 
 ### Grouping queries by OR instead of AND
