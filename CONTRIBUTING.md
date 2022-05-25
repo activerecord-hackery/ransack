@@ -132,7 +132,7 @@ day). We may suggest some changes or improvements or alternatives.
 Some things that will increase the chance that your pull request is accepted:
 
 * Include tests that fail without your code, and pass with it.
-* Update the README, the change log, the wiki documentation... anything that is
+* Update the README, the change log, the documentation... anything that is
   affected by your contribution.
 * Use idiomatic Ruby and follow the syntax conventions below.
 
