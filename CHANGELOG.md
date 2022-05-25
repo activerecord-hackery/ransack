@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## 3.2.1 - 2022-05-24
+
+* Add search functionality to documentation site.
+  PR [1329](https://github.com/activerecord-hackery/ransack/pull/1329)
+
+* Fix contributing URLs and syntax highlight in `README.md`.
+  PR [1326](https://github.com/activerecord-hackery/ransack/pull/1326)
+
+* Cast PostgreSQL's `timestamptz` columns to time.
+  PR [1325](https://github.com/activerecord-hackery/ransack/pull/1325)
+
+* Add Ruby and ERB syntax highlighting support to documentation site.
+  PR [1324](https://github.com/activerecord-hackery/ransack/pull/1324)
+
+* Fix a wrong link in `CHANGELOG.md`.
+  PR [1323](https://github.com/activerecord-hackery/ransack/pull/1323)
+
+* Fix links to bug report templates in `CONTRIBUTING.md`.
+  PR [1321](https://github.com/activerecord-hackery/ransack/pull/1321)
+
 ## 3.2.0 - 2022-05-08
 
 * Drop Rails 6.0 support.
