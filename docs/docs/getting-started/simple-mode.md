@@ -50,7 +50,7 @@ This may be disabled by setting the `strip_whitespace` option in a Ransack initi
 
 ```ruby
 Ransack.configure do |c|
-  # Change whitespace stripping behaviour.
+  # Change whitespace stripping behavior.
   # Default is true
   c.strip_whitespace = false
 end
