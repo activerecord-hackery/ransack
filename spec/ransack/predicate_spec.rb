@@ -368,7 +368,7 @@ module Ransack
         expect(@s.result.to_sql).to match /#{field} IS NULL/
       end
 
-      describe 'with association qeury' do
+      describe 'with association query' do
         it 'generates a value IS NOT NULL query' do
           @s.comments_id_not_null = true
           sql = @s.result.to_sql
