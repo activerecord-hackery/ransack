@@ -84,7 +84,7 @@ Option `C` is used to match substrings. This is useful when you don't care for t
 
 ### Option D - select from a list of tags
 
-In Option `D` we allow the user to select a list of valid tags and then search againt them. We use the plural name here.
+In Option `D` we allow the user to select a list of valid tags and then search against them. We use the plural name here.
 
 ```erb
 <div class='form-group'>
