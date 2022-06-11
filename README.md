@@ -5,11 +5,6 @@
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
 [![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/ransack/sponsors/badge.svg)](#sponsors)
 
-# SPECIAL ANNOUNCEMENT
-
-Please see the [Ransack Blog](https://activerecord-hackery.github.io/ransack/blog) for a special announcement from the Ransack maintainers and Ernie Miller, the original author of Ransack.
-
-
 # Introduction
 
 Ransack will help you easily add **searching to your Rails application**, without any additional dependencies.
