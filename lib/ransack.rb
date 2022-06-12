@@ -24,7 +24,7 @@ require 'ransack/adapters/active_record/ransack/translate'
 require 'ransack/adapters/active_record'
 require 'ransack/adapters/active_record/ransack/visitor'
 require 'ransack/adapters/active_record/ransack/nodes/condition'
-require 'ransack/adapters/active_record/ransack/context'
+require 'ransack/context'
 
 ActiveSupport.on_load(:action_controller) do
   require 'ransack/helpers'

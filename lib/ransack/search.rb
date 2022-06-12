@@ -1,6 +1,6 @@
 require 'ransack/nodes'
 require 'ransack/context'
-require 'ransack/adapters/active_record/ransack/context'
+require 'ransack/context'
 require 'ransack/naming'
 
 module Ransack
