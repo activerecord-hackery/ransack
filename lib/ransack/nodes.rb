@@ -3,6 +3,6 @@ require 'ransack/nodes/node'
 require 'ransack/nodes/attribute'
 require 'ransack/nodes/value'
 require 'ransack/nodes/condition'
-Ransack::Adapters.object_mapper.require_nodes
+require 'ransack/adapters/active_record/ransack/nodes/condition'
 require 'ransack/nodes/sort'
 require 'ransack/nodes/grouping'
