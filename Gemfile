@@ -14,10 +14,10 @@ rails_version = case rails
                   rails
                 end
 
-gem 'faker', '~> 2.0'
-gem 'sqlite3', '~> 1.4.1'
-gem 'pg', '~> 1.0'
-gem 'pry', '~> 0.12.2'
+gem 'faker'
+gem 'sqlite3'
+gem 'pg'
+gem 'pry'
 gem 'byebug'
 
 case rails
@@ -42,11 +42,11 @@ else
     gem 'actionpack'
   end
 end
-gem 'mysql2', '~> 0.5.2'
+gem 'mysql2'
 
 group :test do
   gem 'machinist', '~> 1.0.6'
-  gem 'rspec', '~> 3'
+  gem 'rspec'
   gem 'simplecov', :require => false
 end
 
