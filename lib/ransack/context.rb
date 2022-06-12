@@ -1,5 +1,4 @@
 require 'ransack/visitor'
-require 'ransack/adapters/active_record/ransack/visitor'
 
 module Ransack
   class Context

@@ -19,9 +19,7 @@ end
 require 'ransack/search'
 require 'ransack/ransacker'
 require 'ransack/translate'
-
 require 'ransack/adapters/active_record'
-require 'ransack/adapters/active_record/ransack/visitor'
 require 'ransack/adapters/active_record/ransack/nodes/condition'
 require 'ransack/context'
 
