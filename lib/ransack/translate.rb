@@ -149,7 +149,7 @@ module Ransack
       end
 
       def i18n_key(klass)
-        raise "not implemented"
+        klass.model_name.i18n_key
       end
     end
   end
