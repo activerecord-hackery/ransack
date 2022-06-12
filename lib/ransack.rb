@@ -3,8 +3,6 @@ require 'ransack/configuration'
 require 'ransack/adapters'
 require 'polyamorous/polyamorous'
 
-Ransack::Adapters.object_mapper.require_constants
-
 module Ransack
   extend Configuration
   class UntraversableAssociationError < StandardError; end

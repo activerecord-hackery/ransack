@@ -6,10 +6,6 @@ module Ransack
     end
 
     class ActiveRecordAdapter
-      def require_constants
-        require 'ransack/adapters/active_record/ransack/constants'
-      end
-
       def require_adapter
         require 'ransack/adapters/active_record/ransack/translate'
         require 'ransack/adapters/active_record'
