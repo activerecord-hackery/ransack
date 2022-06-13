@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* Ignore ActiveModel::RangeError in Ransack conditions.
+  PR [1340](https://github.com/activerecord-hackery/ransack/pull/1340)
+
 ## 3.2.1 - 2022-05-24
 
 * Add search functionality to documentation site.
