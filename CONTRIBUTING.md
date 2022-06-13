@@ -69,31 +69,51 @@ Here's a quick guide:
 4. Begin by running the tests. We only take pull requests with passing tests,
    and it's great to know that you have a clean slate:
 
-        $ bundle exec rake spec
+   ```sh
+   bundle exec rake spec
+   ```
 
    The test suite runs by default with SQLite3. To run the test suite with PostgreSQL or MySQL, use:
 
-        $ DB=pg bundle exec rake spec (`DB=postgres` & `DB=postgresql` work too)
-        $ DB=mysql bundle exec rake spec
+   ```sh
+   DB=pg bundle exec rake spec
+   DB=mysql bundle exec rake spec
+   ```
+   
+   A one-liner to run all three
+   
+   ```sh
+   bundle exec rake spec && DB=pg bundle exec rake spec && DB=mysql bundle exec rake spec
+   ```
 
    For Postgres and MySQL, databases are expected to exist, called 'ransack'. To create use these commands (assuming OS X and Homebrew):
 
    ### Postgres
-       $ createdb ransack 
+   
+   ```sh
+   createdb ransack 
+   ```
 
    ### MySQL
-       $ mysql -u root
-       mysql> create database ransack;     
+   
+   ```sh
+   mysql -u root
+   mysql> create database ransack; 
+   ```
 
    The test suite runs by default
 
    To run only the tests in a particular file: `bundle exec rspec <path/to/filename>`
 
-        $ bundle exec rspec spec/ransack/search_spec.rb
+   ```sh
+   bundle exec rspec spec/ransack/search_spec.rb
+   ```
 
    To run a single test in that file: `bundle exec rspec <path/to/filename> -e "test name"`
 
-        $ bundle exec rspec spec/ransack/search_spec.rb -e "accepts a context option"
+   ```sh
+   bundle exec rspec spec/ransack/search_spec.rb -e "accepts a context option"
+   ```
 
 5. Hack away! Please use Ruby features that are compatible down to Ruby 2.3.
    Since version 2.3.1, Ransack no longer maintains Ruby 2.2 compatibility.
@@ -109,8 +129,10 @@ Here's a quick guide:
 
 9. Make sure git knows your name and email address in your `~/.gitconfig` file:
 
-        $ git config --global user.name "Your Name"
-        $ git config --global user.email "contributor@example.com"
+   ```sh
+   git config --global user.name "Your Name"
+   git config --global user.email "contributor@example.com"
+   ```
 
 10. Commit your changes (`git commit -am 'Add feature/fix bug/improve docs'`).
     If your pull request only contains documentation changes, please remember
