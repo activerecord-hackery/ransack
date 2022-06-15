@@ -41,7 +41,7 @@ There is [extensive documentation on Ransack](https://activerecord-hackery.githu
 * File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
 * Please consider adding a branch with a failing spec describing the problem.
 * Contributions are welcome. :smiley:
-* Please do not use the issue tracker for personal support requests. Stack Overflow is a better place for that where a wider community can help you!
+* Please do not use the issue tracker for personal support requests. Stack Overflow or [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) is a better place for that where a wider community can help you!
 
 
 ## Contributions
@@ -54,9 +54,9 @@ broken or missing. A failing spec to demonstrate the issue is awesome. A pull
 request with passing tests is even better!
 * Before filing an issue or pull request, be sure to read and follow the
 [Contributing Guide](CONTRIBUTING.md).
-* Please use Stack Overflow or other sites for questions or discussion not
+* Please use Stack Overflow or [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) for questions or discussion not
 directly related to bug reports, pull requests, or documentation improvements.
-* Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
+* Spread the word on social media if Ransack's been useful
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!
 
