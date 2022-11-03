@@ -27,6 +27,10 @@ def index
 end
 ```
 
+:::caution
+By default, searching and sorting are authorized on any column of your model. See [Authorization (allowlisting/denylisting)](/going-further/other-notes.md#authorization-allowlistingdenylisting) on how to prevent this.
+:::
+
 ### Default search options
 
 #### Search parameter
