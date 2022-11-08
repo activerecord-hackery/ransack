@@ -20,7 +20,7 @@ module Ransack
       Ransack.configure do |config|
         config.add_predicate(
           :test_predicate_without_compound,
-          :compounds => false
+          compounds: false
           )
       end
       expect(Ransack.predicates)
@@ -138,8 +138,8 @@ module Ransack
       Ransack.configure do |config|
         config.add_predicate(
           :test_array_predicate,
-          :wants_array => true,
-          :compounds => true
+          wants_array: true,
+          compounds: true
           )
       end
 
@@ -153,11 +153,11 @@ module Ransack
         Ransack.configure do |config|
           config.add_predicate(
             :test_in_predicate,
-            :arel_predicate => 'in'
+            arel_predicate: 'in'
           )
           config.add_predicate(
             :test_not_in_predicate,
-            :arel_predicate => 'not_in'
+            arel_predicate: 'not_in'
           )
         end
 
@@ -171,13 +171,13 @@ module Ransack
         Ransack.configure do |config|
           config.add_predicate(
             :test_in_predicate_no_array,
-            :arel_predicate => 'in',
-            :wants_array => false
+            arel_predicate: 'in',
+            wants_array: false
           )
           config.add_predicate(
             :test_not_in_predicate_no_array,
-            :arel_predicate => 'not_in',
-            :wants_array => false
+            arel_predicate: 'not_in',
+            wants_array: false
           )
         end
 

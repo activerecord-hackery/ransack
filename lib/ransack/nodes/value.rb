@@ -2,7 +2,7 @@ module Ransack
   module Nodes
     class Value < Node
       attr_accessor :value
-      delegate :present?, :blank?, :to => :value
+      delegate :present?, :blank?, to: :value
 
       def initialize(context, value = nil)
         super(context)

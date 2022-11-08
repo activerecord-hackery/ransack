@@ -2,8 +2,8 @@ module Ransack
   module Nodes
     class Condition < Node
       i18n_word :attribute, :predicate, :combinator, :value
-      i18n_alias :a => :attribute, :p => :predicate,
-                 :m => :combinator, :v => :value
+      i18n_alias a: :attribute, p: :predicate,
+                 m: :combinator, v: :value
 
       attr_accessor :predicate
 
@@ -15,10 +15,10 @@ module Ransack
           if attributes.size > 0 && predicate
             condition = self.new(context)
             condition.build(
-              :a => attributes,
-              :p => predicate.name,
-              :m => combinator,
-              :v => predicate.wants_array ? Array(values) : [values]
+              a: attributes,
+              p: predicate.name,
+              m: combinator,
+              v: predicate.wants_array ? Array(values) : [values]
             )
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything. Tempted to go with "garbage in, garbage out" here.

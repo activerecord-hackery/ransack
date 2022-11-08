@@ -27,15 +27,15 @@ module Ransack
     self.predicates = PredicateCollection.new
 
     self.options = {
-      :search_key => :q,
-      :ignore_unknown_conditions => true,
-      :hide_sort_order_indicators => false,
-      :up_arrow => '&#9660;'.freeze,
-      :down_arrow => '&#9650;'.freeze,
-      :default_arrow => nil,
-      :sanitize_scope_args => true,
-      :postgres_fields_sort_option => nil,
-      :strip_whitespace => true
+      search_key: :q,
+      ignore_unknown_conditions: true,
+      hide_sort_order_indicators: false,
+      up_arrow: '&#9660;'.freeze,
+      down_arrow: '&#9650;'.freeze,
+      default_arrow: nil,
+      sanitize_scope_args: true,
+      postgres_fields_sort_option: nil,
+      strip_whitespace: true
     }
 
     def configure
@@ -55,11 +55,11 @@ module Ransack
         compound_name = name + suffix
         self.predicates[compound_name] = Predicate.new(
           opts.merge(
-            :name => compound_name,
-            :arel_predicate => arel_predicate_with_suffix(
+            name: compound_name,
+            arel_predicate: arel_predicate_with_suffix(
               opts[:arel_predicate], suffix
               ),
-            :compound => true
+            compound: true
           )
         )
       end if compounds
