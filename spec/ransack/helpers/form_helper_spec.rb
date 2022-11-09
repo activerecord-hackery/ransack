@@ -474,7 +474,7 @@ module Ransack
           describe 'with symbol q:, #sort_link should include search params' do
             subject { @controller.view_context.sort_link(Person.ransack, :name) }
             let(:params) { ActionController::Parameters.new(
-              { :q => { name_eq: 'TEST' }, controller: 'people' }
+              { q: { name_eq: 'TEST' }, controller: 'people' }
               ) }
             before { @controller.instance_variable_set(:@params, params) }
 
@@ -489,7 +489,7 @@ module Ransack
           describe 'with symbol q:, #sort_url should include search params' do
             subject { @controller.view_context.sort_url(Person.ransack, :name) }
             let(:params) { ActionController::Parameters.new(
-              { :q => { name_eq: 'TEST' }, controller: 'people' }
+              { q: { name_eq: 'TEST' }, controller: 'people' }
               ) }
             before { @controller.instance_variable_set(:@params, params) }
 

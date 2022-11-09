@@ -2,7 +2,7 @@ module Ransack
   module Nodes
     class Node
       attr_reader :context
-      delegate :contextualize, :to => :context
+      delegate :contextualize, to: :context
       class_attribute :i18n_words
       class_attribute :i18n_aliases
       self.i18n_words = []
