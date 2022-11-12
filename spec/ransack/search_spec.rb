@@ -614,7 +614,7 @@ module Ransack
         expect(@s.result.first.id).to eq 1
       end
 
-      it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name != "MySQL" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'name asc')
@@ -632,10 +632,13 @@ module Ransack
         s = Search.new(Person, s: 'name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" DESC NULLS FIRST"
 
+        # sanity check that query actually works in the database
+        expect { s.result }.not_to raise_error
+
         Ransack.options = default
       end
 
-      it "PG's sort option with double name", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      it "PG's sort option with double name", if: ::ActiveRecord::Base.connection.adapter_name != "MySQL" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'doubled_name asc')
