@@ -141,6 +141,13 @@ module Ransack
           expect(attribute.relation.table_alias).to be_nil
         end
 
+        describe '#scope_arity' do
+          it 'calculates scope arity' do
+            expect(subject.scope_arity("restricted")).to eq -1 # actually it's 0
+            expect(subject.scope_arity("over_age")).to eq -1   # actually it's 1
+            expect(subject.scope_arity("under_age")).to eq 1   # this is correct
+          end
+        end
       end
     end
   end
