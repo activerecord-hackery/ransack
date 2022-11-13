@@ -49,8 +49,8 @@ class Person < ActiveRecord::Base
     of_age ? where("age >= ?", 18) : where("age < ?", 18)
   }
 
-  def self.under_age(y)
-    where(["age > ?", y])
+  def self.active_m(active)
+    where("active = ?", active)
   end
 
   scope :sort_by_reverse_name_asc, lambda { order(Arel.sql("REVERSE(name) ASC")) }

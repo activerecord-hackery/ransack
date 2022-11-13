@@ -28,7 +28,7 @@ module Ransack
             before do
               allow(Person)
               .to receive(:ransackable_scopes)
-              .and_return([:active, :over_age, :of_age])
+              .and_return([:active, :over_age, :of_age, :active_m])
             end
 
             it 'applies true scopes' do
@@ -64,6 +64,36 @@ module Ransack
             it 'ignores stringy false scopes' do
               s = Person.ransack('active' => 'false')
               expect(s.result.to_sql).to_not (include 'active')
+            end
+
+            it 'applies true singleton methods' do
+              s = Person.ransack('active_m' => true)
+              expect(s.result.to_sql).to (include 'active = 1')
+            end
+
+            it 'applies stringy true singleton methods' do
+              s = Person.ransack('active_m' => 'true')
+              expect(s.result.to_sql).to (include 'active = 1')
+            end
+
+            it 'applies stringy boolean singleton methods with true value in an array' do
+              s = Person.ransack('of_age' => ['true'])
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{(age >= '18')} : 'age >= 18')
+            end
+
+            it 'applies false singleton methods' do
+              s = Person.ransack('active_m' => false)
+              expect(s.result.to_sql).to (include 'active = 0')
+            end
+
+            it 'applies stringy false singleton methods' do
+              s = Person.ransack('active_m' => 'false')
+              expect(s.result.to_sql).to (include 'active = 0')
+            end
+
+            it 'applies stringy boolean singleton methods with false value in an array' do
+              s = Person.ransack('of_age' => ['false'])
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age < '18'} : 'age < 18')
             end
 
             it 'passes values to scopes' do

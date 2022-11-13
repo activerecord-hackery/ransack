@@ -145,7 +145,7 @@ module Ransack
           it 'calculates scope arity' do
             expect(subject.scope_arity("restricted")).to eq -1 # actually it's 0
             expect(subject.scope_arity("over_age")).to eq -1   # actually it's 1
-            expect(subject.scope_arity("under_age")).to eq 1   # this is correct
+            expect(subject.scope_arity("active_m")).to eq 1    # this is correct
           end
         end
       end
