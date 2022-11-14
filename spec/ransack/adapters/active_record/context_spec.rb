@@ -151,6 +151,10 @@ module Ransack
             expect(subject.scope_arity("over_age")).to eq 1
           end
 
+          it 'calculates arity correctly for scopes with lambdas with default value' do
+            expect(subject.scope_arity("active_ld")).to eq -1
+          end
+
           it "doesn't calculate arity correctly for scopes with procs" do
             expect(subject.scope_arity("active")).to eq -1 # should be 0
             expect(subject.scope_arity("of_age")).to eq -1 # should be 1

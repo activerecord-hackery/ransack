@@ -49,7 +49,8 @@ class Person < ActiveRecord::Base
     of_age ? where("age >= ?", 18) : where("age < ?", 18)
   }
 
-  scope :active_l, lambda { |val| where("active = ?", val) }
+  scope :active_l,  lambda { |val| where("active = ?", val) }
+  scope :active_ld, lambda { |val = true| where("active = ?", val) }
   def self.active_m(active)
     where("active = ?", active)
   end
