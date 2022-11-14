@@ -180,7 +180,8 @@ module Ransack
           end
 
           def search_params
-            @params[@search.context.search_key].presence || {}
+            query_params = @params[@search.context.search_key]
+            query_params.is_a?(Hash) ? query_params : {}
           end
 
           def sort_params

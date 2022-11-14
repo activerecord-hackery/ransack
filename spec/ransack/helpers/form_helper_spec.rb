@@ -140,6 +140,32 @@ module Ransack
         }
       end
 
+      describe '#sort_link works even if search params are a string' do
+        before { @controller.view_context.params[:q] = 'input error' }
+        specify {
+          expect { @controller.view_context
+            .sort_link(
+              Person.ransack({}),
+              :name,
+              controller: 'people'
+            )
+          }.not_to raise_error
+        }
+      end
+
+      describe '#sort_url works even if search params are a string' do
+        before { @controller.view_context.params[:q] = 'input error' }
+        specify {
+          expect { @controller.view_context
+            .sort_url(
+              Person.ransack({}),
+              :name,
+              controller: 'people'
+            )
+          }.not_to raise_error
+        }
+      end
+
       describe '#sort_link with search_key defined as a string' do
         subject { @controller.view_context
           .sort_link(
