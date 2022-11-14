@@ -55,13 +55,20 @@ module Ransack
 
     def scope_arity(scope)
       arity = @klass.method(scope).arity
+      return arity if arity > -1
       begin
-        klass.send(scope, (1..100).to_a)
-        klass.send(scope) 
+        zero = klass.send(scope)
+        one = klass.send(scope, 2)
+        many = klass.send(scope, *(2..100).to_a)
+        if many.to_sql == zero.to_sql
+          arity = 0
+        elsif many.to_sql == one.to_sql
+          arity = 1
+        end
       rescue ArgumentError => e
-        f = e.message.scan(/expected\s+(\d+)/).flatten.first
-        arity = f.to_i.nonzero? || 0
-      rescue; end
+        arr = e.message.scan(/expected\s+(\d+)(\.\.(\d+))?/).flatten
+        arity = [arr[0].to_i, arr[2].to_i].max
+      rescue e; end
       arity
     end
 
