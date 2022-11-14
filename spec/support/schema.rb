@@ -43,12 +43,13 @@ class Person < ActiveRecord::Base
   has_many   :notes, as: :notable
 
   scope :restricted,  lambda { where("restricted = 1") }
-  scope :active,      lambda { where("active = 1") }
+  scope :active,      proc { where("active = 1") }
   scope :over_age,    lambda { |y| where(["age > ?", y]) }
-  scope :of_age,      lambda { |of_age|
+  scope :of_age,      proc { |of_age|
     of_age ? where("age >= ?", 18) : where("age < ?", 18)
   }
 
+  scope :active_l, lambda { |val| where("active = ?", val) }
   def self.active_m(active)
     where("active = ?", active)
   end

@@ -28,7 +28,7 @@ module Ransack
             before do
               allow(Person)
               .to receive(:ransackable_scopes)
-              .and_return([:active, :over_age, :of_age, :active_m])
+              .and_return([:active, :over_age, :of_age, :active_m, :active_l])
             end
 
             it 'applies true scopes' do
@@ -77,8 +77,8 @@ module Ransack
             end
 
             it 'applies stringy boolean singleton methods with true value in an array' do
-              s = Person.ransack('of_age' => ['true'])
-              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{(age >= '18')} : 'age >= 18')
+              s = Person.ransack('active_m' => ['true'])
+              expect(s.result.to_sql).to (include 'active = 1')
             end
 
             it 'applies false singleton methods' do
@@ -92,8 +92,38 @@ module Ransack
             end
 
             it 'applies stringy boolean singleton methods with false value in an array' do
-              s = Person.ransack('of_age' => ['false'])
-              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age < '18'} : 'age < 18')
+              s = Person.ransack('active_m' => ['false'])
+              expect(s.result.to_sql).to (include 'active = 0')
+            end
+
+            it 'applies true lambda scopes' do
+              s = Person.ransack('active_l' => true)
+              expect(s.result.to_sql).to (include 'active = 1')
+            end
+
+            it 'applies stringy true lambda scopes' do
+              s = Person.ransack('active_l' => 'true')
+              expect(s.result.to_sql).to (include 'active = 1')
+            end
+
+            it 'applies stringy boolean lambda scopes with true value in an array' do
+              s = Person.ransack('active_l' => ['true'])
+              expect(s.result.to_sql).to (include 'active = 1')
+            end
+
+            it 'applies false lambda scopes' do
+              s = Person.ransack('active_l' => false)
+              expect(s.result.to_sql).to (include 'active = 0')
+            end
+
+            it 'applies stringy false lambda scopes' do
+              s = Person.ransack('active_l' => 'false')
+              expect(s.result.to_sql).to (include 'active = 0')
+            end
+
+            it 'applies stringy boolean lambda scopes with false value in an array' do
+              s = Person.ransack('active_l' => ['false'])
+              expect(s.result.to_sql).to (include 'active = 0')
             end
 
             it 'passes values to scopes' do

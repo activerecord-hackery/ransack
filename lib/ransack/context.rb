@@ -54,7 +54,15 @@ module Ransack
     end
 
     def scope_arity(scope)
-      @klass.method(scope).arity
+      arity = @klass.method(scope).arity
+      begin
+        klass.send(scope, (1..100).to_a)
+        klass.send(scope) 
+      rescue ArgumentError => e
+        f = e.message.scan(/expected\s+(\d+)/).flatten.first
+        arity = f.to_i.nonzero? || 0
+      rescue; end
+      arity
     end
 
     def bind(object, str)
