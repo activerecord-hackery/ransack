@@ -1,9 +1,6 @@
 require 'active_support/core_ext'
 require 'ransack/configuration'
-require 'ransack/adapters'
 require 'polyamorous/polyamorous'
-
-Ransack::Adapters.object_mapper.require_constants
 
 module Ransack
   extend Configuration
@@ -22,8 +19,8 @@ end
 require 'ransack/search'
 require 'ransack/ransacker'
 require 'ransack/translate'
-
-Ransack::Adapters.object_mapper.require_adapter
+require 'ransack/active_record'
+require 'ransack/context'
 
 ActiveSupport.on_load(:action_controller) do
   require 'ransack/helpers'
