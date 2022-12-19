@@ -101,6 +101,19 @@ module Ransack
       self.options[:ignore_unknown_conditions] = boolean
     end
 
+    # By default Ransack ignores empty predicates. Ransack can also fallback to
+    # a default predicate by setting it in an initializer file
+    # like `config/initializers/ransack.rb` as follows:
+    #
+    # Ransack.configure do |config|
+    #   # Use the 'eq' predicate if an unknown predicate is passed
+    #   config.default_predicate = 'eq'
+    # end
+    #
+    def default_predicate=(name)
+      self.options[:default_predicate] = name
+    end
+
     # By default, Ransack displays sort order indicator arrows with HTML codes:
     #
     #   up_arrow:   '&#9660;'
