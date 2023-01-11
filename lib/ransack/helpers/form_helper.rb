@@ -129,7 +129,7 @@ module Ransack
         end
 
         def url_options
-          @params.merge(
+          @params.except(:host).merge(
             @options.except(:class, :data, :host).merge(
               @search.context.search_key => search_and_sort_params))
         end

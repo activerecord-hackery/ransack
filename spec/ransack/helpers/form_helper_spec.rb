@@ -808,6 +808,14 @@ module Ransack
         it { should_not match /href=".*foo/ }
       end
 
+      describe "#sort_link ignores host in params" do
+        before { @controller.view_context.params[:host] = 'other_domain' }
+        subject { @controller.view_context.sort_link(Person.ransack, :name, controller: 'people') }
+
+        it { should match /href="\/people\?q/ }
+        it { should_not match /href=".*other_domain/ }
+      end
+
       describe '#search_form_for with default format' do
         subject { @controller.view_context
           .search_form_for(Person.ransack) {} }
