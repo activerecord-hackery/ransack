@@ -72,7 +72,7 @@ class ApplicationController < ActionController::Base
   end
 
 protected
-  # GENERATE A GENERIC SESSION KEY BASED ON TEH CONTROLLER NAME
+  # GENERATE A GENERIC SESSION KEY BASED ON THE CONTROLLER NAME
   def search_key
     "#{controller_name}_search".to_sym
   end
