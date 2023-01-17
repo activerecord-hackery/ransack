@@ -64,7 +64,7 @@ end
 
 The two primary Ransack view helpers are `search_form_for` and `sort_link`,
 which are defined in
-[Ransack::Helpers::FormHelper](https://github.com/activerecord-hackery/ransack/lib/ransack/helpers/form_helper.rb).
+[Ransack::Helpers::FormHelper](https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/helpers/form_helper.rb).
 
 ### Form helper
 

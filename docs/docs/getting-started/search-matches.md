@@ -64,4 +64,4 @@ List of all possible predicates
 | `*_false` | is false | |
 
 
-See full list: https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/locale/en.yml#L15 
+See full list: https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/locale/en.yml#L16

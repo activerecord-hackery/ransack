@@ -40,7 +40,7 @@ end
                         html: { method: :post } do |f| %>
 ```
 
-Once you've done so, you can make use of the helpers in [Ransack::Helpers::FormBuilder](https://github.com/activerecord-hackery/ransack/lib/ransack/helpers/form_builder.rb) to
+Once you've done so, you can make use of the helpers in [Ransack::Helpers::FormBuilder](https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/helpers/form_builder.rb) to
 construct much more complex search forms, such as the one on the
 [demo app](http://ransack-demo.herokuapp.com/users/advanced_search)
 (source code [here](https://github.com/activerecord-hackery/ransack_demo)).
