@@ -3,7 +3,7 @@ sidebar_position: 4
 title: Form customisation
 ---
 
-Predicate and attribute labels in forms may be specified with I18n in a translation file (see the locale files in [Ransack::Locale](https://github.com/activerecord-hackery/ransack/activerecord-hackery/ransack/tree/master/lib/ransack/locale) for more examples):
+Predicate and attribute labels in forms may be specified with I18n in a translation file (see the locale files in [Ransack::Locale](https://github.com/activerecord-hackery/ransack/tree/main/lib/ransack/locale) for more examples):
 
 ```yml
 # locales/en.yml
