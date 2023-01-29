@@ -10,7 +10,7 @@ module Ransack
       end
 
       def named(name)
-        Ransack.predicates[name.to_s]
+        Ransack.predicates[(name || Ransack.options[:default_predicate]).to_s]
       end
 
       def detect_and_strip_from_string!(str)
