@@ -35,12 +35,7 @@ module Ransack
         # For overriding with a whitelist array of strings.
         #
         def ransackable_attributes(auth_object = nil)
-          @ransackable_attributes ||= if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
-            column_names + _ransackers.keys + _ransack_aliases.keys +
-            attribute_aliases.keys
-          else
-            column_names + _ransackers.keys + _ransack_aliases.keys
-          end
+          @ransackable_attributes ||= deprecated_ransackable_list(:ransackable_attributes)
         end
 
         # Ransackable_associations, by default, returns the names
@@ -48,7 +43,7 @@ module Ransack
         # For overriding with a whitelist array of strings.
         #
         def ransackable_associations(auth_object = nil)
-          @ransackable_associations ||= reflect_on_all_associations.map { |a| a.name.to_s }
+          @ransackable_associations ||= deprecated_ransackable_list(:ransackable_associations)
         end
 
         # Ransortable_attributes, by default, returns the names
@@ -75,6 +70,82 @@ module Ransack
           []
         end
 
+        # Bare list of all potentially searchable attributes. Searchable attributes
+        # need to be explicitly allowlisted through the `ransackable_attributes`
+        # method in each model, but if you're allowing almost everything to be
+        # searched, this list can be used as a base for exclusions.
+        #
+        def authorizable_ransackable_attributes
+          if Ransack::SUPPORTS_ATTRIBUTE_ALIAS
+            column_names + _ransackers.keys + _ransack_aliases.keys +
+            attribute_aliases.keys
+          else
+            column_names + _ransackers.keys + _ransack_aliases.keys
+          end.uniq
+        end
+
+        # Bare list of all potentially searchable associations. Searchable
+        # associations need to be explicitly allowlisted through the
+        # `ransackable_associations` method in each model, but if you're
+        # allowing almost everything to be searched, this list can be used as a
+        # base for exclusions.
+        #
+        def authorizable_ransackable_associations
+          reflect_on_all_associations.map { |a| a.name.to_s }
+        end
+
+        private
+
+        def deprecated_ransackable_list(method)
+          list_type = method.to_s.delete_prefix("ransackable_")
+
+          if explicitly_defined?(method)
+            warn_deprecated <<~ERROR
+              Ransack's builtin `#{method}` method is deprecated and will result
+              in an error in the future. If you want to authorize the full list
+              of searchable #{list_type} for this model, use
+              `authorizable_#{method}` instead of delegating to `super`.
+            ERROR
+
+            public_send("authorizable_#{method}")
+          else
+            raise <<~MESSAGE
+              Ransack needs #{name} #{list_type} explicitly allowlisted as
+              searchable. Define a `#{method}` class method in your `#{name}`
+              model, watching out for items you DON'T want searchable (for
+              example, `encrypted_password`, `password_reset_token`, `owner` or
+              other sensitive information). You can use the following as a base:
+
+              ```ruby
+              class #{name} < ApplicationRecord
+
+                # ...
+
+                def self.#{method}(auth_object = nil)
+                  #{public_send("authorizable_#{method}").sort.inspect}
+                end
+
+                # ...
+
+              end
+              ```
+            MESSAGE
+          end
+        end
+
+        def explicitly_defined?(method)
+          definer_ancestor = singleton_class.ancestors.find do |ancestor|
+            ancestor.instance_methods(false).include?(method)
+          end
+
+          definer_ancestor != Ransack::Adapters::ActiveRecord::Base
+        end
+
+        def warn_deprecated(message)
+          caller_location = caller_locations.find { |location| !location.path.start_with?(File.expand_path("../..", __dir__)) }
+
+          warn "DEPRECATION WARNING: #{message.squish} (called at #{caller_location.path}:#{caller_location.lineno})"
+        end
       end
     end
   end
