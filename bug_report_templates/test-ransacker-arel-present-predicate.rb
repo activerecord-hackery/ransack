@@ -56,6 +56,10 @@ class Project < ActiveRecord::Base
   ransacker :number do |parent|
     parent.table[:number]
   end
+
+  def self.ransackable_attributes(_auth_object = nil)
+    ["name", "number"]
+  end
 end
 
 class BugTest < Minitest::Test
