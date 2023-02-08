@@ -2,8 +2,56 @@
 
 ## Unreleased
 
-* Ignore ActiveModel::RangeError in Ransack conditions.
-  PR [1340](https://github.com/activerecord-hackery/ransack/pull/1340)
+## 4.0.0 - 2023-02-09
+
+### 💥 Breaking Changes
+
+* **[SECURITY]** Require explict allowlisting of attributes and associations by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1400
+* Remove Polyamorous entrypoint by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1370
+* Remove dead MongoDB code by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1345
+
+### 🚀 Features
+
+* Add support for default predicates by @p8 in https://github.com/activerecord-hackery/ransack/pull/1384
+
+### 🐛 Bug Fixes
+
+* Ignore `ActiveModel::RangeError` in Ransack conditions by @JunichiIto in https://github.com/activerecord-hackery/ransack/pull/1340
+* Fix crash when using `q=string` as parameter by @stereobooster in https://github.com/activerecord-hackery/ransack/pull/1374
+* Prevent changing host through params by @AndersGM in https://github.com/activerecord-hackery/ransack/pull/1391
+
+### 📝  Documentation
+
+* Fix broken documentation link by @cpgo in https://github.com/activerecord-hackery/ransack/pull/1332
+* Remove more old wiki references by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1333
+* Improve some wording and correct some typos by @ydah in https://github.com/activerecord-hackery/ransack/pull/1336
+* Add warning about necessary authorization by @AmShaegar13 in https://github.com/activerecord-hackery/ransack/pull/1367
+* Fix required Ruby and Rails version in README by @tagliala in https://github.com/activerecord-hackery/ransack/pull/1389
+
+### 💅 Polish
+
+* Implement CodeQL by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1334
+* Code quality improvements by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1371
+* Refactor adapters by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1348
+* Fix typo: teh -> the by @jdufresne in https://github.com/activerecord-hackery/ransack/pull/1387
+* Fix broken link by @maful in https://github.com/activerecord-hackery/ransack/pull/1394
+
+### 🏠 Internal
+
+* Bump docusaurus by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1338
+* Update dependencies by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1342
+* Improve CI by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1351
+* Improve CONTRIBUTING.md by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1347
+* Add links to GitHub Discussions by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1353
+* Bump terser from 5.14.0 to 5.14.2 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1355
+* Bump loader-utils from 2.0.2 to 2.0.3 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1372
+* Bump loader-utils from 2.0.3 to 2.0.4 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1378
+* Upgrade some documentation dependencies by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1379
+* Upgrade local search plugin too by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1380
+* Bump json5 from 2.2.1 to 2.2.3 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1390
+* Bump ua-parser-js from 0.7.31 to 0.7.33 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1397
+* Bump some doc deps by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1398
+* Bump http-cache-semantics from 4.1.0 to 4.1.1 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1401
 
 ## 3.2.1 - 2022-05-24
 
