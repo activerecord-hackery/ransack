@@ -35,6 +35,13 @@ module Ransack
         @s.awesome_eq = nil
         expect(@s.result.to_sql).not_to match /WHERE/
       end
+
+      it 'generates a = condition with a huge integer value' do
+        val = 123456789012345678901
+        @s.salary_eq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} = #{val}/
+      end
     end
 
     describe 'lteq' do
@@ -55,6 +62,13 @@ module Ransack
       it 'does not generate a condition for nil' do
         @s.salary_lteq = nil
         expect(@s.result.to_sql).not_to match /WHERE/
+      end
+
+      it 'generates a <= condition with a huge integer value' do
+        val = 123456789012345678901
+        @s.salary_lteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} <= #{val}/
       end
     end
 
@@ -77,6 +91,13 @@ module Ransack
         @s.salary_lt = nil
         expect(@s.result.to_sql).not_to match /WHERE/
       end
+
+      it 'generates a = condition with a huge integer value' do
+        val = 123456789012345678901
+        @s.salary_lt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} < #{val}/
+      end
     end
 
     describe 'gteq' do
@@ -98,6 +119,13 @@ module Ransack
         @s.salary_gteq = nil
         expect(@s.result.to_sql).not_to match /WHERE/
       end
+
+      it 'generates a >= condition with a huge integer value' do
+        val = 123456789012345678901
+        @s.salary_gteq = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} >= #{val}/
+      end
     end
 
     describe 'gt' do
@@ -118,6 +146,13 @@ module Ransack
       it 'does not generate a condition for nil' do
         @s.salary_gt = nil
         expect(@s.result.to_sql).not_to match /WHERE/
+      end
+
+      it 'generates a > condition with a huge integer value' do
+        val = 123456789012345678901
+        @s.salary_gt = val
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} > #{val}/
       end
     end
 
@@ -368,7 +403,7 @@ module Ransack
         expect(@s.result.to_sql).to match /#{field} IS NULL/
       end
 
-      describe 'with association qeury' do
+      describe 'with association query' do
         it 'generates a value IS NOT NULL query' do
           @s.comments_id_not_null = true
           sql = @s.result.to_sql

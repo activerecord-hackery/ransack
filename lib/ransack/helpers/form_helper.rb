@@ -129,13 +129,21 @@ module Ransack
         end
 
         def url_options
-          @params.merge(
-            @options.merge(
+          @params.except(:host).merge(
+            @options.except(:class, :data, :host).merge(
               @search.context.search_key => search_and_sort_params))
         end
 
         def html_options(args)
-          html_options = extract_options_and_mutate_args!(args)
+          if args.empty?
+            html_options = @options
+          else
+            deprecation_message = "Passing two trailing hashes to `sort_link` is deprecated, merge the trailing hashes into a single one."
+            caller_location = caller_locations(2, 2).first
+            warn "#{deprecation_message} (called at #{caller_location.path}:#{caller_location.lineno})"
+            html_options = extract_options_and_mutate_args!(args)
+          end
+
           html_options.merge(
             class: [['sort_link'.freeze, @current_dir], html_options[:class]]
                    .compact.join(' '.freeze)
@@ -172,7 +180,8 @@ module Ransack
           end
 
           def search_params
-            @params[@search.context.search_key].presence || {}
+            query_params = @params[@search.context.search_key]
+            query_params.is_a?(Hash) ? query_params : {}
           end
 
           def sort_params

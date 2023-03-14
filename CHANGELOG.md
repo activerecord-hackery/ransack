@@ -2,30 +2,218 @@
 
 ## Unreleased
 
+## 4.0.0 - 2023-02-09
+
+### 💥 Breaking Changes
+
+* **[SECURITY]** Require explict allowlisting of attributes and associations by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1400
+* Remove Polyamorous entrypoint by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1370
+* Remove dead MongoDB code by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1345
+
+### 🚀 Features
+
+* Add support for default predicates by @p8 in https://github.com/activerecord-hackery/ransack/pull/1384
+
+### 🐛 Bug Fixes
+
+* Ignore `ActiveModel::RangeError` in Ransack conditions by @JunichiIto in https://github.com/activerecord-hackery/ransack/pull/1340
+* Fix crash when using `q=string` as parameter by @stereobooster in https://github.com/activerecord-hackery/ransack/pull/1374
+* Prevent changing host through params by @AndersGM in https://github.com/activerecord-hackery/ransack/pull/1391
+
+### 📝  Documentation
+
+* Fix broken documentation link by @cpgo in https://github.com/activerecord-hackery/ransack/pull/1332
+* Remove more old wiki references by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1333
+* Improve some wording and correct some typos by @ydah in https://github.com/activerecord-hackery/ransack/pull/1336
+* Add warning about necessary authorization by @AmShaegar13 in https://github.com/activerecord-hackery/ransack/pull/1367
+* Fix required Ruby and Rails version in README by @tagliala in https://github.com/activerecord-hackery/ransack/pull/1389
+
+### 💅 Polish
+
+* Implement CodeQL by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1334
+* Code quality improvements by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1371
+* Refactor adapters by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1348
+* Fix typo: teh -> the by @jdufresne in https://github.com/activerecord-hackery/ransack/pull/1387
+* Fix broken link by @maful in https://github.com/activerecord-hackery/ransack/pull/1394
+
+### 🏠 Internal
+
+* Bump docusaurus by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1338
+* Update dependencies by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1342
+* Improve CI by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1351
+* Improve CONTRIBUTING.md by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1347
+* Add links to GitHub Discussions by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1353
+* Bump terser from 5.14.0 to 5.14.2 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1355
+* Bump loader-utils from 2.0.2 to 2.0.3 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1372
+* Bump loader-utils from 2.0.3 to 2.0.4 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1378
+* Upgrade some documentation dependencies by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1379
+* Upgrade local search plugin too by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1380
+* Bump json5 from 2.2.1 to 2.2.3 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1390
+* Bump ua-parser-js from 0.7.31 to 0.7.33 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1397
+* Bump some doc deps by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1398
+* Bump http-cache-semantics from 4.1.0 to 4.1.1 in /docs by @dependabot in https://github.com/activerecord-hackery/ransack/pull/1401
+
+## 3.2.1 - 2022-05-24
+
+* Add search functionality to documentation site.
+  PR [1329](https://github.com/activerecord-hackery/ransack/pull/1329)
+
+* Fix contributing URLs and syntax highlight in `README.md`.
+  PR [1326](https://github.com/activerecord-hackery/ransack/pull/1326)
+
+* Cast PostgreSQL's `timestamptz` columns to time.
+  PR [1325](https://github.com/activerecord-hackery/ransack/pull/1325)
+
+* Add Ruby and ERB syntax highlighting support to documentation site.
+  PR [1324](https://github.com/activerecord-hackery/ransack/pull/1324)
+
+* Fix a wrong link in `CHANGELOG.md`.
+  PR [1323](https://github.com/activerecord-hackery/ransack/pull/1323)
+
+* Fix links to bug report templates in `CONTRIBUTING.md`.
+  PR [1321](https://github.com/activerecord-hackery/ransack/pull/1321)
+
+## 3.2.0 - 2022-05-08
+
+* Drop Rails 6.0 support.
+  PR [1318](https://github.com/activerecord-hackery/ransack/pull/1318)
+
+* Exclude "host" from params sent to url generator.
+  PR [1317](https://github.com/activerecord-hackery/ransack/pull/1317)
+
+## 3.1.0 - 2022-04-21
+
+* Fix predicate name in "Using Predicates" documentation page.
+  PR [1313](https://github.com/activerecord-hackery/ransack/pull/1313)
+
+* Drop Ruby 2.6 support.
+  PR [1311](https://github.com/activerecord-hackery/ransack/pull/1311)
+
+* Allow Ransack to be used with Rails 7.1.0.alpha.
+  PR [1309](https://github.com/activerecord-hackery/ransack/pull/1309)
+
+* Put contributor list last in documentation site.
+  PR [1308](https://github.com/activerecord-hackery/ransack/pull/1308)
+
+* Add `acts-as-taggable-on` and polymorphic searches to documentation.
+  PR [1306](https://github.com/activerecord-hackery/ransack/pull/1306)
+  PR [1312](https://github.com/activerecord-hackery/ransack/pull/1312)
+
+* Add full link to issue about merging searches to documentation.
+  PR [1305](https://github.com/activerecord-hackery/ransack/pull/1305)
+
+## 3.0.1 - 2022-04-08
+
+* Fix `:data` option to `sort_link` being incorrectly appended to the generated
+  link query parameters.
+  PR [1301](https://github.com/activerecord-hackery/ransack/pull/1301)
+
+* Fix "Edit this page" links in documentation site
+  PR [1303](https://github.com/activerecord-hackery/ransack/pull/1303)
+
+* Auto deploy documentation site after merging PRs
+  PR [1302](https://github.com/activerecord-hackery/ransack/pull/1302)
+
+* Add list of former wiki contributors to documentation site
+  PR [1300](https://github.com/activerecord-hackery/ransack/pull/1300)
+
+* Reduce gem package size
+  PR [1297](https://github.com/activerecord-hackery/ransack/pull/1297)
+
+## 3.0.0 - 2022-03-30
+
+* Move documentation into Docusaurus.
+  PR [1291](https://github.com/activerecord-hackery/ransack/pull/1291)
+
+* [BREAKING CHANGE] Remove deprecated `#search` method.
+  PR [1147](https://github.com/activerecord-hackery/ransack/pull/1147)
+
+* Allow scopes that define string SQL joins.
+  PR [1225](https://github.com/activerecord-hackery/ransack/pull/1225)
+
+* Improve `sort_link` documentation.
+  PR [1290](https://github.com/activerecord-hackery/ransack/pull/1290)
+
+* Deprecate passing two trailing hashes to `sort_link`, for example:
+
+  ```ruby
+  sort_link(@q, :bussiness_name, "bussines_name", {}, class: "foo")
+  ```
+
+  Pass a single hash with all options instead.
+  PR [1289](https://github.com/activerecord-hackery/ransack/pull/1289)
+
+* Fix `:class` option to `sort_link` not being passed to the generated link
+  correctly when no additional options are passed. For example:
+
+  ```ruby
+  sort_link(@q, :bussiness_name, class: "foo")
+  ```
+
+  PR [1288](https://github.com/activerecord-hackery/ransack/pull/1288)
+
+* Evaluate `ransackable_scopes` before attributes when building the query.
+  PR [759](https://github.com/activerecord-hackery/ransack/pull/759)
+
+## 2.6.0 - 2022-03-08
+
+* Fix regression when joining a table with itself.
+  PR [1275](https://github.com/activerecord-hackery/ransack/pull/1276)
+
+* Drop support for ActiveRecord older than 6.0.4.
+  PR [1276](https://github.com/activerecord-hackery/ransack/pull/1276)
+
 ## 2.5.0 - 2021-12-26
 
+* Document release process by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1199, https://github.com/activerecord-hackery/ransack/pull/1200.
+* Support Rails 7 by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1205, https://github.com/activerecord-hackery/ransack/pull/1209, https://github.com/activerecord-hackery/ransack/pull/1234, https://github.com/activerecord-hackery/ransack/pull/1230, https://github.com/activerecord-hackery/ransack/pull/1266
+* Fix for `ActiveRecord::UnknownAttributeReference` in ransack by @TechnologyHypofriend in https://github.com/activerecord-hackery/ransack/pull/1207
+* Make gem compatible with old polyamorous require by @rtweeks in https://github.com/activerecord-hackery/ransack/pull/1145
+* Adding swedish translations by @johanandre in https://github.com/activerecord-hackery/ransack/pull/1208
+* Document how to do case insensitive searches by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1213
+* Add the ability to disable whitespace stripping for string searches by @DCrow in https://github.com/activerecord-hackery/ransack/pull/1214
+* Fix `:default` option in `Translate.attribute` method by @coreyaus in https://github.com/activerecord-hackery/ransack/pull/1218
+* Fix typo in README.md by @d-m-u in https://github.com/activerecord-hackery/ransack/pull/1220
+* Fix another typo in README.md by @plan-do-break-fix in https://github.com/activerecord-hackery/ransack/pull/1221
+* Fix several documentation typos @wonda-tea-coffee in https://github.com/activerecord-hackery/ransack/pull/1233
+* Allow ransack to treat nulls as always first or last by @mollerhoj in https://github.com/activerecord-hackery/ransack/pull/1226
+* Consider ransack aliases when sorting by @faragorn and @waldyr in https://github.com/activerecord-hackery/ransack/pull/1223
+* Fix non-casted array predicates by @danielpclark in https://github.com/activerecord-hackery/ransack/pull/1246
+* Remove Squeel references from README by @Schwad in https://github.com/activerecord-hackery/ransack/pull/1249
+* Remove part of the README that might lead to incorrect results by @RadekMolenda in https://github.com/activerecord-hackery/ransack/pull/1258
 * ActiveRecord 7.0 support
 
-* Drop support for rubies under 2.5. PR #1189
+## 2.4.2 - 2021-01-23
 
-* Have casted array predicates type checked to Arel::Nodes::Casted fixing non-casted array predicates.
-  PR [1246](https://github.com/activerecord-hackery/ransack/pull/1246)
+* Enable RuboCop and configure GitHub Actions to run RuboCop by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1185
+* Add Ruby 3.0.0 support by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1190
+* Drop Ruby 2.5 or older versions of Ruby by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1189
+* Move bug report templates into ransack repository and run templates at CI by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1191
+* Allow Ransack to be tested with Rails main branch by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1192
 
 ## 2.4.1 - 2020-12-21
 
-* Add `ActiveRecord::Base.ransack!` which raises error if passed unknown condition
-
-  *Aaron Lipman*
+* Links to Tidelift subscription by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1178
+* Enable GitHub Actions by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1180
+* Move security contact information to SECURITY.md by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1179
+* Add `ActiveRecord::Base.ransack!` which raises error if passed unknown condition by @alipman88 in https://github.com/activerecord-hackery/ransack/pull/1132
+* Add ability to config PostgreSQL ORDER BY ... NULLS FIRST or NULLS LAST by @itsalongstory in https://github.com/activerecord-hackery/ransack/pull/1184
 
 ## 2.4.0 - 2020-11-27
 
-* Support ActiveRecord 6.1.0.rc1.
-  PR [1172](https://github.com/activerecord-hackery/ransack/pull/1172)
-
-* Fix for ActiveRecord 5.2.4 (note security fix in 5.2.4.2 for ActiveView's escape_javascript CVE-2020-5267 for all earlier versions)
-
-* Drop support for ActiveRecord older than 5.2.4.
-  PR [1166](https://github.com/activerecord-hackery/ransack/pull/1166)
+* Specify actual version of polyamorous, so we can release that separately by @gregmolnar in https://github.com/activerecord-hackery/ransack/pull/1101
+* Only include necessary files in gem package by @tvdeyen in https://github.com/activerecord-hackery/ransack/pull/1104
+* Test/Fix for subquery in Rails 5.2.4  by @stevenjonescgm in https://github.com/activerecord-hackery/ransack/pull/1112
+* Polyamorous module by @varyonic in https://github.com/activerecord-hackery/ransack/pull/1113
+* Remove duplicated rows by @sasharevzin in https://github.com/activerecord-hackery/ransack/pull/1116
+* Fix Ruby 2.7 deprecation warnings by @terracatta in https://github.com/activerecord-hackery/ransack/pull/1121
+* Fixes polymorphic joins. by @PhilCoggins in https://github.com/activerecord-hackery/ransack/pull/1122
+* Drop support for activerecord older than 5.2.4 by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1166
+* Adapt to quoting change in Rails by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1165
+* Typo in docs by @brett-anderson in https://github.com/activerecord-hackery/ransack/pull/1155
+* Add Rails 6.1 support by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1172
+* Strip Leading & Trailing Whitespace Before Searching by @itsalongstory in https://github.com/activerecord-hackery/ransack/pull/1126
+* Use unfrozen version of symbol to string by @fauno in https://github.com/activerecord-hackery/ransack/pull/1149
 
 ## 2.3.2 - 2020-01-11
 

@@ -74,6 +74,30 @@ module Ransack
           specify { expect(subject).to be_nil }
         end
       end
+
+      context 'with an empty predicate' do
+        subject {
+          Condition.extract(
+            Context.for(Person), 'full_name', Person.first.name
+          )
+        }
+
+        context "when default_predicate = nil" do
+          before do
+            Ransack.configure { |c| c.default_predicate = nil }
+          end
+
+          specify { expect(subject).to be_nil }
+        end
+
+        context "when default_predicate = 'eq'" do
+          before do
+            Ransack.configure { |c| c.default_predicate = 'eq' }
+          end
+
+          specify { expect(subject).to eq Condition.extract(Context.for(Person), 'full_name_eq', Person.first.name) }
+        end
+      end
     end
   end
 end

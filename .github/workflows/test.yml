@@ -2,6 +2,8 @@ name: test
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 jobs:
@@ -11,17 +13,12 @@ jobs:
       fail-fast: false
       matrix:
         rails:
-          - v7.0.0
-          - v6.1.4
-          - v6.0.4
-          - 6-0-stable
+          - v7.0.3
+          - v6.1.6
         ruby:
-          - 3.0.2
-          - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
+          - 3.1.2
+          - 3.0.4
+          - 2.7.6
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -31,8 +28,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-      - name: Install dependencies
-        run: bundle install
+          bundler-cache: true
       - name: Run tests
         run: bundle exec rspec
 
@@ -42,17 +38,12 @@ jobs:
       fail-fast: false
       matrix:
         rails:
-          - v7.0.0
-          - v6.1.4
-          - v6.0.4
-          - 6-0-stable
+          - v7.0.3
+          - v6.1.6
         ruby:
-          - 3.0.2
-          - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
+          - 3.1.2
+          - 3.0.4
+          - 2.7.6
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -64,6 +55,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
       - name: Startup MySQL
         run: |
           sudo systemctl start mysql.service
@@ -71,8 +63,6 @@ jobs:
         run: |
           mysql --user=root --password=root --host=127.0.0.1 -e 'create database ransack collate utf8_general_ci;';
           mysql --user=root --password=root --host=127.0.0.1 -e 'use ransack;show variables like "%character%";show variables like "%collation%";';
-      - name: Install dependencies
-        run: bundle install
       - name: Run tests
         run: bundle exec rspec
 
@@ -82,17 +72,12 @@ jobs:
       fail-fast: false
       matrix:
         rails:
-          - v7.0.0
-          - v6.1.4
-          - v6.0.4
-          - 6-0-stable
+          - v7.0.3
+          - v6.1.6
         ruby:
-          - 3.0.2
-          - 2.7.4
-          - 2.6.7
-        exclude:
-          - rails:  v7.0.0
-            ruby:   2.6.7
+          - 3.1.2
+          - 3.0.4
+          - 2.7.6
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
@@ -120,11 +105,10 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
       - name: Setup databases
         run: |
           psql -h localhost -p 5432 -W postgres -c 'create database ransack;' -U postgres;
-      - name: Install dependencies
-        run: bundle install
       - name: Run tests
         run: bundle exec rspec
 
@@ -135,9 +119,8 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0.2
-      - name: Install dependencies
-        run: bundle install
+          ruby-version: 3.1.2
+          bundler-cache: true
       - name: Run bug report templates
         run: |
           ruby bug_report_templates/test-ransacker-arel-present-predicate.rb

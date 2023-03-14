@@ -140,6 +140,32 @@ module Ransack
         }
       end
 
+      describe '#sort_link works even if search params are a string' do
+        before { @controller.view_context.params[:q] = 'input error' }
+        specify {
+          expect { @controller.view_context
+            .sort_link(
+              Person.ransack({}),
+              :name,
+              controller: 'people'
+            )
+          }.not_to raise_error
+        }
+      end
+
+      describe '#sort_url works even if search params are a string' do
+        before { @controller.view_context.params[:q] = 'input error' }
+        specify {
+          expect { @controller.view_context
+            .sort_url(
+              Person.ransack({}),
+              :name,
+              controller: 'people'
+            )
+          }.not_to raise_error
+        }
+      end
+
       describe '#sort_link with search_key defined as a string' do
         subject { @controller.view_context
           .sort_link(
@@ -474,7 +500,7 @@ module Ransack
           describe 'with symbol q:, #sort_link should include search params' do
             subject { @controller.view_context.sort_link(Person.ransack, :name) }
             let(:params) { ActionController::Parameters.new(
-              { :q => { name_eq: 'TEST' }, controller: 'people' }
+              { q: { name_eq: 'TEST' }, controller: 'people' }
               ) }
             before { @controller.instance_variable_set(:@params, params) }
 
@@ -489,7 +515,7 @@ module Ransack
           describe 'with symbol q:, #sort_url should include search params' do
             subject { @controller.view_context.sort_url(Person.ransack, :name) }
             let(:params) { ActionController::Parameters.new(
-              { :q => { name_eq: 'TEST' }, controller: 'people' }
+              { q: { name_eq: 'TEST' }, controller: 'people' }
               ) }
             before { @controller.instance_variable_set(:@params, params) }
 
@@ -724,6 +750,70 @@ module Ransack
           ) { 'Block label' }
         }
         it { should match /Block label&nbsp;&#9660;/ }
+      end
+
+      describe '#sort_link with class option' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.ransack(sorts: ['name desc'])],
+            :name,
+            class: 'people', controller: 'people'
+          )
+        }
+        it { should match /class="sort_link desc people"/ }
+        it { should_not match /people\?class=people/ }
+      end
+
+      describe '#sort_link with class option workaround' do
+        it "generates a correct link and prints a deprecation" do
+          expect do
+            link = @controller.view_context
+              .sort_link(
+                [:main_app, Person.ransack(sorts: ['name desc'])],
+                :name,
+                'name',
+                { controller: 'people' },
+                class: 'people'
+              )
+
+            expect(link).to match(/class="sort_link desc people"/)
+            expect(link).not_to match(/people\?class=people/)
+          end.to output(
+            /Passing two trailing hashes to `sort_link` is deprecated, merge the trailing hashes into a single one\. \(called at #{Regexp.escape(__FILE__)}:/
+          ).to_stderr
+        end
+      end
+
+      describe '#sort_link with data option' do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.ransack(sorts: ['name desc'])],
+            :name,
+            data: { turbo_action: :advance }, controller: 'people'
+          )
+        }
+        it { should match /data-turbo-action="advance"/ }
+        it { should_not match /people\?data%5Bturbo_action%5D=advance/ }
+      end
+
+      describe "#sort_link with host option" do
+        subject { @controller.view_context
+          .sort_link(
+            [:main_app, Person.ransack(sorts: ['name desc'])],
+            :name,
+            host: 'foo', controller: 'people'
+          )
+        }
+        it { should match /href="\/people\?q/ }
+        it { should_not match /href=".*foo/ }
+      end
+
+      describe "#sort_link ignores host in params" do
+        before { @controller.view_context.params[:host] = 'other_domain' }
+        subject { @controller.view_context.sort_link(Person.ransack, :name, controller: 'people') }
+
+        it { should match /href="\/people\?q/ }
+        it { should_not match /href=".*other_domain/ }
       end
 
       describe '#search_form_for with default format' do

@@ -33,7 +33,7 @@ module Ransack
         text = args.first
         i18n = options[:i18n] || {}
         text ||= object.translate(
-          method, i18n.reverse_merge(:include_associations => true)
+          method, i18n.reverse_merge(include_associations: true)
           ) if object.respond_to? :translate
         super(method, text, options, &block)
       end
@@ -240,7 +240,7 @@ module Ransack
       def get_attribute_element(action, base)
         begin
           [
-            Translate.association(base, :context => object.context),
+            Translate.association(base, context: object.context),
             collection_for_base(action, base)
           ]
         rescue UntraversableAssociationError
@@ -253,7 +253,7 @@ module Ransack
           [
             attr_from_base_and_column(base, c),
             Translate.attribute(
-              attr_from_base_and_column(base, c), :context => object.context
+              attr_from_base_and_column(base, c), context: object.context
             )
           ]
         end

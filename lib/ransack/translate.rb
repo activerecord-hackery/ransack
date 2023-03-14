@@ -66,7 +66,7 @@ module Ransack
             [:"ransack.associations.#{i18n_key(context.klass)}.#{key}"]
           end
         defaults << context.traverse(key).model_name.human
-        options = { :count => 1, :default => defaults }
+        options = { count: 1, default: defaults }
         I18n.translate(defaults.shift, **options)
       end
 
@@ -149,7 +149,7 @@ module Ransack
       end
 
       def i18n_key(klass)
-        raise "not implemented"
+        klass.model_name.i18n_key
       end
     end
   end

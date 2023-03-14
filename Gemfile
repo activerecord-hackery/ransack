@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '6-0-stable'
+rails = ENV['RAILS'] || '6-1-stable'
 
 rails_version = case rails
                 when /\// # A path
@@ -14,10 +14,10 @@ rails_version = case rails
                   rails
                 end
 
-gem 'faker', '~> 2.0'
-gem 'sqlite3', ::Gem::Version.new(rails_version == 'main' ? '6.2.0.alpha' : rails_version) >= ::Gem::Version.new('6-0-stable') ? '~> 1.4.1' : '~> 1.3.3'
-gem 'pg', '~> 1.0'
-gem 'pry', '~> 0.12.2'
+gem 'faker'
+gem 'sqlite3'
+gem 'pg'
+gem 'pry'
 gem 'byebug'
 
 case rails
@@ -28,26 +28,26 @@ when /\// # A path
   gem 'actionpack', path: "#{rails}/actionpack"
   gem 'actionview', path: "#{rails}/actionview"
 when /^v/ # A tagged version
-  git 'https://github.com/rails/rails.git', :tag => rails do
+  git 'https://github.com/rails/rails.git', tag: rails do
     gem 'activesupport'
     gem 'activemodel'
     gem 'activerecord', require: false
     gem 'actionpack'
   end
 else
-  git 'https://github.com/rails/rails.git', :branch => rails do
+  git 'https://github.com/rails/rails.git', branch: rails do
     gem 'activesupport'
     gem 'activemodel'
     gem 'activerecord', require: false
     gem 'actionpack'
   end
 end
-gem 'mysql2', '~> 0.5.2'
+gem 'mysql2'
 
 group :test do
   gem 'machinist', '~> 1.0.6'
-  gem 'rspec', '~> 3'
-  gem 'simplecov', :require => false
+  gem 'rspec'
+  gem 'simplecov', require: false
 end
 
 gem 'rubocop', require: false

@@ -8,7 +8,6 @@ module Ransack
         subject { ::ActiveRecord::Base }
 
         it { should respond_to :ransack }
-        it { should respond_to :search }
 
         describe '#search' do
           subject { Person.ransack }
@@ -76,6 +75,16 @@ module Ransack
               s = Person.ransack('over_age' => 18, 'active' => true)
               expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '18'} : 'age > 18')
               expect(s.result.to_sql).to (include 'active = 1')
+            end
+
+            it 'applies scopes that define string SQL joins' do
+              allow(Article)
+                .to receive(:ransackable_scopes)
+                .and_return([:latest_comment_cont])
+
+              # Including a negative condition to test removing the scope
+              s = Search.new(Article, notes_note_not_eq: 'Test', latest_comment_cont: 'Test')
+              expect(s.result.to_sql).to include 'latest_comment'
             end
 
             context "with sanitize_custom_scope_booleans set to false" do
@@ -648,6 +657,37 @@ module Ransack
             it { should_not include 'only_sort' }
             it { should include 'only_admin' }
           end
+
+          context 'when not defined in model, nor in ApplicationRecord' do
+            subject { Article.ransackable_attributes }
+
+            it "raises a helpful error" do
+              without_application_record_method(:ransackable_attributes) do
+                expect { subject }.to raise_error(RuntimeError, /Ransack needs Article attributes explicitly allowlisted/)
+              end
+            end
+          end
+
+          context 'when defined only in model by delegating to super' do
+            subject { Article.ransackable_attributes }
+
+            around do |example|
+              Article.singleton_class.define_method(:ransackable_attributes) do
+                super(nil) - super(nil)
+              end
+
+              example.run
+            ensure
+              Article.singleton_class.remove_method(:ransackable_attributes)
+            end
+
+            it "returns the allowlist in the model, and warns" do
+              without_application_record_method(:ransackable_attributes) do
+                expect { subject }.to output(/Ransack's builtin `ransackable_attributes` method is deprecated/).to_stderr
+                expect(subject).to be_empty
+              end
+            end
+          end
         end
 
         describe '#ransortable_attributes' do
@@ -680,6 +720,37 @@ module Ransack
           it { should include 'parent' }
           it { should include 'children' }
           it { should include 'articles' }
+
+          context 'when not defined in model, nor in ApplicationRecord' do
+            subject { Article.ransackable_associations }
+
+            it "raises a helpful error" do
+              without_application_record_method(:ransackable_associations) do
+                expect { subject }.to raise_error(RuntimeError, /Ransack needs Article associations explicitly allowlisted/)
+              end
+            end
+          end
+
+          context 'when defined only in model by delegating to super' do
+            subject { Article.ransackable_associations }
+
+            around do |example|
+              Article.singleton_class.define_method(:ransackable_associations) do
+                super(nil) - super(nil)
+              end
+
+              example.run
+            ensure
+              Article.singleton_class.remove_method(:ransackable_associations)
+            end
+
+            it "returns the allowlist in the model, and warns" do
+              without_application_record_method(:ransackable_associations) do
+                expect { subject }.to output(/Ransack's builtin `ransackable_associations` method is deprecated/).to_stderr
+                expect(subject).to be_empty
+              end
+            end
+          end
         end
 
         describe '#ransackable_scopes' do
@@ -695,6 +766,17 @@ module Ransack
         end
 
         private
+
+        def without_application_record_method(method)
+          ApplicationRecord.singleton_class.alias_method :"original_#{method}", :"#{method}"
+          ApplicationRecord.singleton_class.remove_method :"#{method}"
+
+          yield
+        ensure
+          ApplicationRecord.singleton_class.alias_method :"#{method}", :"original_#{method}"
+          ApplicationRecord.singleton_class.remove_method :"original_#{method}"
+        end
+
         def rails7_and_mysql
           ::ActiveRecord::VERSION::MAJOR >= 7 && ENV['DB'] == 'mysql'
         end

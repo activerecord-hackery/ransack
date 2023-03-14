@@ -1,6 +1,11 @@
-require 'ransack/nodes'
+require 'ransack/nodes/bindable'
+require 'ransack/nodes/node'
+require 'ransack/nodes/attribute'
+require 'ransack/nodes/value'
+require 'ransack/nodes/condition'
+require 'ransack/nodes/sort'
+require 'ransack/nodes/grouping'
 require 'ransack/context'
-Ransack::Adapters.object_mapper.require_search
 require 'ransack/naming'
 
 module Ransack
@@ -9,10 +14,10 @@ module Ransack
 
     attr_reader :base, :context
 
-    delegate :object, :klass, :to => :context
+    delegate :object, :klass, to: :context
     delegate :new_grouping, :new_condition,
              :build_grouping, :build_condition,
-             :translate, :to => :base
+             :translate, to: :base
 
     def initialize(object, params = {}, options = {})
       strip_whitespace = options.fetch(:strip_whitespace, Ransack.options[:strip_whitespace])
@@ -43,10 +48,10 @@ module Ransack
       collapse_multiparameter_attributes!(params).each do |key, value|
         if ['s'.freeze, 'sorts'.freeze].freeze.include?(key)
           send("#{key}=", value)
-        elsif base.attribute_method?(key)
-          base.send("#{key}=", value)
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
+        elsif base.attribute_method?(key)
+          base.send("#{key}=", value)
         elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
           raise ArgumentError, "Invalid search term #{key}"
         end

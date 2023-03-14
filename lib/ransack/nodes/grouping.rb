@@ -7,9 +7,9 @@ module Ransack
       alias :m= :combinator=
 
       i18n_word :condition, :and, :or
-      i18n_alias :c => :condition, :n => :and, :o => :or
+      i18n_alias c: :condition, n: :and, o: :or
 
-      delegate :each, :to => :values
+      delegate :each, to: :values
 
       def initialize(context, combinator = nil)
         super(context)
@@ -22,7 +22,7 @@ module Ransack
 
       def translate(key, options = {})
         super or Translate.attribute(
-          key.to_s, options.merge(:context => context)
+          key.to_s, options.merge(context: context)
         )
       end
 
