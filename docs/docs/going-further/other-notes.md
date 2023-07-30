@@ -182,7 +182,7 @@ for an `auth_object` key in the options hash which can be used by your own
 overridden methods.
 
 Here is an example that puts all this together, adapted from
-[this blog post by Ernie Miller](http://erniemiller.org/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
+[this blog post by Ernie Miller](https://ernie.io/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/).
 In an `Article` model, add the following `ransackable_attributes` class method
 (preferably private):
 
