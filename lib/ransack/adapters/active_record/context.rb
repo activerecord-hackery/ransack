@@ -12,8 +12,9 @@ module Ransack
 
         def type_for(attr)
           return nil unless attr && attr.valid?
+          relation     = attr.arel_attribute.relation
           name         = attr.arel_attribute.name.to_s
-          table        = attr.arel_attribute.relation.table_name
+          table        = relation.respond_to?(:table_name) ? relation.table_name : relation.name
           schema_cache = self.klass.connection.schema_cache
           unless schema_cache.send(:data_source_exists?, table)
             raise "No table named #{table} exists."
