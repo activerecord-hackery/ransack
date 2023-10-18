@@ -237,6 +237,20 @@ class Account < ApplicationRecord
   belongs_to :trade_account, class_name: "Account"
 end
 
+class Address < ApplicationRecord
+  has_one :organization
+end
+
+class Organization < ApplicationRecord
+  belongs_to :address
+  has_many :employees
+end
+
+class Employee < ApplicationRecord
+  belongs_to :organization
+  has_one :address, through: :organization
+end
+
 module Schema
   def self.create
     ActiveRecord::Migration.verbose = false
@@ -299,6 +313,20 @@ module Schema
       create_table :accounts, force: true do |t|
         t.belongs_to :agent_account
         t.belongs_to :trade_account
+      end
+
+      create_table :addresses, force: true do |t|
+        t.string :city
+      end
+
+      create_table :organizations, force: true do |t|
+        t.string :name
+        t.integer :address_id
+      end
+
+      create_table :employees, force: true do |t|
+        t.string :name
+        t.integer :organization_id
       end
     end
 

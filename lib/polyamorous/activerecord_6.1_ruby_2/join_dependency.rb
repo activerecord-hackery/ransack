@@ -56,11 +56,21 @@ module Polyamorous
     private
 
     def table_aliases_for(parent, node)
+      @joined_tables ||= {}
       node.reflection.chain.map { |reflection|
-        alias_tracker.aliased_table_for(reflection.klass.arel_table) do
-          root = reflection == node.reflection
-          name = reflection.alias_candidate(parent.table_name)
-          root ? name : "#{name}_join"
+        table, terminated = @joined_tables[reflection]
+        root = reflection == node.reflection
+
+        if table && (!root || !terminated)
+          @joined_tables[reflection] = [table, true] if root
+          table
+        else
+          table = alias_tracker.aliased_table_for(reflection.klass.arel_table) do
+            name = reflection.alias_candidate(parent.table_name)
+            root ? name : "#{name}_join"
+          end
+          @joined_tables[reflection] ||= [table, root] if join_type == Arel::Nodes::OuterJoin
+          table
         end
       }
     end
