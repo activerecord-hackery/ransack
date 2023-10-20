@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/activerecord-hackery/ransack"
   s.summary     = %q{Object-based searching for Active Record.}
   s.description = %q{Ransack is the successor to the MetaSearch gem. It improves and expands upon MetaSearch's functionality, but does not have a 100%-compatible API.}
-  s.required_ruby_version = '>= 2.7'
+  s.required_ruby_version = '>= 3.0'
   s.license     = 'MIT'
 
   s.add_dependency 'activerecord', '>= 6.1.5'
