@@ -3,6 +3,9 @@ AllCops:
 
   DisabledByDefault: true
 
+  Exclude:
+    - "docs/**/*"
+
 Layout/EmptyLineAfterMagicComment:
   Enabled: true
 
