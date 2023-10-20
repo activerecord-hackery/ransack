@@ -18,8 +18,8 @@ jobs:
           - v6.1.6
         ruby:
           - 3.2.2
-          - 3.1.2
-          - 3.0.4
+          - 3.1.4
+          - 3.0.6
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -44,8 +44,8 @@ jobs:
           - v6.1.6
         ruby:
           - 3.2.2
-          - 3.1.2
-          - 3.0.4
+          - 3.1.4
+          - 3.0.6
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -79,8 +79,8 @@ jobs:
           - v6.1.6
         ruby:
           - 3.2.2
-          - 3.1.2
-          - 3.0.4
+          - 3.1.4
+          - 3.0.6
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
@@ -122,7 +122,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1.2
+          ruby-version: 3.2.2
           bundler-cache: true
       - name: Run bug report templates
         run: |
