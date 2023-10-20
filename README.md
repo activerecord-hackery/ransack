@@ -13,7 +13,7 @@ There are advanced searching solutions around, like ElasticSearch or Algolia. **
 
 Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
 
-Ransack is supported for Rails 7.0, 6.1 on Ruby 2.7 and later.
+Ransack is supported for Rails 7.0, 6.1 on Ruby 3.0 and later.
 
 ## Installation
 

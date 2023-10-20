@@ -12,7 +12,6 @@ jobs:
       matrix:
         ruby:
           - 3.0.2
-          - 2.7.4
     env:
       DB: sqlite3
       RAILS: main
@@ -34,7 +33,6 @@ jobs:
       matrix:
         ruby:
           - 3.0.2
-          - 2.7.4
     env:
       DB: mysql
       RAILS: main
@@ -65,7 +63,6 @@ jobs:
       matrix:
         ruby:
           - 3.0.2
-          - 2.7.4
     env:
       DB: postgres
       RAILS: main
