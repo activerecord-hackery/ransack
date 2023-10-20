@@ -4572,9 +4572,9 @@ dns-equal@^1.0.0:
   integrity sha512-z+paD6YUQsk+AbGCEM4PrOXSss5gd66QfcVBFTKR/HpFL9jCqikS94HYwKww6fQyO7IxrIIyUu+g0Ka9tUS2Cg==
 
 dns-packet@^5.2.2:
-  version "5.3.1"
-  resolved "https://registry.yarnpkg.com/dns-packet/-/dns-packet-5.3.1.tgz#eb94413789daec0f0ebe2fcc230bdc9d7c91b43d"
-  integrity sha512-spBwIj0TK0Ey3666GwIdWVfUpLyubpU53BTCu8iPn4r4oXd9O14Hjg3EHw3ts2oed77/SeckunUYCyRlSngqHw==
+  version "5.6.1"
+  resolved "https://registry.yarnpkg.com/dns-packet/-/dns-packet-5.6.1.tgz#ae888ad425a9d1478a0674256ab866de1012cf2f"
+  integrity sha512-l4gcSouhcgIKRvyy99RNVOgxXiicE+2jZoNmaNmZ6JXiGajBOJAesk1OBlJuM5k2c+eudGdLxDqXuPCKIj6kpw==
   dependencies:
     "@leichtgewicht/ip-codec" "^2.0.1"
 
