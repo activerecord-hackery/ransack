@@ -6,13 +6,12 @@ on:
 
 jobs:
   sqlite3:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         ruby:
-          - 3.0.2
-          - 2.7.4
+          - 3.2.2
     env:
       DB: sqlite3
       RAILS: main
@@ -28,13 +27,12 @@ jobs:
         run: bundle exec rspec
 
   mysql:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         ruby:
-          - 3.0.2
-          - 2.7.4
+          - 3.2.2
     env:
       DB: mysql
       RAILS: main
@@ -59,13 +57,12 @@ jobs:
         run: bundle exec rspec
 
   postgres:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         ruby:
-          - 3.0.2
-          - 2.7.4
+          - 3.2.2
     env:
       DB: postgres
       RAILS: main

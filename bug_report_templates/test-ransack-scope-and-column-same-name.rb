@@ -12,7 +12,7 @@ unless File.exist?('Gemfile')
     source 'https://rubygems.org'
 
     # Rails master
-    gem 'rails', github: 'rails/rails', branch: '6-1-stable'
+    gem 'rails', github: 'rails/rails', branch: '7-1-stable'
 
     # Rails last release
     # gem 'rails'

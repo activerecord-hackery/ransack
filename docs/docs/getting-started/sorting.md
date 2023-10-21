@@ -10,70 +10,62 @@ title: Sorting
 You can add a form to capture sorting and filtering options together.
 
 ```erb
-<div class="filters" id="filtersSidebar">
-  <header class="filters-header">
-    <div class="filters-header-content">
-      <h3>Filters</h3>
-    </div>
-  </header>
+# app/views/posts/index.html.erb
 
-  <div class="filters-content">
-    <%= search_form_for @q,
-          class: 'form',
-          url: articles_path,
-          html: { autocomplete: 'off', autocapitalize: 'none' } do |f| %>
+<%= search_form_for @q do |f| %>
+  <%= f.label :title_cont %>
+  <%= f.search_field :title_cont %>
 
-      <div class="form-group">
-        <%= f.label :title_cont, t('Filter_by_keyword') %>
-        <%= f.search_field :title_cont %>
-      </div>
+  <%= f.submit "Search" %>
+<% end %>
 
-      <%= render partial: 'filters/date_title_sort', locals: { f: f } %>
+<table>
+  <thead>
+    <tr>
+      <th><%= sort_link(@q, :title, "Title") %></th>
+      <th><%= sort_link(@q, :category, "Category") %></th>
+      <th><%= sort_link(@q, :created_at, "Created at") %></th>
+    </tr>
+  </thead>
 
-      <div class="form-group">
-        <%= f.label :grade_level_gteq, t('Grade_level') %> >=
-        <%= f.search_field :grade_level_gteq  %>
-      </div>
-
-      <div class="form-group">
-        <%= f.label :readability_gteq, t('Readability') %> >=
-        <%= f.search_field :readability_gteq  %>
-      </div>
-
-      <div class="form-group">
-        <i><%= @articles.total_count %> articles</i>
-      </div>
-
-      <div class="form-group">
-        <hr/>
-        <div class="filters-header-content">
-          <%= link_to request.path, class: 'form-link' do %>
-            <i class="far fa-undo icon-l"></i><%= t('Clear_all') %>
-          <% end %>
-
-          <%= f.submit t('Filter'), class: 'btn btn-primary' %>
-        </div>
-      </div>    
+  <tbody>
+    <% @posts.each do |post| %>
+      <tr>
+        <td><%= post.title %></td>
+        <td><%= post.category %></td>
+        <td><%= post.created_at.to_s(:long) %></td>
+      </tr>
     <% end %>
-  </div>
-</div>
+  </tbody>
+</table>
 ```
-
 
 ## Sorting in the Controller
 
 To specify a default search sort field + order in the controller `index`:
 
 ```ruby
-@search = Post.ransack(params[:q])
-@search.sorts = 'name asc' if @search.sorts.empty?
-@posts = @search.result.paginate(page: params[:page], per_page: 20)
+# app/controllers/posts_controller.rb
+class PostsController < ActionController::Base
+  def index
+    @q = Post.ransack(params[:q])
+    @q.sorts = 'title asc' if @q.sorts.empty?
+
+    @posts = @q.result(distinct: true)
+  end
+end
 ```
 
 Multiple sorts can be set by:
 
 ```ruby
-@search = Post.ransack(params[:q])  
-@search.sorts = ['name asc', 'created_at desc'] if @search.sorts.empty?
-@posts = @search.result.paginate(page: params[:page], per_page: 20)
+# app/controllers/posts_controller.rb
+class PostsController < ActionController::Base
+  def index
+    @q = Post.ransack(params[:q])
+    @q.sorts = ['title asc', 'created_at desc'] if @q.sorts.empty?
+
+    @posts = @q.result(distinct: true)
+  end
+end
 ```
