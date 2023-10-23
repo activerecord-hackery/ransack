@@ -141,6 +141,22 @@ module Ransack
           end
         end
 
+        context 'has_one through associations' do
+          let(:address)  { Address.create!(city: 'Boston') }
+          let(:org) { Organization.create!(name: 'Testorg', address: address) }
+          let!(:employee) { Employee.create!(name: 'Ernie', organization: org) }
+
+          it 'works when has_one through association is first' do
+            s = Employee.ransack(address_city_eq: 'Boston', organization_name_eq: 'Testorg')
+            expect(s.result.to_a).to include(employee)
+          end
+
+          it 'works when has_one through association is last' do
+            s = Employee.ransack(organization_name_eq: 'Testorg', address_city_eq: 'Boston')
+            expect(s.result.to_a).to include(employee)
+          end
+        end
+
         context 'negative conditions on HABTM associations' do
           let(:medieval) { Tag.create!(name: 'Medieval') }
           let(:fantasy)  { Tag.create!(name: 'Fantasy') }
