@@ -11,10 +11,9 @@ if defined?(::ActiveRecord)
   require 'polyamorous/join'
   require 'polyamorous/swapping_reflection_class'
 
-  ar_version = ::ActiveRecord::VERSION::STRING[0, 3]
-  %w(join_association join_dependency reflection).each do |file|
-    require "polyamorous/activerecord_#{ar_version}_ruby_2/#{file}"
-  end
+  require 'polyamorous/activerecord/join_association'
+  require 'polyamorous/activerecord/join_dependency'
+  require 'polyamorous/activerecord/reflection'
 
   ActiveRecord::Reflection::AbstractReflection.send(:prepend, Polyamorous::ReflectionExtensions)
 
