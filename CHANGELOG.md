@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 4.1.1 - 2023-10-26
+
+### 🐛 Bug Fixes
+
+* Fix using ransack against edge Rails by @tvongaza in https://github.com/activerecord-hackery/ransack/pull/1445
+
 ## 4.1.0 - 2023-10-23
 
 ### 🚀 Features
