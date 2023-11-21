@@ -152,16 +152,16 @@ module Ransack
     end
 
     def ransackable_alias(str)
-      klass._ransack_aliases.fetch(str, str)
+      klass._ransack_aliases.fetch(str, klass._ransack_aliases.fetch(str.to_sym, str))
     end
 
     def ransackable_attribute?(str, klass)
-      klass.ransackable_attributes(auth_object).include?(str) ||
-        klass.ransortable_attributes(auth_object).include?(str)
+      klass.ransackable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym } ||
+        klass.ransortable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransackable_association?(str, klass)
-      klass.ransackable_associations(auth_object).include? str
+      klass.ransackable_associations(auth_object).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransackable_scope?(str, klass)
