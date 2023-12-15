@@ -126,6 +126,17 @@ class Person < ApplicationRecord
     Arel.sql(query)
   end
 
+  ransacker :article_tags, formatter: proc { |id|
+    if Tag.exists?(id)
+      joins(articles: :tags)
+        .where(tags: { id: id })
+        .distinct
+        .select(:id).arel
+    end
+  } do |parent|
+    parent.table[:id]
+  end
+
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       authorizable_ransackable_attributes - ['only_sort']
