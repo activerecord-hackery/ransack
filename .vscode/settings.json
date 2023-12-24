@@ -1,0 +1,4 @@
+{
+    "cmake.useCMakePresets": "always",
+    "cmake.options.statusBarVisibility": "visible"
+}
