@@ -350,8 +350,7 @@ module Ransack
       it 'evaluates conditions contextually' do
         s = Search.new(Person, children_name_eq: 'Ernie')
         expect(s.result).to be_an ActiveRecord::Relation
-        expect(s.result.to_sql).to match /#{
-          children_people_name_field} = 'Ernie'/
+        expect(s.result.to_sql).to match /#{children_people_name_field} = 'Ernie'/
       end
 
       it 'use appropriate table alias' do
@@ -423,10 +422,10 @@ module Ransack
         expect(s).to be_an ActiveRecord::Relation
         first, last = s.to_sql.split(/ AND /)
         expect(first).to match /#{children_people_name_field} = 'Ernie'/
-        expect(last).to match /#{
-          people_name_field} = 'Ernie' OR #{
-          quote_table_name("children_people_2")}.#{
-          quote_column_name("name")} = 'Ernie'/
+        expect(last).to match(Regexp.new(
+          "#{people_name_field} = 'Ernie' OR " +
+          "#{quote_table_name("children_people_2")}.#{quote_column_name("name")} = 'Ernie'")
+        )
       end
 
       it 'evaluates arrays of groupings' do
@@ -438,10 +437,8 @@ module Ransack
         ).result
         expect(s).to be_an ActiveRecord::Relation
         first, last = s.to_sql.split(/ AND /)
-        expect(first).to match /#{people_name_field} = 'Ernie' OR #{
-          children_people_name_field} = 'Ernie'/
-        expect(last).to match /#{people_name_field} = 'Bert' OR #{
-          children_people_name_field} = 'Bert'/
+        expect(first).to match /#{people_name_field} = 'Ernie' OR #{children_people_name_field} = 'Ernie'/
+        expect(last).to match /#{people_name_field} = 'Bert' OR #{children_people_name_field} = 'Bert'/
       end
 
       it 'returns distinct records when passed distinct: true' do
