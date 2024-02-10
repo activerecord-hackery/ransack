@@ -236,15 +236,16 @@ Ransack's `sort_url` helper is like a `sort_link` but returns only the url
   default_order: { last_name: 'asc', first_name: 'desc' }) %>
 ```
 
-### PostgreSQL's sort option
+### Fields sort option
 
+Does not work for MySQL.
 The `NULLS FIRST` and `NULLS LAST` options can be used to determine whether nulls appear before or after non-null values in the sort ordering.
 
 You may want to configure it like this:
 
 ```ruby
 Ransack.configure do |c|
-  c.postgres_fields_sort_option = :nulls_first # or :nulls_last
+  c.fields_sort_option = :nulls_first # or :nulls_last
 end
 ```
 
@@ -252,7 +253,7 @@ To treat nulls as having the lowest or highest value respectively. To force null
 
 ```ruby
 Ransack.configure do |c|
-  c.postgres_fields_sort_option = :nulls_always_first # or :nulls_always_last
+  c.fields_sort_option = :nulls_always_first # or :nulls_always_last
 end
 ```
 

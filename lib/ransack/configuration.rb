@@ -34,7 +34,7 @@ module Ransack
       down_arrow: '&#9650;'.freeze,
       default_arrow: nil,
       sanitize_scope_args: true,
-      postgres_fields_sort_option: nil,
+      fields_sort_option: nil,
       strip_whitespace: true
     }
 
@@ -162,13 +162,13 @@ module Ransack
     # User may want to configure it like this:
     #
     # Ransack.configure do |c|
-    #   c.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
+    #   c.fields_sort_option = :nulls_first # or e.g. :nulls_always_last
     # end
     #
     # See this feature: https://www.postgresql.org/docs/13/queries-order.html
     #
-    def postgres_fields_sort_option=(setting)
-      self.options[:postgres_fields_sort_option] = setting
+    def fields_sort_option=(setting)
+      self.options[:fields_sort_option] = setting
     end
 
     # By default, Ransack displays sort order indicator arrows in sort links.
