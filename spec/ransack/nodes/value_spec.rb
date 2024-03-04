@@ -25,7 +25,7 @@ module Ransack
       context "with a timestamp value" do
         let(:raw_value) { "2022-05-23 10:40:02 -0400" }
 
-        [:datetime, :timestamp, :time, :timestamptz].each do |type|
+        [:datetime, :timestamp, :time, :timestamptz, :datetimeoffset].each do |type|
           it "should cast #{type} correctly" do
             result = subject.cast(type)
 
