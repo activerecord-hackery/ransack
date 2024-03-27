@@ -21,6 +21,7 @@ require 'ransack/ransacker'
 require 'ransack/translate'
 require 'ransack/active_record'
 require 'ransack/context'
+require 'ransack/version'
 
 ActiveSupport.on_load(:action_controller) do
   require 'ransack/helpers'
