@@ -49,6 +49,34 @@ module Ransack
             expect(subject).to match(/<input.*?type="text".*?\/>/)
           end
         end
+
+        context "may be able to guess the type of the attribute" do
+          context "with :name_present (boolean) predicate" do
+            subject { @f.input(:name_present) }
+
+            it "the wrapping div should have class \"boolean\"" do
+              expect(subject).to match(/<div.*?class=".*?boolean.*?".*?>/)
+            end
+
+            it "should generate correct input type=\"checkbox\"" do
+              expect(subject).to match(/<input.*?type="checkbox".*?\/>/)
+            end
+          end
+
+          context "with :life_start_gteq predicate / date attribute " do
+            subject { @f.input(:life_start_gteq) }
+
+            it "the wrapping div should have class 'input date'" do
+              expect(subject).to match(/<div.*?class=".*?input date.*?".*?>/)
+            end
+
+            it "should generate selects for the fields of the date (year, month, day), at least" do
+              expect(subject).to match(/<select.*?name="q\[life_start_gteq\(1i\)\]".*?>/)
+              expect(subject).to match(/<select.*?name="q\[life_start_gteq\(2i\)\]".*?>/)
+              expect(subject).to match(/<select.*?name="q\[life_start_gteq\(3i\)\]".*?>/)
+            end
+          end
+        end
       end
     end
   end
