@@ -102,14 +102,14 @@ module Ransack
     def method_missing(method_id, *args)
       method_name = method_id.to_s
       getter_name = method_name.sub(/=$/, ''.freeze)
-      if base.attribute_method?(getter_name)
-        base.send(method_id, *args)
-      elsif @context.ransackable_scope?(getter_name, @context.object)
+      if @context.ransackable_scope?(getter_name, @context.object)
         if method_name =~ /=$/
           add_scope getter_name, args
         else
           @scope_args[method_name]
         end
+      elsif base.attribute_method?(getter_name)
+        base.send(method_id, *args)
       else
         super
       end
