@@ -7,6 +7,7 @@ require 'ransack/nodes/sort'
 require 'ransack/nodes/grouping'
 require 'ransack/context'
 require 'ransack/naming'
+require 'ransack/invalid_search_error'
 
 module Ransack
   class Search
@@ -53,7 +54,8 @@ module Ransack
         elsif base.attribute_method?(key)
           base.send("#{key}=", value)
         elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
-          raise ArgumentError, "Invalid search term #{key}"
+          puts '[DEPRECATED] ArgumentError raising will be depreated soon. Take care of replacing related rescues from ArgumentError to InvalidSearchError'
+          raise InvalidSearchError, "Invalid search term #{key}"
         end
       end
       self
@@ -78,8 +80,8 @@ module Ransack
       when String
         self.sorts = [args]
       else
-        raise ArgumentError,
-        "Invalid argument (#{args.class}) supplied to sorts="
+        puts '[DEPRECATED] ArgumentError raising will be depreated soon. Take care of replacing related rescues from ArgumentError to InvalidSearchError'
+        raise InvalidSearchError, "Invalid sorting parameter provided"
       end
     end
     alias :s= :sorts=
