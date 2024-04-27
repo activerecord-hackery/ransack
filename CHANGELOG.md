@@ -43,7 +43,7 @@
 
 ### 💥 Breaking Changes
 
-* **[SECURITY]** Require explict allowlisting of attributes and associations by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1400
+* **[SECURITY]** Require explicit allowlisting of attributes and associations by @deivid-rodriguez in https://github.com/activerecord-hackery/ransack/pull/1400
 * Remove Polyamorous entrypoint by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1370
 * Remove dead MongoDB code by @scarroll32 in https://github.com/activerecord-hackery/ransack/pull/1345
 
