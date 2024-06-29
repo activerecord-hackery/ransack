@@ -160,7 +160,7 @@ module Ransack
       it_has_behavior 'wildcard escaping', :name_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        elsif ["Mysql2", "Trilogy"].include?(ActiveRecord::Base.connection.adapter_name)
           /`people`.`name` LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" LIKE '%%._\\%'/
@@ -179,7 +179,7 @@ module Ransack
       it_has_behavior 'wildcard escaping', :name_not_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        elsif ["Mysql2", "Trilogy"].include?(ActiveRecord::Base.connection.adapter_name)
           /`people`.`name` NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" NOT LIKE '%%._\\%'/
@@ -198,7 +198,7 @@ module Ransack
       it_has_behavior 'wildcard escaping', :name_i_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        elsif ["Mysql2", "Trilogy"].include?(ActiveRecord::Base.connection.adapter_name)
           /LOWER\(`people`.`name`\) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /LOWER\("people"."name"\) LIKE '%%._\\%'/
@@ -217,7 +217,7 @@ module Ransack
       it_has_behavior 'wildcard escaping', :name_not_i_cont,
         (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        elsif ["Mysql2", "Trilogy"].include?(ActiveRecord::Base.connection.adapter_name)
           /LOWER\(`people`.`name`\) NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /LOWER\("people"."name"\) NOT LIKE '%%._\\%'/

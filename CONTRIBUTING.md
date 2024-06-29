@@ -73,17 +73,18 @@ Here's a quick guide:
    bundle exec rake spec
    ```
 
-   The test suite runs by default with SQLite3. To run the test suite with PostgreSQL or MySQL, use:
+   The test suite runs by default with SQLite3. To run the test suite with PostgreSQL, MySQL (Mysql2 adapter), or MySQL (Trilogy adapter), use:
 
    ```sh
    DB=pg bundle exec rake spec
    DB=mysql bundle exec rake spec
+   DB=trilogy bundle exec rake spec
    ```
-   
+
    A one-liner to run all three
    
    ```sh
-   bundle exec rake spec && DB=pg bundle exec rake spec && DB=mysql bundle exec rake spec
+   bundle exec rake spec && DB=pg bundle exec rake spec && DB=mysql bundle exec rake spec && DB=trilogy bundle exec rake spec
    ```
 
    For Postgres and MySQL, databases are expected to exist, called 'ransack'. To create use these commands (assuming OS X and Homebrew):
