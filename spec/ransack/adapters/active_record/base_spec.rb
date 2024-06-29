@@ -794,7 +794,7 @@ module Ransack
         end
 
         def rails7_and_mysql
-          ::ActiveRecord::VERSION::MAJOR >= 7 && ENV['DB'] == 'mysql'
+          ::ActiveRecord::VERSION::MAJOR >= 7 && ['mysql', 'trilogy'].include?(ENV['DB'])
         end
       end
     end

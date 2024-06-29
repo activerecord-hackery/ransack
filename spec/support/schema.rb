@@ -8,6 +8,17 @@ when 'mysql', 'mysql2'
     database: 'ransack',
     username: ENV.fetch("MYSQL_USERNAME") { "root" },
     password: ENV.fetch("MYSQL_PASSWORD") { "" },
+    host: ENV.fetch("MYSQL_HOST") { "localhost" },
+    encoding: 'utf8'
+  )
+when 'trilogy'
+  # To test with trilogy: `DB=trilogy bundle exec rake spec`
+  ActiveRecord::Base.establish_connection(
+    adapter:  'trilogy',
+    database: 'ransack',
+    username: ENV.fetch("MYSQL_USERNAME") { "root" },
+    password: ENV.fetch("MYSQL_PASSWORD") { "" },
+    host: ENV.fetch("MYSQL_HOST") { "localhost" },
     encoding: 'utf8'
   )
 when 'pg', 'postgres', 'postgresql'

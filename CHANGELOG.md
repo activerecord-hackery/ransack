@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Add support for Trilogy database adapter by @navels in https://github.com/activerecord-hackery/ransack/pull/1501
+
 ## 4.1.0 - 2023-10-23
 
 ### 🚀 Features
