@@ -13,13 +13,13 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - 7-2-stable
           - v7.1.0
           - v7.0.3
           - v6.1.6
         ruby:
           - 3.2.2
           - 3.1.4
-          - 3.0.6
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -39,13 +39,13 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - 7-2-stable
           - v7.1.0
           - v7.0.3
           - v6.1.6
         ruby:
           - 3.2.2
           - 3.1.4
-          - 3.0.6
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -74,13 +74,13 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - 7-2-stable
           - v7.1.0
           - v7.0.3
           - v6.1.6
         ruby:
           - 3.2.2
           - 3.1.4
-          - 3.0.6
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
