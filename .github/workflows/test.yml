@@ -13,6 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - v7.2.0
           - v7.1.0
           - v7.0.3
           - v6.1.6
@@ -39,6 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - v7.2.0
           - v7.1.0
           - v7.0.3
           - v6.1.6
@@ -74,6 +76,7 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - v7.2.0
           - v7.1.0
           - v7.0.3
           - v6.1.6
