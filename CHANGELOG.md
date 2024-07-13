@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 4.2.0 - 2023-10-23
+
+* Add Rails 7.2 support by @robinator and @gregmolnar
+
 ## 4.1.0 - 2023-10-23
 
 ### 🚀 Features
