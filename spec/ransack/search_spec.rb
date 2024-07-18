@@ -270,6 +270,13 @@ module Ransack
           end
 
           specify { expect { subject }.to raise_error ArgumentError }
+          specify { expect { subject }.to raise_error InvalidSearchError }
+
+          it 'writes a deprecation message about ArgumentError error raising' do
+            expect do
+              subject rescue ArgumentError
+            end.to output("[DEPRECATED] ArgumentError raising will be depreated soon. Take care of replacing related rescues from ArgumentError to InvalidSearchError\n").to_stdout
+          end
         end
 
         context 'when ignore_unknown_conditions configuration option is true' do
@@ -300,6 +307,13 @@ module Ransack
 
         context 'when ignore_unknown_conditions search parameter is false' do
           specify { expect { with_ignore_unknown_conditions_false }.to raise_error ArgumentError }
+          specify { expect { with_ignore_unknown_conditions_false }.to raise_error InvalidSearchError }
+
+          it 'writes a deprecation message about ArgumentError error raising' do
+            expect do
+              with_ignore_unknown_conditions_false rescue ArgumentError
+            end.to output("[DEPRECATED] ArgumentError raising will be depreated soon. Take care of replacing related rescues from ArgumentError to InvalidSearchError\n").to_stdout
+          end
         end
 
         context 'when ignore_unknown_conditions search parameter is true' do
@@ -350,8 +364,7 @@ module Ransack
       it 'evaluates conditions contextually' do
         s = Search.new(Person, children_name_eq: 'Ernie')
         expect(s.result).to be_an ActiveRecord::Relation
-        expect(s.result.to_sql).to match /#{
-          children_people_name_field} = 'Ernie'/
+        expect(s.result.to_sql).to match /#{children_people_name_field} = 'Ernie'/
       end
 
       it 'use appropriate table alias' do
@@ -423,10 +436,10 @@ module Ransack
         expect(s).to be_an ActiveRecord::Relation
         first, last = s.to_sql.split(/ AND /)
         expect(first).to match /#{children_people_name_field} = 'Ernie'/
-        expect(last).to match /#{
-          people_name_field} = 'Ernie' OR #{
-          quote_table_name("children_people_2")}.#{
-          quote_column_name("name")} = 'Ernie'/
+        expect(last).to match(Regexp.new(
+          "#{people_name_field} = 'Ernie' OR " +
+          "#{quote_table_name("children_people_2")}.#{quote_column_name("name")} = 'Ernie'")
+        )
       end
 
       it 'evaluates arrays of groupings' do
@@ -438,10 +451,8 @@ module Ransack
         ).result
         expect(s).to be_an ActiveRecord::Relation
         first, last = s.to_sql.split(/ AND /)
-        expect(first).to match /#{people_name_field} = 'Ernie' OR #{
-          children_people_name_field} = 'Ernie'/
-        expect(last).to match /#{people_name_field} = 'Bert' OR #{
-          children_people_name_field} = 'Bert'/
+        expect(first).to match /#{people_name_field} = 'Ernie' OR #{children_people_name_field} = 'Ernie'/
+        expect(last).to match /#{people_name_field} = 'Bert' OR #{children_people_name_field} = 'Bert'/
       end
 
       it 'returns distinct records when passed distinct: true' do
@@ -612,6 +623,25 @@ module Ransack
       it 'overrides existing sort' do
         @s.sorts = 'id asc'
         expect(@s.result.first.id).to eq 1
+      end
+
+      it 'raises InvalidSearchError when a invalid argument is sent' do
+        expect do
+          @s.sorts = 1234
+        end.to raise_error(Ransack::InvalidSearchError,  "Invalid sorting parameter provided")
+      end
+
+      it 'raises ArgumentError when a invalid argument is sent' do
+        expect do
+          @s.sorts = 1234
+        end.to raise_error(ArgumentError,  "Invalid sorting parameter provided")
+      end
+
+      it 'writes a deprecation message about ArgumentError error raising' do
+        expect do
+          @s.sorts = 1234
+        rescue ArgumentError
+        end.to output("[DEPRECATED] ArgumentError raising will be depreated soon. Take care of replacing related rescues from ArgumentError to InvalidSearchError\n").to_stdout
       end
 
       it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
