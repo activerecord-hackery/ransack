@@ -168,4 +168,16 @@ Syntax:
 * Prefer simplicity, readability, and maintainability over terseness.
 * Follow the conventions you see used in the code already.
 
+Notes:
+
+* If you are a macOS user ( homebrew ) and you get the following error
+   ```
+   ld: library 'zstd' not found
+   ```
+   You need to set the path to zstd in the environment variable library export.
+   Add the following command to your `.zshrc` .
+   ```
+   export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/
+   ```
+
 And in case we didn't emphasize it enough: We love tests!
