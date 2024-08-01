@@ -53,7 +53,7 @@ module Ransack
       end
 
       def []=(key, value)
-        conditions.reject! { |c| c.key == key.to_s }
+        conditions.reject! { |c| c.key == key.to_s && c.value == value.value }
         self.conditions << value
       end
 
