@@ -15,6 +15,7 @@
 ### 🚀 Features
 
 * Add Rails 7.1.0 support by @yuki24 in https://github.com/activerecord-hackery/ransack/pull/1439
+* Add ability to config any database (apart from MySQL) ORDER BY ... NULLS FIRST or NULLS LAST by @tttffff in https://github.com/activerecord-hackery/ransack/pull/1463
 
 ### 🐛 Bug Fixes
 
