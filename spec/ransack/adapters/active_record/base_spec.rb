@@ -131,8 +131,18 @@ module Ransack
             expect { Person.ransack('') }.to_not raise_error
           end
 
-          it 'raises exception if ransack! called with unknown condition' do
+          it 'raises InvalidSearchError exception if ransack! called with unknown condition' do
+            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(InvalidSearchError)
+          end
+
+          it 'raises ArgumentError exception if ransack! called with unknown condition' do
             expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(ArgumentError)
+          end
+
+          it 'writes a deprecation message about ArgumentError error raising' do
+            expect do
+              Person.ransack!(unknown_attr_eq: 'Ernie') rescue ArgumentError
+            end.to output("[DEPRECATED] ArgumentError raising will be depreated soon. Take care of replacing related rescues from ArgumentError to InvalidSearchError\n").to_stdout
           end
 
           it 'does not modify the parameters' do
