@@ -284,33 +284,33 @@ module Ransack
       end
 
       def arel_predicate
-        predicate = attributes.map { |attribute|
+        attributes.map { |attribute|
           association = attribute.parent
-          if negative? && attribute.associated_collection?
-            query = context.build_correlated_subquery(association)
-            context.remove_association(association)
-            if self.predicate_name == 'not_null' && self.value
-              query.where(format_predicate(attribute))
-              Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
-            else
-              query.where(format_predicate(attribute).not)
-              Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
-            end
-          else
-            format_predicate(attribute)
+          predicate = if negative? && attribute.associated_collection?
+                        query = context.build_correlated_subquery(association)
+                        context.remove_association(association)
+                        if self.predicate_name == 'not_null' && self.value
+                          query.where(format_predicate(attribute))
+                          Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
+                        else
+                          query.where(format_predicate(attribute).not)
+                          Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+                        end
+                      else
+                        format_predicate(attribute)
+                      end
+
+          if replace_right_node?(predicate)
+            # Replace right node object to plain integer value in order to avoid
+            # ActiveModel::RangeError from Arel::Node::Casted.
+            # The error can be ignored here because RDBMSs accept large numbers
+            # in condition clauses.
+            plain_value = predicate.right.value
+            predicate.right = plain_value
           end
+
+          predicate
         }.reduce(combinator_method)
-
-        if replace_right_node?(predicate)
-          # Replace right node object to plain integer value in order to avoid
-          # ActiveModel::RangeError from Arel::Node::Casted.
-          # The error can be ignored here because RDBMSs accept large numbers
-          # in condition clauses.
-          plain_value = predicate.right.value
-          predicate.right = plain_value
-        end
-
-        predicate
       end
 
       private
