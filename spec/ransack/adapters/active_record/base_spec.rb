@@ -239,6 +239,27 @@ module Ransack
             expect(s.result.to_a).to eq []
           end
 
+          it 'return alias correctly from search' do
+            s = Person.ransack(term_cont: 'atlo')
+            expect(s.term_cont).to eq 'atlo'
+            expect(s.name_or_email_cont).to eq nil
+
+            s = Person.ransack(daddy_cont: 'babi')
+            expect(s.daddy_cont).to eq 'babi'
+            expect(s.parent_name_cont).to eq nil
+
+            s = Person.ransack(
+              term_cont: 'atlo',
+              name_or_email_cont: 'different'
+            )
+            expect(s.term_cont).to eq 'atlo'
+            expect(s.name_or_email_cont).to eq 'different'
+            expect(s.result.to_sql).to include(/("|`)people("|`)\.("|`)name("|`) I?LIKE '%different%'/i)
+            expect(s.result.to_sql).to include(/("|`)people("|`)\.("|`)email("|`) I?LIKE '%different%'/i)
+            expect(s.result.to_sql).to include(/("|`)people("|`)\.("|`)name("|`) I?LIKE '%atlo%'/i)
+            expect(s.result.to_sql).to include(/("|`)people("|`)\.("|`)email("|`) I?LIKE '%atlo%'/i)
+          end
+
           it 'also works with associations' do
             dad = Person.create!(name: 'Birdman')
             son = Person.create!(name: 'Weezy', parent: dad)
