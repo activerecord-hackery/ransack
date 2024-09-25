@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 4.2.1 - 2024-8-11
+
+* Fix Rails 7.1.x compatibility
+
+## 4.2.0 - 2024-7-10
+
+* Add Rails 7.2 support by @robinator and @gregmolnar
+
 ## 4.1.0 - 2023-10-23
 
 ### 🚀 Features

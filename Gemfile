@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '7-1-stable'
+rails = ENV['RAILS'] || '7-2-stable'
 
 rails_version = case rails
                 when /\// # A path
@@ -15,7 +15,7 @@ rails_version = case rails
                 end
 
 gem 'faker'
-gem 'sqlite3'
+gem 'sqlite3', '~> 1.4'
 gem 'pg'
 gem 'pry'
 gem 'byebug'
