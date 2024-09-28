@@ -15,7 +15,7 @@ if defined?(::ActiveRecord)
   require 'polyamorous/activerecord/join_dependency'
   require 'polyamorous/activerecord/reflection'
 
-  if ::ActiveRecord.version > ::Gem::Version.new("7.1")
+  if ::ActiveRecord.version >= ::Gem::Version.new("7.2")
     require "polyamorous/activerecord/join_association_7_2"
   end
 
