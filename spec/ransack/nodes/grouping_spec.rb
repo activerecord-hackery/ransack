@@ -106,6 +106,23 @@ module Ransack
         end
       end
 
+      describe "#read_attribute" do
+          let(:conditions) do
+            {
+              '0' => {
+                'a' => { '0'=> { 'name' => 'parent_name', 'ransacker_args' => '' } },
+                'p' => 'cont',
+                'v' => { '0' => { 'value' => 'John' } }
+              },
+            }
+          end
+          before { subject.conditions = conditions }
+
+          it "works with aliases" do
+            expect(subject.parent_name_cont).to eq("John")
+            expect(subject.daddy_cont).to eq("John")
+          end
+      end
     end
   end
 end
