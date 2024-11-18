@@ -147,6 +147,43 @@ module Ransack
         expect(s.result.to_sql).to include 'published'
       end
 
+      # The failure/oversight in Ransack::Nodes::Condition#arel_predicate or deeper is beyond my understanding of the structures
+      it 'preserves (inverts) default scope and conditions for negative subqueries' do
+        # the positive case (published_articles_title_eq) is
+        # SELECT "people".* FROM "people"
+        # LEFT OUTER JOIN "articles" ON "articles"."person_id" = "people"."id"
+        #   AND "articles"."published" = 't'
+        #   AND ('default_scope' = 'default_scope')
+        # WHERE "articles"."title" = 'Test' ORDER BY "people"."id" DESC
+        #
+        # negative case was
+        # SELECT "people".* FROM "people" WHERE "people"."id" NOT IN (
+        #   SELECT "articles"."person_id" FROM "articles"
+        #   WHERE "articles"."person_id" = "people"."id"
+        #     AND NOT ("articles"."title" != 'Test')
+        # ) ORDER BY "people"."id" DESC
+        #
+        # Should have been like
+        # SELECT "people".* FROM "people" WHERE "people"."id" NOT IN (
+        #   SELECT "articles"."person_id" FROM "articles"
+        #   WHERE "articles"."person_id" = "people"."id"
+        #     AND "articles"."title" = 'Test' AND "articles"."published" = 't' AND ('default_scope' = 'default_scope')
+        # ) ORDER BY "people"."id" DESC
+        #
+        # With tenanting (eg default_scope with column reference), NOT IN should be like
+        # SELECT "people".* FROM "people" WHERE "people"."tenant_id" = 'tenant_id' AND "people"."id" NOT IN (
+        #   SELECT "articles"."person_id" FROM "articles"
+        #   WHERE "articles"."person_id" = "people"."id"
+        #     AND "articles"."tenant_id" = 'tenant_id'
+        #     AND "articles"."title" = 'Test' AND "articles"."published" = 't' AND ('default_scope' = 'default_scope')
+        # ) ORDER BY "people"."id" DESC
+
+        #pending("spec should pass, but I do not know how/where to fix lib code")
+        s = Search.new(Person, published_articles_title_not_eq: 'Test')
+        expect(s.result.to_sql).to include 'default_scope'
+        expect(s.result.to_sql).to include 'published'
+      end
+
       it 'discards empty conditions' do
         s = Search.new(Person, children_name_eq: '')
         condition = s.base[:children_name_eq]
