@@ -21,6 +21,7 @@ else
   gem 'sqlite3', '~> 1.4'
 end
 gem 'pg'
+gem 'activerecord-postgis-adapter'
 gem 'pry'
 gem 'byebug'
 

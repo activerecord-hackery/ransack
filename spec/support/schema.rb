@@ -1,4 +1,5 @@
 require 'active_record'
+require 'activerecord-postgis-adapter'
 
 case ENV['DB'].try(:downcase)
 when 'mysql', 'mysql2'
@@ -14,6 +15,17 @@ when 'pg', 'postgres', 'postgresql'
   # To test with PostgreSQL: `DB=postgresql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter: 'postgresql',
+    database: 'ransack',
+    username: ENV.fetch("DATABASE_USERNAME") { "postgres" },
+    password: ENV.fetch("DATABASE_PASSWORD") { "" },
+    host: ENV.fetch("DATABASE_HOST") { "localhost" },
+    min_messages: 'warning'
+  )
+when 'postgis'
+  # To test with PostGIS: `DB=postgis bundle exec rake spec`
+  ActiveRecord::Base.establish_connection(
+    adapter: 'postgis',
+    postgis_extension: 'postgis',
     database: 'ransack',
     username: ENV.fetch("DATABASE_USERNAME") { "postgres" },
     password: ENV.fetch("DATABASE_PASSWORD") { "" },

@@ -73,6 +73,51 @@ jobs:
       - name: Run tests
         run: bundle exec rspec
 
+  postgis:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        rails:
+          - 7-2-stable
+          - v7.1.0
+        ruby:
+          - 3.2.2
+          - 3.1.4
+    env:
+      DB: postgis
+      RAILS: ${{ matrix.rails }}
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: 127.0.0.1
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Setup databases
+        run: |
+          psql -h localhost -p 5432 -W postgres -c 'create database ransack;' -U postgres;
+      - name: Run tests
+        run: bundle exec rspec
+
   postgres:
     runs-on: ubuntu-latest
     strategy:
