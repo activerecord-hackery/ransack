@@ -263,7 +263,7 @@ end
 
 ```ruby
 Article.ransack(unknown_attr_eq: 'Ernie')
-# ArgumentError (Invalid search term unknown_attr_eq)
+# Ransack::InvalidSearchError (Invalid search term unknown_attr_eq)
 ```
 
 As an alternative to setting a global configuration option, the `.ransack!`
@@ -271,7 +271,7 @@ class method also raises an error if passed an unknown condition:
 
 ```ruby
 Article.ransack!(unknown_attr_eq: 'Ernie')
-# ArgumentError: Invalid search term unknown_attr_eq
+# Ransack::InvalidSearchError: Invalid search term unknown_attr_eq
 ```
 
 This is equivalent to the `ignore_unknown_conditions` configuration option,
