@@ -126,8 +126,8 @@ to `jsonb`, as [recommended by the PostgreSQL documentation](https://www.postgre
 
 ### Authorization (allowlisting/denylisting)
 
-By default, searching and sorting are authorized on any column of your model
-and no class methods/scopes are whitelisted.
+By default, searching and sorting are not authorized on any column of your model
+and no class methods/scopes are allowlisted.
 
 Ransack adds four methods to `ActiveRecord::Base` that you can redefine as
 class methods in your models to apply selective authorization:
@@ -137,28 +137,25 @@ class methods in your models to apply selective authorization:
 - `ransackable_scopes`
 - `ransortable_attributes`
 
-Here is how these four methods are implemented in Ransack:
+Here is how these four methods could be implemented in your application:
 
 ```ruby
-  # `ransackable_attributes` by default returns all column names
+  # `ransackable_attributes` returns searchable column names
   # and any defined ransackers as an array of strings.
-  # For overriding with a whitelist array of strings.
   #
   def ransackable_attributes(auth_object = nil)
-    column_names + _ransackers.keys
+    %w(title body) + _ransackers.keys
   end
 
-  # `ransackable_associations` by default returns the names
-  # of all associations as an array of strings.
-  # For overriding with a whitelist array of strings.
+  # `ransackable_associations` returns the names
+  # of searchable associations as an array of strings.
   #
   def ransackable_associations(auth_object = nil)
-    reflect_on_all_associations.map { |a| a.name.to_s }
+    %w[author]
   end
 
   # `ransortable_attributes` by default returns the names
   # of all attributes available for sorting as an array of strings.
-  # For overriding with a whitelist array of strings.
   #
   def ransortable_attributes(auth_object = nil)
     ransackable_attributes(auth_object)
@@ -166,7 +163,7 @@ Here is how these four methods are implemented in Ransack:
 
   # `ransackable_scopes` by default returns an empty array
   # i.e. no class methods/scopes are authorized.
-  # For overriding with a whitelist array of *symbols*.
+  # For overriding with an allowlist, return an array of *symbols*.
   #
   def ransackable_scopes(auth_object = nil)
     []
@@ -190,11 +187,11 @@ In an `Article` model, add the following `ransackable_attributes` class method
 class Article < ActiveRecord::Base
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
-      # whitelist all attributes for admin
-      super
+      # allow all attributes for admin
+      column_names + _ransackers.keys
     else
-      # whitelist only the title and body attributes for other users
-      super & %w(title body)
+      # allow only the title and body attributes for other users
+      %w(title body)
     end
   end
 
@@ -241,7 +238,7 @@ Trying it out in `rails console`:
 => SELECT "articles".* FROM "articles"  WHERE "articles"."id" = 1
 ```
 
-That's it! Now you know how to whitelist/blacklist various elements in Ransack.
+That's it! Now you know how to allow/block various elements in Ransack.
 
 ### Handling unknown predicates or attributes
 
