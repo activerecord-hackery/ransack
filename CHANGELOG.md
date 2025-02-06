@@ -1,7 +1,7 @@
 # Change Log
 
 ## Unreleased
-
+* Rails 8 compatibility
 * Drop Rails 6 and 7.0 compatibility
 
 ## 4.2.1 - 2024-8-11
