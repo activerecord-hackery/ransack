@@ -22,6 +22,9 @@ jobs:
         exclude:
           - rails: 8-0-stable
             ruby: 3.1.4
+exclude:
+          - rails: 8-0-stable
+            ruby: 3.1.4
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -41,11 +44,16 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - 8-0-stable
           - 7-2-stable
           - v7.1.0
         ruby:
           - 3.2.2
           - 3.1.4
+        exclude:
+          - rails: 8-0-stable
+            ruby: 3.1.4
+
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -74,11 +82,15 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - 8-0-stable
           - 7-2-stable
           - v7.1.0
         ruby:
           - 3.2.2
           - 3.1.4
+        exclude:
+          - rails: 8-0-stable
+            ruby: 3.1.4
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
