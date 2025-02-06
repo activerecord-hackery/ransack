@@ -15,7 +15,7 @@ rails_version = case rails
                 end
 
 gem 'faker'
-gem 'sqlite3', '~> 1.4'
+gem 'sqlite3', '>= 2.1'
 gem 'pg'
 gem 'pry'
 gem 'byebug'
