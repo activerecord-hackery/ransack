@@ -15,7 +15,7 @@ rails_version = case rails
                 end
 
 gem 'faker'
-if ::Gem::Version.new(rails) > ::Gem::Version.new('7.3')
+if ::Gem::Version.new(rails_version) > ::Gem::Version.new('7.3')
   gem 'sqlite3', '>= 2.1'
 else
   gem 'sqlite3', '~> 1.4'
