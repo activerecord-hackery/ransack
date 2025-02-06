@@ -22,9 +22,6 @@ jobs:
         exclude:
           - rails: 8-0-stable
             ruby: 3.1.4
-exclude:
-          - rails: 8-0-stable
-            ruby: 3.1.4
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
