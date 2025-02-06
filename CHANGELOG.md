@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Drop Rails 6 and 7.0 compatibility
+
 ## 4.2.1 - 2024-8-11
 
 * Fix Rails 7.1.x compatibility
