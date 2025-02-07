@@ -147,7 +147,6 @@ module Ransack
         expect(s.result.to_sql).to include 'published'
       end
 
-      # The failure/oversight in Ransack::Nodes::Condition#arel_predicate or deeper is beyond my understanding of the structures
       it 'preserves (inverts) default scope and conditions for negative subqueries' do
         # the positive case (published_articles_title_eq) is
         # SELECT "people".* FROM "people"
@@ -178,7 +177,6 @@ module Ransack
         #     AND "articles"."title" = 'Test' AND "articles"."published" = 't' AND ('default_scope' = 'default_scope')
         # ) ORDER BY "people"."id" DESC
 
-        pending("spec should pass, but I do not know how/where to fix lib code")
         s = Search.new(Person, published_articles_title_not_eq: 'Test')
         expect(s.result.to_sql).to include 'default_scope'
         expect(s.result.to_sql).to include 'published'
