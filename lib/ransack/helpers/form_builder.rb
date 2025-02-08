@@ -1,23 +1,5 @@
 require 'action_view'
 
-module ActionView::Helpers::Tags
-  # TODO: Find a better way to solve this issue!
-  # This patch is needed since this Rails commit:
-  # https://github.com/rails/rails/commit/c1a118a
-  class Base
-    private
-    if defined? ::ActiveRecord
-      def value
-        if @allow_method_names_outside_object
-          object.send @method_name if object && object.respond_to?(@method_name, true)
-        else
-          object.send @method_name if object
-        end
-      end
-    end
-  end
-end
-
 RANSACK_FORM_BUILDER = 'RANSACK_FORM_BUILDER'.freeze
 
 require 'simple_form' if
@@ -130,6 +112,7 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
+        options[:selected] ||= nil
         default = options.delete(:default) || Constants::CONT
 
         keys =
