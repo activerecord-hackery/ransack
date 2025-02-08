@@ -178,6 +178,13 @@ module Ransack
       end
 
       def read_attribute(name)
+        if self[name].nil?
+          stripped_name = name.dup
+          predicate = Predicate.detect_and_strip_from_string!(stripped_name)
+          aliased_attribute = context.ransackable_alias(stripped_name)
+          name = "#{aliased_attribute}_#{predicate}" unless aliased_attribute == stripped_name
+        end
+
         if self[name].respond_to?(:value)
           self[name].value
         else
