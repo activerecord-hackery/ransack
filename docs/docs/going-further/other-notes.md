@@ -411,15 +411,33 @@ artists.result.to_sql
     OR \"musicians\".\"email\" ILIKE '%bar%'))"
 ```
 
-### Using SimpleForm
+### Using SimpleForm with Ransack
 
-If you would like to combine the Ransack and SimpleForm form builders, set the
-`RANSACK_FORM_BUILDER` environment variable before Rails boots up, e.g. in
-`config/application.rb` before `require 'rails/all'` as shown below (and add
-`gem 'simple_form'` in your Gemfile).
+To integrate Ransack with SimpleForm, use the `search_simple_form_for` helper
+instead of `search_form_for`. This helper specifically utilizes SimpleForm's
+capabilities to construct your form, ensuring that form fields are
+automatically tailored to match the expected input types based on the
+attribute definitions.
 
-```ruby
-require File.expand_path('../boot', __FILE__)
-ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'
-require 'rails/all'
+```erb
+<%= search_simple_form_for @q do |f| %>
+  <%= f.input :name_cont %>
+  <%= f.input :employee_name_present %>
+  <%= f.input :created_at_gteq %>
+  <%= f.button :submit %>
+<% end %>
 ```
+
+In the example above, if you are employing Bootstrap wrappers with SimpleForm,
+the generated form will include appropriate wrapper **divs** and **classes**.
+The form builder intelligently determines the input type: it uses **boolean**
+for predicates ending in **_present** and **date** for attributes like
+**created_at**.
+
+**Important Update:** Previously, integrating SimpleForm with Ransack required
+setting the environment variable `RANSACK_FORM_BUILDER` to
+`::SimpleForm::FormBuilder`.
+
+With the introduction of the `search_simple_form_for` helper, this workaround
+is obsolete and will be deprecated. Using the new helper is the recommended
+approach moving forward.
