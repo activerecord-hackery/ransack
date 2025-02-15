@@ -710,6 +710,15 @@ module Ransack
           end
         end
 
+        describe '.ransack_allow_attributes' do
+          subject { Article }
+
+          it 'has a class method returning an array with title and subject_header elements' do
+            subject.ransack_allow_attributes :title, :subject_header
+            expect(subject.ransackable_attributes).to match_array(%w[title subject_header])
+          end
+        end
+
         describe '#ransortable_attributes' do
           context 'when auth_object is nil' do
             subject { Person.ransortable_attributes }
@@ -773,10 +782,28 @@ module Ransack
           end
         end
 
+        describe '.ransack_allow_associations' do
+          subject { Article }
+
+          it 'has a class method returning an array with string "person" element' do
+            subject.ransack_allow_associations :person
+            expect(subject.ransackable_associations).to match_array(%w[person])
+          end
+        end
+
         describe '#ransackable_scopes' do
           subject { Person.ransackable_scopes }
 
           it { should eq [] }
+        end
+
+        describe '.ransack_allow_scopes' do
+          subject { Article }
+
+          it 'has a class method returning an array with string "latest_comment_cont" element' do
+            subject.ransack_allow_scopes :latest_comment_cont
+            expect(subject.ransackable_scopes).to match_array(%w[latest_comment_cont])
+          end
         end
 
         describe '#ransackable_scopes_skip_sanitize_args' do
