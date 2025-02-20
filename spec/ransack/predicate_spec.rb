@@ -167,9 +167,10 @@ module Ransack
 
     describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
-        (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+        (case ActiveRecord::Base.connection.adapter_name
+        when "PostGIS", "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        when "Mysql2"
           /`people`.`name` LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" LIKE '%%._\\%'/
@@ -186,9 +187,10 @@ module Ransack
 
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont,
-        (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+        (case ActiveRecord::Base.connection.adapter_name
+        when "PostGIS", "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        when  "Mysql2"
           /`people`.`name` NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" NOT LIKE '%%._\\%'/
@@ -205,9 +207,12 @@ module Ransack
 
     describe 'i_cont' do
       it_has_behavior 'wildcard escaping', :name_i_cont,
-        (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+        (case ActiveRecord::Base.connection.adapter_name
+        when "PostGIS"
+          /LOWER\("people"."name"\) ILIKE '%\\%\\.\\_\\\\%'/
+        when "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        when "Mysql2"
           /LOWER\(`people`.`name`\) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /LOWER\("people"."name"\) LIKE '%%._\\%'/
@@ -224,9 +229,12 @@ module Ransack
 
     describe 'not_i_cont' do
       it_has_behavior 'wildcard escaping', :name_not_i_cont,
-        (if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+        (case ActiveRecord::Base.connection.adapter_name
+        when "PostGIS"
+          /LOWER\("people"."name"\) NOT ILIKE '%\\%\\.\\_\\\\%'/
+        when "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        elsif ActiveRecord::Base.connection.adapter_name == "Mysql2"
+        when "Mysql2"
           /LOWER\(`people`.`name`\) NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /LOWER\("people"."name"\) NOT LIKE '%%._\\%'/
