@@ -131,8 +131,12 @@ module Ransack
             expect { Person.ransack('') }.to_not raise_error
           end
 
-          it 'raises exception if ransack! called with unknown condition' do
+          it 'raises ArgumentError exception if ransack! called with unknown condition' do
             expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(ArgumentError)
+          end
+
+          it 'raises InvalidSearchError exception if ransack! called with unknown condition' do
+            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(InvalidSearchError)
           end
 
           it 'does not modify the parameters' do
