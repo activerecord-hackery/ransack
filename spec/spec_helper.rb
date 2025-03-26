@@ -1,13 +1,12 @@
-require 'machinist/active_record'
-require 'polyamorous/polyamorous'
+require 'ransack'
 require 'sham'
 require 'faker'
-require 'ransack'
 require 'action_controller'
 require 'ransack/helpers'
 require 'pry'
 require 'simplecov'
 require 'byebug'
+require 'machinist/active_record'
 
 SimpleCov.start
 I18n.enforce_available_locales = false

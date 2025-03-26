@@ -1,4 +1,4 @@
-if defined?(::ActiveRecord)
+ActiveSupport.on_load(:active_record) do
   module Polyamorous
     InnerJoin = Arel::Nodes::InnerJoin
     OuterJoin = Arel::Nodes::OuterJoin
