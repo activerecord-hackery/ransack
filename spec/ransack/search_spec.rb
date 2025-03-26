@@ -479,6 +479,11 @@ module Ransack
         @s = Search.new(Person)
       end
 
+      it 'doesn\'t creates sorts' do
+        @s.sorts = ''
+        expect(@s.sorts.size).to eq(0)
+      end
+
       it 'creates sorts based on a single attribute/direction' do
         @s.sorts = 'id desc'
         expect(@s.sorts.size).to eq(1)
