@@ -42,6 +42,15 @@ module Ransack
         field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
         expect(@s.result.to_sql).to match /#{field} = #{val}/
       end
+
+      it 'generates a condition for multiple fields with a huge integer value' do
+        val = 123456789012345678901
+        @s.salary_or_articles_title_eq = val
+        person_field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        article_field = "#{quote_table_name("articles")}.#{quote_column_name("title")}"
+        expect(@s.result.to_sql).to match /#{person_field} = #{val}/
+        expect(@s.result.to_sql).to match /#{article_field} = '#{val}'/
+      end
     end
 
     describe 'lteq' do
