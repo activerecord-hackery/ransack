@@ -141,6 +141,24 @@ module Ransack
           expect(attribute.relation.table_alias).to be_nil
         end
 
+        describe '#scope_arity' do
+          it 'calculates arity correctly for method' do
+            expect(subject.scope_arity("active_m")).to eq 1
+            expect(subject.scope_arity("active_md")).to eq 1
+          end
+
+          it 'calculates arity correctly for scopes with lambdas' do
+            expect(subject.scope_arity("restricted")).to eq 0
+            expect(subject.scope_arity("over_age")).to eq 1
+            expect(subject.scope_arity("active_ld")).to eq 1
+          end
+
+          it 'calculates arity correctly for scopes with procs with 0 or 1 argument' do
+            expect(subject.scope_arity("active")).to eq 0
+            expect(subject.scope_arity("of_age")).to eq 1
+            expect(subject.scope_arity("active_pd")).to eq 1
+          end
+        end
       end
     end
   end

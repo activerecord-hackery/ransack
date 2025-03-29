@@ -74,7 +74,7 @@ module Ransack
     end
 
     def chain_scope(scope, args)
-      return unless @klass.method(scope) && args != false
+      return unless @klass.method(scope) && (args != false || scope_arity(scope) == 1)
       @object = if scope_arity(scope) < 1 && args == true
                   @object.public_send(scope)
                 else
@@ -83,7 +83,22 @@ module Ransack
     end
 
     def scope_arity(scope)
-      @klass.method(scope).arity
+      arity = @klass.method(scope).arity
+      return arity if arity > -1
+      begin
+        zero = klass.send(scope)
+        one = klass.send(scope, 2)
+        many = klass.send(scope, *(2..100).to_a)
+        if many.to_sql == zero.to_sql
+          arity = 0
+        elsif many.to_sql == one.to_sql
+          arity = 1
+        end
+      rescue ArgumentError => e
+        arr = e.message.scan(/expected\s+(\d+)(\.\.(\d+))?/).flatten
+        arity = [arr[0].to_i, arr[2].to_i].max
+      rescue e; end
+      arity
     end
 
     def bind(object, str)
