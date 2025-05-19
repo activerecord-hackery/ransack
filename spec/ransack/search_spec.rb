@@ -342,6 +342,9 @@ module Ransack
       let(:people_name_field) {
         "#{quote_table_name("people")}.#{quote_column_name("name")}"
       }
+      let(:people_temperament_field) {
+        "#{quote_table_name("people")}.#{quote_column_name("temperament")}"
+      }
       let(:children_people_name_field) {
         "#{quote_table_name("children_people")}.#{quote_column_name("name")}"
       }
@@ -354,6 +357,36 @@ module Ransack
         expect(s.result).to be_an ActiveRecord::Relation
         expect(s.result.to_sql).to match /#{
           children_people_name_field} = 'Ernie'/
+      end
+
+      context 'when evaluating enums' do
+        before do
+          Person.take.update_attribute(:temperament, 'choleric')
+        end
+
+        it 'evaluates enum key correctly' do
+          s = Search.new(Person, temperament_eq: 'choleric')
+
+          expect(s.result.to_sql).not_to match /#{
+          people_temperament_field} = 0/
+
+          expect(s.result.to_sql).to match /#{
+          people_temperament_field} = #{Person.temperaments[:choleric]}/
+
+          expect(s.result).not_to be_empty
+        end
+
+        it 'evaluates enum value correctly' do
+          s = Search.new(Person, temperament_eq: Person.temperaments[:choleric])
+
+          expect(s.result.to_sql).not_to match /#{
+          people_temperament_field} = 0/
+
+          expect(s.result.to_sql).to match /#{
+          people_temperament_field} = #{Person.temperaments[:choleric]}/
+
+          expect(s.result).not_to be_empty
+        end
       end
 
       it 'use appropriate table alias' do
