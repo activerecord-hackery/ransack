@@ -201,7 +201,6 @@ module Ransack
               nil
             end
           when Arel::Nodes::And
-            # To support nested children
             if join_root.children.any?
               join_root.children.each do |child|
                 eck = extract_correlated_key(child)

@@ -235,6 +235,9 @@ module Ransack
             val = attr.ransacker.formatter.call(val)
           end
           val = predicate.format(val)
+          if val.is_a?(String) && (val.starts_with?('%') || val.ends_with?('%'))
+            val = Arel::Nodes::Quoted.new(val)
+          end
           val
         end
         if predicate.wants_array
@@ -290,16 +293,22 @@ module Ransack
           association = attribute.parent
           parent_table = association.table
 
-          if parent_table.class == Arel::Nodes::TableAlias && association.reflection.class == ActiveRecord::Reflection::ThroughReflection
-            parent_table.right = parent_table.left.name
-          end
-
           if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
             query = context.build_correlated_subquery(association)
             context.remove_association(association)
-            if self.predicate_name == 'not_null' && self.value
-              query.where(format_predicate(attribute))
-              Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
+
+            case self.predicate_name
+            when 'not_null'
+              if self.value
+                query.where(format_predicate(attribute))
+                Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
+              else
+                query.where(format_predicate(attribute).not)
+                Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+              end
+            when 'not_cont'
+              query.where(attribute.attr.matches(formatted_values_for_attribute(attribute)))
+              Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
             else
               query.where(format_predicate(attribute).not)
               Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
