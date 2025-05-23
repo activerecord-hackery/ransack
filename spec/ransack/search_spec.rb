@@ -336,7 +336,6 @@ module Ransack
           expect(s.base[:name_eq]).to be_nil
         end
       end
-
     end
 
     describe '#result' do
