@@ -66,6 +66,7 @@ module Ransack
               }
             }
           end
+
           before { subject.conditions = conditions }
 
           it 'expect duplicates to be removed' do
@@ -98,6 +99,7 @@ module Ransack
               }
             }
           end
+
           before { subject.conditions = conditions }
 
           it 'expect them to be parsed as different and not as duplicates' do
