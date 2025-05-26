@@ -3,7 +3,6 @@ require 'spec_helper'
 module Ransack
   module Helpers
     describe FormBuilder do
-
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people, :comments, :notes
@@ -165,7 +164,6 @@ module Ransack
         def date_select_html(val)
           %(<option value="#{val}" selected="selected">#{val}</option>)
         end
-
     end
   end
 end

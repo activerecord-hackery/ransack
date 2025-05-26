@@ -3,7 +3,6 @@ require 'spec_helper'
 module Ransack
   module Helpers
     describe FormHelper do
-
       router = ActionDispatch::Routing::RouteSet.new
       router.draw do
         resources :people, :notes
@@ -458,9 +457,7 @@ module Ransack
       end
 
       context 'view has existing parameters' do
-
         describe '#sort_link should not remove existing params' do
-
           before { @controller.view_context.params[:exist] = 'existing' }
 
           subject {
@@ -478,7 +475,6 @@ module Ransack
         end
 
         describe '#sort_url should not remove existing params' do
-
           before { @controller.view_context.params[:exist] = 'existing' }
 
           subject {
@@ -496,7 +492,6 @@ module Ransack
         end
 
         context 'using a real ActionController::Parameter object' do
-
           describe 'with symbol q:, #sort_link should include search params' do
             subject { @controller.view_context.sort_link(Person.ransack, :name) }
             let(:params) { ActionController::Parameters.new(

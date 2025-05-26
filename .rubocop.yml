@@ -18,6 +18,9 @@ Layout/EmptyLineBetweenDefs:
 Layout/EmptyLines:
   Enabled: true
 
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: true
+
 Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
 

@@ -109,7 +109,6 @@ module Ransack
           end
         end
       end
-
     end
   end
 end
