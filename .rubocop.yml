@@ -1,3 +1,6 @@
+plugins:
+  - rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 3.0
 
@@ -31,6 +34,9 @@ Layout/SpaceInsideParens:
   Enabled: true
 
 Layout/TrailingEmptyLines:
+  Enabled: true
+
+RSpec/EmptyLineAfterFinalLet:
   Enabled: true
 
 Style/HashSyntax:

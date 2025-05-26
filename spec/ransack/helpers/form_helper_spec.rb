@@ -502,6 +502,7 @@ module Ransack
             let(:params) { ActionController::Parameters.new(
               { q: { name_eq: 'TEST' }, controller: 'people' }
               ) }
+
             before { @controller.instance_variable_set(:@params, params) }
 
             it {
@@ -517,6 +518,7 @@ module Ransack
             let(:params) { ActionController::Parameters.new(
               { q: { name_eq: 'TEST' }, controller: 'people' }
               ) }
+
             before { @controller.instance_variable_set(:@params, params) }
 
             it {
@@ -533,6 +535,7 @@ module Ransack
               ActionController::Parameters.new(
                 { 'q' => { name_eq: 'Test2' }, controller: 'people' }
                 ) }
+
             before { @controller.instance_variable_set(:@params, params) }
 
             it {
@@ -549,6 +552,7 @@ module Ransack
               ActionController::Parameters.new(
                 { 'q' => { name_eq: 'Test2' }, controller: 'people' }
                 ) }
+
             before { @controller.instance_variable_set(:@params, params) }
 
             it {
