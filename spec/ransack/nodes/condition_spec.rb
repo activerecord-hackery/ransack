@@ -205,6 +205,112 @@ module Ransack
           expect(result).to be false
         end
       end
+
+      context 'with polymorphic associations and not_in predicate' do
+        before do
+          # Define test models for polymorphic associations
+          class ::TestTask < ActiveRecord::Base
+            self.table_name = 'tasks'
+            has_many :follows, primary_key: :uid, inverse_of: :followed, foreign_key: :followed_uid, class_name: 'TestFollow'
+            has_many :users, through: :follows, source: :follower, source_type: 'TestUser'
+
+            # Add ransackable_attributes method
+            def self.ransackable_attributes(auth_object = nil)
+              ["created_at", "id", "name", "uid", "updated_at"]
+            end
+
+            # Add ransackable_associations method
+            def self.ransackable_associations(auth_object = nil)
+              ["follows", "users"]
+            end
+          end
+
+          class ::TestFollow < ActiveRecord::Base
+            self.table_name = 'follows'
+            belongs_to :follower, polymorphic: true, foreign_key: :follower_uid, primary_key: :uid
+            belongs_to :followed, polymorphic: true, foreign_key: :followed_uid, primary_key: :uid
+
+            # Add ransackable_attributes method
+            def self.ransackable_attributes(auth_object = nil)
+              ["created_at", "followed_type", "followed_uid", "follower_type", "follower_uid", "id", "updated_at"]
+            end
+
+            # Add ransackable_associations method
+            def self.ransackable_associations(auth_object = nil)
+              ["followed", "follower"]
+            end
+          end
+
+          class ::TestUser < ActiveRecord::Base
+            self.table_name = 'users'
+            has_many :follows, primary_key: :uid, inverse_of: :follower, foreign_key: :follower_uid, class_name: 'TestFollow'
+            has_many :tasks, through: :follows, source: :followed, source_type: 'TestTask'
+
+            # Add ransackable_attributes method
+            def self.ransackable_attributes(auth_object = nil)
+              ["created_at", "id", "name", "uid", "updated_at"]
+            end
+
+            # Add ransackable_associations method
+            def self.ransackable_associations(auth_object = nil)
+              ["follows", "tasks"]
+            end
+          end
+
+          # Create tables if they don't exist
+          ActiveRecord::Base.connection.create_table(:tasks, force: true) do |t|
+            t.string :uid
+            t.string :name
+            t.timestamps null: false
+          end
+
+          ActiveRecord::Base.connection.create_table(:follows, force: true) do |t|
+            t.string :followed_uid, null: false
+            t.string :followed_type, null: false
+            t.string :follower_uid, null: false
+            t.string :follower_type, null: false
+            t.timestamps null: false
+            t.index [:followed_uid, :followed_type]
+            t.index [:follower_uid, :follower_type]
+          end
+
+          ActiveRecord::Base.connection.create_table(:users, force: true) do |t|
+            t.string :uid
+            t.string :name
+            t.timestamps null: false
+          end
+        end
+
+        after do
+          # Clean up test models and tables
+          Object.send(:remove_const, :TestTask)
+          Object.send(:remove_const, :TestFollow)
+          Object.send(:remove_const, :TestUser)
+
+          ActiveRecord::Base.connection.drop_table(:tasks, if_exists: true)
+          ActiveRecord::Base.connection.drop_table(:follows, if_exists: true)
+          ActiveRecord::Base.connection.drop_table(:users, if_exists: true)
+        end
+
+        it 'correctly handles not_in predicate with polymorphic associations' do
+          # Create the search
+          search = TestTask.ransack(users_uid_not_in: ['uid_example'])
+          sql = search.result.to_sql
+
+          # Verify the SQL contains the expected NOT IN clause
+          expect(sql).to include('NOT IN')
+          expect(sql).to include("follower_uid")
+          expect(sql).to include("followed_uid")
+          expect(sql).to include("'uid_example'")
+
+          # The SQL should include a reference to tasks.uid
+          expect(sql).to include("tasks")
+          expect(sql).to include("uid")
+
+          # The SQL should include a reference to follows table
+          expect(sql).to include("follows")
+        end
+      end
     end
   end
 end
