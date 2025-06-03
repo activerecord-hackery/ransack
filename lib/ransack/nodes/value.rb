@@ -88,7 +88,7 @@ module Ransack
       end
 
       def cast_to_integer(val)
-        val.blank? ? nil : val.to_i
+        val.respond_to?(:to_i) && !val.blank? ? val.to_i : nil
       end
 
       def cast_to_float(val)
