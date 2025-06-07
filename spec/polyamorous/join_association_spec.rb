@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Polyamorous
   describe JoinAssociation do
-
     let(:join_dependency) { new_join_dependency Note, {} }
     let(:reflection) { Note.reflect_on_association(:notable) }
     let(:parent) { join_dependency.send(:join_root) }
