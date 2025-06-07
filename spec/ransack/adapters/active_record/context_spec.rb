@@ -44,39 +44,45 @@ module Ransack
             search = Search.new(Person, { articles_title_not_eq: 'some_title' }, context: subject)
             attribute = search.conditions.first.attributes.first
             constraints = subject.build_correlated_subquery(attribute.parent).constraints
-            constraint = constraints.first
+            equality_constraint = constraints.detect { |c| c.is_a?(Arel::Nodes::Equality) }
+            and_constraints = constraints.detect { |c| c.is_a?(Arel::Nodes::And) }
 
-            expect(constraints.length).to eql 1
-            expect(constraint.left.name).to eql 'person_id'
-            expect(constraint.left.relation.name).to eql 'articles'
-            expect(constraint.right.name).to eql 'id'
-            expect(constraint.right.relation.name).to eql 'people'
+            expect(constraints.length).to eql 2
+            expect(equality_constraint.left.name).to eql 'person_id'
+            expect(equality_constraint.left.relation.name).to eql 'articles'
+            expect(equality_constraint.right.name).to eql 'id'
+            expect(equality_constraint.right.relation.name).to eql 'people'
+            expect(and_constraints.to_sql).to include('default_scope')
           end
 
           it 'build correlated subquery for Child STI model when predicate is not_eq' do
             search = Search.new(Person, { story_articles_title_not_eq: 'some_title' }, context: subject)
             attribute = search.conditions.first.attributes.first
             constraints = subject.build_correlated_subquery(attribute.parent).constraints
-            constraint = constraints.first
+            equality_constraint = constraints.detect { |c| c.is_a?(Arel::Nodes::Equality) }
+            and_constraints = constraints.detect { |c| c.is_a?(Arel::Nodes::And) }
 
-            expect(constraints.length).to eql 1
-            expect(constraint.left.relation.name).to eql 'articles'
-            expect(constraint.left.name).to eql 'person_id'
-            expect(constraint.right.relation.name).to eql 'people'
-            expect(constraint.right.name).to eql 'id'
+            expect(constraints.length).to eql 2
+            expect(equality_constraint.left.relation.name).to eql 'articles'
+            expect(equality_constraint.left.name).to eql 'person_id'
+            expect(equality_constraint.right.relation.name).to eql 'people'
+            expect(equality_constraint.right.name).to eql 'id'
+            expect(and_constraints.to_sql).to include('default_scope')
           end
 
           it 'build correlated subquery for Child STI model when predicate is eq' do
             search = Search.new(Person, { story_articles_title_not_eq: 'some_title' }, context: subject)
             attribute = search.conditions.first.attributes.first
             constraints = subject.build_correlated_subquery(attribute.parent).constraints
-            constraint = constraints.first
+            equality_constraint = constraints.detect { |c| c.is_a?(Arel::Nodes::Equality) }
+            and_constraints = constraints.detect { |c| c.is_a?(Arel::Nodes::And) }
 
-            expect(constraints.length).to eql 1
-            expect(constraint.left.relation.name).to eql 'articles'
-            expect(constraint.left.name).to eql 'person_id'
-            expect(constraint.right.relation.name).to eql 'people'
-            expect(constraint.right.name).to eql 'id'
+            expect(constraints.length).to eql 2
+            expect(equality_constraint.left.relation.name).to eql 'articles'
+            expect(equality_constraint.left.name).to eql 'person_id'
+            expect(equality_constraint.right.relation.name).to eql 'people'
+            expect(equality_constraint.right.name).to eql 'id'
+            expect(and_constraints.to_sql).to include('default_scope')
           end
 
           it 'build correlated subquery for multiple conditions (default scope)' do
