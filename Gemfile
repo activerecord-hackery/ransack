@@ -32,12 +32,14 @@ when /\// # A path
   gem 'activerecord', path: "#{rails}/activerecord", require: false
   gem 'actionpack', path: "#{rails}/actionpack"
   gem 'actionview', path: "#{rails}/actionview"
+  gem 'railties', path: "#{rails}/railties"
 when /^v/ # A tagged version
   git 'https://github.com/rails/rails.git', tag: rails do
     gem 'activesupport'
     gem 'activemodel'
     gem 'activerecord', require: false
     gem 'actionpack'
+    gem 'railties'
   end
 else
   git 'https://github.com/rails/rails.git', branch: rails do
@@ -45,6 +47,7 @@ else
     gem 'activemodel'
     gem 'activerecord', require: false
     gem 'actionpack'
+    gem 'railties'
   end
 end
 gem 'mysql2'

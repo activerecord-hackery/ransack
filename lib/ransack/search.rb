@@ -129,6 +129,41 @@ module Ransack
       "Ransack::Search<#{details}>"
     end
 
+    # Determines if the given attribute exists within the base object (Nodes::Grouping).
+    # This method is particularly useful for form builders like SimpleForm,
+    # which rely on such checks to build appropriate input fields dynamically.
+    #
+    # @param attr_name [String, Symbol] the name of the attribute to check
+    # @return [Boolean] truethy if the attribute exists, falsey otherwise
+    def has_attribute?(attr_name)
+      base.attribute_method?(attr_name.to_s)
+    end
+
+    # Retrieves the type of a specified attribute, used primarily by form builders
+    # like SimpleForm to correctly generate input fields. It leverages private
+    # method calls within the Nodes::Condition to deduce attribute details
+    # such as name, predicate, and combinator.
+    #
+    # If the predicate defines a type, the predicate is returned.
+    # Otherwise, this method fetches the type based on the search context's object,
+    # defaulting to the type of the first attribute if multiple are specified.
+    # The form builder will call #type on the returned value to get a Symbol
+    # representing the type of input field to generate (e.g. :boolean, :string, :date).
+    #
+    # @param attr_name [String, Symbol] the name of the attribute for which the type is requested
+    # @return [Object] the predicate or AR type (both should respond to #type).
+
+    def type_for_attribute(attr_name)
+      attributes, predicate, _combinator =
+        Nodes::Condition.send(
+          :extract_values_for_condition,
+          attr_name,
+          context
+        )
+
+      predicate.type ? predicate : context.object.type_for_attribute(attributes.first)
+    end
+
     private
 
     def add_scope(key, args)

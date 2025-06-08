@@ -849,11 +849,38 @@ module Ransack
         before do
           Ransack.configure { |c| c.search_key = :example }
         end
+
+        after do
+          Ransack.configure { |c| c.search_key = nil }
+        end
+
         subject {
           @controller.view_context
           .search_form_for(Person.ransack) { |f| f.text_field :name_eq }
         }
         it { should match /example_name_eq/ }
+      end
+
+      describe "#search_form_for default builder" do
+        subject {
+          @controller.view_context
+          .search_form_for(Person.ransack) { |f| return f.class }
+        }
+        it { should be Ransack::Helpers::FormBuilder }
+      end
+
+      describe "#search_simple_form_for default builder" do
+        subject {
+          @controller.view_context
+          .search_simple_form_for(Person.ransack) { |f| return f.class }
+        }
+        it { should be Ransack::Helpers::SimpleFormBuilder }
+      end
+
+      describe '#search_simple_form_for with default format' do
+        subject { @controller.view_context
+          .search_simple_form_for(Person.ransack) {} }
+        it { should match /action="\/people"/ }
       end
     end
   end
