@@ -193,6 +193,41 @@ module Ransack
           end
         end
 
+        context 'negative conditions on related object with HABTM associations' do
+          let(:medieval) { Tag.create!(name: 'Medieval') }
+          let(:fantasy)  { Tag.create!(name: 'Fantasy') }
+          let(:arthur)   { Article.create!(title: 'King Arthur') }
+          let(:marco)    { Article.create!(title: 'Marco Polo') }
+          let(:comment_arthur)  { marco.comments.create!(body: 'King Arthur comment') }
+          let(:comment_marco)   { arthur.comments.create!(body: 'Marco Polo comment') }
+
+          before do
+            comment_arthur.tags << medieval
+            comment_marco.tags << fantasy
+          end
+
+          it 'removes redundant joins from top query' do
+            s = Article.ransack(comments_tags_name_not_eq: "Fantasy")
+            sql = s.result.to_sql
+            expect(sql).to include('LEFT OUTER JOIN')
+          end
+
+          it 'handles != for single values' do
+            s = Article.ransack(comments_tags_name_not_eq: "Fantasy")
+            articles = s.result.to_a
+            expect(articles).to include marco
+            expect(articles).to_not include arthur
+          end
+
+          it 'handles NOT IN for multiple attributes' do
+            s = Article.ransack(comments_tags_name_not_in: ["Fantasy", "Scifi"])
+            articles = s.result.to_a
+
+            expect(articles).to include marco
+            expect(articles).to_not include arthur
+          end
+        end
+
         context 'negative conditions on self-referenced associations' do
           let(:pop) { Person.create!(name: 'Grandpa') }
           let(:dad) { Person.create!(name: 'Father') }
