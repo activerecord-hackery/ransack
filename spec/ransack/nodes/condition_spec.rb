@@ -106,7 +106,16 @@ module Ransack
           sql = Person.ransack(ransack_hash).result.to_sql
 
           # The % should be properly quoted in the SQL
-          expect(sql).to include("LIKE '%test%%'")
+          case ActiveRecord::Base.connection.adapter_name
+          when "Mysql2"
+            expect(sql).to include("LIKE '%test\\\\%%'")
+            expect(sql).not_to include("NOT LIKE '%test\\\\%%'")
+          when "PostGIS", "PostgreSQL"
+            expect(sql).to include("ILIKE '%test\\\\%%'")
+            expect(sql).not_to include("NOT ILIKE '%test\\\\%%'")
+          else
+            expect(sql).to include("LIKE '%test%%'")
+          end
         end
 
         it 'properly quotes values with wildcards for NOT LIKE predicates' do
@@ -114,7 +123,14 @@ module Ransack
           sql = Person.ransack(ransack_hash).result.to_sql
 
           # The % should be properly quoted in the SQL
-          expect(sql).to include("NOT LIKE '%test%%'")
+          case ActiveRecord::Base.connection.adapter_name
+          when "Mysql2"
+            expect(sql).to include("NOT LIKE '%test\\\\%%'")
+          when "PostGIS", "PostgreSQL"
+            expect(sql).to include("NOT ILIKE '%test\\\\%%'")
+          else
+            expect(sql).to include("NOT LIKE '%test%%'")
+          end
         end
       end
 
