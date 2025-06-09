@@ -115,6 +115,7 @@ module Ransack
             expect(sql).not_to include("NOT ILIKE '%test\\\\%%'")
           else
             expect(sql).to include("LIKE '%test%%'")
+            expect(sql).not_to include("NOT LIKE '%test%%'")
           end
         end
 
