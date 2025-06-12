@@ -15,6 +15,8 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 3.0'
   s.license     = 'MIT'
 
+  s.metadata['changelog_uri'] = 'https://github.com/activerecord-hackery/ransack/blob/main/CHANGELOG.md'
+
   s.add_dependency 'activerecord', '>= 7.1'
   s.add_dependency 'activesupport', '>= 7.1'
   s.add_dependency 'i18n'
