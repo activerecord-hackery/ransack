@@ -9,6 +9,51 @@ module Ransack
             class_attribute :_ransack_aliases
             self._ransackers ||= {}
             self._ransack_aliases ||= {}
+
+            # Allow attributes to be searched by ransack
+            #
+            # Defines the ransackable_attributes class method.
+            # @see Base.ransackable_attributes
+            # @param [Array<Symbol>] attributes the attributes to be allowed
+            # @example allow column_a and column_b to be searched
+            #   class MyModel < ApplicationRecord
+            #     ransack_allow_attributes :column_a, :column_b
+            #   end
+            def self.ransack_allow_attributes(*attributes)
+              define_singleton_method(:ransackable_attributes) do |auth_object = nil|
+                attributes.map(&:to_s)
+              end
+            end
+
+            # Allow associations to be searched by ransack
+            #
+            # Defines the ransackable_associations class method.
+            # @see Base.ransackable_associations
+            # @param [Array<Symbol>] associations the associations to be allowed
+            # @example allow association_a and association_b to be searched
+            #   class MyModel < ApplicationRecord
+            #     ransack_allow_associations :association_a, :association_b
+            #   end
+            def self.ransack_allow_associations(*associations)
+              define_singleton_method(:ransackable_associations) do |auth_object = nil|
+                associations.map(&:to_s)
+              end
+            end
+
+            # Allow scopes to be searched by ransack
+            #
+            # Defines the ransackable_scopes class method.
+            # @see Base.ransackable_scopes
+            # @param [Array<Symbol>] scopes the scopes to be allowed
+            # @example allow scope_a and scope_b to be used with ransack
+            #   class MyModel < ApplicationRecord
+            #     ransack_allow_scopes :scope_a, :scope_b
+            #   end
+            def self.ransack_allow_scopes(*scopes)
+              define_singleton_method(:ransackable_scopes) do |auth_object = nil|
+                scopes.map(&:to_s)
+              end
+            end
           end
         end
 
