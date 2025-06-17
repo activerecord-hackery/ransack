@@ -1,4 +1,4 @@
-if defined?(::ActiveRecord)
+ActiveSupport.on_load(:active_record) do
   module Polyamorous
     InnerJoin = Arel::Nodes::InnerJoin
     OuterJoin = Arel::Nodes::OuterJoin
@@ -15,7 +15,7 @@ if defined?(::ActiveRecord)
   require 'polyamorous/activerecord/join_dependency'
   require 'polyamorous/activerecord/reflection'
 
-  if ::ActiveRecord.version >= ::Gem::Version.new("7.2")
+  if ::ActiveRecord.version >= ::Gem::Version.new("7.2") && ::ActiveRecord.version < ::Gem::Version.new("7.2.2.1")
     require "polyamorous/activerecord/join_association_7_2"
   end
 
