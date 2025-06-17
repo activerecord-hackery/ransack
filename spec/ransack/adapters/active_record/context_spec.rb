@@ -97,6 +97,43 @@ module Ransack
 
             expect(search.result.to_sql).to match /.comments.\..person_id. = .people.\..id./
           end
+
+          it 'handles Arel::Nodes::And with children' do
+            # Create a mock Arel::Nodes::And with children for testing
+            search = Search.new(Person, { articles_title_not_eq: 'some_title', articles_body_not_eq: 'some_body' }, context: subject)
+            attribute = search.conditions.first.attributes.first
+            constraints = subject.build_correlated_subquery(attribute.parent).constraints
+            constraint = constraints.first
+
+            expect(constraints.length).to eql 1
+            expect(constraint.left.name).to eql 'person_id'
+            expect(constraint.left.relation.name).to eql 'articles'
+            expect(constraint.right.name).to eql 'id'
+            expect(constraint.right.relation.name).to eql 'people'
+          end
+
+          it 'correctly extracts correlated key from complex AND conditions' do
+            # Test with multiple nested conditions to ensure the children traversal works
+            search = Search.new(
+              Person,
+              {
+                articles_title_not_eq: 'title',
+                articles_body_not_eq: 'body',
+                articles_published_eq: true
+              },
+              context: subject
+            )
+
+            attribute = search.conditions.first.attributes.first
+            constraints = subject.build_correlated_subquery(attribute.parent).constraints
+            constraint = constraints.first
+
+            expect(constraints.length).to eql 1
+            expect(constraint.left.relation.name).to eql 'articles'
+            expect(constraint.left.name).to eql 'person_id'
+            expect(constraint.right.relation.name).to eql 'people'
+            expect(constraint.right.name).to eql 'id'
+          end
         end
 
         describe 'sharing context across searches' do
