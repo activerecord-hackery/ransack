@@ -126,7 +126,7 @@ module Ransack
           # The % should be properly quoted in the SQL
           case ActiveRecord::Base.connection.adapter_name
           when "Mysql2"
-            expect(sql).to include("NOT LIKE '%test\\%%'")
+            expect(sql).to include("NOT LIKE '%test\\\\%%'")
           when "PostGIS", "PostgreSQL"
             expect(sql).to include("NOT ILIKE '%test\\%%'")
           else
