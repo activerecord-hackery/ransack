@@ -27,13 +27,16 @@ module Ransack
     class FormBuilder < (ENV[RANSACK_FORM_BUILDER].try(:constantize) ||
       ActionView::Helpers::FormBuilder)
 
-      def label(method, *args, &block)
-        options = args.extract_options!
-        text = args.first
+      def label_text(method, text=nil, options={})
         i18n = options[:i18n] || {}
         text ||= object.translate(
           method, i18n.reverse_merge(include_associations: true)
           ) if object.respond_to? :translate
+      end
+
+      def label(method, *args, &block)
+        options = args.extract_options!
+        text = label_text(method, args.first, options)
         super(method, text, options, &block)
       end
 

@@ -34,6 +34,19 @@ module Ransack
         form_for(record, options, &proc)
       end
 
+      # +search_simple_form_for+
+      #
+      #   <%= search_simple_form_for(@q) do |f| %>
+      #
+      #   This is a shortcut to:
+      #
+      #   <%= search_form_for(@q, builder: Ransack::Helpers::SimpleFormBuilder) do |f| %>
+      #
+
+      def search_simple_form_for(record, options = {}, &proc)
+        search_form_for(record, options.merge(builder: Ransack::Helpers::SimpleFormBuilder), &proc)
+      end
+
       # +sort_link+
       #
       #   <%= sort_link(@q, :name, [:name, 'kind ASC'], 'Player Name') %>
