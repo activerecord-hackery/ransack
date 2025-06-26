@@ -39,7 +39,7 @@ ActiveRecord::Base.logger = Logger.new(STDOUT)
 # Display versions.
 message = "Running test case with Ruby #{RUBY_VERSION}, Active Record #{
   ::ActiveRecord::VERSION::STRING}, Arel #{Arel::VERSION} and #{
-  ::ActiveRecord::Base.connection.adapter_name}"
+  ::ActiveRecord::Base.adapter_class::ADAPTER_NAME}"
 line = '=' * message.length
 puts line, message, line
 

@@ -161,7 +161,7 @@ module Ransack
   module_function
     # replace % \ to \% \\
     def escape_wildcards(unescaped)
-      case ActiveRecord::Base.connection.adapter_name
+      case ActiveRecord::Base.adapter_class::ADAPTER_NAME
       when "Mysql2".freeze
         # Necessary for MySQL
         unescaped.to_s.gsub(/([\\%_])/, '\\\\\\1')

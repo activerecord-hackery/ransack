@@ -35,7 +35,7 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     message = "Running Ransack specs with #{
-      ActiveRecord::Base.connection.adapter_name
+      ActiveRecord::Base.adapter_class::ADAPTER_NAME
       }, Active Record #{::ActiveRecord::VERSION::STRING}, Arel #{Arel::VERSION
       } and Ruby #{RUBY_VERSION}"
     line = '=' * message.length

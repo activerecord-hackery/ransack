@@ -40,6 +40,8 @@ else
   )
 end
 
+ActiveRecord.permanent_connection_checkout = :disallowed
+
 # This is just a test app with no sensitive data, so we explicitly allowlist all
 # attributes and associations for search. In general, end users should
 # explicitly authorize each model, but this shows a way to configure the
@@ -382,7 +384,7 @@ module SubDB
   module Schema
     def self.create
       s = ::ActiveRecord::Schema.new
-      s.instance_variable_set(:@connection, SubDB::Base.connection)
+      s.instance_variable_set(:@connection, SubDB::Base.lease_connection)
       s.verbose = false
       s.define({}) do
         create_table :operation_histories, force: true do |t|

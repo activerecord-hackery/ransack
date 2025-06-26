@@ -15,7 +15,7 @@ module Ransack
           relation     = attr.arel_attribute.relation
           name         = attr.arel_attribute.name.to_s
           table        = relation.respond_to?(:table_name) ? relation.table_name : relation.name
-          schema_cache = self.klass.connection.schema_cache
+          schema_cache = self.klass.connection_pool.schema_cache
           unless schema_cache.send(:data_source_exists?, table)
             raise "No table named #{table} exists."
           end

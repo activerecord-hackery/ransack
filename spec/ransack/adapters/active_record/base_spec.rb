@@ -277,7 +277,7 @@ module Ransack
         describe '#ransacker' do
           # For infix tests
           def self.sane_adapter?
-            case ::ActiveRecord::Base.connection.adapter_name
+            case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
             when 'SQLite3', 'PostgreSQL'
               true
             else
@@ -379,7 +379,7 @@ module Ransack
           context 'searching by underscores' do
             # when escaping is supported right in LIKE expression without adding extra expressions
             def self.simple_escaping?
-              case ::ActiveRecord::Base.connection.adapter_name
+              case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
                 when 'Mysql2', 'PostgreSQL'
                   true
                 else
