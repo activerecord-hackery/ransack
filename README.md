@@ -13,7 +13,7 @@ There are advanced searching solutions around, like ElasticSearch or Algolia. **
 
 Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
 
-Ransack is supported for Rails 7.0, 6.1 on Ruby 3.0 and later.
+Ransack is supported for Rails 8.0, 7.2, 7.1 on Ruby 3.1 and later.
 
 ## Installation
 
@@ -33,7 +33,9 @@ gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 
 ### Documentation
 
-There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site.
+There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site. Alternatively there is [AI Generated documentation](https://deepwiki.com/activerecord-hackery/ransack/1-overview) produced by [devin.ai](https://devin.ai/).
+
+This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quick-start cheatsheet, created by [@raghubetina](https://gist.github.com/raghubetina)
 
 ## Issues tracker
 
