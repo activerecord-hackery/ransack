@@ -69,7 +69,7 @@ module Ransack
           else
             sort = Nodes::Sort.extract(@context, sort)
           end
-          self.sorts << sort
+          self.sorts << sort if sort
         end
       when Hash
         args.each do |index, attrs|
