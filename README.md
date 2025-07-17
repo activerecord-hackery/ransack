@@ -33,7 +33,9 @@ gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 
 ### Documentation
 
-There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site.
+There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site. Alternatively there is [AI Generated documentation](https://deepwiki.com/activerecord-hackery/ransack/1-overview) produced by [devin.ai](https://devin.ai/).
+
+This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quick-start cheatsheet, created by [@raghubetina](https://gist.github.com/raghubetina)
 
 ## Issues tracker
 
