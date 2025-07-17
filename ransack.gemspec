@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport', '>= 7.1'
   s.add_dependency 'i18n'
 
-  s.files         = `git ls-files`.split("\n")
+  s.files         = Dir["README.md", "LICENSE", "lib/**/*"]
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
