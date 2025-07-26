@@ -29,6 +29,7 @@ require 'ransack/ransacker'
 require 'ransack/translate'
 require 'ransack/active_record'
 require 'ransack/context'
+require 'ransack/distinct_sorts_processor'
 require 'ransack/version'
 
 ActiveSupport.on_load(:action_controller) do
