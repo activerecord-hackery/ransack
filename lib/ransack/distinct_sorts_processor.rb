@@ -161,12 +161,10 @@ module Ransack
     end
 
     def add_necessary_selects(processed_sorts)
-      if query.select_values.empty?
-        query.select_values << Arel.sql("#{query.table.name}.*")
-      end
+      query.select_values = [Arel.sql("#{query.table.name}.*")] if query.select_values.empty?
 
       new_selects = processed_sorts.filter_map { |sort_info| sort_info[:select_value] }
-      query.select_values.concat(new_selects) if new_selects.any?
+      query.select_values += new_selects if new_selects.any?
     end
 
     def update_order_values(processed_sorts)
