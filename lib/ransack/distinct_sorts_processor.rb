@@ -5,7 +5,7 @@ module Ransack
   # When using DISTINCT, all columns in ORDER BY must also be present in the SELECT clause.
   class DistinctSortsProcessor
     # Regex pattern to match ORDER BY clauses (ASC/DESC with optional NULLS FIRST/LAST)
-    ORDER_BY_PATTERN = /\s+(asc|desc)(\s+nulls\s+(first|last))?/i.freeze
+    ORDER_BY_PATTERN = /\s+(asc|desc)(\s+nulls\s+(first|last))?$/i.freeze
 
     attr_reader :search, :query, :sorts
 
