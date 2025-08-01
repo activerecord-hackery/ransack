@@ -89,7 +89,7 @@ module Ransack
 
     def matches_select_expression?(select_str, sort_expression)
       select_str.include?(sort_expression) ||
-        select_str.match(/#{Regexp.escape(sort_expression)}\s+AS\s+(\w+)/i)
+        !!select_str.match(/#{Regexp.escape(sort_expression)}\s+AS\s+(\w+)/i)
     end
 
     # Extracts the alias from a SELECT expression, handling subqueries and regular columns
@@ -106,8 +106,7 @@ module Ransack
       match ? match[1] : nil
     end
 
-    # Extracts the pure expression from a sort (without ORDER BY clauses)
-    def extract_sort_expression(sort)
+    def extract_sort(sort)
       case sort
       when Arel::Nodes::Ordering
         case sort.expr
@@ -119,8 +118,14 @@ module Ransack
           sort.expr.to_sql
         end
       when String
-        remove_order_by_clauses(sort)
+        sort
       end
+    end
+
+    # Extracts the pure expression from a sort (without ORDER BY clauses)
+    def extract_sort_expression(sort)
+      sort_expression = extract_sort(sort)
+      remove_order_by_clauses(sort_expression) if sort_expression
     end
 
     # Removes ORDER BY clauses from a sort expression
@@ -134,31 +139,16 @@ module Ransack
     end
 
     def build_select_value(sort, alias_name)
-      case sort
-      when Arel::Nodes::Ordering
-        build_ordering_select_value(sort, alias_name)
-      when String
-        build_string_select_value(sort, alias_name)
+      if sort.is_a?(Arel::Nodes::Ordering) && sort.expr.is_a?(Arel::Attributes::Attribute)
+        column_name = sort.expr.name.to_s
+        relation_name = sort.expr.relation.name
+        return nil if should_skip_column?(column_name, relation_name)
       end
+
+      expr = extract_sort_expression(sort)
+      Arel.sql("#{expr} AS #{alias_name}") unless expr.nil?
     end
 
-    def build_ordering_select_value(sort, alias_name)
-      return nil unless sort.expr.is_a?(Arel::Attributes::Attribute)
-
-      column_name = sort.expr.name.to_s
-      relation_name = sort.expr.relation.name
-
-      # Skip if the column is already selected to avoid ambiguous columns
-      return nil if should_skip_column?(column_name, relation_name)
-
-      sort.expr.as(alias_name)
-    end
-
-    def build_string_select_value(sort, alias_name)
-      expr = remove_order_by_clauses(sort)
-      Arel.sql("#{expr} AS #{alias_name}")
-    end
-    
     def split_sql_expression(expr)
       Utilities::SqlExpressionParser.split_sql_expression(expr)
     end
