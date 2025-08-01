@@ -29,6 +29,7 @@ require 'ransack/ransacker'
 require 'ransack/translate'
 require 'ransack/active_record'
 require 'ransack/context'
+require 'ransack/utilities/sql_expression_parser'
 require 'ransack/distinct_sorts_processor'
 require 'ransack/version'
 

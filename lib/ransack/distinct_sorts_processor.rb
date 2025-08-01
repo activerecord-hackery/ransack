@@ -41,7 +41,16 @@ module Ransack
 
     # Processes all sorts and returns only those that need processing
     def process_sorts
-      sorts.map { |sort| process_single_sort(sort) }
+      sorts.flat_map { |sort| process_sort(sort) }
+    end
+
+    def process_sort(sort)
+      if sort.is_a?(String)
+        sql_sorts = split_sql_expression(sort)
+        sql_sorts.map { |sql_sort| process_single_sort(sql_sort) }
+      else
+        process_single_sort(sort)
+      end
     end
 
     # Processes a single sort and returns processing info if needed
@@ -54,7 +63,7 @@ module Ransack
         alias_name = generate_alias_name
         select_value = build_select_value(sort, alias_name)
 
-        return { original_sort: sort } unless select_value
+        return { original_sort: sort } if select_value.nil?
 
         {
           original_sort: sort,
@@ -72,9 +81,7 @@ module Ransack
       query.select_values.each do |select_value|
         select_str = select_value.to_s.strip
 
-        if matches_select_expression?(select_str, sort_expression)
-          return extract_alias_from_select(select_str)
-        end
+        return extract_alias_from_select(select_str) if matches_select_expression?(select_str, sort_expression)
       end
 
       nil
@@ -103,15 +110,16 @@ module Ransack
     def extract_sort_expression(sort)
       case sort
       when Arel::Nodes::Ordering
-        if sort.expr.is_a?(Arel::Attributes::Attribute)
+        case sort.expr
+        when Arel::Attributes::Attribute
           sort.expr.name.to_s
+        when Arel::Nodes::SqlLiteral
+          sort.expr.to_s
         else
           sort.expr.to_sql
         end
       when String
         remove_order_by_clauses(sort)
-      else
-        nil
       end
     end
 
@@ -131,8 +139,6 @@ module Ransack
         build_ordering_select_value(sort, alias_name)
       when String
         build_string_select_value(sort, alias_name)
-      else
-        nil
       end
     end
 
@@ -151,6 +157,10 @@ module Ransack
     def build_string_select_value(sort, alias_name)
       expr = remove_order_by_clauses(sort)
       Arel.sql("#{expr} AS #{alias_name}")
+    end
+    
+    def split_sql_expression(expr)
+      Utilities::SqlExpressionParser.split_sql_expression(expr)
     end
 
     def should_skip_column?(column_name, relation_name)
@@ -188,8 +198,6 @@ module Ransack
         sort.direction.to_s.upcase
       when String
         extract_order_by_clauses(sort)
-      else
-        nil
       end
     end
 
