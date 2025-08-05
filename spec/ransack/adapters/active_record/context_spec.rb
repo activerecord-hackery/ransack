@@ -114,7 +114,7 @@ module Ransack
              ],
             )
 
-            expect(search.result.to_sql).to include '("notes"."note" != \'some_note\')'
+            expect(search.result.to_sql).to match /(.notes.\..note. != \'some_note\')/
           end
         end
 
