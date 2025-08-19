@@ -4,7 +4,6 @@ module Ransack
   module Adapters
     module ActiveRecord
       describe Base do
-
         subject { ::ActiveRecord::Base }
 
         it { should respond_to :ransack }
@@ -124,7 +123,6 @@ module Ransack
                 expect(s.result.to_sql).to (include  rails7_and_mysql ? %q{age > '0'} : 'age > 0')
               end
             end
-
           end
 
           it 'does not raise exception for string :params argument' do

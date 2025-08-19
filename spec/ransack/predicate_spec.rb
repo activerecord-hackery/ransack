@@ -5,7 +5,6 @@ module Ransack
   FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
 
   describe Predicate do
-
     before do
       @s = Search.new(Person)
     end

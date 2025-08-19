@@ -81,6 +81,8 @@ class Person < ApplicationRecord
   scope :sort_by_reverse_name_asc, lambda { order(Arel.sql("REVERSE(name) ASC")) }
   scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
 
+  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
+
   alias_attribute :full_name, :name
 
   ransack_alias :term, :name_or_email
@@ -278,6 +280,7 @@ module Schema
         t.string   :new_start
         t.string   :stop_end
         t.integer  :salary
+        t.integer  :temperament
         t.date     :life_start
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
