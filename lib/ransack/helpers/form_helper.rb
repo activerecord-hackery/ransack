@@ -58,19 +58,16 @@ module Ransack
           'No Ransack::Search object was provided to turbo_search_form_for!'
         end
         options[:html] ||= {}
-        
         # Set up turbo-specific options
-        turbo_options = {
-          'data-turbo-frame': options.delete(:turbo_frame),
-          'data-turbo-action': options.delete(:turbo_action) || 'advance'
-        }.compact
+        turbo_options = {}
+        turbo_options['data-turbo-frame'] = options.delete(:turbo_frame) if options[:turbo_frame]
+        turbo_options['data-turbo-action'] = options.delete(:turbo_action) || 'advance'
         
         html_options = {
           class:  html_option_for(options[:class], search),
           id:     html_option_for(options[:id], search),
           method: options.delete(:method) || :post
         }.merge(turbo_options)
-        
         options[:as] ||= Ransack.options[:search_key]
         options[:html].reverse_merge!(html_options)
         options[:builder] ||= FormBuilder
