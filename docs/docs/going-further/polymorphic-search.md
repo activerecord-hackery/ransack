@@ -38,3 +38,9 @@ Location.ransack(locatable_of_House_type_number_eq: 100).result
 ```
 
 note the `_of_House_type_` added to the search key. This allows Ransack to correctly specify the table names in SQL join queries.
+
+For namespaced models you should use a quoted string containing the standard Ruby module notation
+
+```ruby
+Location.ransack('locatable_of_Residences::House_type_number_eq' => 100).result
+```

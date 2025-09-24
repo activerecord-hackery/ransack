@@ -1,4 +1,5 @@
 require 'active_record'
+require 'activerecord-postgis-adapter'
 
 case ENV['DB'].try(:downcase)
 when 'mysql', 'mysql2'
@@ -14,6 +15,17 @@ when 'pg', 'postgres', 'postgresql'
   # To test with PostgreSQL: `DB=postgresql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter: 'postgresql',
+    database: 'ransack',
+    username: ENV.fetch("DATABASE_USERNAME") { "postgres" },
+    password: ENV.fetch("DATABASE_PASSWORD") { "" },
+    host: ENV.fetch("DATABASE_HOST") { "localhost" },
+    min_messages: 'warning'
+  )
+when 'postgis'
+  # To test with PostGIS: `DB=postgis bundle exec rake spec`
+  ActiveRecord::Base.establish_connection(
+    adapter: 'postgis',
+    postgis_extension: 'postgis',
     database: 'ransack',
     username: ENV.fetch("DATABASE_USERNAME") { "postgres" },
     password: ENV.fetch("DATABASE_PASSWORD") { "" },
@@ -68,6 +80,8 @@ class Person < ApplicationRecord
 
   scope :sort_by_reverse_name_asc, lambda { order(Arel.sql("REVERSE(name) ASC")) }
   scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
+
+  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
 
   alias_attribute :full_name, :name
 
@@ -124,6 +138,17 @@ class Person < ApplicationRecord
     SQL
     .squish
     Arel.sql(query)
+  end
+
+  ransacker :article_tags, formatter: proc { |id|
+    if Tag.exists?(id)
+      joins(articles: :tags)
+        .where(tags: { id: id })
+        .distinct
+        .select(:id).arel
+    end
+  } do |parent|
+    parent.table[:id]
   end
 
   def self.ransackable_attributes(auth_object = nil)
@@ -237,6 +262,20 @@ class Account < ApplicationRecord
   belongs_to :trade_account, class_name: "Account"
 end
 
+class Address < ApplicationRecord
+  has_one :organization
+end
+
+class Organization < ApplicationRecord
+  belongs_to :address
+  has_many :employees
+end
+
+class Employee < ApplicationRecord
+  belongs_to :organization
+  has_one :address, through: :organization
+end
+
 module Schema
   def self.create
     ActiveRecord::Migration.verbose = false
@@ -252,6 +291,7 @@ module Schema
         t.string   :new_start
         t.string   :stop_end
         t.integer  :salary
+        t.integer  :temperament
         t.date     :life_start
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
@@ -299,6 +339,20 @@ module Schema
       create_table :accounts, force: true do |t|
         t.belongs_to :agent_account
         t.belongs_to :trade_account
+      end
+
+      create_table :addresses, force: true do |t|
+        t.string :city
+      end
+
+      create_table :organizations, force: true do |t|
+        t.string :name
+        t.integer :address_id
+      end
+
+      create_table :employees, force: true do |t|
+        t.string :name
+        t.integer :organization_id
       end
     end
 

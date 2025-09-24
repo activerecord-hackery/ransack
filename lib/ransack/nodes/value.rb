@@ -43,6 +43,14 @@ module Ransack
         end
       end
 
+      def cast_array
+        if value.is_a?(Array)
+          cast_to_date(value)
+        else
+          value
+        end
+      end
+
       def cast_to_date(val)
         if val.respond_to?(:to_date)
           val.to_date rescue nil
@@ -80,7 +88,7 @@ module Ransack
       end
 
       def cast_to_integer(val)
-        val.blank? ? nil : val.to_i
+        val.respond_to?(:to_i) && !val.blank? ? val.to_i : nil
       end
 
       def cast_to_float(val)

@@ -12,8 +12,9 @@ module Ransack
 
         def type_for(attr)
           return nil unless attr && attr.valid?
+          relation     = attr.arel_attribute.relation
           name         = attr.arel_attribute.name.to_s
-          table        = attr.arel_attribute.relation.table_name
+          table        = relation.respond_to?(:table_name) ? relation.table_name : relation.name
           schema_cache = self.klass.connection.schema_cache
           unless schema_cache.send(:data_source_exists?, table)
             raise "No table named #{table} exists."
@@ -109,7 +110,7 @@ module Ransack
         #
         def join_sources
           base, joins = begin
-            alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, @object.table.name, [])
+            alias_tracker = @object.alias_tracker
             constraints   = @join_dependency.join_constraints(@object.joins_values, alias_tracker, @object.references_values)
 
             [
@@ -285,7 +286,7 @@ module Ransack
 
           join_list = join_nodes + convert_join_strings_to_ast(relation.table, string_joins)
 
-          alias_tracker = ::ActiveRecord::Associations::AliasTracker.create(self.klass.connection, relation.table.name, join_list)
+          alias_tracker = relation.alias_tracker(join_list)
           join_dependency = Polyamorous::JoinDependency.new(relation.klass, relation.table, association_joins, Arel::Nodes::OuterJoin)
           join_dependency.instance_variable_set(:@alias_tracker, alias_tracker)
           join_nodes.each do |join|
