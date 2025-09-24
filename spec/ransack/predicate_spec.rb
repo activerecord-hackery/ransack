@@ -461,6 +461,30 @@ module Ransack
       end
     end
 
+    describe 'in_or_blank' do
+      it 'generates an IN query combined with blank condition' do
+        @s.name_in_or_blank = ['active', 'pending']
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        sql = @s.result.to_sql
+        expect(sql).to match /#{field} IN \('active', 'pending'\)/
+        expect(sql).to match /#{field} IS NULL OR #{field} = ''/
+        expect(sql).to match /OR/
+      end
+
+      it 'generates proper SQL when array has one value' do
+        @s.name_in_or_blank = ['active']
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        sql = @s.result.to_sql
+        expect(sql).to match /#{field} IN \('active'\)/
+        expect(sql).to match /#{field} IS NULL OR #{field} = ''/
+      end
+
+      it 'does not generate a condition for empty array' do
+        @s.name_in_or_blank = []
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
     context "defining custom predicates" do
       describe "with 'not_in' arel predicate" do
         before do

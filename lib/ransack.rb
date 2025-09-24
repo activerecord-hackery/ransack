@@ -8,6 +8,7 @@ end
 
 require 'active_support/core_ext'
 require 'ransack/configuration'
+require 'ransack/arel_extension'
 require 'polyamorous/polyamorous'
 
 module Ransack

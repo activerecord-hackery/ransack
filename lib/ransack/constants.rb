@@ -155,6 +155,11 @@ module Ransack
         type: :boolean,
         validator: proc { |v| BOOLEAN_VALUES.include?(v) },
         formatter: proc { |v| nil } }
+      ],
+      ['in_or_blank'.freeze, {
+        arel_predicate: 'in_or_blank',
+        wants_array: true
+        }
       ]
     ].freeze
 

@@ -26,6 +26,7 @@ List of all possible predicates
 | `*_null` | is null | |
 | `*_not_null` | is not null | |
 | `*_in` | match any values in array | e.g. `q[name_in][]=Alice&q[name_in][]=Bob` |
+| `*_in_or_blank` | match any values in array or blank | e.g. `q[status_in_or_blank][]=active&q[status_in_or_blank][]=pending` (SQL: `col IN ('active', 'pending') OR col IS NULL OR col = ''`) |
 | `*_not_in` | match none of values in array | |
 | `*_lt_any` | Less than any |  SQL: `col < value1 OR col < value2` |
 | `*_lteq_any` | Less than or equal to any | |

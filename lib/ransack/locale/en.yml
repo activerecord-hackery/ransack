@@ -68,3 +68,4 @@ en:
       blank: "is blank"
       'null': "is null"
       not_null: "is not null"
+      in_or_blank: "in or blank"
