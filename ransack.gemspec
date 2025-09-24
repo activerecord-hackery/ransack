@@ -21,8 +21,8 @@ Gem::Specification.new do |s|
 
   s.metadata['changelog_uri'] = 'https://github.com/activerecord-hackery/ransack/blob/main/CHANGELOG.md'
 
-  s.add_dependency 'activerecord', '>= 7.1'
-  s.add_dependency 'activesupport', '>= 7.1'
+  s.add_dependency 'activerecord', '>= 7.2'
+  s.add_dependency 'activesupport', '>= 7.2'
   s.add_dependency 'i18n'
 
   s.files         = Dir["README.md", "LICENSE", "lib/**/*"]
