@@ -143,7 +143,12 @@ module Ransack
       else
         @scope_args[key] = args.is_a?(Array) ? sanitized_args : args
       end
-      @context.chain_scope(key, sanitized_args)
+      
+      # Don't immediately apply scopes when there's an OR combinator
+      # This allows proper handling of scope combinations
+      if base.combinator != Constants::OR
+        @context.chain_scope(key, sanitized_args)
+      end
     end
 
     def sanitized_scope_args(args)

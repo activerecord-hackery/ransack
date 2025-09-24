@@ -25,7 +25,39 @@ module Ransack
 
         def evaluate(search, opts = {})
           viz = Visitor.new
-          relation = @object.where(viz.accept(search.base))
+          
+          # Handle scopes when using OR combinator
+          if search.base.combinator == Constants::OR && search.instance_variable_get(:@scope_args).present?
+            # Build separate queries for scopes and regular conditions, then combine with OR
+            relations = []
+            
+            # Create relations for each scope
+            search.instance_variable_get(:@scope_args).each do |scope_name, scope_args|
+              scope_relation = @object.send(scope_name, *[scope_args].flatten.compact)
+              relations << scope_relation
+            end
+            
+            # Get the base relation with regular conditions (excluding scopes)
+            base_conditions = viz.accept(search.base)
+            if base_conditions && search.base.conditions.any?
+              base_relation = @object.where(base_conditions)
+              relations << base_relation
+            end
+            
+            # Use OR to combine all the queries
+            if relations.size > 1
+              relation = relations.first
+              relations[1..-1].each do |rel|
+                relation = relation.or(rel)
+              end
+            elsif relations.size == 1
+              relation = relations.first
+            else
+              relation = @object
+            end
+          else
+            relation = @object.where(viz.accept(search.base))
+          end
 
           if search.sorts.any?
             relation = relation.except(:order)
