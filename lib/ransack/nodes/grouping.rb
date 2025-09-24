@@ -63,7 +63,7 @@ module Ransack
       end
 
       def matched_condition(c, key)
-        c.name == key.to_s
+        c.name == key.to_s || (c.respond_to?(:key) && c.key == key.to_s)
       end
 
       def values
