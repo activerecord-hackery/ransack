@@ -10,16 +10,16 @@ checking for cpuid.h... yes
 creating Makefile
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/json-2.15.0/ext/json/ext/parser
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-gqp432 sitelibdir\=./.gem.20250924-3342-gqp432 clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-9oyjsz sitelibdir\=./.gem.20250924-3541-9oyjsz clean
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/json-2.15.0/ext/json/ext/parser
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-gqp432 sitelibdir\=./.gem.20250924-3342-gqp432
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-9oyjsz sitelibdir\=./.gem.20250924-3541-9oyjsz
 compiling parser.c
 linking shared-object json/ext/parser.so
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/json-2.15.0/ext/json/ext/parser
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-gqp432 sitelibdir\=./.gem.20250924-3342-gqp432 install
-/usr/bin/install -c -m 0755 parser.so ./.gem.20250924-3342-gqp432/json/ext
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-9oyjsz sitelibdir\=./.gem.20250924-3541-9oyjsz install
+/usr/bin/install -c -m 0755 parser.so ./.gem.20250924-3541-9oyjsz/json/ext
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/json-2.15.0/ext/json/ext/parser
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-gqp432 sitelibdir\=./.gem.20250924-3342-gqp432 clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-9oyjsz sitelibdir\=./.gem.20250924-3541-9oyjsz clean

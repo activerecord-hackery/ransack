@@ -33,10 +33,10 @@ Setting rpath to /usr/lib/x86_64-linux-gnu
 creating Makefile
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/mysql2-0.5.7/ext/mysql2
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-wtsdhf sitelibdir\=./.gem.20250924-3342-wtsdhf clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-zv2pjk sitelibdir\=./.gem.20250924-3541-zv2pjk clean
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/mysql2-0.5.7/ext/mysql2
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-wtsdhf sitelibdir\=./.gem.20250924-3342-wtsdhf
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-zv2pjk sitelibdir\=./.gem.20250924-3541-zv2pjk
 compiling client.c
 compiling infile.c
 compiling mysql2_ext.c
@@ -45,8 +45,8 @@ compiling statement.c
 linking shared-object mysql2/mysql2.so
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/mysql2-0.5.7/ext/mysql2
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-wtsdhf sitelibdir\=./.gem.20250924-3342-wtsdhf install
-/usr/bin/install -c -m 0755 mysql2.so ./.gem.20250924-3342-wtsdhf/mysql2
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-zv2pjk sitelibdir\=./.gem.20250924-3541-zv2pjk install
+/usr/bin/install -c -m 0755 mysql2.so ./.gem.20250924-3541-zv2pjk/mysql2
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/mysql2-0.5.7/ext/mysql2
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-wtsdhf sitelibdir\=./.gem.20250924-3342-wtsdhf clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-zv2pjk sitelibdir\=./.gem.20250924-3541-zv2pjk clean

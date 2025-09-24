@@ -6,10 +6,10 @@ checking for whether -fvisibility=hidden is accepted as CFLAGS... yes
 creating Makefile
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-pvv0im sitelibdir\=./.gem.20250924-3342-pvv0im clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-7avo0f sitelibdir\=./.gem.20250924-3541-7avo0f clean
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-pvv0im sitelibdir\=./.gem.20250924-3342-pvv0im
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-7avo0f sitelibdir\=./.gem.20250924-3541-7avo0f
 compiling api_node.c
 compiling api_pack.c
 compiling ./../../src/diagnostic.c
@@ -37,8 +37,8 @@ compiling ./../../src/token_type.c
 linking shared-object prism/prism.so
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-pvv0im sitelibdir\=./.gem.20250924-3342-pvv0im install
-/usr/bin/install -c -m 0755 prism.so ./.gem.20250924-3342-pvv0im/prism
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-7avo0f sitelibdir\=./.gem.20250924-3541-7avo0f install
+/usr/bin/install -c -m 0755 prism.so ./.gem.20250924-3541-7avo0f/prism
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-pvv0im sitelibdir\=./.gem.20250924-3342-pvv0im clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-7avo0f sitelibdir\=./.gem.20250924-3541-7avo0f clean

@@ -3,16 +3,16 @@ current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/ge
 creating Makefile
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/cgi-0.5.0/ext/cgi/escape
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-xd1gqm sitelibdir\=./.gem.20250924-3342-xd1gqm clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-nx55dd sitelibdir\=./.gem.20250924-3541-nx55dd clean
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/cgi-0.5.0/ext/cgi/escape
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-xd1gqm sitelibdir\=./.gem.20250924-3342-xd1gqm
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-nx55dd sitelibdir\=./.gem.20250924-3541-nx55dd
 compiling escape.c
 linking shared-object cgi/escape.so
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/cgi-0.5.0/ext/cgi/escape
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-xd1gqm sitelibdir\=./.gem.20250924-3342-xd1gqm install
-/usr/bin/install -c -m 0755 escape.so ./.gem.20250924-3342-xd1gqm/cgi
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-nx55dd sitelibdir\=./.gem.20250924-3541-nx55dd install
+/usr/bin/install -c -m 0755 escape.so ./.gem.20250924-3541-nx55dd/cgi
 
 current directory: /home/runner/work/ransack/ransack/vendor/bundle/ruby/3.2.0/gems/cgi-0.5.0/ext/cgi/escape
-make DESTDIR\= sitearchdir\=./.gem.20250924-3342-xd1gqm sitelibdir\=./.gem.20250924-3342-xd1gqm clean
+make DESTDIR\= sitearchdir\=./.gem.20250924-3541-nx55dd sitelibdir\=./.gem.20250924-3541-nx55dd clean
