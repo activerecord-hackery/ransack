@@ -3,6 +3,8 @@
 vendor/bundle
 Gemfile.lock
 pkg/*
+spec/dummy
 coverage/*
 .DS_Store
 .byebug_history
+vendor/bundle
