@@ -336,6 +336,34 @@ module Ransack
           expect(s.base[:name_eq]).to be_nil
         end
       end
+
+      context "ransackable_scope with array arguments" do
+        around(:each) do |example|
+          Person.define_singleton_method(:domestic) do |countries|
+            self.where(name: countries)
+          end
+
+          begin
+            example.run
+          ensure
+            Person.singleton_class.undef_method :domestic
+          end
+        end
+
+        it "handles scopes that take arrays as arguments" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:domestic])
+
+          # This should not raise ArgumentError
+          expect {
+            s = Search.new(Person, domestic: ['US', 'JP'])
+            s.result # This triggers the actual scope call
+          }.not_to raise_error
+
+          s = Search.new(Person, domestic: ['US', 'JP'])
+          expect(s.instance_variable_get(:@scope_args)["domestic"]).to eq("US")
+        end
+      end
     end
 
     describe '#result' do
