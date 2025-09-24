@@ -1,0 +1,4 @@
+coverage
+doc
+*.gem
+*.project
