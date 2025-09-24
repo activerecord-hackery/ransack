@@ -1,0 +1,2 @@
+class StoryArticle < Article
+end

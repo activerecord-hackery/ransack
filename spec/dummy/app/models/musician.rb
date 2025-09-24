@@ -1,0 +1,2 @@
+class Musician < Person
+end
