@@ -53,6 +53,24 @@ module Polyamorous
       tables
     end
 
+    def populate_joined_tables_from_existing_joins(join_nodes, relation)
+      @joined_tables ||= {}
+      
+      join_nodes.each do |join|
+        next unless join.left.respond_to?(:name)
+        
+        table_name = join.left.name
+        
+        # Find reflections that correspond to this joined table
+        relation.klass.reflect_on_all_associations.each do |reflection|
+          if reflection.klass.table_name == table_name
+            # Mark this reflection as already joined with the existing table
+            @joined_tables[reflection] = [join.left, true]
+          end
+        end
+      end
+    end
+
     private
 
     def table_aliases_for(parent, node)
