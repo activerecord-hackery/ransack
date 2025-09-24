@@ -828,6 +828,38 @@ module Ransack
           end
         end
 
+        context 'when using matches predicate with integer columns' do
+          it 'should handle id_matches with integer value without error' do
+            person = Person.create!(name: 'Test Person')
+            
+            # This should work without causing database errors
+            search = Person.ransack(id_matches: person.id)
+            
+            # The search should execute without raising an exception
+            expect { search.result.to_a }.not_to raise_error
+          end
+
+          it 'should handle id_matches with string value' do
+            person = Person.create!(name: 'Test Person')
+            
+            # This should definitely work
+            search = Person.ransack(id_matches: person.id.to_s)
+            
+            # Should find the person
+            expect(search.result.to_a).to include(person)
+          end
+
+          it 'should convert integer values to strings for matches predicate' do
+            person = Person.create!(name: 'Test Person')
+            
+            # Both integer and string should produce the same result
+            search_int = Person.ransack(id_matches: person.id)
+            search_str = Person.ransack(id_matches: person.id.to_s)
+            
+            expect(search_int.result.to_a).to eq(search_str.result.to_a)
+          end
+        end
+
         describe '#ransackable_scopes' do
           subject { Person.ransackable_scopes }
 

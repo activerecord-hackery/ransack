@@ -17,7 +17,12 @@ end
 
 Ransack.configure do |config|
   Ransack::Constants::AREL_PREDICATES.each do |name|
-    config.add_predicate name, arel_predicate: name
+    if name == 'matches' || name == 'does_not_match'
+      # Add formatter to convert values to strings for LIKE operations
+      config.add_predicate name, arel_predicate: name, formatter: proc { |v| v.to_s }
+    else
+      config.add_predicate name, arel_predicate: name
+    end
   end
   Ransack::Constants::DERIVED_PREDICATES.each do |args|
     config.add_predicate(*args)
