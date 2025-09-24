@@ -151,6 +151,10 @@ module Ransack
           html = @f.text_field(:notable_type_eq)
           expect(html).to match /id=\"q_notable_type_eq\"/
         end
+        it 'can generate labels for polymorphic association traversal fields' do
+          # This should not raise "Polymorphic associations do not support computing the class"
+          expect { @f.label(:notable_of_Person_name_eq) }.not_to raise_error
+        end
       end
 
       private
