@@ -140,6 +140,23 @@ module Ransack
           expect(attribute.relation.name).to eq 'articles'
           expect(attribute.relation.table_alias).to be_nil
         end
+
+        describe '#type_for' do
+          it 'returns nil when column does not exist instead of raising NoMethodError' do
+            # Create a mock attribute that references a non-existent column
+            mock_attr = double('attribute')
+            allow(mock_attr).to receive(:valid?).and_return(true)
+            
+            mock_arel_attr = double('arel_attribute')
+            allow(mock_arel_attr).to receive(:relation).and_return(Person.arel_table)
+            allow(mock_arel_attr).to receive(:name).and_return('nonexistent_column')
+            allow(mock_attr).to receive(:arel_attribute).and_return(mock_arel_attr)
+            allow(mock_attr).to receive(:klass).and_return(Person)
+
+            # This should return nil instead of raising an error
+            expect(subject.type_for(mock_attr)).to be_nil
+          end
+        end
       end
     end
   end
