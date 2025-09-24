@@ -69,3 +69,33 @@ class PostsController < ActionController::Base
   end
 end
 ```
+
+## Sorting on Association Attributes
+
+You can sort on attributes of associated models by using the association name followed by the attribute name:
+
+```ruby
+# Sort by the name of the associated category
+@q = Post.ransack(s: 'category_name asc')
+@posts = @q.result
+
+# Sort by attributes of nested associations
+@q = Post.ransack(s: 'category_section_title desc')
+@posts = @q.result
+```
+
+### Sorting on Globalized/Translated Attributes
+
+When working with internationalized models (like those using the Globalize gem), special care is needed when sorting on translated attributes of associations. If you need to join translations and sort on association translated attributes, let Ransack handle the joins first:
+
+```ruby
+# Let Ransack establish the necessary joins for sorting
+@q = Book.ransack(s: 'category_translations_name asc')
+@books = @q.result.joins(:translations)
+
+# For complex scenarios with multiple translations
+@q = Book.ransack(s: 'category_translations_name asc')
+@books = @q.result.includes(:translations, category: :translations)
+```
+
+This ensures that Ransack properly handles the join dependencies between your main model's translations and the associated model's translations.
