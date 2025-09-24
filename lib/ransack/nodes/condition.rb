@@ -235,7 +235,7 @@ module Ransack
             val = attr.ransacker.formatter.call(val)
           end
           val = predicate.format(val)
-          if val.is_a?(String) && (val.starts_with?('%') || val.ends_with?('%'))
+          if val.is_a?(String) && val.include?('%')
             val = Arel::Nodes::Quoted.new(val)
           end
           val
