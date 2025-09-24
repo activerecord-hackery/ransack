@@ -1,2 +1,0 @@
-class StoryArticle < Article
-end
