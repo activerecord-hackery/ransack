@@ -59,7 +59,18 @@ module Ransack
             end
           end
 
-          opts[:distinct] ? relation.distinct : relation
+          if opts[:distinct]
+            if opts[:distinct] == true
+              relation.distinct
+            else
+              # Support distinct on specific columns
+              # Convert string or symbol to array for consistency
+              columns = Array(opts[:distinct])
+              relation.distinct(*columns)
+            end
+          else
+            relation
+          end
         end
 
         def attribute_method?(str, klass = @klass)

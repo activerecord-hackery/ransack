@@ -56,6 +56,29 @@ If passed `distinct: true`, `result` will generate a `SELECT DISTINCT` to
 avoid returning duplicate rows, even if conditions on a join would otherwise
 result in some. It generates the same SQL as calling `uniq` on the relation.
 
+You can also specify which columns should be included in the distinct clause
+by passing an array of column names or a single column name:
+
+```ruby
+def index
+  @q = Person.ransack(params[:q])
+  # Distinct on specific columns
+  @people = @q.result(distinct: [:name, :email])
+              .page(params[:page])
+end
+```
+
+Or with a single column:
+
+```ruby
+def index
+  @q = Person.ransack(params[:q])
+  # Distinct on single column
+  @people = @q.result(distinct: 'name')
+              .page(params[:page])
+end
+```
+
 Please note that for many databases, a sort on an associated table's columns
 may result in invalid SQL with `distinct: true` -- in those cases, you
 will need to modify the result as needed to allow these queries to work.
