@@ -167,9 +167,11 @@ module Ransack
                       reflection.through_reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection))
           
           unless is_habtm
-            join_scope = reflection.join_scope(join_root.left, @object.table, @object.klass)
-            if join_scope.arel.constraints.any?
-              subquery.where(join_scope.arel.constraints.first)
+            if reflection.respond_to?(:join_scope)
+              join_scope = reflection.join_scope(join_root.left, @object.table, @object.klass)
+              if join_scope.arel.constraints.any?
+                subquery.where(join_scope.arel.constraints.first)
+              end
             end
           end
           
