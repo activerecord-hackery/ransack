@@ -54,6 +54,30 @@ module Ransack
             expect(result).to be_an ::ActiveRecord::Relation
             expect(result.to_sql).to match /SELECT DISTINCT/
           end
+
+          it 'does not SELECT DISTINCT when distinct: false' do
+            s = Search.new(Person, name_eq: 'Joe Blow')
+            result = subject.evaluate(s, distinct: false)
+
+            expect(result).to be_an ::ActiveRecord::Relation
+            expect(result.to_sql).not_to match /SELECT DISTINCT/
+          end
+
+          it 'does not SELECT DISTINCT when distinct: nil' do
+            s = Search.new(Person, name_eq: 'Joe Blow')
+            result = subject.evaluate(s, distinct: nil)
+
+            expect(result).to be_an ::ActiveRecord::Relation
+            expect(result.to_sql).not_to match /SELECT DISTINCT/
+          end
+
+          it 'SELECTs DISTINCT when distinct: [] (empty array falls back to DISTINCT)' do
+            s = Search.new(Person, name_eq: 'Joe Blow')
+            result = subject.evaluate(s, distinct: [])
+
+            expect(result).to be_an ::ActiveRecord::Relation
+            expect(result.to_sql).to match /SELECT DISTINCT/
+          end
         end
 
         describe '#build_correlated_subquery' do

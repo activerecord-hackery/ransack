@@ -79,6 +79,13 @@ def index
 end
 ```
 
+The distinct option accepts:
+- `true` - SELECT DISTINCT on all columns (default behavior)
+- `false` or `nil` - no DISTINCT clause
+- `'column_name'` - SELECT DISTINCT on a single column
+- `[:column1, :column2]` - SELECT DISTINCT on specific columns
+- `[]` (empty array) - falls back to SELECT DISTINCT on all columns
+
 Please note that for many databases, a sort on an associated table's columns
 may result in invalid SQL with `distinct: true` -- in those cases, you
 will need to modify the result as needed to allow these queries to work.

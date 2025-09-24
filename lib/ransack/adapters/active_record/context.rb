@@ -60,13 +60,20 @@ module Ransack
           end
 
           if opts[:distinct]
-            if opts[:distinct] == true
+            case opts[:distinct]
+            when true
               relation.distinct
+            when false, nil
+              relation
             else
               # Support distinct on specific columns
               # Convert string or symbol to array for consistency
               columns = Array(opts[:distinct])
-              relation.distinct(*columns)
+              if columns.empty?
+                relation.distinct
+              else
+                relation.distinct(*columns)
+              end
             end
           else
             relation
