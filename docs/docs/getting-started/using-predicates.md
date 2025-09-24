@@ -108,6 +108,25 @@ It can also take an array:
 
 **Opposite: `not_in`**
 
+## in_or_blank
+
+The `in_or_blank` predicate returns all records where a field is within a specified list OR is blank (null or empty string):
+
+```ruby
+>> User.ransack(status_in_or_blank: ['active', 'pending']).result.to_sql
+=> SELECT "users".* FROM "users" WHERE ("users"."status" IN ('active', 'pending') OR ("users"."status" IS NULL OR "users"."status" = ''))
+```
+
+This is particularly useful for handling cases where you want to include records that have one of several specific values OR no value at all. For example, finding users with specific statuses or users who haven't had their status set yet.
+
+```ruby
+# Find users who are active, pending, or have no status set
+User.ransack(status_in_or_blank: ['active', 'pending']).result
+
+# In a form, this might be used as:
+# q[status_in_or_blank][]=active&q[status_in_or_blank][]=pending
+```
+
 ## cont
 
 The `cont` predicate returns all records where a field contains a given value:
