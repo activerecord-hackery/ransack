@@ -15,7 +15,7 @@ ActiveSupport.on_load(:active_record) do
   require 'polyamorous/activerecord/join_dependency'
   require 'polyamorous/activerecord/reflection'
 
-  if ::ActiveRecord.version >= ::Gem::Version.new("7.2") && ::ActiveRecord.version < ::Gem::Version.new("7.3.0")
+  if ::ActiveRecord.version >= ::Gem::Version.new("7.2") && ::ActiveRecord.version < ::Gem::Version.new("7.2.2.1")
     require "polyamorous/activerecord/join_association_7_2"
   end
 
