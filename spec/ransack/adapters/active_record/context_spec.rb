@@ -97,6 +97,25 @@ module Ransack
 
             expect(search.result.to_sql).to match /.comments.\..person_id. = .people.\..id./
           end
+
+          it 'build correlated subquery for polymorphic & default_scope when predicate is not_cont_all' do
+            search = Search.new(Article,
+             g: [
+               {
+                 m: "and",
+                 c: [
+                   {
+                     a: ["recent_notes_note"],
+                     p: "not_eq",
+                     v: ["some_note"],
+                   }
+                 ]
+               }
+             ],
+            )
+
+            expect(search.result.to_sql).to match /(.notes.\..note. != \'some_note\')/
+          end
         end
 
         describe 'sharing context across searches' do

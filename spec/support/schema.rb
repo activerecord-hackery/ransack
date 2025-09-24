@@ -176,6 +176,7 @@ class Article < ApplicationRecord
   has_many :comments
   has_and_belongs_to_many :tags
   has_many :notes, as: :notable
+  has_many :recent_notes, as: :notable
 
   alias_attribute :content, :body
 
@@ -254,6 +255,14 @@ class Tag < ApplicationRecord
 end
 
 class Note < ApplicationRecord
+  belongs_to :notable, polymorphic: true
+end
+
+class RecentNote < ApplicationRecord
+  DEFAULT_NOTABLE_ID = 1
+  self.table_name = "notes"
+  default_scope { where(notable_id: DEFAULT_NOTABLE_ID) }
+
   belongs_to :notable, polymorphic: true
 end
 
