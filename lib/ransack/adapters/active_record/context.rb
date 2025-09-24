@@ -19,7 +19,8 @@ module Ransack
           unless schema_cache.send(:data_source_exists?, table)
             raise "No table named #{table} exists."
           end
-          attr.klass.columns.find { |column| column.name == name }.type
+          column = attr.klass.columns.find { |column| column.name == name }
+          column&.type
         end
 
         def evaluate(search, opts = {})
@@ -208,7 +209,12 @@ module Ransack
               nil
             end
           when Arel::Nodes::And
-            extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
+            # And may have multiple children, so we need to check all, not via left/right
+            join_root.children.each do |child|
+              key = extract_correlated_key(child)
+              return key if key
+            end
+            nil
           else
             # e.g., parent was Arel::Nodes::And and the evaluated side was
             # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause

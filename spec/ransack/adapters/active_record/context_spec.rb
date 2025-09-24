@@ -130,6 +130,25 @@ module Ransack
 
             expect(search.result.to_sql).to match /.comments.\..person_id. = .people.\..id./
           end
+
+          it 'build correlated subquery for polymorphic & default_scope when predicate is not_cont_all' do
+            search = Search.new(Article,
+             g: [
+               {
+                 m: "and",
+                 c: [
+                   {
+                     a: ["recent_notes_note"],
+                     p: "not_eq",
+                     v: ["some_note"],
+                   }
+                 ]
+               }
+             ],
+            )
+
+            expect(search.result.to_sql).to match /(.notes.\..note. != \'some_note\')/
+          end
         end
 
         describe 'sharing context across searches' do
@@ -172,6 +191,23 @@ module Ransack
           expect(attribute.name.to_s).to eq 'title'
           expect(attribute.relation.name).to eq 'articles'
           expect(attribute.relation.table_alias).to be_nil
+        end
+
+        describe '#type_for' do
+          it 'returns nil when column does not exist instead of raising NoMethodError' do
+            # Create a mock attribute that references a non-existent column
+            mock_attr = double('attribute')
+            allow(mock_attr).to receive(:valid?).and_return(true)
+            
+            mock_arel_attr = double('arel_attribute')
+            allow(mock_arel_attr).to receive(:relation).and_return(Person.arel_table)
+            allow(mock_arel_attr).to receive(:name).and_return('nonexistent_column')
+            allow(mock_attr).to receive(:arel_attribute).and_return(mock_arel_attr)
+            allow(mock_attr).to receive(:klass).and_return(Person)
+
+            # This should return nil instead of raising an error
+            expect(subject.type_for(mock_attr)).to be_nil
+          end
         end
       end
     end
