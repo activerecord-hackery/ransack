@@ -1,6 +1,0 @@
---markup rdoc
---output-dir ./yardoc
-lib/**/*.rb
-ext/**/*.{c,h}
--
-doc/*.md
