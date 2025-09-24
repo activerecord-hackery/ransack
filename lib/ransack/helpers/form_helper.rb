@@ -7,7 +7,7 @@ module Ransack
       #   <%= search_form_for(@q) do |f| %>
       #
       def search_form_for(record, options = {}, &proc)
-        search = extract_search_and_set_url(record, options)
+        search = extract_search_and_set_url(record, options, 'search_form_for')
         options[:html] ||= {}
         html_options = build_html_options(search, options, :get)
         finalize_form_options(options, html_options)
@@ -23,7 +23,7 @@ module Ransack
       # paginated results and other turbo-enabled components.
       #
       def turbo_search_form_for(record, options = {}, &proc)
-        search = extract_search_and_set_url(record, options)
+        search = extract_search_and_set_url(record, options, 'turbo_search_form_for')
         options[:html] ||= {}
         turbo_options = build_turbo_options(options)
         method = options.delete(:method) || :post
@@ -66,7 +66,7 @@ module Ransack
 
       private
 
-        def extract_search_and_set_url(record, options)
+        def extract_search_and_set_url(record, options, method_name)
           if record.is_a? Ransack::Search
             search = record
             options[:url] ||= polymorphic_path(
@@ -80,7 +80,6 @@ module Ransack
             )
             search
           else
-            method_name = caller_locations(1, 1).first.label.include?('turbo') ? 'turbo_search_form_for' : 'search_form_for'
             raise ArgumentError,
             "No Ransack::Search object was provided to #{method_name}!"
           end

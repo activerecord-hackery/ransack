@@ -972,23 +972,23 @@ module Ransack
         describe '#extract_search_and_set_url' do
           it 'extracts search from Ransack::Search object' do
             options = {}
-            result = helper.send(:extract_search_and_set_url, search, options)
+            result = helper.send(:extract_search_and_set_url, search, options, 'search_form_for')
             expect(result).to eq(search)
             expect(options[:url]).to match(/people/)
           end
 
           it 'extracts search from array with Search object' do
             options = {}
-            result = helper.send(:extract_search_and_set_url, [:admin, search], options)
+            result = helper.send(:extract_search_and_set_url, [:admin, search], options, 'search_form_for')
             expect(result).to eq(search)
             expect(options[:url]).to match(/admin/)
           end
 
-          it 'raises error for invalid record' do
+          it 'raises error for invalid record with correct method name' do
             options = {}
             expect {
-              helper.send(:extract_search_and_set_url, "invalid", options)
-            }.to raise_error(ArgumentError)
+              helper.send(:extract_search_and_set_url, "invalid", options, 'turbo_search_form_for')
+            }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to turbo_search_form_for!')
           end
         end
       end
