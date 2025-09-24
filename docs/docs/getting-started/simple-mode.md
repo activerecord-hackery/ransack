@@ -106,6 +106,39 @@ The `search_form_for` answer format can be set like this:
 <%= search_form_for(@q, format: :json) do |f| %>
 ```
 
+### Turbo-enabled search form
+
+For applications using Turbo (Hotwire), Ransack provides `turbo_search_form_for` helper which submits forms via turbo streams instead of traditional HTML GET requests. This is particularly useful when integrating with paginated results or other turbo-enabled components:
+
+```erb
+<%= turbo_search_form_for @q do |f| %>
+  <%= f.label :name_cont %>
+  <%= f.search_field :name_cont %>
+  <%= f.submit %>
+<% end %>
+```
+
+The turbo form helper supports the same options as `search_form_for`, plus additional turbo-specific options:
+
+```erb
+# Target a specific turbo frame
+<%= turbo_search_form_for @q, turbo_frame: 'search_results' do |f| %>
+  # form fields
+<% end %>
+
+# Use a custom HTTP method (defaults to POST)
+<%= turbo_search_form_for @q, method: :patch do |f| %>
+  # form fields
+<% end %>
+
+# Set turbo action behavior
+<%= turbo_search_form_for @q, turbo_action: 'replace' do |f| %>
+  # form fields
+<% end %>
+```
+
+This eliminates the need for complex controller logic to handle different request formats when combining search with pagination.
+
 ### Search link helper
 
 Ransack's `sort_link` helper creates table headers that are sortable links

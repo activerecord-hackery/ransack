@@ -849,11 +849,226 @@ module Ransack
         before do
           Ransack.configure { |c| c.search_key = :example }
         end
+        after do
+          Ransack.configure { |c| c.search_key = :q }
+        end
         subject {
           @controller.view_context
           .search_form_for(Person.ransack) { |f| f.text_field :name_eq }
         }
         it { should match /example_name_eq/ }
+      end
+
+      describe '#search_form_with with default format' do
+        subject { @controller.view_context
+          .search_form_with(model: Person.ransack) {} }
+        it { should match /action="\/people"/ }
+      end
+
+      describe '#search_form_with with pdf format' do
+        subject {
+          @controller.view_context
+          .search_form_with(model: Person.ransack, format: :pdf) {}
+        }
+        it { should match /action="\/people.pdf"/ }
+      end
+
+      describe '#search_form_with with json format' do
+        subject {
+          @controller.view_context
+          .search_form_with(model: Person.ransack, format: :json) {}
+        }
+        it { should match /action="\/people.json"/ }
+      end
+
+      describe '#search_form_with with an array of routes' do
+        subject {
+          @controller.view_context
+          .search_form_with(model: [:admin, Comment.ransack]) {}
+        }
+        it { should match /action="\/admin\/comments"/ }
+      end
+
+      describe '#search_form_with with custom default search key' do
+        before do
+          Ransack.configure { |c| c.search_key = :example }
+        end
+        after do
+          Ransack.configure { |c| c.search_key = :q }
+        end
+        subject {
+          @controller.view_context
+          .search_form_with(model: Person.ransack) { |f| f.text_field :name_eq }
+        }
+        it { should match /example\[name_eq\]/ }
+      end
+
+      describe '#search_form_with without Ransack::Search object' do
+        it 'raises ArgumentError' do
+          expect {
+            @controller.view_context.search_form_with(model: "not a search object") {}
+          }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to search_form_with!')
+        end
+      end
+
+      describe '#turbo_search_form_for with default options' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack) {}
+        }
+        it { should match /action="\/people"/ }
+        it { should match /method="post"/ }
+        it { should match /data-turbo-action="advance"/ }
+      end
+
+      describe '#turbo_search_form_for with custom method' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, method: :patch) {}
+        }
+        it { should match /method="post"/ }
+        it { should match /name="_method" value="patch"/ }
+        it { should match /data-turbo-action="advance"/ }
+      end
+
+      describe '#turbo_search_form_for with turbo_frame' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, turbo_frame: 'search_results') {}
+        }
+        it { should match /data-turbo-frame="search_results"/ }
+      end
+
+      describe '#turbo_search_form_for with custom turbo_action' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, turbo_action: 'replace') {}
+        }
+        it { should match /data-turbo-action="replace"/ }
+      end
+
+      describe '#turbo_search_form_for with format' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, format: :json) {}
+        }
+        it { should match /action="\/people.json"/ }
+      end
+
+      describe '#turbo_search_form_for with array of routes' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for([:admin, Comment.ransack]) {}
+        }
+        it { should match /action="\/admin\/comments"/ }
+      end
+
+      describe '#turbo_search_form_for with custom search key' do
+        before do
+          Ransack.configure { |c| c.search_key = :example }
+        end
+        after do
+          Ransack.configure { |c| c.search_key = :q }
+        end
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack) { |f| f.text_field :name_eq }
+        }
+        it { should match /example_name_eq/ }
+      end
+
+      describe '#turbo_search_form_for without Ransack::Search object' do
+        it 'raises ArgumentError' do
+          expect {
+            @controller.view_context.turbo_search_form_for("not a search object") {}
+          }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to turbo_search_form_for!')
+        end
+      end
+
+      describe 'private helper methods' do
+        let(:helper) { @controller.view_context }
+        let(:search) { Person.ransack }
+
+        describe '#build_turbo_options' do
+          it 'builds turbo options with frame' do
+            options = { turbo_frame: 'results', turbo_action: 'replace' }
+            result = helper.send(:build_turbo_options, options)
+            expect(result).to eq({
+              data: {
+                turbo_frame: 'results',
+                turbo_action: 'replace'
+              }
+            })
+            expect(options).to be_empty
+          end
+
+          it 'builds turbo options without frame' do
+            options = { turbo_action: 'advance' }
+            result = helper.send(:build_turbo_options, options)
+            expect(result).to eq({ data: { turbo_action: 'advance' } })
+          end
+
+          it 'uses default turbo action' do
+            options = {}
+            result = helper.send(:build_turbo_options, options)
+            expect(result).to eq({ data: { turbo_action: 'advance' } })
+          end
+        end
+
+        describe '#build_html_options' do
+          it 'builds HTML options with correct method' do
+            options = { class: 'custom' }
+            result = helper.send(:build_html_options, search, options, :post)
+            expect(result[:method]).to eq(:post)
+            expect(result[:class]).to include('custom')
+          end
+        end
+
+        describe '#extract_search_and_set_url' do
+          it 'extracts search from Ransack::Search object' do
+            options = {}
+            result = helper.send(:extract_search_and_set_url, search, options, 'search_form_for')
+            expect(result).to eq(search)
+            expect(options[:url]).to match(/people/)
+          end
+
+          it 'extracts search from array with Search object' do
+            options = {}
+            comment_search = Comment.ransack
+            result = helper.send(:extract_search_and_set_url, [:admin, comment_search], options, 'search_form_for')
+            expect(result).to eq(comment_search)
+            expect(options[:url]).to match(/admin/)
+          end
+
+          it 'raises error for invalid record with correct method name' do
+            options = {}
+            expect {
+              helper.send(:extract_search_and_set_url, "invalid", options, 'turbo_search_form_for')
+            }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to turbo_search_form_for!')
+          end
+
+          it 'extracts search from Ransack::Search object for search_form_with' do
+            options = {}
+            result = helper.send(:extract_search_and_set_url, search, options, 'search_form_with')
+            expect(result).to eq(search)
+            expect(options[:url]).to match(/people/)
+          end
+
+          it 'extracts search from array with Search object for search_form_with' do
+            options = {}
+            comment_search = Comment.ransack
+            result = helper.send(:extract_search_and_set_url, [:admin, comment_search], options, 'search_form_with')
+            expect(result).to eq(comment_search)
+            expect(options[:url]).to match(/admin/)
+          end
+
+          it 'raises error for invalid record with correct method name for search_form_with' do
+            options = {}
+            expect {
+              helper.send(:extract_search_and_set_url, "invalid", options, 'search_form_with')
+            }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to search_form_with!')
+          end
+        end
       end
     end
   end
