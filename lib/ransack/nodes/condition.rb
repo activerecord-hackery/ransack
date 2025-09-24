@@ -265,7 +265,20 @@ module Ransack
       end
 
       def default_type
-        predicate.type || (attributes.first && attributes.first.type)
+        predicate.type || best_attribute_type
+      end
+
+      private
+
+      def best_attribute_type
+        return nil if attributes.empty?
+        
+        # Prioritize attributes with explicit ransacker types
+        ransacker_attr = attributes.find { |attr| attr.ransacker&.type }
+        return ransacker_attr.type if ransacker_attr
+        
+        # Fall back to the first attribute's type
+        attributes.first.type
       end
 
       def inspect

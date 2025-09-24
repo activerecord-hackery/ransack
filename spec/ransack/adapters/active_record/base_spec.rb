@@ -672,6 +672,27 @@ module Ransack
               /BETWEEN 2 AND 6 GROUP BY articles.person_id \) DESC/
             )
           end
+          
+          it 'should maintain ransacker type when combined with other conditions' do
+            # This test reproduces the issue where a string ransacker was
+            # incorrectly cast as integer when combined with another integer condition
+            
+            # First, test the ransacker alone (should work)
+            s1 = Person.ransack(name_case_insensitive_matches: 'test')
+            sql1 = s1.result.to_sql
+            # Should include quoted string value
+            expect(sql1).to match(/LIKE.*'test'/)
+            
+            # Now combine with an integer condition
+            s2 = Person.ransack(
+              name_case_insensitive_matches: 'test',
+              id_eq: 1
+            )
+            sql2 = s2.result.to_sql
+            # Should still include quoted string value, not unquoted integer
+            expect(sql2).to match(/LIKE.*'test'/)
+            expect(sql2).not_to match(/LIKE.*test[^']/) # No unquoted "test"
+          end
 
           context 'case insensitive sorting' do
             it 'allows sort by desc' do

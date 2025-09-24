@@ -99,6 +99,78 @@ module Ransack
           specify { expect(subject).to eq Condition.extract(Context.for(Person), 'full_name_eq', Person.first.name) }
         end
       end
+      
+      describe '#default_type' do
+        let(:context) { Context.for(Person) }
+        
+        it 'returns predicate type when available' do
+          condition = Condition.new(context)
+          predicate = double('predicate', type: :datetime)
+          condition.predicate = predicate
+          
+          expect(condition.default_type).to eq :datetime
+        end
+        
+        it 'returns attribute type when predicate type is nil' do
+          condition = Condition.new(context)
+          predicate = double('predicate', type: nil)
+          condition.predicate = predicate
+          
+          attribute = double('attribute', type: :string)
+          condition.attributes << attribute
+          
+          expect(condition.default_type).to eq :string
+        end
+        
+        it 'prioritizes ransacker type over regular attribute type' do
+          condition = Condition.new(context)
+          predicate = double('predicate', type: nil)
+          condition.predicate = predicate
+          
+          # Regular attribute with integer type
+          regular_attr = double('regular_attribute', 
+            type: :integer, 
+            ransacker: nil
+          )
+          
+          # Ransacker attribute with explicit string type
+          ransacker = double('ransacker', type: :string)
+          ransacker_attr = double('ransacker_attribute',
+            type: :string,
+            ransacker: ransacker
+          )
+          
+          # Add regular attribute first, ransacker second
+          condition.attributes << regular_attr
+          condition.attributes << ransacker_attr
+          
+          # Should prioritize ransacker type even though it's not first
+          expect(condition.default_type).to eq :string
+        end
+        
+        it 'handles empty attributes gracefully' do
+          condition = Condition.new(context)
+          predicate = double('predicate', type: nil)
+          condition.predicate = predicate
+          
+          expect(condition.default_type).to be_nil
+        end
+        
+        it 'falls back to first attribute when no ransackers present' do
+          condition = Condition.new(context)
+          predicate = double('predicate', type: nil)
+          condition.predicate = predicate
+          
+          attr1 = double('attr1', type: :integer, ransacker: nil)
+          attr2 = double('attr2', type: :string, ransacker: nil)
+          
+          condition.attributes << attr1
+          condition.attributes << attr2
+          
+          # Should use first attribute when no ransackers
+          expect(condition.default_type).to eq :integer
+        end
+      end
     end
   end
 end
