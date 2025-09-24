@@ -28,17 +28,10 @@ module Ransack
 
           if search.sorts.any?
             relation = relation.except(:order)
-            # Rather than applying all of the search's sorts in one fell swoop,
-            # as the original implementation does, we apply one at a time.
-            #
-            # If the sort (returned by the Visitor above) is a symbol, we know
-            # that it represents a scope on the model and we can apply that
-            # scope.
-            #
-            # Otherwise, we fall back to the applying the sort with the "order"
-            # method as the original implementation did. Actually the original
-            # implementation used "reorder," which was overkill since we already
-            # have a clean slate after "relation.except(:order)" above.
+            # Apply sorts one at a time. If the sort is a symbol, it represents
+            # a model scope; otherwise, use the "order" method. We use "order"
+            # instead of "reorder" since we already have a clean slate after
+            # "relation.except(:order)" above.
             viz.accept(search.sorts).each do |scope_or_sort|
               if scope_or_sort.is_a?(Symbol)
                 relation = relation.send(scope_or_sort)
@@ -101,12 +94,10 @@ module Ransack
           end
         end
 
-        # All dependent Arel::Join nodes used in the search query.
-        #
-        # This could otherwise be done as `@object.arel.join_sources`, except
-        # that ActiveRecord's build_joins sets up its own JoinDependency.
-        # This extracts what we need to access the joins using our existing
-        # JoinDependency to track table aliases.
+        # Returns all Arel::Join nodes used in the search query.
+        # 
+        # Uses our existing JoinDependency to track table aliases instead of
+        # @object.arel.join_sources, which would create its own JoinDependency.
         #
         def join_sources
           base, joins = begin
@@ -143,31 +134,47 @@ module Ransack
           }
         end
 
-        # Build an Arel subquery that selects keys for the top query,
-        # drawn from the first join association's foreign_key.
-        #
-        # Example: for an Article that has_and_belongs_to_many Tags
-        #
-        #   context = Article.search.context
-        #   attribute = Attribute.new(context, "tags_name").tap do |a|
-        #     context.bind(a, a.name)
-        #   end
-        #   context.build_correlated_subquery(attribute.parent).to_sql
-        #
-        #   # SELECT "articles_tags"."article_id" FROM "articles_tags"
-        #   # INNER JOIN "tags" ON "tags"."id" = "articles_tags"."tag_id"
-        #   # WHERE "articles_tags"."article_id" = "articles"."id"
-        #
-        # The WHERE condition on this query makes it invalid by itself,
-        # because it is correlated to the primary key on the outer query.
+        # Builds a correlated subquery for negative conditions (NOT IN).
+        # 
+        # The subquery selects foreign keys from the associated table and applies
+        # default scopes to ensure consistent behavior with positive conditions.
+        # 
+        # Example for Article has_and_belongs_to_many Tags:
+        #   SELECT "articles_tags"."article_id" FROM "articles_tags"
+        #   INNER JOIN "tags" ON "tags"."id" = "articles_tags"."tag_id"
+        #   WHERE "articles_tags"."article_id" = "articles"."id"
+        #   AND ('default_scope' = 'default_scope')  # Applied default scope
         #
         def build_correlated_subquery(association)
           join_constraints = extract_joins(association)
           join_root = join_constraints.shift
           correlated_key = extract_correlated_key(join_root)
+          
           subquery = Arel::SelectManager.new(association.base_klass)
           subquery.from(join_root.left)
           subquery.project(correlated_key)
+          
+          # Apply default scopes to maintain consistency with positive conditions.
+          # Skip HABTM associations as they use join tables without proper model classes.
+          reflection = association.reflection
+          
+          # Detect HABTM associations by checking reflection types and table naming patterns
+          is_habtm = reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection) ||
+                     reflection.class.name.include?('HasAndBelongsToMany') ||
+                     (reflection.is_a?(::ActiveRecord::Reflection::ThroughReflection) && 
+                      reflection.source_reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection)) ||
+                     (reflection.is_a?(::ActiveRecord::Reflection::ThroughReflection) && 
+                      reflection.through_reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection)) ||
+                     (correlated_key.relation.name.include?('_') && 
+                      correlated_key.relation.name.match?(/\A\w+_\w+\z/))
+          
+          unless is_habtm
+            join_scope = reflection.join_scope(join_root.left, @object.table, @object.klass)
+            if join_scope.arel.constraints.any?
+              subquery.where(join_scope.arel.constraints.first)
+            end
+          end
+          
           join_constraints.each do |j|
             subquery.join_sources << Arel::Nodes::InnerJoin.new(j.left, j.right)
           end
@@ -203,7 +210,7 @@ module Ransack
           when Arel::Nodes::And
             extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
           else
-            # eg parent was Arel::Nodes::And and the evaluated side was one of
+            # e.g., parent was Arel::Nodes::And and the evaluated side was
             # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause
             nil
           end
@@ -250,8 +257,8 @@ module Ransack
           end
         end
 
-        # Checkout active_record/relation/query_methods.rb +build_joins+ for
-        # reference. Lots of duplicated code maybe we can avoid it
+        # Builds joins for the relation, similar to ActiveRecord's build_joins.
+        # TODO: Consider refactoring to reduce code duplication with ActiveRecord.
         def build_joins(relation)
           buckets = relation.joins_values + relation.left_outer_joins_values
 
@@ -316,14 +323,13 @@ module Ransack
 
           @associations_pot[found_association] = parent
 
-          # TODO maybe we dont need to push associations here, we could loop
-          # through the @associations_pot instead
+          # TODO: Consider refactoring to loop through @associations_pot instead
           @join_dependency.instance_variable_get(:@join_root).children.push found_association
 
-          # Builds the arel nodes properly for this association
+          # Builds the Arel nodes for this association
           @tables_pot[found_association] = @join_dependency.construct_tables_for_association!(jd.instance_variable_get(:@join_root), found_association)
 
-          # Leverage the stashed association functionality in AR
+          # Use ActiveRecord's stashed association functionality
           @object = @object.joins(jd)
           found_association
         end

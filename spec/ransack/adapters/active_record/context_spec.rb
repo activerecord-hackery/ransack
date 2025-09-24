@@ -44,39 +44,72 @@ module Ransack
             search = Search.new(Person, { articles_title_not_eq: 'some_title' }, context: subject)
             attribute = search.conditions.first.attributes.first
             constraints = subject.build_correlated_subquery(attribute.parent).constraints
-            constraint = constraints.first
 
-            expect(constraints.length).to eql 1
-            expect(constraint.left.name).to eql 'person_id'
-            expect(constraint.left.relation.name).to eql 'articles'
-            expect(constraint.right.name).to eql 'id'
-            expect(constraint.right.relation.name).to eql 'people'
+            expect(constraints.length).to eql 2
+            
+            # The first constraint should be an And node containing default scope and correlation
+            first_constraint = constraints.first
+            expect(first_constraint).to be_a(Arel::Nodes::And)
+            expect(first_constraint.children.length).to eql 2
+            
+            # The first child should be the default scope (grouping)
+            default_scope_constraint = first_constraint.children.first
+            expect(default_scope_constraint).to be_a(Arel::Nodes::Grouping)
+            
+            # The second child should be the correlation constraint
+            correlation_constraint = first_constraint.children.last
+            expect(correlation_constraint.left.name).to eql 'person_id'
+            expect(correlation_constraint.left.relation.name).to eql 'articles'
+            expect(correlation_constraint.right.name).to eql 'id'
+            expect(correlation_constraint.right.relation.name).to eql 'people'
           end
 
           it 'build correlated subquery for Child STI model when predicate is not_eq' do
             search = Search.new(Person, { story_articles_title_not_eq: 'some_title' }, context: subject)
             attribute = search.conditions.first.attributes.first
             constraints = subject.build_correlated_subquery(attribute.parent).constraints
-            constraint = constraints.first
 
-            expect(constraints.length).to eql 1
-            expect(constraint.left.relation.name).to eql 'articles'
-            expect(constraint.left.name).to eql 'person_id'
-            expect(constraint.right.relation.name).to eql 'people'
-            expect(constraint.right.name).to eql 'id'
+            expect(constraints.length).to eql 2
+            
+            # The first constraint should be an And node containing default scope and correlation
+            first_constraint = constraints.first
+            expect(first_constraint).to be_a(Arel::Nodes::And)
+            expect(first_constraint.children.length).to be >= 2
+            
+            # The first child should be the default scope (grouping)
+            default_scope_constraint = first_constraint.children.first
+            expect(default_scope_constraint).to be_a(Arel::Nodes::Grouping)
+            
+            # The second-to-last child should be the correlation constraint (STI adds type constraint at the end)
+            correlation_constraint = first_constraint.children[-2]
+            expect(correlation_constraint.left.relation.name).to eql 'articles'
+            expect(correlation_constraint.left.name).to eql 'person_id'
+            expect(correlation_constraint.right.relation.name).to eql 'people'
+            expect(correlation_constraint.right.name).to eql 'id'
           end
 
           it 'build correlated subquery for Child STI model when predicate is eq' do
             search = Search.new(Person, { story_articles_title_not_eq: 'some_title' }, context: subject)
             attribute = search.conditions.first.attributes.first
             constraints = subject.build_correlated_subquery(attribute.parent).constraints
-            constraint = constraints.first
 
-            expect(constraints.length).to eql 1
-            expect(constraint.left.relation.name).to eql 'articles'
-            expect(constraint.left.name).to eql 'person_id'
-            expect(constraint.right.relation.name).to eql 'people'
-            expect(constraint.right.name).to eql 'id'
+            expect(constraints.length).to eql 2
+            
+            # The first constraint should be an And node containing default scope and correlation
+            first_constraint = constraints.first
+            expect(first_constraint).to be_a(Arel::Nodes::And)
+            expect(first_constraint.children.length).to be >= 2
+            
+            # The first child should be the default scope (grouping)
+            default_scope_constraint = first_constraint.children.first
+            expect(default_scope_constraint).to be_a(Arel::Nodes::Grouping)
+            
+            # The second-to-last child should be the correlation constraint (STI adds type constraint at the end)
+            correlation_constraint = first_constraint.children[-2]
+            expect(correlation_constraint.left.relation.name).to eql 'articles'
+            expect(correlation_constraint.left.name).to eql 'person_id'
+            expect(correlation_constraint.right.relation.name).to eql 'people'
+            expect(correlation_constraint.right.name).to eql 'id'
           end
 
           it 'build correlated subquery for multiple conditions (default scope)' do
