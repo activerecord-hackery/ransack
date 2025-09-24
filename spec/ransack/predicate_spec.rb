@@ -21,6 +21,45 @@ module Ransack
       end
     end
 
+    describe 'wildcard escaping behavior' do
+      context 'with special characters in search values' do
+        it 'properly escapes wildcard characters in LIKE predicates' do
+          # Test that % and _ are treated as literal characters
+          Person.create!(name: '100% Pure')
+          Person.create!(name: '50_50 Blend')
+          Person.create!(name: 'Normal Text')
+          
+          # Search for literal %
+          results = Person.ransack(name_cont: '%').result
+          expect(results).to include(Person.find_by(name: '100% Pure'))
+          expect(results).not_to include(Person.find_by(name: 'Normal Text'))
+          
+          # Search for literal _
+          results = Person.ransack(name_cont: '_').result
+          expect(results).to include(Person.find_by(name: '50_50 Blend'))
+          expect(results).not_to include(Person.find_by(name: 'Normal Text'))
+        end
+
+        it 'works with start predicate' do
+          Person.create!(name: '%start')
+          Person.create!(name: 'normalstart')
+          
+          results = Person.ransack(name_start: '%').result
+          expect(results).to include(Person.find_by(name: '%start'))
+          expect(results).not_to include(Person.find_by(name: 'normalstart'))
+        end
+
+        it 'works with end predicate' do
+          Person.create!(name: 'end%')
+          Person.create!(name: 'endnormal')
+          
+          results = Person.ransack(name_end: '%').result
+          expect(results).to include(Person.find_by(name: 'end%'))
+          expect(results).not_to include(Person.find_by(name: 'endnormal'))
+        end
+      end
+    end
+
     describe 'eq' do
       it 'generates an equality condition for boolean true values' do
         test_boolean_equality_for(true)
@@ -163,7 +202,7 @@ module Ransack
         when "Mysql2"
           /`people`.`name` LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /"people"."name" LIKE '%%._\\%'/
+         /LIKE '%\\%\.\\_\\\\%' ESCAPE '\\'/
         end) do
         subject { @s }
       end
@@ -183,7 +222,7 @@ module Ransack
         when  "Mysql2"
           /`people`.`name` NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /"people"."name" NOT LIKE '%%._\\%'/
+         /NOT LIKE '%\\%\.\\_\\\\%' ESCAPE '\\'/
         end) do
         subject { @s }
       end
@@ -205,7 +244,7 @@ module Ransack
         when "Mysql2"
           /LOWER\(`people`.`name`\) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /LOWER\("people"."name"\) LIKE '%%._\\%'/
+         /LIKE '%\\%\.\\_\\\\%' ESCAPE '\\'/
         end) do
         subject { @s }
       end
@@ -227,7 +266,7 @@ module Ransack
         when "Mysql2"
           /LOWER\(`people`.`name`\) NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /LOWER\("people"."name"\) NOT LIKE '%%._\\%'/
+         /NOT LIKE '%\\%\.\\_\\\\%' ESCAPE '\\'/
         end) do
         subject { @s }
       end
