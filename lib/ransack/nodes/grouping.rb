@@ -49,12 +49,21 @@ module Ransack
       alias :c= :conditions=
 
       def [](key)
-        conditions.detect { |c| c.key == key.to_s }
+        conditions.detect do |c|
+          matched_condition(c, key)
+        end
       end
 
       def []=(key, value)
-        conditions.reject! { |c| c.key == key.to_s }
+        conditions.reject! do |c|
+          matched_condition(c, key)
+        end
+
         self.conditions << value
+      end
+
+      def matched_condition(c, key)
+        c.name == key.to_s || (c.respond_to?(:key) && c.key == key.to_s)
       end
 
       def values
@@ -106,6 +115,14 @@ module Ransack
         end
       end
       alias :g= :groupings=
+
+      def respond_to_missing?(method_id, include_private = false)
+        method_name = method_id.to_s.dup
+        writer = method_name.sub!(/\=$/, ''.freeze)
+        return true if attribute_method?(method_name)
+
+        super
+      end
 
       def method_missing(method_id, *args)
         method_name = method_id.to_s.dup

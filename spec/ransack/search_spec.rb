@@ -741,6 +741,14 @@ module Ransack
         ]
         expect(@s.groupings.first.children_name_eq).to eq 'Ernie'
       end
+
+      it 'respond_to? method_missing' do
+        @s.groupings = [
+          { m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' }
+        ]
+        expect(@s.groupings.first.respond_to?(:children_name_eq)).to eq true
+        expect(@s.groupings.first.method(:children_name_eq)).to be_truthy
+      end
     end
   end
 end

@@ -100,6 +100,15 @@ module Ransack
       Nodes::Sort.new(@context).build(opts)
     end
 
+    def respond_to_missing?(method_id, include_private = false)
+      method_name = method_id.to_s
+      getter_name = method_name.sub(/=$/, ''.freeze)
+      return true if base.attribute_method?(getter_name)
+      return true if @context.ransackable_scope?(getter_name, @context.object)
+
+      super
+    end
+
     def method_missing(method_id, *args)
       method_name = method_id.to_s
       getter_name = method_name.sub(/=$/, ''.freeze)
