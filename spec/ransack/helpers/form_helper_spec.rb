@@ -849,6 +849,9 @@ module Ransack
         before do
           Ransack.configure { |c| c.search_key = :example }
         end
+        after do
+          Ransack.configure { |c| c.search_key = :q }
+        end
         subject {
           @controller.view_context
           .search_form_for(Person.ransack) { |f| f.text_field :name_eq }
@@ -910,6 +913,9 @@ module Ransack
       describe '#turbo_search_form_for with custom search key' do
         before do
           Ransack.configure { |c| c.search_key = :example }
+        end
+        after do
+          Ransack.configure { |c| c.search_key = :q }
         end
         subject {
           @controller.view_context
