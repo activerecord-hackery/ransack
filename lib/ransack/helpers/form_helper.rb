@@ -34,6 +34,50 @@ module Ransack
         form_for(record, options, &proc)
       end
 
+      # +turbo_search_form_for+
+      #
+      #   <%= turbo_search_form_for(@q) do |f| %>
+      #
+      # This is a turbo-enabled version of search_form_for that submits via turbo streams
+      # instead of traditional HTML GET requests. Useful for seamless integration with
+      # paginated results and other turbo-enabled components.
+      #
+      def turbo_search_form_for(record, options = {}, &proc)
+        if record.is_a? Ransack::Search
+          search = record
+          options[:url] ||= polymorphic_path(
+            search.klass, format: options.delete(:format)
+            )
+        elsif record.is_a?(Array) &&
+        (search = record.detect { |o| o.is_a?(Ransack::Search) })
+          options[:url] ||= polymorphic_path(
+            options_for(record), format: options.delete(:format)
+            )
+        else
+          raise ArgumentError,
+          'No Ransack::Search object was provided to turbo_search_form_for!'
+        end
+        options[:html] ||= {}
+        
+        # Set up turbo-specific options
+        turbo_options = {
+          'data-turbo-frame': options.delete(:turbo_frame),
+          'data-turbo-action': options.delete(:turbo_action) || 'advance'
+        }.compact
+        
+        html_options = {
+          class:  html_option_for(options[:class], search),
+          id:     html_option_for(options[:id], search),
+          method: options.delete(:method) || :post
+        }.merge(turbo_options)
+        
+        options[:as] ||= Ransack.options[:search_key]
+        options[:html].reverse_merge!(html_options)
+        options[:builder] ||= FormBuilder
+
+        form_for(record, options, &proc)
+      end
+
       # +sort_link+
       #
       #   <%= sort_link(@q, :name, [:name, 'kind ASC'], 'Player Name') %>

@@ -855,6 +855,76 @@ module Ransack
         }
         it { should match /example_name_eq/ }
       end
+
+      describe '#turbo_search_form_for with default options' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack) {}
+        }
+        it { should match /action="\/people"/ }
+        it { should match /method="post"/ }
+        it { should match /data-turbo-action="advance"/ }
+      end
+
+      describe '#turbo_search_form_for with custom method' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, method: :patch) {}
+        }
+        it { should match /method="patch"/ }
+        it { should match /data-turbo-action="advance"/ }
+      end
+
+      describe '#turbo_search_form_for with turbo_frame' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, turbo_frame: 'search_results') {}
+        }
+        it { should match /data-turbo-frame="search_results"/ }
+      end
+
+      describe '#turbo_search_form_for with custom turbo_action' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, turbo_action: 'replace') {}
+        }
+        it { should match /data-turbo-action="replace"/ }
+      end
+
+      describe '#turbo_search_form_for with format' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack, format: :json) {}
+        }
+        it { should match /action="\/people.json"/ }
+      end
+
+      describe '#turbo_search_form_for with array of routes' do
+        subject {
+          @controller.view_context
+          .turbo_search_form_for([:admin, Comment.ransack]) {}
+        }
+        it { should match /action="\/admin\/comments"/ }
+      end
+
+      describe '#turbo_search_form_for with custom search key' do
+        before do
+          Ransack.configure { |c| c.search_key = :example }
+        end
+        subject {
+          @controller.view_context
+          .turbo_search_form_for(Person.ransack) { |f| f.text_field :name_eq }
+        }
+        it { should match /example_name_eq/ }
+      end
+
+      describe '#turbo_search_form_for without Ransack::Search object' do
+        it 'raises ArgumentError' do
+          expect {
+            @controller.view_context.turbo_search_form_for("not a search object") {}
+          }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to turbo_search_form_for!')
+        end
+      end
     end
   end
 end
