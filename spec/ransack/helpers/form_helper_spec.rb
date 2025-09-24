@@ -859,6 +859,58 @@ module Ransack
         it { should match /example_name_eq/ }
       end
 
+      describe '#search_form_with with default format' do
+        subject { @controller.view_context
+          .search_form_with(model: Person.ransack) {} }
+        it { should match /action="\/people"/ }
+      end
+
+      describe '#search_form_with with pdf format' do
+        subject {
+          @controller.view_context
+          .search_form_with(model: Person.ransack, format: :pdf) {}
+        }
+        it { should match /action="\/people.pdf"/ }
+      end
+
+      describe '#search_form_with with json format' do
+        subject {
+          @controller.view_context
+          .search_form_with(model: Person.ransack, format: :json) {}
+        }
+        it { should match /action="\/people.json"/ }
+      end
+
+      describe '#search_form_with with an array of routes' do
+        subject {
+          @controller.view_context
+          .search_form_with(model: [:admin, Comment.ransack]) {}
+        }
+        it { should match /action="\/admin\/comments"/ }
+      end
+
+      describe '#search_form_with with custom default search key' do
+        before do
+          Ransack.configure { |c| c.search_key = :example }
+        end
+        after do
+          Ransack.configure { |c| c.search_key = :q }
+        end
+        subject {
+          @controller.view_context
+          .search_form_with(model: Person.ransack) { |f| f.text_field :name_eq }
+        }
+        it { should match /example\[name_eq\]/ }
+      end
+
+      describe '#search_form_with without Ransack::Search object' do
+        it 'raises ArgumentError' do
+          expect {
+            @controller.view_context.search_form_with(model: "not a search object") {}
+          }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to search_form_with!')
+        end
+      end
+
       describe '#turbo_search_form_for with default options' do
         subject {
           @controller.view_context
@@ -993,6 +1045,28 @@ module Ransack
             expect {
               helper.send(:extract_search_and_set_url, "invalid", options, 'turbo_search_form_for')
             }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to turbo_search_form_for!')
+          end
+
+          it 'extracts search from Ransack::Search object for search_form_with' do
+            options = {}
+            result = helper.send(:extract_search_and_set_url, search, options, 'search_form_with')
+            expect(result).to eq(search)
+            expect(options[:url]).to match(/people/)
+          end
+
+          it 'extracts search from array with Search object for search_form_with' do
+            options = {}
+            comment_search = Comment.ransack
+            result = helper.send(:extract_search_and_set_url, [:admin, comment_search], options, 'search_form_with')
+            expect(result).to eq(comment_search)
+            expect(options[:url]).to match(/admin/)
+          end
+
+          it 'raises error for invalid record with correct method name for search_form_with' do
+            options = {}
+            expect {
+              helper.send(:extract_search_and_set_url, "invalid", options, 'search_form_with')
+            }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to search_form_with!')
           end
         end
       end

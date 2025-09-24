@@ -14,6 +14,27 @@ module Ransack
         form_for(record, options, &proc)
       end
 
+      # +search_form_with+
+      #
+      #   <%= search_form_with(model: @q) do |f| %>
+      #
+      def search_form_with(record_or_options = {}, options = {}, &proc)
+        if record_or_options.is_a?(Hash) && record_or_options.key?(:model)
+          # Called with keyword arguments: search_form_with(model: @q)
+          options = record_or_options
+          record = options.delete(:model)
+        else
+          # Called with positional arguments: search_form_with(@q)
+          record = record_or_options
+        end
+        
+        search = extract_search_and_set_url(record, options, 'search_form_with')
+        options[:html] ||= {}
+        html_options = build_html_options(search, options, :get)
+        finalize_form_with_options(options, html_options)
+        form_with(model: search, **options, &proc)
+      end
+
       # +turbo_search_form_for+
       #
       #   <%= turbo_search_form_for(@q) do |f| %>
@@ -104,6 +125,12 @@ module Ransack
 
         def finalize_form_options(options, html_options)
           options[:as] ||= Ransack.options[:search_key]
+          options[:html].reverse_merge!(html_options)
+          options[:builder] ||= FormBuilder
+        end
+
+        def finalize_form_with_options(options, html_options)
+          options[:scope] ||= Ransack.options[:search_key]
           options[:html].reverse_merge!(html_options)
           options[:builder] ||= FormBuilder
         end
