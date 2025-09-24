@@ -376,6 +376,63 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          if ::ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::Base.respond_to?(:normalizes)
+            context 'with ActiveRecord::normalizes' do
+              around(:each) do |example|
+                # Create a temporary model class with normalization for testing
+                test_class = Class.new(ActiveRecord::Base) do
+                  self.table_name = 'people'
+                  normalizes :name, with: ->(name) { name.gsub(/[^a-z0-9]/, '_') }
+
+                  def self.ransackable_attributes(auth_object = nil)
+                    Person.ransackable_attributes(auth_object)
+                  end
+
+                  def self.name
+                    'TestPersonWithNormalization'
+                  end
+                end
+
+                stub_const('TestPersonWithNormalization', test_class)
+                example.run
+              end
+
+              it 'should not apply normalization to LIKE wildcards for cont predicate' do
+                # Create a person with characters that would be normalized
+                p = TestPersonWithNormalization.create!(name: 'foo%bar')
+                expect(p.reload.name).to eq('foo_bar') # Verify normalization happened on storage
+
+                # Search should find the person using the original search term
+                s = TestPersonWithNormalization.ransack(name_cont: 'foo')
+                expect(s.result.to_a).to eq [p]
+
+                # Verify the SQL contains proper LIKE wildcards, not normalized ones
+                sql = s.result.to_sql
+                expect(sql).to include("LIKE '%foo%'")
+                expect(sql).not_to include("LIKE '_foo_'")
+              end
+
+              it 'should not apply normalization to LIKE wildcards for other LIKE predicates' do
+                p = TestPersonWithNormalization.create!(name: 'foo%bar')
+
+                # Test start predicate
+                s = TestPersonWithNormalization.ransack(name_start: 'foo')
+                expect(s.result.to_a).to eq [p]
+                expect(s.result.to_sql).to include("LIKE 'foo%'")
+
+                # Test end predicate  
+                s = TestPersonWithNormalization.ransack(name_end: 'bar')
+                expect(s.result.to_a).to eq [p]
+                expect(s.result.to_sql).to include("LIKE '%bar'")
+
+                # Test i_cont predicate
+                s = TestPersonWithNormalization.ransack(name_i_cont: 'FOO')
+                expect(s.result.to_a).to eq [p]
+                expect(s.result.to_sql).to include("LIKE '%foo%'")
+              end
+            end
+          end
+
           context 'searching by underscores' do
             # when escaping is supported right in LIKE expression without adding extra expressions
             def self.simple_escaping?
