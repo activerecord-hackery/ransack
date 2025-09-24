@@ -16,7 +16,6 @@ unless File.exist?('Gemfile')
     # gem 'rails'
 
     gem 'sqlite3'
-    gem 'rspec'
     gem 'ransack', github: 'activerecord-hackery/ransack'
   GEMFILE
 
@@ -27,7 +26,7 @@ require 'bundler'
 Bundler.setup(:default)
 
 require 'active_record'
-require 'rspec/autorun'
+require 'minitest/autorun'
 require 'logger'
 require 'ransack'
 
@@ -63,14 +62,14 @@ class Project < ActiveRecord::Base
   end
 end
 
-RSpec.describe 'Ransacker Arel Present Predicate Bug Report' do
-  it 'handles ransackers with present predicate correctly' do
+class BugTest < Minitest::Test
+  def test_ransackers
     sql = Project.ransack({ number_present: 1 }).result.to_sql
     puts sql
-    expect(sql).to eq("SELECT \"projects\".* FROM \"projects\" WHERE (\"projects\".\"number\" IS NOT NULL AND \"projects\".\"number\" != '')")
+    assert_equal "SELECT \"projects\".* FROM \"projects\" WHERE (\"projects\".\"number\" IS NOT NULL AND \"projects\".\"number\" != '')", sql
 
     sql = Project.ransack({ name_present: 1 }).result.to_sql
     puts sql
-    expect(sql).to eq("SELECT \"projects\".* FROM \"projects\" WHERE (projects.name IS NOT NULL AND projects.name != '')")
+    assert_equal "SELECT \"projects\".* FROM \"projects\" WHERE (projects.name IS NOT NULL AND projects.name != '')", sql
   end
 end

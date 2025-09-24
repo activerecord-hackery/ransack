@@ -18,7 +18,6 @@ unless File.exist?('Gemfile')
     # gem 'rails'
 
     gem 'sqlite3'
-    gem 'rspec'
     gem 'ransack', github: 'activerecord-hackery/ransack'
   GEMFILE
 
@@ -29,7 +28,7 @@ require 'bundler'
 Bundler.setup(:default)
 
 require 'active_record'
-require 'rspec/autorun'
+require 'minitest/autorun'
 require 'logger'
 require 'ransack'
 
@@ -60,20 +59,20 @@ class User < ActiveRecord::Base
   end
 end
 
-RSpec.describe 'Ransack Scope and Column Same Name Bug Report' do
-  it 'handles activated scope equals true' do
+class BugTest < Minitest::Test
+  def test_activated_scope_equals_true
     sql = User.ransack({ activated: true }).result.to_sql
     puts sql
-    expect(sql).to eq(
-      "SELECT \"users\".* FROM \"users\" WHERE \"users\".\"active\" = 1"
+    assert_equal(
+      "SELECT \"users\".* FROM \"users\" WHERE \"users\".\"active\" = 1", sql
       )
   end
 
-  it 'handles activated scope equals false' do
+  def test_activated_scope_equals_false
     sql = User.ransack({ activated: false }).result.to_sql
     puts sql
-    expect(sql).to eq(
-      "SELECT \"users\".* FROM \"users\""
+    assert_equal(
+      "SELECT \"users\".* FROM \"users\"", sql
       )
   end
 end
