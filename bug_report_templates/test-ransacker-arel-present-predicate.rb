@@ -20,19 +20,25 @@ unless File.exist?('Gemfile')
     gem 'ransack', github: 'activerecord-hackery/ransack'
   GEMFILE
 
+  # Install gems locally to avoid permission issues
+  system 'bundle config set --local path .bundle'
   system 'bundle install'
-  
-  # Re-execute with bundle exec to load gems properly
-  exec 'bundle', 'exec', 'ruby', __FILE__
 end
 
 require 'bundler'
 Bundler.setup(:default)
 
 require 'active_record'
-require 'rspec'
 require 'logger'
 require 'ransack'
+
+begin
+  require 'rspec'
+rescue LoadError
+  # RSpec not available, trying to load with bundler
+  puts "RSpec not found, please run with bundle exec or install rspec gem"
+  exit 1
+end
 
 # This connection will do for database-independent bug reports.
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
@@ -79,4 +85,6 @@ RSpec.describe 'Ransacker Arel Present Predicate Bug Report' do
 end
 
 # Run the specs when executed directly
-RSpec::Core::Runner.run([__FILE__]) if __FILE__ == $0
+if __FILE__ == $0
+  RSpec::Core::Runner.run([__FILE__])
+end
