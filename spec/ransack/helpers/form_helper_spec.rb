@@ -874,7 +874,8 @@ module Ransack
           @controller.view_context
           .turbo_search_form_for(Person.ransack, method: :patch) {}
         }
-        it { should match /method="patch"/ }
+        it { should match /method="post"/ }
+        it { should match /name="_method" value="patch"/ }
         it { should match /data-turbo-action="advance"/ }
       end
 
@@ -981,8 +982,9 @@ module Ransack
 
           it 'extracts search from array with Search object' do
             options = {}
-            result = helper.send(:extract_search_and_set_url, [:admin, search], options, 'search_form_for')
-            expect(result).to eq(search)
+            comment_search = Comment.ransack
+            result = helper.send(:extract_search_and_set_url, [:admin, comment_search], options, 'search_form_for')
+            expect(result).to eq(comment_search)
             expect(options[:url]).to match(/admin/)
           end
 
