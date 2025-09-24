@@ -27,7 +27,6 @@ module Ransack
           # Called with positional arguments: search_form_with(@q)
           record = record_or_options
         end
-        
         search = extract_search_and_set_url(record, options, 'search_form_with')
         options[:html] ||= {}
         html_options = build_html_options(search, options, :get)
