@@ -25,7 +25,49 @@ module Ransack
 
         def evaluate(search, opts = {})
           viz = Visitor.new
-          relation = @object.where(viz.accept(search.base))
+          
+          # Handle scopes when using OR combinator
+          if search.base.combinator == Constants::OR && search.instance_variable_get(:@scope_args).present?
+            # Build separate queries for scopes and regular conditions, then combine with OR
+            relations = []
+            
+            # Create relations for each scope (respecting the same logic as chain_scope)
+            search.instance_variable_get(:@scope_args).each do |scope_name, scope_args|
+              # Only apply scope if it would normally be applied
+              if @klass.method(scope_name) && scope_args != false
+                scope_relation = if scope_arity(scope_name) < 1 && scope_args == true
+                                   @object.public_send(scope_name)
+                                 elsif scope_arity(scope_name) == 1 && scope_args.is_a?(Array)
+                                   @object.public_send(scope_name, scope_args)
+                                 else
+                                   @object.public_send(scope_name, *[scope_args].flatten.compact)
+                                 end
+                relations << scope_relation
+              end
+            end
+            
+            # Get the base relation with regular conditions (excluding scopes)
+            base_conditions = viz.accept(search.base)
+            if base_conditions
+              base_relation = @object.where(base_conditions)
+              relations << base_relation
+            end
+            
+            # Use OR to combine all the queries, but only if we have valid scope relations
+            if relations.size > 1
+              relation = relations.first
+              relations[1..-1].each do |rel|
+                relation = relation.or(rel)
+              end
+            elsif relations.size == 1
+              relation = relations.first
+            else
+              # No valid scopes and no base conditions - fall back to normal behavior
+              relation = @object.where(viz.accept(search.base))
+            end
+          else
+            relation = @object.where(viz.accept(search.base))
+          end
 
           if search.sorts.any?
             relation = relation.except(:order)
