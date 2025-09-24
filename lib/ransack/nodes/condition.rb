@@ -352,7 +352,7 @@ module Ransack
       end
 
       def casted_array?(predicate)
-        predicate.value.is_a?(Array) && predicate.is_a?(Arel::Nodes::Casted)
+        predicate.is_a?(Arel::Nodes::Casted) && predicate.value.is_a?(Array)
       end
 
       def format_values_for(predicate)
