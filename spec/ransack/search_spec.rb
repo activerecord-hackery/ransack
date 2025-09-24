@@ -230,7 +230,7 @@ module Ransack
         or1 = ors.first
         expect(or1).to be_a Nodes::Grouping
         expect(or1.combinator).to eq 'or'
-        expect(or1.groupings).to eq(2)
+        expect(or1.groupings.size).to eq(2)
       end
 
       it 'accepts attributes hashes for groupings' do
