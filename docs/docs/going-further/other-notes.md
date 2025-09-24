@@ -127,7 +127,15 @@ Book.joins(:translations).ransack({ s: ['category_translations_name asc'] }).res
 ```
 
 **Solution:**
-Let Ransack establish the sorting joins first, then add your additional joins:
+The simplest and most effective approach is to use the `sort_link` helper directly with the translation attribute:
+
+```erb
+<!-- This works perfectly for sorting on translated attributes -->
+<%= sort_link @search, :translations_name %>
+<%= sort_link @search, :category_translations_name %>
+```
+
+For programmatic sorting, let Ransack establish the sorting joins first, then add your additional joins:
 
 ```ruby
 # Let Ransack handle the sorting joins first

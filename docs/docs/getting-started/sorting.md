@@ -86,7 +86,15 @@ You can sort on attributes of associated models by using the association name fo
 
 ### Sorting on Globalized/Translated Attributes
 
-When working with internationalized models (like those using the Globalize gem), special care is needed when sorting on translated attributes of associations. If you need to join translations and sort on association translated attributes, let Ransack handle the joins first:
+When working with internationalized models (like those using the Globalize gem), special care is needed when sorting on translated attributes of associations. The simplest approach is to use the `sort_link` helper directly with the translation attribute:
+
+```erb
+<!-- This works perfectly for sorting on translated attributes -->
+<%= sort_link @q, :translations_name %>
+<%= sort_link @q, :category_translations_name %>
+```
+
+For programmatic sorting, let Ransack handle the joins first:
 
 ```ruby
 # Let Ransack establish the necessary joins for sorting
