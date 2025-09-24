@@ -467,6 +467,15 @@ module Ransack
               expect(s.result.map(&:id)).to eq [3, 2, 1]
             end
 
+            it 'should function correctly with HABTM associations' do
+              article = Article.first
+              tag = article.tags.first
+              s = Person.ransack(article_tags_in: [tag.id])
+
+              expect(s.result.count).to be 1
+              expect(s.result.map(&:id)).to eq [article.person.id]
+            end
+
             it 'should function correctly when passing an array of strings' do
               a, b = Person.select(:id).order(:id).limit(2).map { |a| a.id.to_s }
 
