@@ -257,7 +257,7 @@ module Ransack
       end
 
       def attr_value_for_attribute(attr)
-        return attr.attr if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+        return attr.attr if ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL"
 
         predicate.case_insensitive ? attr.attr.lower : attr.attr
       rescue

@@ -698,7 +698,7 @@ module Ransack
         end.to raise_error(Ransack::InvalidSearchError,  "Invalid argument (Integer) supplied to sorts=")
       end
 
-      it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      it "PG's sort option", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'name asc')
@@ -719,7 +719,7 @@ module Ransack
         Ransack.options = default
       end
 
-      it "PG's sort option with double name", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      it "PG's sort option with double name", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'doubled_name asc')
