@@ -941,8 +941,10 @@ module Ransack
             options = { turbo_frame: 'results', turbo_action: 'replace' }
             result = helper.send(:build_turbo_options, options)
             expect(result).to eq({
-              'data-turbo-frame' => 'results',
-              'data-turbo-action' => 'replace'
+              data: {
+                turbo_frame: 'results',
+                turbo_action: 'replace'
+              }
             })
             expect(options).to be_empty
           end
@@ -950,13 +952,13 @@ module Ransack
           it 'builds turbo options without frame' do
             options = { turbo_action: 'advance' }
             result = helper.send(:build_turbo_options, options)
-            expect(result).to eq({ 'data-turbo-action' => 'advance' })
+            expect(result).to eq({ data: { turbo_action: 'advance' } })
           end
 
           it 'uses default turbo action' do
             options = {}
             result = helper.send(:build_turbo_options, options)
-            expect(result).to eq({ 'data-turbo-action' => 'advance' })
+            expect(result).to eq({ data: { turbo_action: 'advance' } })
           end
         end
 

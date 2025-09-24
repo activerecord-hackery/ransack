@@ -86,12 +86,12 @@ module Ransack
         end
 
         def build_turbo_options(options)
-          turbo_options = {}
+          data_options = {}
           if options[:turbo_frame]
-            turbo_options['data-turbo-frame'] = options.delete(:turbo_frame)
+            data_options[:turbo_frame] = options.delete(:turbo_frame)
           end
-          turbo_options['data-turbo-action'] = options.delete(:turbo_action) || 'advance'
-          turbo_options
+          data_options[:turbo_action] = options.delete(:turbo_action) || 'advance'
+          { data: data_options }
         end
 
         def build_html_options(search, options, method)
