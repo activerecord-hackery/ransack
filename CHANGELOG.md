@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 4.3.0 - 2025-2-7
+
+* Fix wildcard escaping with PostGIS adapter.
+* Rails 8 compatibility
+* Drop Rails 6 and 7.0 compatibility
+* Raise Ransack::InvalidSearchError instead of ArgumentError on unknown conditions
+
+## 4.2.1 - 2024-8-11
+
+* Fix Rails 7.1.x compatibility
+
+## 4.2.0 - 2024-7-10
+
+* Add Rails 7.2 support by @robinator and @gregmolnar
+
 ## 4.1.0 - 2023-10-23
 
 ### 🚀 Features

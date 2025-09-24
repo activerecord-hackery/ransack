@@ -6,13 +6,12 @@ module ActionView::Helpers::Tags
   # https://github.com/rails/rails/commit/c1a118a
   class Base
     private
-    if defined? ::ActiveRecord
-      def value
-        if @allow_method_names_outside_object
-          object.send @method_name if object && object.respond_to?(@method_name, true)
-        else
-          object.send @method_name if object
-        end
+
+    def value
+      if @allow_method_names_outside_object
+        object.send @method_name if object && object.respond_to?(@method_name, true)
+      else
+        object.send @method_name if object
       end
     end
   end

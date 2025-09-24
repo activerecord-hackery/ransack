@@ -1,0 +1,72 @@
+# Інші переклади на https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/locale
+#
+uk:
+  ransack:
+    search: пошук
+    predicate: предикат
+    and: і
+    or: або
+    any: будь-який
+    all: усі
+    combinator: комбінатор
+    attribute: атрибут
+    value: значення
+    condition: умова
+    sort: сортування
+    asc: за зростанням
+    desc: за спаданням
+    predicates:
+      eq: рівний
+      eq_any: рівний будь-якому
+      eq_all: рівний усім
+      not_eq: не рівний
+      not_eq_any: не рівний будь-якому
+      not_eq_all: не рівний усім
+      matches: збігається
+      matches_any: збігається з будь-яким
+      matches_all: збігається з усіма
+      does_not_match: не збігається
+      does_not_match_any: не збігається з будь-яким
+      does_not_match_all: не збігається з усіма
+      lt: менше ніж
+      lt_any: менше за будь-який
+      lt_all: менше за всі
+      lteq: менше або рівне
+      lteq_any: менше або рівне будь-якому
+      lteq_all: менше або рівне всім
+      gt: більше ніж
+      gt_any: більше ніж будь-який
+      gt_all: більше ніж усі
+      gteq: більше або рівне
+      gteq_any: більше або рівне будь-якому
+      gteq_all: більше або рівне всім
+      in: міститься у
+      in_any: міститься в будь-якому
+      in_all: міститься в усіх
+      not_in: не міститься у
+      not_in_any: не міститься в будь-якому
+      not_in_all: не міститься в усіх
+      cont: містить
+      cont_any: містить будь-який
+      cont_all: містить усі
+      not_cont: не містить
+      not_cont_any: не містить жодного
+      not_cont_all: не містить усіх
+      start: починається з
+      start_any: починається з будь-якого
+      start_all: починається з усіх
+      not_start: не починається з
+      not_start_any: не починається з будь-якого
+      not_start_all: не починається з усіх
+      end: закінчується на
+      end_any: закінчується на будь-який
+      end_all: закінчується на всі
+      not_end: не закінчується на
+      not_end_any: не закінчується на будь-який
+      not_end_all: не закінчується на всі
+      'true': так
+      'false': ні
+      present: присутній
+      blank: порожній
+      'null': нульовий
+      not_null: не нульовий

@@ -1,3 +1,5 @@
+require 'ransack/invalid_search_error'
+
 module Ransack
   module Nodes
     class Condition < Node
@@ -38,7 +40,7 @@ module Ransack
             predicate = Predicate.named(name)
 
             unless predicate || Ransack.options[:ignore_unknown_conditions]
-              raise ArgumentError, "No valid predicate for #{key}"
+              raise InvalidSearchError, "No valid predicate for #{key}"
             end
 
             if context.present?
@@ -224,7 +226,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map { |v| v.cast(predicate.type || attr.type) }
+        validated_values.map(&:cast_array)
       end
 
       def formatted_values_for_attribute(attr)

@@ -64,6 +64,7 @@ module Ransack
           end
 
           specify { expect { subject }.to raise_error ArgumentError }
+          specify { expect { subject }.to raise_error InvalidSearchError }
         end
 
         context "when ignore_unknown_conditions is true" do

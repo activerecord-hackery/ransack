@@ -165,7 +165,7 @@ module Ransack
       when "Mysql2".freeze
         # Necessary for MySQL
         unescaped.to_s.gsub(/([\\%_])/, '\\\\\\1')
-      when "PostgreSQL".freeze
+      when "PostGIS".freeze, "PostgreSQL".freeze
         # Necessary for PostgreSQL
         unescaped.to_s.gsub(/([\\%_.])/, '\\\\\\1')
       else

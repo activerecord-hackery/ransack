@@ -1,3 +1,6 @@
+plugins:
+  - rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 3.0
 
@@ -13,6 +16,9 @@ Layout/EmptyLineBetweenDefs:
   Enabled: true
 
 Layout/EmptyLines:
+  Enabled: true
+
+Layout/EmptyLinesAroundBlockBody:
   Enabled: true
 
 Layout/FirstArrayElementIndentation:
@@ -31,6 +37,9 @@ Layout/SpaceInsideParens:
   Enabled: true
 
 Layout/TrailingEmptyLines:
+  Enabled: true
+
+RSpec/EmptyLineAfterFinalLet:
   Enabled: true
 
 Style/HashSyntax:

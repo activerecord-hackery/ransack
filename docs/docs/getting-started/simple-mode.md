@@ -28,7 +28,8 @@ end
 ```
 
 :::caution
-By default, searching and sorting are authorized on any column of your model. See [Authorization (allowlisting/denylisting)](/going-further/other-notes.md#authorization-allowlistingdenylisting) on how to prevent this.
+As of v4.0, searching and sorting are not authorized on _any_ column of your model by default. See [Authorization (allowlisting/denylisting)](/going-further/other-notes.md#authorization-allowlistingdenylisting) on how to define searchable attributes.
+Prior to v4.0, searching and sorting were authorized on any column of your model by default.
 :::
 
 ### Default search options

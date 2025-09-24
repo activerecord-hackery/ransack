@@ -10,6 +10,7 @@ List of all possible predicates
 | Predicate | Description | Notes |
 | ------------- | ------------- |-------- |
 | `*_eq`  | equal  | |
+| `*_eq_any`  | equal to any of the provided values  | |
 | `*_not_eq` | not equal | |
 | `*_matches` | matches with `LIKE` | e.g. `q[email_matches]=%@gmail.com`|
 | `*_does_not_match` | does not match with `LIKE` | |

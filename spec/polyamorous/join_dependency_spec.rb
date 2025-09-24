@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Polyamorous
   describe JoinDependency do
-
     context 'with symbol joins' do
       subject { new_join_dependency Person, articles: :comments }
 
