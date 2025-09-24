@@ -285,6 +285,19 @@ class Employee < ApplicationRecord
   has_one :address, through: :organization
 end
 
+class Visitor < ApplicationRecord
+  has_many :automated_campaign_receipts
+end
+
+class AutomatedCampaign < ApplicationRecord
+  has_many :automated_campaign_receipts
+end
+
+class AutomatedCampaignReceipt < ApplicationRecord
+  belongs_to :visitor
+  belongs_to :automated_campaign
+end
+
 module Schema
   def self.create
     ActiveRecord::Migration.verbose = false
@@ -363,6 +376,23 @@ module Schema
         t.string :name
         t.integer :organization_id
       end
+
+      create_table :visitors, force: true do |t|
+        t.string :name
+        t.timestamps null: false
+      end
+
+      create_table :automated_campaigns, force: true do |t|
+        t.string :name
+        t.timestamps null: false
+      end
+
+      create_table :automated_campaign_receipts, force: true do |t|
+        t.integer :visitor_id
+        t.integer :automated_campaign_id
+        t.string :event_type
+        t.timestamps null: false
+      end
     end
 
     10.times do
@@ -384,6 +414,14 @@ module Schema
       body: 'First post!',
       article: Article.make(title: 'Hello, world!')
     )
+
+    # Create test data for the double join issue
+    5.times do |i|
+      visitor = Visitor.create(name: "Visitor #{i}")
+      campaign = AutomatedCampaign.create(name: "Campaign #{i}")
+      AutomatedCampaignReceipt.create(visitor: visitor, automated_campaign: campaign, event_type: 'clicked')
+      AutomatedCampaignReceipt.create(visitor: visitor, automated_campaign: campaign, event_type: 'opened')
+    end
   end
 end
 
