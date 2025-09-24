@@ -31,15 +31,24 @@ module Ransack
             # Build separate queries for scopes and regular conditions, then combine with OR
             relations = []
             
-            # Create relations for each scope
+            # Create relations for each scope (respecting the same logic as chain_scope)
             search.instance_variable_get(:@scope_args).each do |scope_name, scope_args|
-              scope_relation = @object.send(scope_name, *[scope_args].flatten.compact)
-              relations << scope_relation
+              # Only apply scope if it would normally be applied
+              if @klass.method(scope_name) && scope_args != false
+                scope_relation = if scope_arity(scope_name) < 1 && scope_args == true
+                                   @object.public_send(scope_name)
+                                 elsif scope_arity(scope_name) == 1 && scope_args.is_a?(Array)
+                                   @object.public_send(scope_name, scope_args)
+                                 else
+                                   @object.public_send(scope_name, *[scope_args].flatten.compact)
+                                 end
+                relations << scope_relation
+              end
             end
             
             # Get the base relation with regular conditions (excluding scopes)
             base_conditions = viz.accept(search.base)
-            if base_conditions && search.base.conditions.any?
+            if base_conditions
               base_relation = @object.where(base_conditions)
               relations << base_relation
             end
