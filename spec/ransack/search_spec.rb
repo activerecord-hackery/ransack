@@ -4,7 +4,7 @@ module Ransack
   describe Search do
     describe '#initialize' do
       it 'removes empty conditions before building' do
-        expect_any_instance_of(Search).to receive(:build).with({})
+        expect_any_instance_of(Search).to receive(:build).with({ 'name_eq' => '' })
         Search.new(Person, name_eq: '')
       end
 
@@ -184,10 +184,31 @@ module Ransack
         expect(s.result.to_sql).to include 'published'
       end
 
-      it 'discards empty conditions' do
+      it 'does not discard conditions with empty string values' do
         s = Search.new(Person, children_name_eq: '')
         condition = s.base[:children_name_eq]
+        expect(condition).not_to be_nil
+        expect(condition.values.first.value).to eq('')
+      end
+
+      it 'discards nil conditions' do
+        s = Search.new(Person, children_name_eq: nil)
+        condition = s.base[:children_name_eq]
         expect(condition).to be_nil
+      end
+
+      it 'should not discard conditions with empty string values in arrays' do
+        s = Search.new(Person, name_in: ['', 'John'])
+        condition = s.base[:name_in]
+        expect(condition).not_to be_nil
+        expect(condition.values.map(&:value)).to eq(['', 'John'])
+      end
+
+      it 'should not discard eq conditions with empty string values' do
+        s = Search.new(Person, name_eq: '')
+        condition = s.base[:name_eq]
+        expect(condition).not_to be_nil
+        expect(condition.values.first.value).to eq('')
       end
 
       it 'accepts base grouping condition as an option' do
