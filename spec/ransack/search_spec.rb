@@ -500,6 +500,30 @@ module Ransack
         expect(s).to be_an ActiveRecord::Relation
       end
 
+      it 'should use OR combinator when m: "or" is used at top level' do
+        s = Search.new(Person, m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie')
+        
+        expect(s.base.combinator).to eq 'or'
+        
+        # Should generate OR query
+        result = s.result
+        expect(result.to_sql).to match /#{people_name_field} = 'Ernie' OR #{children_people_name_field} = 'Ernie'/
+      end
+      
+      it 'should create conditions in base grouping with OR combinator' do
+        s = Search.new(Person, m: 'or', id_eq: '12', name_contains: '12')
+        
+        expect(s.base.combinator).to eq 'or'
+        expect(s.base.conditions.size).to eq 2
+        
+        # Check that both conditions are in the base grouping
+        id_condition = s.base.conditions.find { |c| c.key.include?('id_eq') }
+        name_condition = s.base.conditions.find { |c| c.key.include?('name_contains') }
+        
+        expect(id_condition).not_to be_nil
+        expect(name_condition).not_to be_nil
+      end
+
       private
 
         def remove_quotes_and_backticks(str)
