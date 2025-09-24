@@ -140,6 +140,80 @@ module Ransack
           expect(attribute.relation.name).to eq 'articles'
           expect(attribute.relation.table_alias).to be_nil
         end
+
+        describe '#extract_correlated_key' do
+          it 'handles Arel::Nodes::And with multiple children correctly' do
+            # This test specifically targets the bug where extract_correlated_key
+            # only checks left/right of And nodes instead of all children
+
+            # Create models that will trigger the issue with polymorphic associations
+            # and default scopes creating multiple conditions
+            Article.delete_all
+            Note.delete_all
+
+            article = Article.create!(title: 'Test Article', body: 'Test body', published: true)
+            note = Note.create!(note: 'Test Note', notable: article)
+
+            # This search should trigger the problematic code path where
+            # extract_correlated_key gets an And node with multiple children
+            search = Article.ransack(
+              g: [
+                {
+                  m: "and",
+                  c: [
+                    {
+                      a: ["notes_note"],
+                      p: "not_cont_all",
+                      v: ["test"],
+                    }
+                  ]
+                }
+              ]
+            )
+
+            # Let's see what SQL is actually generated first
+            sql = search.result.to_sql
+            puts "Generated SQL: #{sql}"
+
+            # The bug would cause this to raise "NoMethodError: undefined method 'eq' for nil"
+            # because extract_correlated_key returns nil for And nodes with more than 2 children
+            expect { search.result.to_sql }.not_to raise_error
+            
+            # The SQL should contain proper conditions
+            expect(sql).to include('notes')
+            expect(sql).to include('NOT (')
+          end
+
+          it 'extract_correlated_key method directly returns the correct key for And nodes' do
+            # Let's test the method directly to ensure it handles And nodes properly
+            context = subject
+
+            # Create a mock And node with multiple children to test the specific bug
+            pk = context.send(:primary_key)
+            
+            # Create equality nodes - first two don't match, third one matches our primary key
+            eq1 = Arel::Nodes::Equality.new(Arel::Attributes::Attribute.new(pk.relation, :other_id), Arel::Attributes::Attribute.new(pk.relation, :some_value))
+            eq2 = Arel::Nodes::Equality.new(Arel::Attributes::Attribute.new(pk.relation, :another_id), Arel::Attributes::Attribute.new(pk.relation, :another_value))
+            eq3 = Arel::Nodes::Equality.new(pk, Arel::Attributes::Attribute.new(pk.relation, :target_id))  # This should match and is in 3rd position
+
+            # Create an And node with multiple children (more than just left/right)
+            and_node = Arel::Nodes::And.new([eq1, eq2, eq3])
+
+            # Verify the setup - and_node should have 3 children but left/right only covers first 2
+            expect(and_node.children.length).to eq(3)
+            expect(and_node.left).to eq(eq1)
+            expect(and_node.right).to eq(eq2)
+            expect(and_node.children[2]).to eq(eq3)  # This is the one that matches but won't be found by current code
+
+            # Call extract_correlated_key directly - this should fail with current implementation
+            result = context.send(:extract_correlated_key, and_node)
+
+            # With the bug, this will be nil because the matching equality is in position 3
+            # After the fix, it should find the correct key
+            expect(result).not_to be_nil, "extract_correlated_key should find the matching key even when it's not in left/right position"
+            expect(result.name).to eq(:target_id)
+          end
+        end
       end
     end
   end
