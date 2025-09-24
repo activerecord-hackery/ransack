@@ -77,6 +77,9 @@ module Ransack
       return unless @klass.method(scope) && args != false
       @object = if scope_arity(scope) < 1 && args == true
                   @object.public_send(scope)
+                elsif scope_arity(scope) == 1 && args.is_a?(Array)
+                  # For scopes with arity 1, pass the array as a single argument instead of splatting
+                  @object.public_send(scope, args)
                 else
                   @object.public_send(scope, *args)
                 end
