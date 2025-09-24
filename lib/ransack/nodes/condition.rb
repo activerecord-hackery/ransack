@@ -324,7 +324,13 @@ module Ransack
       def format_predicate(attribute)
         arel_pred = arel_predicate_for_attribute(attribute)
         arel_values = formatted_values_for_attribute(attribute)
-        predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
+        
+        # For LIKE predicates that use escaped wildcards, add ESCAPE clause for proper behavior
+        if needs_escape_clause?(arel_pred, arel_values)
+          predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values, '\\')
+        else
+          predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
+        end
 
         if in_predicate?(predicate)
           predicate.right = predicate.right.map do |pr|
@@ -363,6 +369,15 @@ module Ransack
 
       def valid_combinator?
         attributes.size < 2 || Constants::AND_OR.include?(combinator)
+      end
+
+      def needs_escape_clause?(arel_pred, arel_values)
+        # Add ESCAPE clause for LIKE predicates when values contain escaped wildcards
+        like_predicates = ['matches', 'does_not_match']
+        return false unless like_predicates.include?(arel_pred.to_s)
+        
+        # Check if any values contain escaped wildcards (backslash followed by %, _, or \)
+        Array(arel_values).any? { |val| val.to_s.match?(/\\[%_\\]/) }
       end
     end
   end
