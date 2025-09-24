@@ -1,3 +1,5 @@
+require 'ransack/invalid_search_error'
+
 module Ransack
   module Nodes
     class Condition < Node
@@ -38,7 +40,7 @@ module Ransack
             predicate = Predicate.named(name)
 
             unless predicate || Ransack.options[:ignore_unknown_conditions]
-              raise ArgumentError, "No valid predicate for #{key}"
+              raise InvalidSearchError, "No valid predicate for #{key}"
             end
 
             if context.present?
@@ -224,7 +226,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map { |v| v.cast(predicate.type || attr.type) }
+        validated_values.map(&:cast_array)
       end
 
       def formatted_values_for_attribute(attr)
@@ -322,6 +324,13 @@ module Ransack
       def format_predicate(attribute)
         arel_pred = arel_predicate_for_attribute(attribute)
         arel_values = formatted_values_for_attribute(attribute)
+        
+        # For LIKE predicates, wrap the value in Arel::Nodes.build_quoted to prevent
+        # ActiveRecord normalization from affecting wildcard patterns
+        if like_predicate?(arel_pred)
+          arel_values = Arel::Nodes.build_quoted(arel_values)
+        end
+        
         predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
 
         if in_predicate?(predicate)
@@ -336,6 +345,10 @@ module Ransack
       def in_predicate?(predicate)
         return unless defined?(Arel::Nodes::Casted)
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
+      end
+
+      def like_predicate?(arel_predicate)
+        arel_predicate == 'matches' || arel_predicate == 'does_not_match'
       end
 
       def casted_array?(predicate)

@@ -140,7 +140,6 @@ module Ransack
           expect(attribute.relation.name).to eq 'articles'
           expect(attribute.relation.table_alias).to be_nil
         end
-
       end
     end
   end

@@ -71,6 +71,18 @@ module Ransack
         end
       end
 
+      [[], ["12"], ["101.5"]].each do |value|
+        context "with an array value (#{value.inspect})" do
+          let(:raw_value) { value }
+
+          it "should cast to integer as nil" do
+            result = subject.cast(:integer)
+
+            expect(result).to be nil
+          end
+        end
+      end
+
       ["12", "101.5"].each do |value|
         context "with a float value (#{value})" do
           let(:raw_value) { value }
@@ -109,7 +121,6 @@ module Ransack
           end
         end
       end
-
     end
   end
 end

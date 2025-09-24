@@ -1,4 +1,5 @@
 require 'active_record'
+require 'activerecord-postgis-adapter'
 
 case ENV['DB'].try(:downcase)
 when 'mysql', 'mysql2'
@@ -14,6 +15,17 @@ when 'pg', 'postgres', 'postgresql'
   # To test with PostgreSQL: `DB=postgresql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
     adapter: 'postgresql',
+    database: 'ransack',
+    username: ENV.fetch("DATABASE_USERNAME") { "postgres" },
+    password: ENV.fetch("DATABASE_PASSWORD") { "" },
+    host: ENV.fetch("DATABASE_HOST") { "localhost" },
+    min_messages: 'warning'
+  )
+when 'postgis'
+  # To test with PostGIS: `DB=postgis bundle exec rake spec`
+  ActiveRecord::Base.establish_connection(
+    adapter: 'postgis',
+    postgis_extension: 'postgis',
     database: 'ransack',
     username: ENV.fetch("DATABASE_USERNAME") { "postgres" },
     password: ENV.fetch("DATABASE_PASSWORD") { "" },
@@ -68,6 +80,8 @@ class Person < ApplicationRecord
 
   scope :sort_by_reverse_name_asc, lambda { order(Arel.sql("REVERSE(name) ASC")) }
   scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
+
+  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
 
   alias_attribute :full_name, :name
 
@@ -277,6 +291,7 @@ module Schema
         t.string   :new_start
         t.string   :stop_end
         t.integer  :salary
+        t.integer  :temperament
         t.date     :life_start
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
