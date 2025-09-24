@@ -931,6 +931,67 @@ module Ransack
           }.to raise_error(ArgumentError, 'No Ransack::Search object was provided to turbo_search_form_for!')
         end
       end
+
+      describe 'private helper methods' do
+        let(:helper) { @controller.view_context }
+        let(:search) { Person.ransack }
+
+        describe '#build_turbo_options' do
+          it 'builds turbo options with frame' do
+            options = { turbo_frame: 'results', turbo_action: 'replace' }
+            result = helper.send(:build_turbo_options, options)
+            expect(result).to eq({
+              'data-turbo-frame' => 'results',
+              'data-turbo-action' => 'replace'
+            })
+            expect(options).to be_empty
+          end
+
+          it 'builds turbo options without frame' do
+            options = { turbo_action: 'advance' }
+            result = helper.send(:build_turbo_options, options)
+            expect(result).to eq({ 'data-turbo-action' => 'advance' })
+          end
+
+          it 'uses default turbo action' do
+            options = {}
+            result = helper.send(:build_turbo_options, options)
+            expect(result).to eq({ 'data-turbo-action' => 'advance' })
+          end
+        end
+
+        describe '#build_html_options' do
+          it 'builds HTML options with correct method' do
+            options = { class: 'custom' }
+            result = helper.send(:build_html_options, search, options, :post)
+            expect(result[:method]).to eq(:post)
+            expect(result[:class]).to include('custom')
+          end
+        end
+
+        describe '#extract_search_and_set_url' do
+          it 'extracts search from Ransack::Search object' do
+            options = {}
+            result = helper.send(:extract_search_and_set_url, search, options)
+            expect(result).to eq(search)
+            expect(options[:url]).to match(/people/)
+          end
+
+          it 'extracts search from array with Search object' do
+            options = {}
+            result = helper.send(:extract_search_and_set_url, [:admin, search], options)
+            expect(result).to eq(search)
+            expect(options[:url]).to match(/admin/)
+          end
+
+          it 'raises error for invalid record' do
+            options = {}
+            expect {
+              helper.send(:extract_search_and_set_url, "invalid", options)
+            }.to raise_error(ArgumentError)
+          end
+        end
+      end
     end
   end
 end

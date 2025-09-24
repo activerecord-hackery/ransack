@@ -7,30 +7,10 @@ module Ransack
       #   <%= search_form_for(@q) do |f| %>
       #
       def search_form_for(record, options = {}, &proc)
-        if record.is_a? Ransack::Search
-          search = record
-          options[:url] ||= polymorphic_path(
-            search.klass, format: options.delete(:format)
-            )
-        elsif record.is_a?(Array) &&
-        (search = record.detect { |o| o.is_a?(Ransack::Search) })
-          options[:url] ||= polymorphic_path(
-            options_for(record), format: options.delete(:format)
-            )
-        else
-          raise ArgumentError,
-          'No Ransack::Search object was provided to search_form_for!'
-        end
+        search = extract_search_and_set_url(record, options)
         options[:html] ||= {}
-        html_options = {
-          class:  html_option_for(options[:class], search),
-          id:     html_option_for(options[:id], search),
-          method: :get
-        }
-        options[:as] ||= Ransack.options[:search_key]
-        options[:html].reverse_merge!(html_options)
-        options[:builder] ||= FormBuilder
-
+        html_options = build_html_options(search, options, :get)
+        finalize_form_options(options, html_options)
         form_for(record, options, &proc)
       end
 
@@ -43,37 +23,12 @@ module Ransack
       # paginated results and other turbo-enabled components.
       #
       def turbo_search_form_for(record, options = {}, &proc)
-        if record.is_a? Ransack::Search
-          search = record
-          options[:url] ||= polymorphic_path(
-            search.klass, format: options.delete(:format)
-            )
-        elsif record.is_a?(Array) &&
-        (search = record.detect { |o| o.is_a?(Ransack::Search) })
-          options[:url] ||= polymorphic_path(
-            options_for(record), format: options.delete(:format)
-            )
-        else
-          raise ArgumentError,
-          'No Ransack::Search object was provided to turbo_search_form_for!'
-        end
+        search = extract_search_and_set_url(record, options)
         options[:html] ||= {}
-        # Set up turbo-specific options
-        turbo_options = {}
-        if options[:turbo_frame]
-          turbo_options['data-turbo-frame'] = options.delete(:turbo_frame)
-        end
-        turbo_options['data-turbo-action'] = options.delete(:turbo_action) || 'advance'
-        
-        html_options = {
-          class:  html_option_for(options[:class], search),
-          id:     html_option_for(options[:id], search),
-          method: options.delete(:method) || :post
-        }.merge(turbo_options)
-        options[:as] ||= Ransack.options[:search_key]
-        options[:html].reverse_merge!(html_options)
-        options[:builder] ||= FormBuilder
-
+        turbo_options = build_turbo_options(options)
+        method = options.delete(:method) || :post
+        html_options = build_html_options(search, options, method).merge(turbo_options)
+        finalize_form_options(options, html_options)
         form_for(record, options, &proc)
       end
 
@@ -110,6 +65,49 @@ module Ransack
       end
 
       private
+
+        def extract_search_and_set_url(record, options)
+          if record.is_a? Ransack::Search
+            search = record
+            options[:url] ||= polymorphic_path(
+              search.klass, format: options.delete(:format)
+            )
+            search
+          elsif record.is_a?(Array) &&
+          (search = record.detect { |o| o.is_a?(Ransack::Search) })
+            options[:url] ||= polymorphic_path(
+              options_for(record), format: options.delete(:format)
+            )
+            search
+          else
+            method_name = caller_locations(1, 1).first.label.include?('turbo') ? 'turbo_search_form_for' : 'search_form_for'
+            raise ArgumentError,
+            "No Ransack::Search object was provided to #{method_name}!"
+          end
+        end
+
+        def build_turbo_options(options)
+          turbo_options = {}
+          if options[:turbo_frame]
+            turbo_options['data-turbo-frame'] = options.delete(:turbo_frame)
+          end
+          turbo_options['data-turbo-action'] = options.delete(:turbo_action) || 'advance'
+          turbo_options
+        end
+
+        def build_html_options(search, options, method)
+          {
+            class:  html_option_for(options[:class], search),
+            id:     html_option_for(options[:id], search),
+            method: method
+          }
+        end
+
+        def finalize_form_options(options, html_options)
+          options[:as] ||= Ransack.options[:search_key]
+          options[:html].reverse_merge!(html_options)
+          options[:builder] ||= FormBuilder
+        end
 
         def options_for(record)
           record.map { |r| parse_record(r) }
