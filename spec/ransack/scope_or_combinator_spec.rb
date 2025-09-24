@@ -24,13 +24,20 @@ module Ransack
       after do
         # Clean up test data
         Person.delete_all
+        
+        # Remove the added scopes to avoid affecting other tests
+        Person.class_eval do
+          def self.ransackable_scopes(auth_object = nil)
+            super - [:red, :green]
+          end
+        end
       end
 
       context 'when conditions are two scopes' do
         let(:ransack) { Person.ransack(red: true, green: true, m: :or) }
 
         it 'supports :or combinator' do
-          expect(ransack.base.combinator).to eq :or
+          expect(ransack.base.combinator).to eq 'or'
         end
 
         it 'generates SQL containing OR' do
@@ -50,7 +57,7 @@ module Ransack
         let(:ransack) { Person.ransack(red: true, name_cont: 'Green', m: :or) }
 
         it 'supports :or combinator' do
-          expect(ransack.base.combinator).to eq :or
+          expect(ransack.base.combinator).to eq 'or'
         end
 
         it 'generates SQL containing OR' do
@@ -62,6 +69,22 @@ module Ransack
           results = ransack.result.to_a
           expect(results).to include(@red_person)
           expect(results).to include(@green_person)
+          expect(results).not_to include(@blue_person)
+        end
+      end
+
+      # Test that AND behavior still works correctly
+      context 'when scopes are combined with AND (default behavior)' do
+        let(:ransack) { Person.ransack(red: true, green: false) }
+
+        it 'uses AND combinator by default' do
+          expect(ransack.base.combinator).to eq 'and'
+        end
+
+        it 'only returns records matching all conditions' do
+          results = ransack.result.to_a
+          expect(results).to include(@red_person)
+          expect(results).not_to include(@green_person)
           expect(results).not_to include(@blue_person)
         end
       end

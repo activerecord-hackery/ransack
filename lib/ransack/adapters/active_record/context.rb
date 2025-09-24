@@ -53,7 +53,7 @@ module Ransack
               relations << base_relation
             end
             
-            # Use OR to combine all the queries
+            # Use OR to combine all the queries, but only if we have valid scope relations
             if relations.size > 1
               relation = relations.first
               relations[1..-1].each do |rel|
@@ -62,7 +62,8 @@ module Ransack
             elsif relations.size == 1
               relation = relations.first
             else
-              relation = @object
+              # No valid scopes and no base conditions - fall back to normal behavior
+              relation = @object.where(viz.accept(search.base))
             end
           else
             relation = @object.where(viz.accept(search.base))
