@@ -248,8 +248,9 @@ class Note < ApplicationRecord
 end
 
 class RecentNote < ApplicationRecord
+  DEFAULT_NOTABLE_ID = 1
   self.table_name = "notes"
-  default_scope { where(notable_id: 1) }
+  default_scope { where(notable_id: DEFAULT_NOTABLE_ID) }
 
   belongs_to :notable, polymorphic: true
 end
