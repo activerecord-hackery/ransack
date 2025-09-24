@@ -278,6 +278,7 @@ module Ransack
           end
 
           specify { expect { subject }.to raise_error ArgumentError }
+          specify { expect { subject }.to raise_error InvalidSearchError }
         end
 
         context 'when ignore_unknown_conditions configuration option is true' do
@@ -308,6 +309,7 @@ module Ransack
 
         context 'when ignore_unknown_conditions search parameter is false' do
           specify { expect { with_ignore_unknown_conditions_false }.to raise_error ArgumentError }
+          specify { expect { with_ignore_unknown_conditions_false }.to raise_error InvalidSearchError }
         end
 
         context 'when ignore_unknown_conditions search parameter is true' do
@@ -342,12 +344,14 @@ module Ransack
           expect(s.base[:name_eq]).to be_nil
         end
       end
-
     end
 
     describe '#result' do
       let(:people_name_field) {
         "#{quote_table_name("people")}.#{quote_column_name("name")}"
+      }
+      let(:people_temperament_field) {
+        "#{quote_table_name("people")}.#{quote_column_name("temperament")}"
       }
       let(:children_people_name_field) {
         "#{quote_table_name("children_people")}.#{quote_column_name("name")}"
@@ -355,11 +359,42 @@ module Ransack
       let(:notable_type_field) {
         "#{quote_table_name("notes")}.#{quote_column_name("notable_type")}"
       }
+
       it 'evaluates conditions contextually' do
         s = Search.new(Person, children_name_eq: 'Ernie')
         expect(s.result).to be_an ActiveRecord::Relation
         expect(s.result.to_sql).to match /#{
           children_people_name_field} = 'Ernie'/
+      end
+
+      context 'when evaluating enums' do
+        before do
+          Person.take.update_attribute(:temperament, 'choleric')
+        end
+
+        it 'evaluates enum key correctly' do
+          s = Search.new(Person, temperament_eq: 'choleric')
+
+          expect(s.result.to_sql).not_to match /#{
+          people_temperament_field} = 0/
+
+          expect(s.result.to_sql).to match /#{
+          people_temperament_field} = #{Person.temperaments[:choleric]}/
+
+          expect(s.result).not_to be_empty
+        end
+
+        it 'evaluates enum value correctly' do
+          s = Search.new(Person, temperament_eq: Person.temperaments[:choleric])
+
+          expect(s.result.to_sql).not_to match /#{
+          people_temperament_field} = 0/
+
+          expect(s.result.to_sql).to match /#{
+          people_temperament_field} = #{Person.temperaments[:choleric]}/
+
+          expect(s.result).not_to be_empty
+        end
       end
 
       it 'use appropriate table alias' do
@@ -483,6 +518,11 @@ module Ransack
     describe '#sorts=' do
       before do
         @s = Search.new(Person)
+      end
+
+      it 'doesn\'t creates sorts' do
+        @s.sorts = ''
+        expect(@s.sorts.size).to eq(0)
       end
 
       it 'creates sorts based on a single attribute/direction' do
@@ -620,6 +660,18 @@ module Ransack
       it 'overrides existing sort' do
         @s.sorts = 'id asc'
         expect(@s.result.first.id).to eq 1
+      end
+
+      it 'raises ArgumentError when an invalid argument is sent' do
+        expect do
+          @s.sorts = 1234
+        end.to raise_error(ArgumentError,  "Invalid argument (Integer) supplied to sorts=")
+      end
+
+      it 'raises InvalidSearchError when an invalid argument is sent' do
+        expect do
+          @s.sorts = 1234
+        end.to raise_error(Ransack::InvalidSearchError,  "Invalid argument (Integer) supplied to sorts=")
       end
 
       it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
