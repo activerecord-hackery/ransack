@@ -265,6 +265,12 @@ class Employee < ApplicationRecord
   has_one :address, through: :organization
 end
 
+class Message < ApplicationRecord
+  belongs_to :user, class_name: 'Person'
+  belongs_to :from, polymorphic: true
+  belongs_to :to, polymorphic: true
+end
+
 module Schema
   def self.create
     ActiveRecord::Migration.verbose = false
@@ -343,6 +349,15 @@ module Schema
         t.string :name
         t.integer :organization_id
       end
+      
+      create_table :messages, force: true do |t|
+        t.integer :user_id
+        t.integer :from_id
+        t.string :from_type
+        t.integer :to_id
+        t.string :to_type
+        t.text :content
+      end
     end
 
     10.times do
@@ -364,6 +379,14 @@ module Schema
       body: 'First post!',
       article: Article.make(title: 'Hello, world!')
     )
+    
+    # Create some test messages with polymorphic associations
+    person1 = Person.create!(name: 'Alice', email: 'alice@example.com')
+    person2 = Person.create!(name: 'Bob', email: 'bob@example.com')
+    article1 = Article.create!(person: person1, title: 'Test Article', body: 'Test body')
+    
+    Message.create!(user: person1, from: person1, to: person2, content: 'Hello from person to person')
+    Message.create!(user: person1, from: article1, to: person2, content: 'Hello from article to person')
   end
 end
 
