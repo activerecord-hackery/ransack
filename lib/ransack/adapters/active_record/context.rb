@@ -19,7 +19,8 @@ module Ransack
           unless schema_cache.send(:data_source_exists?, table)
             raise "No table named #{table} exists."
           end
-          attr.klass.columns.find { |column| column.name == name }.type
+          column = attr.klass.columns.find { |column| column.name == name }
+          column&.type
         end
 
         def evaluate(search, opts = {})
