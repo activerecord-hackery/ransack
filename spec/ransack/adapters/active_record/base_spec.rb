@@ -4,7 +4,6 @@ module Ransack
   module Adapters
     module ActiveRecord
       describe Base do
-
         subject { ::ActiveRecord::Base }
 
         it { should respond_to :ransack }
@@ -124,15 +123,18 @@ module Ransack
                 expect(s.result.to_sql).to (include  rails7_and_mysql ? %q{age > '0'} : 'age > 0')
               end
             end
-
           end
 
           it 'does not raise exception for string :params argument' do
             expect { Person.ransack('') }.to_not raise_error
           end
 
-          it 'raises exception if ransack! called with unknown condition' do
+          it 'raises ArgumentError exception if ransack! called with unknown condition' do
             expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(ArgumentError)
+          end
+
+          it 'raises InvalidSearchError exception if ransack! called with unknown condition' do
+            expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(InvalidSearchError)
           end
 
           it 'does not modify the parameters' do

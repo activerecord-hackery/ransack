@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Ransack
   describe Translate do
-
     describe '.attribute' do
       it 'translate namespaced attribute like AR does' do
         ar_translation = ::Namespace::Article.human_attribute_name(:title)
