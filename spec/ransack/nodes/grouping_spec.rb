@@ -3,7 +3,6 @@ require 'spec_helper'
 module Ransack
   module Nodes
     describe Grouping do
-
       before do
         @g = 1
       end
@@ -66,6 +65,7 @@ module Ransack
               }
             }
           end
+
           before { subject.conditions = conditions }
 
           it 'expect duplicates to be removed' do
@@ -98,6 +98,7 @@ module Ransack
               }
             }
           end
+
           before { subject.conditions = conditions }
 
           it 'expect them to be parsed as different and not as duplicates' do
@@ -105,7 +106,6 @@ module Ransack
           end
         end
       end
-
     end
   end
 end

@@ -7,6 +7,7 @@ require 'ransack/nodes/sort'
 require 'ransack/nodes/grouping'
 require 'ransack/context'
 require 'ransack/naming'
+require 'ransack/invalid_search_error'
 
 module Ransack
   class Search
@@ -53,7 +54,7 @@ module Ransack
         elsif base.attribute_method?(key)
           base.send("#{key}=", value)
         elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
-          raise ArgumentError, "Invalid search term #{key}"
+          raise InvalidSearchError, "Invalid search term #{key}"
         end
       end
       self
@@ -68,7 +69,7 @@ module Ransack
           else
             sort = Nodes::Sort.extract(@context, sort)
           end
-          self.sorts << sort
+          self.sorts << sort if sort
         end
       when Hash
         args.each do |index, attrs|
@@ -78,7 +79,7 @@ module Ransack
       when String
         self.sorts = [args]
       else
-        raise ArgumentError,
+        raise InvalidSearchError,
         "Invalid argument (#{args.class}) supplied to sorts="
       end
     end
