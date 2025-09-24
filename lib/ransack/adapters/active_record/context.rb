@@ -159,15 +159,12 @@ module Ransack
           # Skip HABTM associations as they use join tables without proper model classes.
           reflection = association.reflection
           
-          # Detect HABTM associations by checking reflection types and table naming patterns
+          # Detect HABTM associations by checking reflection types only
           is_habtm = reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection) ||
-                     reflection.class.name.include?('HasAndBelongsToMany') ||
                      (reflection.is_a?(::ActiveRecord::Reflection::ThroughReflection) && 
                       reflection.source_reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection)) ||
                      (reflection.is_a?(::ActiveRecord::Reflection::ThroughReflection) && 
-                      reflection.through_reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection)) ||
-                     (correlated_key.relation.name.include?('_') && 
-                      correlated_key.relation.name.match?(/\A\w+_\w+\z/))
+                      reflection.through_reflection.is_a?(::ActiveRecord::Reflection::HasAndBelongsToManyReflection))
           
           unless is_habtm
             join_scope = reflection.join_scope(join_root.left, @object.table, @object.klass)
