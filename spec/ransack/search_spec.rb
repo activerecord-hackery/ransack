@@ -343,14 +343,24 @@ module Ransack
             self.where(name: countries)
           end
 
+          Person.define_singleton_method(:flexible_scope) do |*args|
+            self.where(id: args)
+          end
+
+          Person.define_singleton_method(:two_param_scope) do |param1, param2|
+            self.where(name: param1, id: param2)
+          end
+
           begin
             example.run
           ensure
             Person.singleton_class.undef_method :domestic
+            Person.singleton_class.undef_method :flexible_scope
+            Person.singleton_class.undef_method :two_param_scope
           end
         end
 
-        it "handles scopes that take arrays as arguments" do
+        it "handles scopes that take arrays as single arguments (arity 1)" do
           allow(Person).to receive(:ransackable_scopes)
             .and_return(Person.ransackable_scopes + [:domestic])
 
@@ -362,6 +372,37 @@ module Ransack
 
           s = Search.new(Person, domestic: ['US', 'JP'])
           expect(s.instance_variable_get(:@scope_args)["domestic"]).to eq("US")
+        end
+
+        it "handles scopes with flexible arity (negative arity)" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:flexible_scope])
+
+          expect {
+            s = Search.new(Person, flexible_scope: ['US', 'JP'])
+            s.result
+          }.not_to raise_error
+        end
+
+        it "handles scopes with arity > 1" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:two_param_scope])
+
+          expect {
+            s = Search.new(Person, two_param_scope: ['param1', 'param2'])
+            s.result
+          }.not_to raise_error
+        end
+
+        it "still supports the workaround with nested arrays" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:domestic])
+
+          # The workaround from the issue should still work
+          expect {
+            s = Search.new(Person, domestic: [['US', 'JP']])
+            s.result
+          }.not_to raise_error
         end
       end
     end
