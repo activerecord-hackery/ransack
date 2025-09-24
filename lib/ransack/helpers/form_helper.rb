@@ -60,7 +60,9 @@ module Ransack
         options[:html] ||= {}
         # Set up turbo-specific options
         turbo_options = {}
-        turbo_options['data-turbo-frame'] = options.delete(:turbo_frame) if options[:turbo_frame]
+        if options[:turbo_frame]
+          turbo_options['data-turbo-frame'] = options.delete(:turbo_frame)
+        end
         turbo_options['data-turbo-action'] = options.delete(:turbo_action) || 'advance'
         
         html_options = {
