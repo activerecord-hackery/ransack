@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Drop Rails 7.1 support (Rails 7.1 reaches end-of-life on October 1, 2025)
+* Enforce minimum Ruby version 3.1
 
 ## 4.3.0 - 2025-2-7
 

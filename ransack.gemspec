@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/activerecord-hackery/ransack"
   s.summary     = %q{Object-based searching for Active Record.}
   s.description = %q{Powerful object-based searching and filtering for Active Record with advanced features like complex boolean queries, association searching, custom predicates and i18n support.}
-  s.required_ruby_version = '>= 3.0'
+  s.required_ruby_version = '>= 3.1'
   s.license     = 'MIT'
   
   s.metadata = {
