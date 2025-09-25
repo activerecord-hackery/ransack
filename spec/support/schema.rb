@@ -373,23 +373,23 @@ module Schema
     end
 
     10.times do
-      person = Person.make
-      Note.make(notable: person)
+      person = FactoryBot.create(:person)
+      FactoryBot.create(:note, :for_person, notable: person)
       3.times do
-        article = Article.make(person: person)
+        article = FactoryBot.create(:article, person: person)
         3.times do
-          article.tags = [Tag.make, Tag.make, Tag.make]
+          article.tags = [FactoryBot.create(:tag), FactoryBot.create(:tag), FactoryBot.create(:tag)]
         end
-        Note.make(notable: article)
+        FactoryBot.create(:note, :for_article, notable: article)
         10.times do
-          Comment.make(article: article, person: person)
+          FactoryBot.create(:comment, article: article, person: person)
         end
       end
     end
 
-    Comment.make(
+    FactoryBot.create(:comment,
       body: 'First post!',
-      article: Article.make(title: 'Hello, world!')
+      article: FactoryBot.create(:article, title: 'Hello, world!')
     )
   end
 end

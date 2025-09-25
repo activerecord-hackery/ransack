@@ -1,37 +1,27 @@
 require 'ransack'
-require 'sham'
+require 'factory_bot'
 require 'faker'
 require 'action_controller'
 require 'ransack/helpers'
 require 'pry'
 require 'simplecov'
 require 'byebug'
-require 'machinist/active_record'
+require 'rspec'
 
 SimpleCov.start
 I18n.enforce_available_locales = false
 Time.zone = 'Eastern Time (US & Canada)'
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'support', '*.yml')]
 
-Dir[File.expand_path('../{helpers,support,blueprints}/*.rb', __FILE__)]
+Dir[File.expand_path('../{helpers,support,factories}/*.rb', __FILE__)]
 .each { |f| require f }
 
 Faker::Config.random = Random.new(0)
-Sham.define do
-  name        { Faker::Name.name }
-  title       { Faker::Lorem.sentence }
-  body        { Faker::Lorem.paragraph }
-  salary      { |index| 30000 + (index * 1000) }
-  tag_name    { Faker::Lorem.words(number: 3).join(' ') }
-  note        { Faker::Lorem.words(number: 7).join(' ') }
-  only_admin  { Faker::Lorem.words(number: 3).join(' ') }
-  only_search { Faker::Lorem.words(number: 3).join(' ') }
-  only_sort   { Faker::Lorem.words(number: 3).join(' ') }
-  notable_id  { |id| id }
-end
 
 RSpec.configure do |config|
   config.alias_it_should_behave_like_to :it_has_behavior, 'has behavior'
+  
+  config.include FactoryBot::Syntax::Methods
 
   config.before(:suite) do
     message = "Running Ransack specs with #{
@@ -41,11 +31,8 @@ RSpec.configure do |config|
     line = '=' * message.length
     puts line, message, line
     Schema.create
-    SubDB::Schema.create
+    SubDB::Schema.create if defined?(SubDB)
   end
-
-  config.before(:all)   { Sham.reset(:before_all) }
-  config.before(:each)  { Sham.reset(:before_each) }
 
   config.include RansackHelper
   config.include PolyamorousHelper

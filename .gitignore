@@ -8,3 +8,4 @@ coverage/*
 .byebug_history
 vendor/bundle
 .idea
+
