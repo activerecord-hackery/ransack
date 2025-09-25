@@ -25,6 +25,7 @@ module Ransack
 
       context 'with custom options' do
         let(:opts) { { type: :integer, args: [:parent, :custom_arg], formatter: proc { |v| v.to_i } } }
+
         subject { Ransacker.new(klass, name, opts) }
 
         it 'sets the custom type' do
@@ -43,6 +44,7 @@ module Ransack
       context 'with callable option' do
         let(:callable) { proc { |parent| parent.table[:id] } }
         let(:opts) { { callable: callable } }
+
         subject { Ransacker.new(klass, name, opts) }
 
         it 'initializes successfully' do
