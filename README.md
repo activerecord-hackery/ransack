@@ -37,7 +37,7 @@ There is [extensive documentation on Ransack](https://activerecord-hackery.githu
 
 This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quick-start cheatsheet, created by [@raghubetina](https://gist.github.com/raghubetina)
 
-## Issues tracker
+## Issue tracker
 
 * Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
 * File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
