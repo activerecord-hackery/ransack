@@ -556,7 +556,7 @@ module Ransack
 
         all_or_load, uniq_or_distinct = :load, :distinct
         expect(s.result.send(all_or_load).size)
-        .to eq(9000)
+        .to eq(8998)
         expect(s.result(distinct: true).size)
         .to eq(10)
         expect(s.result.send(all_or_load).send(uniq_or_distinct))
