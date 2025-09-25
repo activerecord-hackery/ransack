@@ -246,12 +246,14 @@ end
 class Comment < ApplicationRecord
   belongs_to :article
   belongs_to :person
+  has_and_belongs_to_many :tags
 
   default_scope { where(disabled: false) }
 end
 
 class Tag < ApplicationRecord
   has_and_belongs_to_many :articles
+  has_and_belongs_to_many :comments
 end
 
 class Note < ApplicationRecord
@@ -330,6 +332,11 @@ module Schema
 
       create_table :articles_tags, force: true, id: false do |t|
         t.integer  :article_id
+        t.integer  :tag_id
+      end
+
+      create_table :comments_tags, force: true, id: false do |t|
+        t.integer  :comment_id
         t.integer  :tag_id
       end
 
