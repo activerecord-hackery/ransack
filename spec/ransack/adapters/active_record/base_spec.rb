@@ -729,6 +729,44 @@ module Ransack
             end
           end
 
+          context 'ransacker with different types' do
+            it 'handles string type ransacker correctly' do
+              s = Person.ransack(name_case_insensitive_eq: 'test')
+              expect(s.result.to_sql).to match(/LOWER\(.*\) = 'test'/)
+            end
+
+            it 'handles integer type ransacker correctly' do
+              s = Person.ransack(sql_literal_id_eq: 1)
+              expect(s.result.to_sql).to match(/people\.id = 1/)
+            end
+          end
+
+          context 'ransacker with formatter returning nil' do
+            it 'handles formatter returning nil gracefully' do
+              # This tests the edge case where a formatter might return nil
+              s = Person.ransack(article_tags_eq: 999999) # Non-existent tag ID
+              expect { s.result.to_sql }.not_to raise_error
+            end
+          end
+
+          context 'ransacker with array formatters' do
+            it 'handles array_people_ids formatter correctly' do
+              person1 = Person.create!(name: 'Test1')
+              person2 = Person.create!(name: 'Test2')
+              
+              s = Person.ransack(array_people_ids_eq: 'test')
+              expect { s.result }.not_to raise_error
+            end
+
+            it 'handles array_where_people_ids formatter correctly' do
+              person1 = Person.create!(name: 'Test1')
+              person2 = Person.create!(name: 'Test2')
+              
+              s = Person.ransack(array_where_people_ids_eq: [person1.id, person2.id])
+              expect { s.result }.not_to raise_error
+            end
+          end
+
           context 'regular sorting' do
             it 'allows sort by desc' do
               search = Person.ransack(sorts: ['name desc'])
