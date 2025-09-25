@@ -3,174 +3,158 @@ require 'spec_helper'
 module Ransack
   module Adapters
     module ActiveRecord
-      describe 'Deep Association Search Bug Reproduction' do
+      describe 'Deep Association Search Bug from Issue' do
         
-        # Create a scenario that definitely should fail if the bug exists
-        describe 'isolated test with restrictive ransackable configuration' do
-          # Create new AR models that DON'T use ApplicationRecord's permissive configuration
-          before(:all) do
-            # Create table for testing if needed
-            ActiveRecord::Migration.verbose = false
-            ActiveRecord::Schema.define do
-              unless connection.table_exists?(:test_users)
-                create_table :test_users, force: true do |t|
-                  t.string :name
-                  t.string :email
-                end
-              end
-              
-              unless connection.table_exists?(:test_posts)
-                create_table :test_posts, force: true do |t|
-                  t.references :test_user, null: false
-                  t.string :title
-                  t.text :body
-                end
-              end
-              
-              unless connection.table_exists?(:test_comments)
-                create_table :test_comments, force: true do |t|
-                  t.references :test_post, null: false
-                  t.text :body
-                  t.boolean :disabled, default: false
-                end
-              end
-            end
-          end
-          
+        describe 'test with restrictive ransackable configuration to reproduce bug' do
           before do
-            # Define models with explicit, restrictive ransackable configuration
-            stub_const('TestUser', Class.new(ActiveRecord::Base) do
-              self.table_name = 'test_users'
-              has_many :test_posts, dependent: :destroy
-              
-              # Explicit ransackable configuration
-              def self.ransackable_attributes(auth_object = nil)
-                ['name', 'email']
-              end
-              
-              def self.ransackable_associations(auth_object = nil)
-                ['test_posts']
-              end
-            end)
-
-            stub_const('TestPost', Class.new(ActiveRecord::Base) do
-              self.table_name = 'test_posts'
-              belongs_to :test_user
-              has_many :test_comments, dependent: :destroy
-              
-              def self.ransackable_attributes(auth_object = nil)
-                ['title', 'body']
-              end
-              
-              def self.ransackable_associations(auth_object = nil)
-                ['test_user', 'test_comments']
-              end
-            end)
-
-            stub_const('TestComment', Class.new(ActiveRecord::Base) do
-              self.table_name = 'test_comments'
-              belongs_to :test_post
-              default_scope { where(disabled: false) }
-              
-              def self.ransackable_attributes(auth_object = nil)
-                ['body']
-              end
-              
-              def self.ransackable_associations(auth_object = nil)
-                ['test_post']
-              end
-            end)
+            # Clear any existing data
+            Comment.delete_all
+            Article.delete_all  
+            Person.delete_all
             
             # Create test data
-            @user1 = TestUser.create!(name: 'John Doe', email: 'john@example.com')
-            @user2 = TestUser.create!(name: 'Jane Smith', email: 'jane@example.com')
+            @john = Person.create!(name: 'John Doe', email: 'john@example.com')
+            @jane = Person.create!(name: 'Jane Smith', email: 'jane@example.com')
             
-            @post1 = TestPost.create!(test_user: @user1, title: 'Post by John', body: 'Content')
-            @post2 = TestPost.create!(test_user: @user2, title: 'Post by Jane', body: 'Content')
+            @johns_post = Article.create!(person: @john, title: 'Johns Article', body: 'Content by John')
+            @janes_post = Article.create!(person: @jane, title: 'Janes Article', body: 'Content by Jane')
             
-            @comment1 = TestComment.create!(test_post: @post1, body: 'Johns comment')
-            @comment2 = TestComment.create!(test_post: @post2, body: 'Janes comment')
+            @johns_comment = Comment.create!(article: @johns_post, person: @john, body: 'Johns comment on his post')
+            @janes_comment = Comment.create!(article: @janes_post, person: @jane, body: 'Janes comment on her post')
           end
 
-          it 'reproduces the bug: deep association search should fail' do
-            # This should fail because:
-            # - TestComment.ransackable_associations only includes 'test_post'
-            # - TestPost.ransackable_associations includes 'test_user' 
-            # - TestUser.ransackable_attributes includes 'email'
-            # BUT the association traversal for 'test_post_test_user_email_cont' might not work
+          it 'should reproduce the issue with models that have missing intermediate ransackable associations - DEBUG' do
+            # Debug version with more detailed tracing
             
-            expect {
-              search = TestComment.ransack(test_post_test_user_email_cont: 'john@example.com')
-              results = search.result.to_a
-              puts "Search worked! Found #{results.count} results"
-              results.each { |r| puts "  - #{r.inspect}" }
-            }.to raise_error(Ransack::UntraversableAssociationError, /No association matches/)
-          end
-          
-          it 'should work with proper intermediate association declarations' do
-            # Let's modify TestPost to include test_user in ransackable_associations
-            TestPost.define_singleton_method(:ransackable_associations) do |auth_object = nil|
-              ['test_user', 'test_comments']
+            # Temporarily override Article's ransackable_associations to NOT include 'person'
+            Article.define_singleton_method(:ransackable_associations) do |auth_object = nil|
+              puts "Article.ransackable_associations called with auth_object: #{auth_object.inspect}"
+              result = ['comments', 'tags', 'notes', 'recent_notes']  # Notice 'person' is missing!
+              puts "Article.ransackable_associations returning: #{result.inspect}"
+              result
             end
             
-            # Now it should work
-            search = TestComment.ransack(test_post_test_user_email_cont: 'john@example.com')
+            begin
+              puts "\n=== DEBUGGING: Testing with Article missing 'person' in ransackable_associations ==="
+              
+              search = Comment.ransack(article_person_email_cont: 'john@example.com')
+              context = search.context
+              
+              # Test the intermediate steps
+              puts "1. Testing Comment.get_association('article')"
+              comment_article_assoc = context.send(:get_association, 'article', Comment)
+              puts "   Result: #{comment_article_assoc ? comment_article_assoc.name : 'nil'}"
+              
+              puts "2. Testing Article.get_association('person') - this should fail"
+              if comment_article_assoc
+                article_person_assoc = context.send(:get_association, 'person', comment_article_assoc.klass)
+                puts "   Result: #{article_person_assoc ? article_person_assoc.name : 'nil'}"
+              end
+              
+              puts "3. Testing attribute_method?('article_person_email', Comment)"
+              attr_method_result = context.attribute_method?('article_person_email', Comment)
+              puts "   Result: #{attr_method_result}"
+              
+              puts "4. Attempting to execute the search"
+              results = search.result.to_a
+              puts "   Results count: #{results.count}"
+              
+              # This should fail if security is working correctly
+              expect(attr_method_result).to be false
+              
+            ensure
+              # Restore the original method
+              Article.define_singleton_method(:ransackable_associations) do |auth_object = nil|
+                authorizable_ransackable_associations
+              end
+            end
+          end
+
+          it 'should reproduce the issue with Comment missing article ransackable association' do
+            # Similarly, if Comment doesn't declare 'article' as ransackable
+            
+            Comment.define_singleton_method(:ransackable_associations) do |auth_object = nil|
+              ['person']  # Missing 'article'!
+            end
+            
+            begin
+              puts "\n=== Testing with Comment missing 'article' in ransackable_associations ==="
+              
+              search = Comment.ransack(article_person_email_cont: 'john@example.com')
+              
+              expect {
+                results = search.result.to_a
+                puts "Unexpected success: found #{results.count} results"
+              }.to raise_error(Ransack::UntraversableAssociationError)
+              
+            ensure  
+              # Restore
+              Comment.define_singleton_method(:ransackable_associations) do |auth_object = nil|
+                authorizable_ransackable_associations
+              end
+            end
+          end
+
+          it 'should work when all associations are properly declared' do
+            # This should work with the default ApplicationRecord configuration
+            search = Comment.ransack(article_person_email_cont: 'john@example.com') 
             results = search.result
             
             expect(results.count).to eq(1)
-            expect(results.first).to eq(@comment1)
+            expect(results.first).to eq(@johns_comment)
+            
+            # Verify the SQL is correct
+            sql = results.to_sql.downcase
+            expect(sql).to include('join')
+            expect(sql).to include('articles')
+            expect(sql).to include('people') 
+            expect(sql).to include('email')
           end
-        end
-        
-        describe 'examining the context association_path logic' do
-          it 'should demonstrate the association_path bug' do
-            context = Comment.ransack.context
+
+          it 'should test the exact error condition from Ransack 4.3.0' do
+            # Version 4.3.0 changed error handling - maybe this is where the issue lies
             
-            puts "\n=== Testing association_path behavior ==="
-            
-            # Test what happens with our specific case
-            path_result = context.association_path('article_person_email')
-            puts "association_path('article_person_email') = '#{path_result}'"
-            
-            # The path should be 'article_person' but what if it's cutting off early?
-            # Let's manually trace through the logic
-            
-            base = Comment
-            segments = 'article_person_email'.split('_')
-            puts "Segments: #{segments.inspect}"
-            
-            path = []
-            association_parts = []
-            current_base = base
-            
-            segments.each_with_index do |segment, i|
-              association_parts << segment
-              current_path = association_parts.join('_')
-              
-              # Check if current path is a column on the current base
-              has_column = current_base.columns_hash[segments[i..-1].join('_')] != nil
-              puts "  Step #{i+1}: checking '#{segments[i..-1].join('_')}' as column on #{current_base.name}: #{has_column}"
-              
-              # Check if current path is an association
-              found_assoc = nil
-              begin
-                found_assoc = current_base.reflect_on_association(current_path.to_sym)
-                puts "    Association '#{current_path}' on #{current_base.name}: #{found_assoc ? found_assoc.klass.name : 'nil'}"
-              rescue => e
-                puts "    Error checking association: #{e.class.name}: #{e.message}"
-              end
-              
-              if found_assoc
-                path += association_parts
-                association_parts = []
-                current_base = found_assoc.klass
-                puts "    -> Advanced to #{current_base.name}, path so far: #{path.join('_')}"
-              end
+            Comment.define_singleton_method(:ransackable_associations) do |auth_object = nil|
+              []  # No associations allowed
             end
             
-            puts "Final path: #{path.join('_')}"
+            begin
+              search = Comment.ransack(article_person_email_cont: 'john@example.com')
+              
+              # In 4.3.0, this should raise InvalidSearchError instead of ArgumentError
+              expect {
+                search.result.to_a
+              }.to raise_error(Ransack::UntraversableAssociationError)
+              
+            ensure
+              Comment.define_singleton_method(:ransackable_associations) do |auth_object = nil|
+                authorizable_ransackable_associations
+              end
+            end
+          end
+
+          it 'should test edge case: Person missing email in ransackable_attributes' do
+            # What if the final attribute isn't ransackable?
             
-            # This test helps us understand the exact logic flow
+            Person.define_singleton_method(:ransackable_attributes) do |auth_object = nil|
+              ['id', 'name']  # Missing 'email'!
+            end
+            
+            begin
+              search = Comment.ransack(article_person_email_cont: 'john@example.com')
+              
+              # This might not raise an error but return no results
+              results = search.result.to_a
+              puts "Results when email not ransackable: #{results.count}"
+              
+              # The search might succeed but return no results
+              expect(results.count).to eq(0)
+              
+            ensure
+              Person.define_singleton_method(:ransackable_attributes) do |auth_object = nil|
+                authorizable_ransackable_attributes
+              end
+            end
           end
         end
       end
