@@ -25,32 +25,23 @@ To release a new version of Ransack and publish it to RubyGems, take the followi
 
 ### Manual Release Process
 
-1. Update the [`version.rb`](https://github.com/activerecord-hackery/ransack/lib/ransack/version.rb) file to the new release, commit and push to `main`.
-2. Create a new release, e.g: v4.4.0 and mark it `Prerelease`.
-3. Click the **"Generate release notes"** button to automatically populate the release notes with commits since the last tag.
-4. Create and push a tag with the same name:
-   ```bash
-   git tag v4.4.0
-   git push origin v4.4.0
-   ```
-5. From the terminal, run the following commands:
+Example for release 4.4.0 
+
+1. Update the [`version.rb`](https://github.com/activerecord-hackery/ransack/lib/ransack/version.rb) file to the `4.4.0`, commit and push to `main`.
+3. Click the [Draft a new Release](https://github.com/activerecord-hackery/ransack/releases/new) button 
+4. Use these settings:
+- Tag: v4.4.0
+- Release Title: 4.4.0
+- Check `Set as the Latest Release`
+- Click `Generate release notes`
+- Click `Publish Release`
+
+5. Release to RubyGems From the terminal
 
 ```bash
 rake build
 rake release
 ```
 
-**GitHub Release UI**
-- **Tag**: v4.4.0
-- **Target**: main  
-- **Release title**: v4.4.0 (auto-filled)
-- **Release notes**: Click **"Generate release notes"** to auto-populate using the configured categories
-- **Set as a pre-release**: **Checked** (required for step 2)
-- **Set as the latest release**: Unchecked (correct for prerelease)
-- **Action**: Click **"Publish release"** (not "Save draft")
-
-### Release Notes Configuration
-
-The repository includes a release configuration file (`.github/release.yml`) that customizes how release notes are organized when using GitHub's "Generate release notes" button.
 
 
