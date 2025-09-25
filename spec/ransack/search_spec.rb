@@ -313,6 +313,46 @@ module Ransack
         expect { Search.new(Person, params) }.not_to change { params }
       end
 
+      context 'with empty search parameters' do
+        it 'handles completely empty parameters' do
+          search = Search.new(Person, {})
+          expect(search.result.to_sql).not_to match(/WHERE/)
+        end
+
+        it 'handles nil parameters' do
+          search = Search.new(Person, nil)
+          expect(search.result.to_sql).not_to match(/WHERE/)
+        end
+      end
+
+      context 'with whitespace-only values' do
+        before do
+          Ransack.configure { |c| c.strip_whitespace = true }
+        end
+
+        it 'removes whitespace-only values' do
+          expect_any_instance_of(Search).to receive(:build).with({})
+          Search.new(Person, name_eq: '   ')
+        end
+
+        it 'keeps values with content after whitespace stripping' do
+          expect_any_instance_of(Search).to receive(:build).with({ 'name_eq' => 'test' })
+          Search.new(Person, name_eq: '  test  ')
+        end
+      end
+
+      context 'with special characters in values' do
+        it 'handles values with special regex characters' do
+          search = Search.new(Person, name_cont: 'test[(){}^$|?*+.\\')
+          expect { search.result }.not_to raise_error
+        end
+
+        it 'handles values with SQL injection attempts' do
+          search = Search.new(Person, name_cont: "'; DROP TABLE people; --")
+          expect { search.result }.not_to raise_error
+        end
+      end
+
       context "ransackable_scope" do
         around(:each) do |example|
           Person.define_singleton_method(:name_eq) do |name|
