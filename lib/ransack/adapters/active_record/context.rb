@@ -19,7 +19,8 @@ module Ransack
           unless schema_cache.send(:data_source_exists?, table)
             raise "No table named #{table} exists."
           end
-          attr.klass.columns.find { |column| column.name == name }.type
+          column = attr.klass.columns.find { |column| column.name == name }
+          column&.type
         end
 
         def evaluate(search, opts = {})
@@ -171,7 +172,25 @@ module Ransack
           join_constraints.each do |j|
             subquery.join_sources << Arel::Nodes::InnerJoin.new(j.left, j.right)
           end
-          subquery.where(correlated_key.eq(primary_key))
+
+          # Handle polymorphic associations where correlated_key is an array
+          if correlated_key.is_a?(Array)
+            # For polymorphic associations, we need to add conditions for both the foreign key and type
+            correlated_key.each_with_index do |key, index|
+              if index == 0
+                # This is the foreign key
+                subquery = subquery.where(key.eq(primary_key))
+              else
+                # This is the type key, which should be equal to the model name
+                subquery = subquery.where(key.eq(@klass.name))
+              end
+            end
+          else
+            # Original behavior for non-polymorphic associations
+            subquery = subquery.where(correlated_key.eq(primary_key))
+          end
+
+          subquery
         end
 
         def primary_key
@@ -201,7 +220,15 @@ module Ransack
               nil
             end
           when Arel::Nodes::And
-            extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
+            # And may have multiple children, so we need to check all, not via left/right
+            if join_root.children.any?
+              join_root.children.each do |child|
+                key = extract_correlated_key(child)
+                return key if key
+              end
+            else
+              extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
+            end
           else
             # eg parent was Arel::Nodes::And and the evaluated side was one of
             # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause

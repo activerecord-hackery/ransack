@@ -140,6 +140,17 @@ class Person < ApplicationRecord
     Arel.sql(query)
   end
 
+  ransacker :article_tags, formatter: proc { |id|
+    if Tag.exists?(id)
+      joins(articles: :tags)
+        .where(tags: { id: id })
+        .distinct
+        .select(:id).arel
+    end
+  } do |parent|
+    parent.table[:id]
+  end
+
   def self.ransackable_attributes(auth_object = nil)
     if auth_object == :admin
       authorizable_ransackable_attributes - ['only_sort']
@@ -165,6 +176,7 @@ class Article < ApplicationRecord
   has_many :comments
   has_and_belongs_to_many :tags
   has_many :notes, as: :notable
+  has_many :recent_notes, as: :notable
 
   alias_attribute :content, :body
 
@@ -234,15 +246,25 @@ end
 class Comment < ApplicationRecord
   belongs_to :article
   belongs_to :person
+  has_and_belongs_to_many :tags
 
   default_scope { where(disabled: false) }
 end
 
 class Tag < ApplicationRecord
   has_and_belongs_to_many :articles
+  has_and_belongs_to_many :comments
 end
 
 class Note < ApplicationRecord
+  belongs_to :notable, polymorphic: true
+end
+
+class RecentNote < ApplicationRecord
+  DEFAULT_NOTABLE_ID = 1
+  self.table_name = "notes"
+  default_scope { where(notable_id: DEFAULT_NOTABLE_ID) }
+
   belongs_to :notable, polymorphic: true
 end
 
@@ -310,6 +332,11 @@ module Schema
 
       create_table :articles_tags, force: true, id: false do |t|
         t.integer  :article_id
+        t.integer  :tag_id
+      end
+
+      create_table :comments_tags, force: true, id: false do |t|
+        t.integer  :comment_id
         t.integer  :tag_id
       end
 

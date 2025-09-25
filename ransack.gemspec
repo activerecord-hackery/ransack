@@ -14,6 +14,10 @@ Gem::Specification.new do |s|
   s.description = %q{Ransack is the successor to the MetaSearch gem. It improves and expands upon MetaSearch's functionality, but does not have a 100%-compatible API.}
   s.required_ruby_version = '>= 3.0'
   s.license     = 'MIT'
+  
+  s.metadata = {
+    'changelog_uri' => "#{s.homepage}/releases/tag/v#{s.version}"
+  }
 
   s.metadata['changelog_uri'] = 'https://github.com/activerecord-hackery/ransack/blob/main/CHANGELOG.md'
 
