@@ -32,6 +32,7 @@ module Ransack
       end
       @context = options[:context] || Context.for(object, options)
       @context.auth_object = options[:auth_object]
+      @context.strip_whitespace = strip_whitespace
       @base = Nodes::Grouping.new(
         @context, options[:grouping] || Constants::AND
         )
