@@ -98,6 +98,43 @@ module Ransack
             expect(search.result.to_sql).to match /.comments.\..person_id. = .people.\..id./
           end
 
+          it 'handles Arel::Nodes::And with children' do
+            # Create a mock Arel::Nodes::And with children for testing
+            search = Search.new(Person, { articles_title_not_eq: 'some_title', articles_body_not_eq: 'some_body' }, context: subject)
+            attribute = search.conditions.first.attributes.first
+            constraints = subject.build_correlated_subquery(attribute.parent).constraints
+            constraint = constraints.first
+
+            expect(constraints.length).to eql 1
+            expect(constraint.left.name).to eql 'person_id'
+            expect(constraint.left.relation.name).to eql 'articles'
+            expect(constraint.right.name).to eql 'id'
+            expect(constraint.right.relation.name).to eql 'people'
+          end
+
+          it 'correctly extracts correlated key from complex AND conditions' do
+            # Test with multiple nested conditions to ensure the children traversal works
+            search = Search.new(
+              Person,
+              {
+                articles_title_not_eq: 'title',
+                articles_body_not_eq: 'body',
+                articles_published_eq: true
+              },
+              context: subject
+            )
+
+            attribute = search.conditions.first.attributes.first
+            constraints = subject.build_correlated_subquery(attribute.parent).constraints
+            constraint = constraints.first
+
+            expect(constraints.length).to eql 1
+            expect(constraint.left.relation.name).to eql 'articles'
+            expect(constraint.left.name).to eql 'person_id'
+            expect(constraint.right.relation.name).to eql 'people'
+            expect(constraint.right.name).to eql 'id'
+          end
+
           it 'build correlated subquery for polymorphic & default_scope when predicate is not_cont_all' do
             search = Search.new(Article,
              g: [
@@ -165,7 +202,7 @@ module Ransack
             # Create a mock attribute that references a non-existent column
             mock_attr = double('attribute')
             allow(mock_attr).to receive(:valid?).and_return(true)
-            
+
             mock_arel_attr = double('arel_attribute')
             allow(mock_arel_attr).to receive(:relation).and_return(Person.arel_table)
             allow(mock_arel_attr).to receive(:name).and_return('nonexistent_column')
