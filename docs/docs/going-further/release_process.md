@@ -36,9 +36,10 @@ Example for release 4.4.0
 - Click `Generate release notes`
 - Click `Publish Release`
 
-5. Release to RubyGems From the terminal
+5. Release to RubyGems
 
 ```bash
+gem signin
 rake build
 rake release
 ```
