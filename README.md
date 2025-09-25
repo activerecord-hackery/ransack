@@ -41,7 +41,7 @@ This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quic
 
 * Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
 * File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
-* Please consider adding a branch with a failing spec describing the problem.
+* Please consider creating a pull request with a failing test that demonstrates the problem.
 * Contributions are welcome. :smiley:
 * Please do not use the issue tracker for personal support requests. Stack Overflow or [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) is a better place for that where a wider community can help you!
 

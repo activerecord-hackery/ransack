@@ -25,12 +25,12 @@ Steps:
 3. **Isolate the real problem** &mdash; make sure the issue is really a bug in
    Ransack and not in your code or another gem.
 
-4. **Report the issue** by providing the link to a self-contained
-   gist like [this](https://github.com/activerecord-hackery/ransack/blob/main/bug_report_templates/test-ransack-scope-and-column-same-name.rb) or
-   [this](https://github.com/activerecord-hackery/ransack/blob/main/bug_report_templates/test-ransacker-arel-present-predicate.rb). Please use
-   these code examples as a bug-report template for your Ransack issue!
+4. **Create a failing test** by writing a test that demonstrates the issue. You can:
+   - Copy and modify an existing test from the test suite
+   - Create a new test file following the existing patterns
+   - Submit a pull request with your failing test
 
-If you do not provide a self-contained gist and would like your issue to be reviewed, do provide at a minimum:
+If you do not provide a failing test and would like your issue to be reviewed, do provide at a minimum:
 
 * A comprehensive list of steps to reproduce the issue, or even better, a
   passing/failing test spec.

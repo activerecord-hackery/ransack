@@ -122,7 +122,7 @@
 * Fix a wrong link in `CHANGELOG.md`.
   PR [1323](https://github.com/activerecord-hackery/ransack/pull/1323)
 
-* Fix links to bug report templates in `CONTRIBUTING.md`.
+* Update `CONTRIBUTING.md` to encourage failing tests in PRs instead of bug report templates.
   PR [1321](https://github.com/activerecord-hackery/ransack/pull/1321)
 
 ## 3.2.0 - 2022-05-08
@@ -240,7 +240,7 @@
 * Enable RuboCop and configure GitHub Actions to run RuboCop by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1185
 * Add Ruby 3.0.0 support by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1190
 * Drop Ruby 2.5 or older versions of Ruby by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1189
-* Move bug report templates into ransack repository and run templates at CI by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1191
+* Remove bug report templates and encourage failing tests in PRs instead by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1191
 * Allow Ransack to be tested with Rails main branch by @yahonda in https://github.com/activerecord-hackery/ransack/pull/1192
 
 ## 2.4.1 - 2020-12-21
