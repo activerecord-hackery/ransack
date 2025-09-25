@@ -310,7 +310,7 @@ module Ransack
           join_dependency.instance_variable_set(:@alias_tracker, alias_tracker)
           
           # Track existing join nodes to prevent duplicate joins
-          join_dependency.send(:populate_joined_tables_from_existing_joins, join_nodes, relation)
+          join_dependency.populate_joined_tables_from_existing_joins(join_nodes, relation)
           
           join_nodes.each do |join|
             join_dependency.send(:alias_tracker).aliases[join.left.name.downcase] = 1
