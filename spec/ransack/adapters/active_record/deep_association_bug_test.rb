@@ -54,6 +54,47 @@ module Ransack
           expect(results.count).to eq(1)
           expect(results.first).to eq(@johns_comment)
         end
+
+        it 'should still handle multi-part conditions with combinators' do
+          # Test that legitimate _and_/_or_ conditions still work
+          search = Comment.ransack(article_title_or_body_cont: 'Article')
+          
+          # Should create conditions for the multi-part search
+          expect(search.base.conditions.size).to be > 0
+          
+          # Should find both articles that contain 'Article' in title or body
+          results = search.result.to_a
+          expect(results.count).to eq(2)  # Both comments should match
+        end
+
+        it 'should handle edge case where final attribute is not ransackable' do
+          # Test what happens when the final attribute (email) is not ransackable
+          original_method = Person.method(:ransackable_attributes)
+          Person.define_singleton_method(:ransackable_attributes) do |auth_object = nil|
+            ['id', 'name']  # Missing 'email'!
+          end
+          
+          begin
+            search = Comment.ransack(article_person_email_cont: 'john@example.com')
+            
+            # A condition is created, but it should have no valid attributes due to security
+            expect(search.base.conditions.size).to eq(1)
+            condition = search.base.conditions.first
+            expect(condition.attributes).to be_empty  # No valid attributes due to security
+            
+            # Should return all records (no filtering applied due to invalid condition)
+            results = search.result.to_a
+            expect(results.count).to eq(2)
+            
+            # Verify this matches direct attribute search behavior
+            direct_search = Person.ransack(email_cont: 'john@example.com')
+            direct_results = direct_search.result.to_a
+            expect(direct_results.count).to eq(2)  # Same behavior
+            
+          ensure
+            Person.define_singleton_method(:ransackable_attributes, original_method)
+          end
+        end
       end
     end
   end
