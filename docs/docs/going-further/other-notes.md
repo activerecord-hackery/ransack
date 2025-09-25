@@ -146,6 +146,39 @@ def index
 end
 ```
 
+### Problem with Globalized Attributes and Sorting
+
+When using internationalization gems like [Globalize](https://github.com/globalize/globalize), you may encounter issues when trying to sort on translated attributes of associations while also having pre-existing joins to translation tables.
+
+**Problem scenario:**
+```ruby
+# This may fail to generate proper joins:
+Book.joins(:translations).ransack({ s: ['category_translations_name asc'] }).result
+```
+
+**Solution:**
+The simplest and most effective approach is to use the `sort_link` helper directly with the translation attribute:
+
+```erb
+<!-- This works perfectly for sorting on translated attributes -->
+<%= sort_link @search, :translations_name %>
+<%= sort_link @search, :category_translations_name %>
+```
+
+For programmatic sorting, let Ransack establish the sorting joins first, then add your additional joins:
+
+```ruby
+# Let Ransack handle the sorting joins first
+search = Book.ransack({ s: ['category_translations_name asc'] })
+results = search.result.joins(:translations)
+
+# Or use includes for complex scenarios
+search = Book.ransack({ s: ['category_translations_name asc'] })
+results = search.result.includes(:translations, category: :translations)
+```
+
+This ensures that Ransack properly handles the join dependencies between your main model's translations and the associated model's translations.
+
 #### `PG::UndefinedFunction: ERROR: could not identify an equality operator for type json`
 
 If you get the above error while using `distinct: true` that means that

@@ -7,3 +7,4 @@ coverage/*
 .DS_Store
 .byebug_history
 vendor/bundle
+.idea

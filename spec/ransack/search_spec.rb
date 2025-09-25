@@ -178,7 +178,6 @@ module Ransack
         #     AND "articles"."title" = 'Test' AND "articles"."published" = 't' AND ('default_scope' = 'default_scope')
         # ) ORDER BY "people"."id" DESC
 
-        pending("spec should pass, but I do not know how/where to fix lib code")
         s = Search.new(Person, published_articles_title_not_eq: 'Test')
         expect(s.result.to_sql).to include 'default_scope'
         expect(s.result.to_sql).to include 'published'
@@ -334,6 +333,75 @@ module Ransack
           s = Search.new(Person, name_eq: "Johny")
           expect(s.instance_variable_get(:@scope_args)["name_eq"]).to eq("Johny")
           expect(s.base[:name_eq]).to be_nil
+        end
+      end
+
+      context "ransackable_scope with array arguments" do
+        around(:each) do |example|
+          Person.define_singleton_method(:domestic) do |countries|
+            self.where(name: countries)
+          end
+
+          Person.define_singleton_method(:flexible_scope) do |*args|
+            self.where(id: args)
+          end
+
+          Person.define_singleton_method(:two_param_scope) do |param1, param2|
+            self.where(name: param1, id: param2)
+          end
+
+          begin
+            example.run
+          ensure
+            Person.singleton_class.undef_method :domestic
+            Person.singleton_class.undef_method :flexible_scope
+            Person.singleton_class.undef_method :two_param_scope
+          end
+        end
+
+        it "handles scopes that take arrays as single arguments (arity 1)" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:domestic])
+
+          # This should not raise ArgumentError
+          expect {
+            s = Search.new(Person, domestic: ['US', 'JP'])
+            s.result # This triggers the actual scope call
+          }.not_to raise_error
+
+          s = Search.new(Person, domestic: ['US', 'JP'])
+          expect(s.instance_variable_get(:@scope_args)["domestic"]).to eq("US")
+        end
+
+        it "handles scopes with flexible arity (negative arity)" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:flexible_scope])
+
+          expect {
+            s = Search.new(Person, flexible_scope: ['US', 'JP'])
+            s.result
+          }.not_to raise_error
+        end
+
+        it "handles scopes with arity > 1" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:two_param_scope])
+
+          expect {
+            s = Search.new(Person, two_param_scope: ['param1', 'param2'])
+            s.result
+          }.not_to raise_error
+        end
+
+        it "still supports the workaround with nested arrays" do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:domestic])
+
+          # The workaround from the issue should still work
+          expect {
+            s = Search.new(Person, domestic: [['US', 'JP']])
+            s.result
+          }.not_to raise_error
         end
       end
     end
