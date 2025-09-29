@@ -226,7 +226,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map(&:cast_array)
+        validated_values.map { |v| v.cast(predicate.type || attr.type) }
       end
 
       def formatted_values_for_attribute(attr)
