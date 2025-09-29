@@ -116,7 +116,7 @@ class Person < ApplicationRecord
       )
   end
 
-  ransacker :sql_literal_id do
+  ransacker :sql_literal_id, type: :integer do
     Arel.sql('people.id')
   end
 
