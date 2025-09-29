@@ -1,9 +1,8 @@
 # Change Log
 
-## Unreleased
+## From v4.4.0, the CHANGELOG is captured in the [Release info](https://github.com/activerecord-hackery/ransack/releases)
 
-* Drop Rails 7.1 support (Rails 7.1 reaches end-of-life on October 1, 2025)
-* Enforce minimum Ruby version 3.1
+## Historical releases
 
 ## 4.3.0 - 2025-2-7
 
