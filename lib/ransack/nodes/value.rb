@@ -43,14 +43,6 @@ module Ransack
         end
       end
 
-      def cast_array
-        if value.is_a?(Array)
-          cast_to_date(value)
-        else
-          value
-        end
-      end
-
       def cast_to_date(val)
         if val.respond_to?(:to_date)
           val.to_date rescue nil
