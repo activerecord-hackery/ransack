@@ -56,6 +56,36 @@ module Ransack
           .with({ 'name_eq' => '   foobar     ' })
           Search.new(Person, { name_eq: '   foobar     ' }, { strip_whitespace: false })
         end
+
+        context 'with group conditions' do
+          it 'strips leading & trailing whitespace from group condition values when strip_whitespace is true' do
+            search = Person.ransack({g: [{name_cont: "  John  ", email_cont: "  john@example.com  ", m: "or"}]}, { strip_whitespace: true })
+            
+            # Access the base grouping to inspect conditions
+            grouping = search.base.groupings.first
+            
+            # Check that whitespace was stripped from the values
+            name_condition = grouping.conditions.find { |c| c.predicate.name == "cont" && c.attributes.first.name == "name" }
+            email_condition = grouping.conditions.find { |c| c.predicate.name == "cont" && c.attributes.first.name == "email" }
+            
+            expect(name_condition.values.first.value).to eq("John")  # Should be stripped
+            expect(email_condition.values.first.value).to eq("john@example.com")  # Should be stripped
+          end
+
+          it 'does not strip whitespace from group condition values when strip_whitespace is false' do
+            search = Person.ransack({g: [{name_cont: "  John  ", email_cont: "  john@example.com  ", m: "or"}]}, { strip_whitespace: false })
+            
+            # Access the base grouping to inspect conditions
+            grouping = search.base.groupings.first
+            
+            # Check that whitespace was NOT stripped from the values
+            name_condition = grouping.conditions.find { |c| c.predicate.name == "cont" && c.attributes.first.name == "name" }
+            email_condition = grouping.conditions.find { |c| c.predicate.name == "cont" && c.attributes.first.name == "email" }
+            
+            expect(name_condition.values.first.value).to eq("  John  ")  # Should NOT be stripped
+            expect(email_condition.values.first.value).to eq("  john@example.com  ")  # Should NOT be stripped
+          end
+        end
       end
 
       it 'removes empty suffixed conditions before building' do
