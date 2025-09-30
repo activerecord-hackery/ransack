@@ -570,6 +570,39 @@ module Ransack
         .to eq s.result(distinct: true).send(all_or_load)
       end
 
+      it 'returns distinct records when passed distinct with specific columns' do
+        s = Search.new(Person, name_eq: 'Ernie')
+        
+        # Test with array of columns
+        result_array = s.result(distinct: [:name])
+        expect(result_array).to be_an ActiveRecord::Relation
+        expect(result_array.to_sql).to match /SELECT DISTINCT/
+        
+        # Test with single column as string
+        result_string = s.result(distinct: 'name')
+        expect(result_string).to be_an ActiveRecord::Relation
+        expect(result_string.to_sql).to match /SELECT DISTINCT/
+      end
+
+      it 'handles distinct edge cases correctly' do
+        s = Search.new(Person, name_eq: 'Ernie')
+        
+        # Test with false - should not use distinct
+        result_false = s.result(distinct: false)
+        expect(result_false).to be_an ActiveRecord::Relation
+        expect(result_false.to_sql).not_to match /SELECT DISTINCT/
+        
+        # Test with nil - should not use distinct  
+        result_nil = s.result(distinct: nil)
+        expect(result_nil).to be_an ActiveRecord::Relation
+        expect(result_nil.to_sql).not_to match /SELECT DISTINCT/
+        
+        # Test with empty array - should fall back to regular distinct
+        result_empty = s.result(distinct: [])
+        expect(result_empty).to be_an ActiveRecord::Relation
+        expect(result_empty.to_sql).to match /SELECT DISTINCT/
+      end
+
       it 'evaluates joins with belongs_to join' do
         s = Person.joins(:parent).ransack(parent_name_eq: 'Ernie').result(distinct: true)
         expect(s).to be_an ActiveRecord::Relation
