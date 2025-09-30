@@ -26,7 +26,12 @@ module Ransack
       if params.is_a? Hash
         params = params.dup
         params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
-        params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false } }
+        params.delete_if { |k, v| 
+          [*v].all? do |i|
+            i.nil? || 
+            (i.respond_to?(:blank?) && i.blank? && !i.is_a?(String) && i != false)
+          end
+        }
       else
         params = {}
       end
