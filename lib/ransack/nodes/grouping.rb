@@ -178,10 +178,28 @@ module Ransack
       end
 
       def read_attribute(name)
-        if self[name].respond_to?(:value)
-          self[name].value
+        # First try to find condition with the exact name (including aliases)
+        condition = self[name]
+        
+        # If not found and the name might be an alias, try the resolved attribute name
+        if condition.nil?
+          # Strip predicate and resolve alias, similar to condition extraction logic
+          str = name.to_s.dup
+          require_relative '../predicate'
+          predicate_name = Predicate.detect_and_strip_from_string!(str)
+          resolved_base = @context.ransackable_alias(str)
+          
+          if resolved_base != str
+            # Reconstruct the full attribute name with predicate
+            resolved_name = predicate_name ? "#{resolved_base}_#{predicate_name}" : resolved_base
+            condition = self[resolved_name]
+          end
+        end
+        
+        if condition.respond_to?(:value)
+          condition.value
         else
-          self[name]
+          condition
         end
       end
 
