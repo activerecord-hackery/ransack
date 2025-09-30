@@ -510,6 +510,27 @@ module Ransack
         expect(real_query).to eq expected_query
       end
 
+      it 'evaluates single condition for multiple `belongs_to` associations to the same table' do
+        # Why Search.new(Recommendation.joins(:person, :target_person)...) is not the same thing?
+        s = Recommendation.joins(:person, :target_person).ransack(
+          { target_person_name_eq: 'Test' },
+        ).result
+
+        expect(s).to be_an ActiveRecord::Relation
+
+        real_query = remove_quotes_and_backticks(s.to_sql)
+        expected_query = <<-SQL
+          SELECT recommendations.* FROM recommendations
+          INNER JOIN people ON people.id = recommendations.person_id
+          INNER JOIN people target_people_recommendations
+            ON target_people_recommendations.id = recommendations.target_person_id
+          WHERE target_people_recommendations.name = 'Test'
+        SQL
+        .squish
+
+        expect(real_query).to eq expected_query
+      end
+
       it 'evaluates compound conditions contextually' do
         s = Search.new(Person, children_name_or_name_eq: 'Ernie').result
         expect(s).to be_an ActiveRecord::Relation
