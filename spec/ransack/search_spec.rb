@@ -31,6 +31,14 @@ module Ransack
             .with({ 'name_eq' => 'foobar' })
             Search.new(Person, name_eq: '   foobar     ')
           end
+
+          describe 'nested search params with group conditions' do
+            it 'strips leading & trailing whitespace in all nested values before building' do
+              expect_any_instance_of(Search).to receive(:build)
+              .with({ 'g' => [{ 'm' => 'or', 'name_eq' => 'foobar' }] })
+              Search.new(Person, { g: [{ m: 'or', name_eq: '   foobar     ' }] })
+            end
+          end
         end
 
         context 'when whitespace_strip option is false' do
