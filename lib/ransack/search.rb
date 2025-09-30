@@ -49,6 +49,9 @@ module Ransack
       collapse_multiparameter_attributes!(params).each do |key, value|
         if ['s'.freeze, 'sorts'.freeze].freeze.include?(key)
           send("#{key}=", value)
+        elsif key.to_s == 'm'
+          # Handle combinator (m) parameter explicitly to ensure it works at top level
+          base.combinator = value.to_s
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
         elsif base.attribute_method?(key)

@@ -575,6 +575,80 @@ module Ransack
         expect(s).to be_an ActiveRecord::Relation
       end
 
+      it 'should use OR combinator when m: "or" is used at top level' do
+        s = Search.new(Person, m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie')
+        
+        expect(s.base.combinator).to eq 'or'
+        
+        # Should generate OR query
+        result = s.result
+        expect(result.to_sql).to match /#{people_name_field} = 'Ernie' OR #{children_people_name_field} = 'Ernie'/
+      end
+      
+      it 'should create conditions in base grouping with OR combinator' do
+        s = Search.new(Person, m: 'or', id_eq: '12', name_contains: '12')
+        
+        expect(s.base.combinator).to eq 'or'
+        expect(s.base.conditions.size).to eq 2
+        
+        # Check that both conditions are in the base grouping
+        id_condition = s.base.conditions.find { |c| c.key.include?('id_eq') }
+        name_condition = s.base.conditions.find { |c| c.key.include?('name_contains') }
+        
+        expect(id_condition).not_to be_nil
+        expect(name_condition).not_to be_nil
+      end
+
+      it 'should handle OR combinator with symbol value' do
+        s = Search.new(Person, m: :or, name_eq: 'John')
+        
+        expect(s.base.combinator).to eq 'or'
+      end
+
+      it 'should default to AND combinator when m parameter is not specified' do
+        s = Search.new(Person, name_eq: 'John', id_eq: '1')
+        
+        expect(s.base.combinator).to eq 'and'
+      end
+
+      it 'should not interfere with existing grouping-based OR functionality' do
+        s = Search.new(Person,
+          g: [
+            { m: 'or', name_eq: 'Ernie', children_name_eq: 'Ernie' }
+          ]
+        )
+        
+        # Base grouping should still use default AND combinator
+        expect(s.base.combinator).to eq 'and'
+        
+        # Sub-grouping should use OR combinator
+        sub_grouping = s.base.groupings.first
+        expect(sub_grouping).not_to be_nil
+        expect(sub_grouping.combinator).to eq 'or'
+      end
+
+      it 'should work with combination of top-level OR and sub-groupings' do
+        s = Search.new(Person,
+          m: 'or',
+          name_eq: 'John',
+          g: [
+            { m: 'and', id_eq: '1', email_cont: 'test' }
+          ]
+        )
+        
+        # Base grouping should use OR combinator from top-level m parameter
+        expect(s.base.combinator).to eq 'or'
+        
+        # Sub-grouping should use AND combinator from its own m parameter
+        sub_grouping = s.base.groupings.first
+        expect(sub_grouping).not_to be_nil
+        expect(sub_grouping.combinator).to eq 'and'
+        
+        # Base should have both a condition and a sub-grouping
+        expect(s.base.conditions.size).to eq 1
+        expect(s.base.groupings.size).to eq 1
+      end
+
       private
 
         def remove_quotes_and_backticks(str)
