@@ -23,6 +23,9 @@ module Ransack
       end
 
       def cast(type)
+        # Convert type to symbol if it's a string to ensure proper case matching
+        type = type.to_sym if type.is_a?(String)
+        
         case type
         when :date
           cast_to_date(value)
