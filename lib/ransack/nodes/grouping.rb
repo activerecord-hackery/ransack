@@ -11,9 +11,13 @@ module Ransack
 
       delegate :each, to: :values
 
+      def combinator=(val)
+        super
+      end
+
       def initialize(context, combinator = nil)
         super(context)
-        self.combinator = combinator.to_s if combinator
+        self.combinator = combinator if combinator
       end
 
       def persisted?
