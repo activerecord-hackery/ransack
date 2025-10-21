@@ -27,6 +27,14 @@ module Ransack
         params = params.dup
         params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
         params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false } }
+        if params.key?(:c)
+          case params[:c]
+          when Array
+            params[:c].delete_if { |v| check_advanced_search_value? v }
+          when Hash
+            params[:c].delete_if { |_,v| check_advanced_search_value? v }
+          end
+        end
       else
         params = {}
       end
@@ -191,5 +199,13 @@ module Ransack
       attrs
     end
 
+    def check_advanced_search_value?(value)
+      case value[:v]
+      when Array
+        value[:v].all?{ |i| i.blank? && i != false }
+      when Hash
+        value[:v].all?{ |_,i| value[:value].blank? && value[:value] != false }
+      end
+    end
   end
 end
