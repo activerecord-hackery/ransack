@@ -461,6 +461,91 @@ module Ransack
       end
     end
 
+    describe 'length_eq' do
+      it 'generates a LENGTH(column) = value condition' do
+        @s.name_length_eq = 4
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) = 4/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.name_length_eq = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+
+      it "works with attribute names containing 'length'" do
+        @s.length_field_length_eq = 8
+        field = "#{quote_table_name("people")}.#{quote_column_name("length_field")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) = 8/
+      end
+    end
+
+    describe 'length_lt' do
+      it 'generates a LENGTH(column) < value condition' do
+        @s.name_length_lt = 5
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) < 5/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.name_length_lt = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'length_lteq' do
+      it 'generates a LENGTH(column) <= value condition' do
+        @s.name_length_lteq = 4
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) <= 4/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.name_length_lteq = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+
+      it "works with attribute names containing 'length'" do
+        @s.length_field_length_lteq = 10
+        field = "#{quote_table_name("people")}.#{quote_column_name("length_field")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) <= 10/
+      end
+
+      it "works with attribute names starting with 'length'" do
+        @s.length_of_name_length_lteq = 5
+        field = "#{quote_table_name("people")}.#{quote_column_name("length_of_name")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) <= 5/
+      end
+    end
+
+    describe 'length_gt' do
+      it 'generates a LENGTH(column) > value condition' do
+        # Use email instead of name to avoid conflict with name_length column
+        @s.email_length_gt = 10
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) > 10/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.email_length_gt = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
+    describe 'length_gteq' do
+      it 'generates a LENGTH(column) >= value condition' do
+        # Use email instead of name to avoid conflict with name_length column
+        @s.email_length_gteq = 10
+        field = "#{quote_table_name("people")}.#{quote_column_name("email")}"
+        expect(@s.result.to_sql).to match /(CHAR_LENGTH|LENGTH)\(#{field}\) >= 10/
+      end
+
+      it 'does not generate a condition for nil' do
+        @s.email_length_gteq = nil
+        expect(@s.result.to_sql).not_to match /WHERE/
+      end
+    end
+
     context "defining custom predicates" do
       describe "with 'not_in' arel predicate" do
         before do
