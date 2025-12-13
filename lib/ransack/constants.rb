@@ -159,18 +159,10 @@ module Ransack
     ].freeze
 
   module_function
-    # replace % \ to \% \\
+    # replace % \ _ to \% \\ \_
+    # Uses Rails' sanitize_sql_like which works for all databases
     def escape_wildcards(unescaped)
-      case ActiveRecord::Base.connection.adapter_name
-      when "Mysql2".freeze
-        # Necessary for MySQL
-        unescaped.to_s.gsub(/([\\%_])/, '\\\\\\1')
-      when "PostGIS".freeze, "PostgreSQL".freeze
-        # Necessary for PostgreSQL
-        unescaped.to_s.gsub(/([\\%_.])/, '\\\\\\1')
-      else
-        unescaped
-      end
+      ActiveRecord::Base.sanitize_sql_like(unescaped.to_s)
     end
   end
 end
