@@ -304,6 +304,8 @@ module Schema
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
         t.boolean  :true_or_false, default: true
+        t.string   :length_field
+        t.string   :length_of_name
         t.timestamps null: false
       end
 
