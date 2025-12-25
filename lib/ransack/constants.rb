@@ -155,6 +155,31 @@ module Ransack
         type: :boolean,
         validator: proc { |v| BOOLEAN_VALUES.include?(v) },
         formatter: proc { |v| nil } }
+      ],
+      ['length_eq'.freeze, {
+        arel_predicate: 'eq'.freeze,
+        type: :integer
+        }
+      ],
+      ['length_lt'.freeze, {
+        arel_predicate: 'lt'.freeze,
+        type: :integer
+        }
+      ],
+      ['length_lteq'.freeze, {
+        arel_predicate: 'lteq'.freeze,
+        type: :integer
+        }
+      ],
+      ['length_gt'.freeze, {
+        arel_predicate: 'gt'.freeze,
+        type: :integer
+        }
+      ],
+      ['length_gteq'.freeze, {
+        arel_predicate: 'gteq'.freeze,
+        type: :integer
+        }
       ]
     ].freeze
 
