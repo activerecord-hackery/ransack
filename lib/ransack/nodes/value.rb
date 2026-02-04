@@ -24,6 +24,8 @@ module Ransack
 
       def cast(type)
         case type
+        when :enum
+          value
         when :date
           cast_to_date(value)
         when :datetime, :timestamp, :time, :timestamptz

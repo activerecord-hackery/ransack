@@ -456,6 +456,49 @@ module Ransack
       let(:notable_type_field) {
         "#{quote_table_name("notes")}.#{quote_column_name("notable_type")}"
       }
+      let(:people_temperament_field) {
+        "#{quote_table_name("people")}.#{quote_column_name("temperament")}"
+      }
+
+      context 'when evaluating enums' do
+        before do
+          Person.first.update_attribute(:temperament, 'choleric')
+        end
+
+        it 'evaluates enum key correctly' do
+          s = Search.new(Person, temperament_eq: 'choleric')
+
+          expect(s.result.to_sql).not_to match(/#{people_temperament_field} = 0/)
+          expect(s.result.to_sql).to match(/#{people_temperament_field} = #{Person.temperaments[:choleric]}/)
+          expect(s.result).not_to be_empty
+        end
+
+        it 'evaluates enum value correctly' do
+          s = Search.new(Person, temperament_eq: Person.temperaments[:choleric])
+
+          expect(s.result.to_sql).not_to match(/#{people_temperament_field} = 0/)
+          expect(s.result.to_sql).to match(/#{people_temperament_field} = #{Person.temperaments[:choleric]}/)
+          expect(s.result).not_to be_empty
+        end
+      end
+
+      # Regression test for https://github.com/activerecord-hackery/ransack/issues/1644
+      context 'when enum fix does not break boolean predicate casting' do
+        it 'casts 0 to false for not_null predicate' do
+          s = Search.new(Person, name_not_null: 0)
+          expect(s.result.to_sql).to match(/#{people_name_field} IS NULL/)
+        end
+
+        it 'casts 1 to true for not_null predicate' do
+          s = Search.new(Person, name_not_null: 1)
+          expect(s.result.to_sql).to match(/#{people_name_field} IS NOT NULL/)
+        end
+
+        it 'casts "false" to false for not_null predicate' do
+          s = Search.new(Person, name_not_null: 'false')
+          expect(s.result.to_sql).to match(/#{people_name_field} IS NULL/)
+        end
+      end
 
       it 'evaluates conditions contextually' do
         s = Search.new(Person, children_name_eq: 'Ernie')
