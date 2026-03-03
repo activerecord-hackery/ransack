@@ -156,8 +156,7 @@ module Ransack
     end
 
     def ransackable_attribute?(str, klass)
-      klass.ransackable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym } ||
-        klass.ransortable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
+      klass.ransackable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransortable_attribute?(str, klass)
