@@ -654,6 +654,23 @@ module Ransack
         expect(@s.result.first.id).to eq 1
       end
 
+      it 'creates valid sort when ransortable_attributes returns symbols (issue #1538)' do
+        Person.singleton_class.class_eval do
+          define_method(:ransortable_attributes) { |_auth = nil| [:id, :name] }
+        end
+        begin
+          @s.sorts = 'name asc'
+          expect(@s.sorts.size).to eq(1)
+          sort = @s.sorts.first
+          expect(sort).to be_a Nodes::Sort
+          expect(sort).to be_valid
+          expect(@s.result.to_sql).to include('ORDER BY')
+          expect(@s.result.to_sql).to include('name')
+        ensure
+          Person.singleton_class.remove_method(:ransortable_attributes)
+        end
+      end
+
       it 'raises ArgumentError when an invalid argument is sent' do
         expect do
           @s.sorts = 1234
