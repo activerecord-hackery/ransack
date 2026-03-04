@@ -13,12 +13,18 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - 8-1-stable
           - 8-0-stable
           - v7.2.2
         ruby:
+          - 4.0.1
+          - 3.4.8
+          - 3.3.10
           - 3.2.2
           - 3.1.4
         exclude:
+          - rails: 8-1-stable
+            ruby: 3.1.4
           - rails: 8-0-stable
             ruby: 3.1.4
     env:
@@ -162,4 +168,3 @@ jobs:
           psql -h localhost -p 5432 -W postgres -c 'create database ransack;' -U postgres;
       - name: Run tests
         run: bundle exec rspec
-

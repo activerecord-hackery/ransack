@@ -519,8 +519,9 @@ module Ransack
 
         expect(real_query)
                 .to match(%r{LEFT OUTER JOIN articles ON (\('default_scope' = 'default_scope'\) AND )?articles.person_id = people.id})
+        # Rails 8.1+ / Arel 10+ use "AS" for join table aliases (e.g. "articles AS articles_people")
         expect(real_query)
-                .to match(%r{LEFT OUTER JOIN articles articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
+                .to match(%r{LEFT OUTER JOIN articles(\s+AS)?\s+articles_people ON (\('default_scope' = 'default_scope'\) AND )?articles_people.person_id = parents_people.id})
 
         expect(real_query)
           .to include "people.name = 'person_name_query'"
@@ -550,7 +551,9 @@ module Ransack
           WHERE (people.name = 'Ernie' AND parents_people.name = 'Test')
         SQL
         .squish
-        expect(real_query).to eq expected_query
+        # Normalize JOIN alias format: Rails 8.1+ / Arel 10+ output "AS" (e.g. "people AS parents_people")
+        normalize_join_aliases = ->(sql) { sql.gsub(/\s+AS\s+/, ' ') }
+        expect(normalize_join_aliases.call(real_query)).to eq normalize_join_aliases.call(expected_query)
       end
 
       it 'evaluates compound conditions contextually' do
