@@ -64,6 +64,8 @@ class Person < ApplicationRecord
   has_many   :articles
   has_many   :story_articles
 
+  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
+
   has_many :published_articles, ->{ where(published: true) },
       class_name: "Article"
   has_many   :comments
@@ -304,6 +306,7 @@ module Schema
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
         t.boolean  :true_or_false, default: true
+        t.integer  :temperament
         t.timestamps null: false
       end
 

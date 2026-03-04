@@ -31,6 +31,8 @@ module Ransack
       def type
         if ransacker
           ransacker.type
+        elsif enum?
+          :enum
         else
           context.type_for(self)
         end
@@ -52,6 +54,14 @@ module Ransack
 
       def inspect
         "Attribute <#{name}>"
+      end
+
+      private
+
+      def enum?
+        bound? &&
+        klass.respond_to?(:defined_enums) &&
+        klass.defined_enums.key?(attr_name.to_s)
       end
 
     end
