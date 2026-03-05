@@ -3,15 +3,22 @@ require 'spec_helper'
 module Ransack
   describe Search do
     describe '#initialize' do
-      it 'removes empty conditions before building' do
-        expect_any_instance_of(Search).to receive(:build).with({})
-        Search.new(Person, name_eq: '')
-      end
-
       it 'keeps conditions with a false value before building' do
         expect_any_instance_of(Search).to receive(:build)
         .with({ 'name_eq' => false })
         Search.new(Person, name_eq: false)
+      end
+
+      it 'keeps empty array conditions before building' do
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ 'name_in' => [] })
+        Search.new(Person, name_in: [])
+      end
+
+      it 'keeps empty string conditions before building' do
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ 'name_eq' => '' })
+        Search.new(Person, name_eq: '')
       end
 
       it 'keeps conditions with a value before building' do
@@ -58,8 +65,14 @@ module Ransack
         end
       end
 
-      it 'removes empty suffixed conditions before building' do
+      it 'removes nil-only array conditions before building' do
         expect_any_instance_of(Search).to receive(:build).with({})
+        Search.new(Person, name_eq_any: [nil, nil])
+      end
+
+      it 'keeps array with empty string before building' do
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ 'name_eq_any' => [''] })
         Search.new(Person, name_eq_any: [''])
       end
 
@@ -183,8 +196,15 @@ module Ransack
         expect(s.result.to_sql).to include 'published'
       end
 
-      it 'discards empty conditions' do
+      it 'keeps empty string conditions' do
         s = Search.new(Person, children_name_eq: '')
+        condition = s.base[:children_name_eq]
+        expect(condition).not_to be_nil
+        expect(condition.values.first.value).to eq ''
+      end
+
+      it 'discards nil conditions' do
+        s = Search.new(Person, children_name_eq: nil)
         condition = s.base[:children_name_eq]
         expect(condition).to be_nil
       end
@@ -330,8 +350,8 @@ module Ransack
           Ransack.configure { |c| c.strip_whitespace = true }
         end
 
-        it 'removes whitespace-only values' do
-          expect_any_instance_of(Search).to receive(:build).with({})
+        it 'keeps whitespace-only values as empty strings after stripping' do
+          expect_any_instance_of(Search).to receive(:build).with({ 'name_eq' => '' })
           Search.new(Person, name_eq: '   ')
         end
 
@@ -505,6 +525,16 @@ module Ransack
         expect(s.result).to be_an ActiveRecord::Relation
         expect(s.result.to_sql).to match /#{
           children_people_name_field} = 'Ernie'/
+      end
+
+      it 'returns no results for empty array in _in predicate' do
+        s = Search.new(Person, name_in: [])
+        expect(s.result.to_sql).to match /1=0|IN \(NULL\)/i
+      end
+
+      it 'searches for empty string with _eq predicate' do
+        s = Search.new(Person, name_eq: '')
+        expect(s.result.to_sql).to match /#{people_name_field} = ''/
       end
 
       it 'use appropriate table alias' do

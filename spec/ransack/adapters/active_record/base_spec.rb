@@ -357,8 +357,14 @@ module Ransack
             expect(s.result.count).to eq 1
           end if defined?(Arel::Nodes::InfixOperation) && sane_adapter?
 
-          it 'should remove empty key value pairs from the params hash' do
+          it 'should keep empty string values in the params hash and search for them' do
             s = Person.ransack(children_reversed_name_eq: '')
+            expect(s.result.to_sql).to match /LEFT OUTER JOIN/
+            expect(s.result.to_sql).to match(/= ''/)
+          end
+
+          it 'should remove nil key value pairs from the params hash' do
+            s = Person.ransack(children_reversed_name_eq: nil)
             expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
           end
 
