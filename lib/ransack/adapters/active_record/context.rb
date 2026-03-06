@@ -65,7 +65,8 @@ module Ransack
 
         def attribute_method?(str, klass = @klass)
           exists = false
-          if ransackable_attribute?(str, klass)
+          if ransackable_attribute?(str, klass) ||
+             ransortable_attribute?(str, klass)
             exists = true
           elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
@@ -239,7 +240,8 @@ module Ransack
         def get_parent_and_attribute_name(str, parent = @base)
           attr_name = nil
 
-          if ransackable_attribute?(str, klassify(parent))
+          if ransackable_attribute?(str, klassify(parent)) ||
+             ransortable_attribute?(str, klassify(parent))
             attr_name = str
           elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
             remainder = []
