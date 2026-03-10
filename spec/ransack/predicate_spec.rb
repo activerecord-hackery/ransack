@@ -473,6 +473,27 @@ module Ransack
           expect(@s.result.to_sql).to match /#{field} NOT IN \('a', 'b'\)/
         end
       end
+
+      describe "with date type and formatter" do
+        before do
+          Ransack.configure do |c|
+            c.add_predicate 'lteq_eod',
+                           arel_predicate: 'lteq',
+                           formatter: proc { |value|
+                             # This should receive a Date object, not a String
+                             raise "Expected Date, got #{value.class}" unless value.is_a?(Date)
+                             value.end_of_day
+                           },
+                           type: :date
+          end
+        end
+
+        it 'passes a Date object to the formatter, not a String' do
+          @s.life_start_lteq_eod = '2022-05-23'
+          # If the formatter receives a Date object, it won't raise an error
+          expect { @s.result.to_sql }.not_to raise_error
+        end
+      end
     end
 
     private

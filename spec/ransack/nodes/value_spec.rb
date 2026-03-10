@@ -20,6 +20,14 @@ module Ransack
             expect(result).to eq(Date.parse(raw_value))
           end
         end
+        
+        # Test that string type also works (for robustness)
+        it "should cast 'date' string type correctly" do
+          result = subject.cast('date')
+
+          expect(result).to be_a_kind_of(Date)
+          expect(result).to eq(Date.parse(raw_value))
+        end
       end
 
       context "with a timestamp value" do
