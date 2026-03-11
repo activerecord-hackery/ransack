@@ -42,7 +42,13 @@ module Ransack
     end
 
     def result(opts = {})
-      @context.evaluate(self, opts)
+      q = @context.evaluate(self, opts)
+      sorts = q.order_values
+
+      return q unless DistinctSortsProcessor.should_process?(q, sorts)
+
+      DistinctSortsProcessor.new(self, q, sorts).process!
+      q
     end
 
     def build(params)
