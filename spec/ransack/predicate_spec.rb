@@ -163,7 +163,7 @@ module Ransack
         when "Mysql2"
           /`people`.`name` LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /"people"."name" LIKE '%%._\\%'/
+         /"people"."name" LIKE '%\\%.\\_\\\\%'/
         end) do
         subject { @s }
       end
@@ -183,7 +183,7 @@ module Ransack
         when  "Mysql2"
           /`people`.`name` NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /"people"."name" NOT LIKE '%%._\\%'/
+         /"people"."name" NOT LIKE '%\\%.\\_\\\\%'/
         end) do
         subject { @s }
       end
@@ -205,7 +205,7 @@ module Ransack
         when "Mysql2"
           /LOWER\(`people`.`name`\) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /LOWER\("people"."name"\) LIKE '%%._\\%'/
+         /LOWER\("people"."name"\) LIKE '%\\%.\\_\\\\%'/
         end) do
         subject { @s }
       end
@@ -227,7 +227,7 @@ module Ransack
         when "Mysql2"
           /LOWER\(`people`.`name`\) NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
-         /LOWER\("people"."name"\) NOT LIKE '%%._\\%'/
+         /LOWER\("people"."name"\) NOT LIKE '%\\%.\\_\\\\%'/
         end) do
         subject { @s }
       end
