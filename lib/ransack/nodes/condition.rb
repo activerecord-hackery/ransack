@@ -124,8 +124,9 @@ module Ransack
       end
 
       def combinator=(val)
-        @combinator = Constants::AND_OR.detect { |v| v == val.to_s } || nil
+        super
       end
+
       alias :m= :combinator=
       alias :m :combinator
 

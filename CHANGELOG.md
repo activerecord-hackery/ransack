@@ -19,6 +19,9 @@
 
 * Add Rails 7.2 support by @robinator and @gregmolnar
 
+* Dangerous searches (e.g. ransack!) will now raise an ArgumentError when passed an unrecognised combinator rather than silently fall back on "AND".
+* Combinator values "OR" and :or are now treated as the expected 'or'.
+
 ## 4.1.0 - 2023-10-23
 
 ### 🚀 Features
