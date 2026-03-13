@@ -473,6 +473,25 @@ module Ransack
           expect(@s.result.to_sql).to match /#{field} NOT IN \('a', 'b'\)/
         end
       end
+
+      describe "with 'in' arel predicate and string formatter" do
+        before do
+          Ransack.configure do |config|
+            config.add_predicate 'in_list',
+              arel_predicate: 'in',
+              formatter: ->(v) { v&.split(';').join("','") }
+          end
+        end
+
+        it 'generates correct IN clause without extra quotes' do
+          @s.name_in_list = 'test;othertest'
+          field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+          # Should generate: WHERE people.name IN ('test', 'othertest')
+          # Not: WHERE people.name IN ('test'',''othertest')
+          expect(@s.result.to_sql).to match /#{field} IN \('test', 'othertest'\)/
+          expect(@s.result.to_sql).not_to match /#{field} IN \('test'',''othertest'\)/
+        end
+      end
     end
 
     private

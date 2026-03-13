@@ -235,11 +235,21 @@ module Ransack
             val = attr.ransacker.formatter.call(val)
           end
           val = predicate.format(val)
+          
+          # Handle case where formatter for IN/NOT IN predicates returns a string with comma-separated values
+          if predicate.wants_array && val.is_a?(String) && val.include?("','")
+            val = val.split("','")
+          end
+          
           if val.is_a?(String) && val.include?('%')
             val = Arel::Nodes::Quoted.new(val)
           end
           val
         end
+        
+        # Flatten the array in case any formatters returned arrays
+        formatted = formatted.flatten if predicate.wants_array
+        
         if predicate.wants_array
           formatted
         else
