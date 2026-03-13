@@ -69,7 +69,7 @@ module Polyamorous
             name = reflection.alias_candidate(parent.table_name)
             root ? name : "#{name}_join"
           end
-          @joined_tables[reflection] ||= [table, root] if join_type == Arel::Nodes::OuterJoin
+          @joined_tables[reflection] ||= [table, root]
           table
         end
       }
