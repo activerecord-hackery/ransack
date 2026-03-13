@@ -25,13 +25,13 @@ To release a new version of Ransack and publish it to RubyGems, take the followi
 
 ### Manual Release Process
 
-Example for release 4.4.0 
+Example for release 4.4.1 
 
-1. Update the [`version.rb`](https://github.com/activerecord-hackery/ransack/lib/ransack/version.rb) file to the `4.4.0`, commit and push to `main`.
+1. Update the [`version.rb`](https://github.com/activerecord-hackery/ransack/lib/ransack/version.rb) file to the `4.4.1`, commit and push to `main`.
 3. Click the [Draft a new Release](https://github.com/activerecord-hackery/ransack/releases/new) button 
 4. Use these settings:
-- Tag: v4.4.0
-- Release Title: 4.4.0
+- Tag: v4.4.1
+- Release Title: 4.4.1
 - Check `Set as the Latest Release`
 - Click `Generate release notes`
 - Click `Publish Release`
@@ -41,7 +41,7 @@ Example for release 4.4.0
 ```bash
 gem signin
 rake build
-rake release
+gem push pkg/ransack-4.4.1.gem
 ```
 
 
