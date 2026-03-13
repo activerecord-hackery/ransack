@@ -210,6 +210,28 @@ module Ransack
         expect(or2.combinator).to eq 'or'
       end
 
+      it 'accepts nested arrays of longhand :groupings' do
+        s = Search.new(Person,
+          groupings: [
+            { 
+              m: 'or', 
+              name_eq: 'Ernie', 
+              children_name_eq: 'Ernie',
+              groupings: [
+                { m: 'and', name_eq: 'Bert' },
+                { m: 'and', children_name_eq: 'Bert' }
+              ]
+            },
+          ]
+        )
+        ors = s.groupings
+        expect(ors.size).to eq(1)
+        or1 = ors.first
+        expect(or1).to be_a Nodes::Grouping
+        expect(or1.combinator).to eq 'or'
+        expect(or1.groupings.size).to eq(2)
+      end
+
       it 'accepts attributes hashes for groupings' do
         s = Search.new(Person,
           g: {
