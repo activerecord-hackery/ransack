@@ -166,9 +166,11 @@ module Ransack
           join_constraints = extract_joins(association)
           join_root = join_constraints.shift
           correlated_key = extract_correlated_key(join_root)
+          join_conditions = extract_join_conditions(join_root, correlated_key)
           subquery = Arel::SelectManager.new(association.base_klass)
           subquery.from(join_root.left)
           subquery.project(correlated_key)
+          subquery.where(join_conditions) if join_conditions
           join_constraints.each do |j|
             subquery.join_sources << Arel::Nodes::InnerJoin.new(j.left, j.right)
           end
@@ -233,6 +235,39 @@ module Ransack
             # eg parent was Arel::Nodes::And and the evaluated side was one of
             # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause
             nil
+          end
+        end
+
+        def extract_join_conditions(join_root, correlated_key)
+          case join_root
+          when Arel::Nodes::OuterJoin
+            # one of join_root.right/join_root.left is expected to be Arel::Nodes::On
+            if join_root.right.is_a?(Arel::Nodes::On)
+              join_root.right.expr = extract_join_conditions(join_root.right.expr, correlated_key)
+            elsif join_root.left.is_a?(Arel::Nodes::On)
+              join_root.right.expr = extract_join_conditions(join_root.left.expr, correlated_key)
+            else
+              raise 'Ransack encountered an unexpected arel structure'
+            end
+          when Arel::Nodes::Grouping
+            join_root.expr = extract_join_conditions(join_root.expr, correlated_key)
+          when Arel::Nodes::Equality
+            pk = primary_key
+
+            if (join_root.left == pk && join_root.right == correlated_key) ||
+                (join_root.right == pk && join_root.left == correlated_key)
+              return nil # skip correlated_key node
+            end
+
+            join_root
+          when Arel::Nodes::And
+            filtered_children = join_root.children.filter_map do |child|
+              extract_join_conditions(child, correlated_key)
+            end
+
+            Arel::Nodes::And.new(filtered_children)
+          else
+            join_root
           end
         end
 
