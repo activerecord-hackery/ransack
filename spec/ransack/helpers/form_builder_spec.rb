@@ -153,6 +153,19 @@ module Ransack
         end
       end
 
+      context 'search field values with aliases' do
+        before do
+          @controller.view_context.search_form_for(Person.ransack(term_cont: 'test_value')) { |f| @f = f }
+        end
+
+        it 'should persist alias field value in search forms' do
+          # This tests that when a search is created with an alias parameter,
+          # the form field using that alias should show the correct value
+          html = @f.search_field(:term_cont)
+          expect(html).to match /value="test_value"/
+        end
+      end
+
       private
 
         def test_label(f, query, expected)
