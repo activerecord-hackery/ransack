@@ -147,6 +147,7 @@ module Ransack
       end
 
       def build(params)
+        params = strip_whitespace_from_params(params) if @context.strip_whitespace
         params.with_indifferent_access.each do |key, value|
           case key
           when /^(g|c|m)$/
@@ -199,6 +200,19 @@ module Ransack
           c.attributes.map { |a| [a.name, a.ransacker_args] }.flatten +
           [c.predicate.name] +
           c.values.map { |v| v.value }
+        end
+      end
+
+      def strip_whitespace_from_params(params)
+        case params
+        when Hash
+          params.transform_values { |v| strip_whitespace_from_params(v) }
+        when Array
+          params.map { |v| strip_whitespace_from_params(v) }
+        when String
+          params.strip
+        else
+          params
         end
       end
     end
