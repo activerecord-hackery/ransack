@@ -57,7 +57,18 @@ module Ransack
             if context.present? && context.attribute_method?(str)
               attributes = [str]
             else
-              attributes = str.split(/_and_|_or_/)
+              # Split by combinators, but only proceed if the string actually contains them
+              # or if all individual parts are valid attributes
+              parts = str.split(/_and_|_or_/)
+              if parts.size > 1
+                # Multi-part condition with combinators - validate each part
+                attributes = parts.select { |part| context.blank? || context.attribute_method?(part) }
+                # If any part is invalid, the whole condition is invalid
+                attributes = [] if attributes.size != parts.size
+              else
+                # Single part without combinators - if context check failed above, this is invalid
+                attributes = []
+              end
             end
 
             [attributes, predicate, combinator]
