@@ -38,7 +38,7 @@ module Ransack
       @type = opts[:type]
       @formatter = opts[:formatter]
       @validator = opts[:validator] ||
-        lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
+        lambda { |v| v.is_a?(String) || (v.respond_to?(:empty?) ? !v.empty? : !v.nil?) }
       @compound = opts[:compound]
       @wants_array = opts.fetch(:wants_array,
         @compound || Constants::IN_NOT_IN.include?(@arel_predicate))
