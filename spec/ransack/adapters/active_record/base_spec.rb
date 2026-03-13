@@ -362,6 +362,17 @@ module Ransack
             expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
           end
 
+          it 'should remove empty key value pairs from the complex params hash' do
+            s = Person.ransack(
+              c: {
+                '0' => {
+                        a: ['children_name'],
+                        p: 'eq', v: ['']
+                      }
+              })
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
           it 'should keep proper key value pairs in the params hash' do
             s = Person.ransack(children_reversed_name_eq: 'Testing')
             expect(s.result.to_sql).to match /LEFT OUTER JOIN/
