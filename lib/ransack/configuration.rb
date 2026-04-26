@@ -35,7 +35,8 @@ module Ransack
       default_arrow: nil,
       sanitize_scope_args: true,
       postgres_fields_sort_option: nil,
-      strip_whitespace: true
+      strip_whitespace: true,
+      case_insensitive_sort: false
     }
 
     def configure
@@ -195,6 +196,10 @@ module Ransack
     #
     def strip_whitespace=(boolean)
       self.options[:strip_whitespace] = boolean
+    end
+
+    def case_insensitive_sort=(boolean)
+      self.options[:case_insensitive_sort] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

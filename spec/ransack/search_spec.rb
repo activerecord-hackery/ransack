@@ -840,6 +840,53 @@ module Ransack
 
         Ransack.options = default
       end
+
+      it 'sorts with and without case-insensitivity' do
+        default = Ransack.options.clone
+
+        old_values = Person.all.map.with_index do |person, index|
+          old_val = person.only_sort
+          person.update!(only_sort: old_val.upcase) if index.even? && !old_val.nil?
+          [old_val, person.id]
+        end
+        comp = Person.all.map(&:only_sort).sort do |a, b|
+          if a.nil?
+            0
+          elsif b.nil?
+            -1
+          else
+            a <=> b
+          end
+        end
+
+        s = Search.new(Person, s: 'only_sort asc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"only_sort\" ASC"
+        expect(s.result.map(&:only_sort)).to eq comp
+
+        Ransack.configure { |c| c.case_insensitive_sort = true }
+        comp = Person.all.map(&:only_sort).sort do |a, b|
+          if a.nil?
+            0
+          elsif b.nil?
+            -1
+          else
+            a.downcase <=> b.downcase
+          end
+        end
+
+        s = Search.new(Person, s: 'only_sort asc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"only_sort\" COLLATE NOCASE ASC"
+        expect(s.result.map(&:only_sort)).to eq comp
+
+        s = Search.new(Person, s: 'only_sort desc')
+        expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"only_sort\" COLLATE NOCASE DESC"
+        expect(s.result.map(&:only_sort)).to eq comp.reverse
+
+        old_values.each do |(old_val, id)|
+          Person.find(id).update_attribute(:only_sort, old_val)
+        end
+        Ransack.options = default
+      end
     end
 
     describe '#method_missing' do

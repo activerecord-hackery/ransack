@@ -44,6 +44,12 @@ module Ransack
               if scope_or_sort.is_a?(Symbol)
                 relation = relation.send(scope_or_sort)
               else
+
+                if Ransack.options[:case_insensitive_sort]
+                  sql = scope_or_sort.to_sql
+                  scope_or_sort = Arel.sql(sql.sub(/\s+(ASC|DESC)\z/i, ' COLLATE NOCASE \1').then { |s| s == sql ? "#{s} COLLATE NOCASE" : s })
+                end
+
                 case Ransack.options[:postgres_fields_sort_option]
                 when :nulls_first
                   scope_or_sort = scope_or_sort.direction == :asc ? Arel.sql("#{scope_or_sort.to_sql} NULLS FIRST") : Arel.sql("#{scope_or_sort.to_sql} NULLS LAST")
