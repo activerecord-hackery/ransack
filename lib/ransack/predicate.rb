@@ -37,8 +37,7 @@ module Ransack
       @arel_predicate = opts[:arel_predicate]
       @type = opts[:type]
       @formatter = opts[:formatter]
-      @validator = opts[:validator] ||
-        lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
+      @validator = opts[:validator] || lambda { |v| !v.nil? }
       @compound = opts[:compound]
       @wants_array = opts.fetch(:wants_array,
         @compound || Constants::IN_NOT_IN.include?(@arel_predicate))
@@ -64,6 +63,7 @@ module Ransack
     end
 
     def validate(vals, type = @type)
+      return true if vals.empty? && wants_array
       vals.any? { |v| validator.call(type ? v.cast(type) : v.value) }
     end
 
