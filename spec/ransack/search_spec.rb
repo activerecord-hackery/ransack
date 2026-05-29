@@ -456,13 +456,13 @@ module Ransack
 
         it "applies the scope when it is the only key inside a grouping" do
           s = Search.new(Person, g: [{ over_age: 18 }])
-          expect(s.result.to_sql).to match(/age > 18/)
+          expect(s.result.to_sql).to match(/age > '?18'?/)
         end
 
         it "applies the scope alongside other conditions in the same grouping" do
           s = Search.new(Person, g: [{ name_eq: 'Aaron', over_age: 18 }])
           sql = s.result.to_sql
-          expect(sql).to match(/age > 18/)
+          expect(sql).to match(/age > '?18'?/)
           expect(sql).to match(/name.* = 'Aaron'/)
         end
       end
