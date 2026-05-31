@@ -152,7 +152,11 @@ module Ransack
           when /^(g|c|m)$/
             self.send("#{key}=", value)
           else
-            write_attribute(key.to_s, value)
+            if @context.ransackable_scope?(key, @context.object)
+              @context.chain_scope(key, @context.sanitize_scope_args(key, value))
+            else
+              write_attribute(key.to_s, value)
+            end
           end
         end
         self
