@@ -172,6 +172,11 @@ module Ransack
           end
           position = position.to_i - 1
           value = attrs.delete(k)
+          # Drop malformed positions. A negative/zero position is invalid,
+          # and an excessively large one would allocate a huge array, so
+          # bound it to the maximum number of legitimate components. Rails
+          # never emits more than 6 (a full datetime), but do 16 just in case.
+          next if position < 0 || position >= 16
           attrs[real_attribute] ||= []
           attrs[real_attribute][position] =
           if cast
