@@ -444,6 +444,28 @@ module Ransack
           }.not_to raise_error
         end
       end
+
+      # Regression test for https://github.com/activerecord-hackery/ransack/issues/1339
+      # Scopes nested inside groupings (`g: [...]`) were silently dropped
+      # rather than applied to the query.
+      context "ransackable_scope inside groupings" do
+        before do
+          allow(Person).to receive(:ransackable_scopes)
+            .and_return(Person.ransackable_scopes + [:over_age])
+        end
+
+        it "applies the scope when it is the only key inside a grouping" do
+          s = Search.new(Person, g: [{ over_age: 18 }])
+          expect(s.result.to_sql).to match(/age > '?18'?/)
+        end
+
+        it "applies the scope alongside other conditions in the same grouping" do
+          s = Search.new(Person, g: [{ name_eq: 'Aaron', over_age: 18 }])
+          sql = s.result.to_sql
+          expect(sql).to match(/age > '?18'?/)
+          expect(sql).to match(/name.* = 'Aaron'/)
+        end
+      end
     end
 
     describe '#result' do
