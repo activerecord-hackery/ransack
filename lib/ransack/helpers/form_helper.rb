@@ -10,7 +10,7 @@ module Ransack
         search = extract_search_and_set_url(record, options, 'search_form_for')
         options[:html] ||= {}
         html_options = build_html_options(search, options, :get)
-        finalize_form_options(options, html_options)
+        finalize_form_options(search, options, html_options)
         form_for(record, options, &proc)
       end
 
@@ -30,7 +30,7 @@ module Ransack
         search = extract_search_and_set_url(record, options, 'search_form_with')
         options[:html] ||= {}
         html_options = build_html_options(search, options, :get)
-        finalize_form_with_options(options, html_options)
+        finalize_form_with_options(search, options, html_options)
         form_with(model: search, **options, &proc)
       end
 
@@ -48,7 +48,7 @@ module Ransack
         turbo_options = build_turbo_options(options)
         method = options.delete(:method) || :post
         html_options = build_html_options(search, options, method).merge(turbo_options)
-        finalize_form_options(options, html_options)
+        finalize_form_options(search, options, html_options)
         form_for(record, options, &proc)
       end
 
@@ -122,14 +122,14 @@ module Ransack
           }
         end
 
-        def finalize_form_options(options, html_options)
-          options[:as] ||= Ransack.options[:search_key]
+        def finalize_form_options(search, options, html_options)
+          options[:as] ||= search.context.search_key
           options[:html].reverse_merge!(html_options)
           options[:builder] ||= FormBuilder
         end
 
-        def finalize_form_with_options(options, html_options)
-          options[:scope] ||= Ransack.options[:search_key]
+        def finalize_form_with_options(search, options, html_options)
+          options[:scope] ||= search.context.search_key
           options[:html].reverse_merge!(html_options)
           options[:builder] ||= FormBuilder
         end
