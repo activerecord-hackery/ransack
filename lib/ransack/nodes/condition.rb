@@ -343,13 +343,22 @@ module Ransack
       def format_predicate(attribute)
         arel_pred = arel_predicate_for_attribute(attribute)
         arel_values = formatted_values_for_attribute(attribute)
-        
+
+        # The `present` / `blank` predicate formatters produce `[nil, '']` regardless
+        # of column type. The empty-string half has no meaning on non-string columns:
+        # ActiveRecord casts `''` to NULL for those types, producing the
+        # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
+        # empty string when the attribute is not a string-like column.
+        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
+          arel_values = arel_values.reject { |v| v == ''.freeze }
+        end
+
         # For LIKE predicates, wrap the value in Arel::Nodes.build_quoted to prevent
         # ActiveRecord normalization from affecting wildcard patterns
         if like_predicate?(arel_pred)
           arel_values = Arel::Nodes.build_quoted(arel_values)
         end
-        
+
         predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
 
         if in_predicate?(predicate)
@@ -368,6 +377,15 @@ module Ransack
 
       def like_predicate?(arel_predicate)
         arel_predicate == 'matches' || arel_predicate == 'does_not_match'
+      end
+
+      STRING_LIKE_TYPES = %i[string text citext].freeze
+
+      def string_like_attribute?(attribute)
+        type = attribute.type
+        # Treat unknown types as string-like (conservative: keep the existing
+        # empty-string comparison rather than silently dropping it).
+        type.nil? || STRING_LIKE_TYPES.include?(type.to_sym)
       end
 
       def casted_array?(predicate)
