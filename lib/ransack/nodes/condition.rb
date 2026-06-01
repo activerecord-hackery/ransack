@@ -217,10 +217,6 @@ module Ransack
       end
       alias :p :predicate_name
 
-      def arel_predicate
-        raise "not implemented"
-      end
-
       def validated_values
         values.select { |v| predicate.validator.call(v.value) }
       end
