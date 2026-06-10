@@ -212,9 +212,9 @@ module Ransack
             end
           when Arel::Nodes::Equality
             pk = primary_key
-            if join_root.left == pk
+            if join_root.left.eql?(pk)
               join_root.right
-            elsif join_root.right == pk
+            elsif join_root.right.eql?(pk)
               join_root.left
             else
               nil
