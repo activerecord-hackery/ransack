@@ -13,13 +13,18 @@ jobs:
       fail-fast: false
       matrix:
         rails:
+          - 8-1-stable
           - 8-0-stable
           - v7.2.2
-          - v7.1.0
         ruby:
+          - 4.0.1
+          - 3.4.8
+          - 3.3.10
           - 3.2.2
           - 3.1.4
         exclude:
+          - rails: 8-1-stable
+            ruby: 3.1.4
           - rails: 8-0-stable
             ruby: 3.1.4
     env:
@@ -43,7 +48,6 @@ jobs:
         rails:
           - 8-0-stable
           - 7-2-stable
-          - v7.1.0
         ruby:
           - 3.2.2
           - 3.1.4
@@ -80,7 +84,6 @@ jobs:
       matrix:
         rails:
           - 7-2-stable
-          - v7.1.0
         ruby:
           - 3.2.2
           - 3.1.4
@@ -126,7 +129,6 @@ jobs:
         rails:
           - 8-0-stable
           - 7-2-stable
-          - v7.1.0
         ruby:
           - 3.2.2
           - 3.1.4
@@ -166,18 +168,3 @@ jobs:
           psql -h localhost -p 5432 -W postgres -c 'create database ransack;' -U postgres;
       - name: Run tests
         run: bundle exec rspec
-
-  bug-report-templates:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2.2
-          bundler-cache: true
-      - name: Run bug report templates
-        run: |
-          ruby bug_report_templates/test-ransacker-arel-present-predicate.rb
-          ruby bug_report_templates/test-ransack-scope-and-column-same-name.rb
-          rm Gemfile Gemfile.lock

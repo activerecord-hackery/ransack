@@ -50,7 +50,7 @@ end
 gem 'mysql2'
 
 group :test do
-  gem 'machinist', '~> 1.0.6'
+  gem 'factory_bot'
   gem 'rspec'
   gem 'simplecov', require: false
 end

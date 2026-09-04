@@ -64,6 +64,8 @@ class Person < ApplicationRecord
   has_many   :articles
   has_many   :story_articles
 
+  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
+
   has_many :published_articles, ->{ where(published: true) },
       class_name: "Article"
   has_many   :comments
@@ -80,8 +82,6 @@ class Person < ApplicationRecord
 
   scope :sort_by_reverse_name_asc, lambda { order(Arel.sql("REVERSE(name) ASC")) }
   scope :sort_by_reverse_name_desc, lambda { order("REVERSE(name) DESC") }
-
-  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
 
   alias_attribute :full_name, :name
 
@@ -118,7 +118,7 @@ class Person < ApplicationRecord
       )
   end
 
-  ransacker :sql_literal_id do
+  ransacker :sql_literal_id, type: :integer do
     Arel.sql('people.id')
   end
 
@@ -138,6 +138,17 @@ class Person < ApplicationRecord
     SQL
     .squish
     Arel.sql(query)
+  end
+
+  ransacker :article_tags, formatter: proc { |id|
+    if Tag.exists?(id)
+      joins(articles: :tags)
+        .where(tags: { id: id })
+        .distinct
+        .select(:id).arel
+    end
+  } do |parent|
+    parent.table[:id]
   end
 
   def self.ransackable_attributes(auth_object = nil)
@@ -165,6 +176,7 @@ class Article < ApplicationRecord
   has_many :comments
   has_and_belongs_to_many :tags
   has_many :notes, as: :notable
+  has_many :recent_notes, as: :notable
 
   alias_attribute :content, :body
 
@@ -234,15 +246,25 @@ end
 class Comment < ApplicationRecord
   belongs_to :article
   belongs_to :person
+  has_and_belongs_to_many :tags
 
   default_scope { where(disabled: false) }
 end
 
 class Tag < ApplicationRecord
   has_and_belongs_to_many :articles
+  has_and_belongs_to_many :comments
 end
 
 class Note < ApplicationRecord
+  belongs_to :notable, polymorphic: true
+end
+
+class RecentNote < ApplicationRecord
+  DEFAULT_NOTABLE_ID = 1
+  self.table_name = "notes"
+  default_scope { where(notable_id: DEFAULT_NOTABLE_ID) }
+
   belongs_to :notable, polymorphic: true
 end
 
@@ -280,11 +302,11 @@ module Schema
         t.string   :new_start
         t.string   :stop_end
         t.integer  :salary
-        t.integer  :temperament
         t.date     :life_start
         t.boolean  :awesome, default: false
         t.boolean  :terms_and_conditions, default: false
         t.boolean  :true_or_false, default: true
+        t.integer  :temperament
         t.timestamps null: false
       end
 
@@ -310,6 +332,11 @@ module Schema
 
       create_table :articles_tags, force: true, id: false do |t|
         t.integer  :article_id
+        t.integer  :tag_id
+      end
+
+      create_table :comments_tags, force: true, id: false do |t|
+        t.integer  :comment_id
         t.integer  :tag_id
       end
 
@@ -346,23 +373,23 @@ module Schema
     end
 
     10.times do
-      person = Person.make
-      Note.make(notable: person)
+      person = FactoryBot.create(:person)
+      FactoryBot.create(:note, :for_person, notable: person)
       3.times do
-        article = Article.make(person: person)
+        article = FactoryBot.create(:article, person: person)
         3.times do
-          article.tags = [Tag.make, Tag.make, Tag.make]
+          article.tags = [FactoryBot.create(:tag), FactoryBot.create(:tag), FactoryBot.create(:tag)]
         end
-        Note.make(notable: article)
+        FactoryBot.create(:note, :for_article, notable: article)
         10.times do
-          Comment.make(article: article, person: person)
+          FactoryBot.create(:comment, article: article, person: person)
         end
       end
     end
 
-    Comment.make(
+    FactoryBot.create(:comment,
       body: 'First post!',
-      article: Article.make(title: 'Hello, world!')
+      article: FactoryBot.create(:article, title: 'Hello, world!')
     )
   end
 end

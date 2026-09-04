@@ -226,7 +226,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map(&:cast_array)
+        validated_values.map { |v| v.cast(predicate.type || attr.type) }
       end
 
       def formatted_values_for_attribute(attr)
@@ -235,6 +235,9 @@ module Ransack
             val = attr.ransacker.formatter.call(val)
           end
           val = predicate.format(val)
+          if val.is_a?(String) && val.include?('%')
+            val = Arel::Nodes::Quoted.new(val)
+          end
           val
         end
         if predicate.wants_array
@@ -288,12 +291,24 @@ module Ransack
       def arel_predicate
         predicate = attributes.map { |attribute|
           association = attribute.parent
-          if negative? && attribute.associated_collection?
+          parent_table = association.table
+
+          if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
             query = context.build_correlated_subquery(association)
             context.remove_association(association)
-            if self.predicate_name == 'not_null' && self.value
-              query.where(format_predicate(attribute))
-              Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
+
+            case self.predicate_name
+            when 'not_null'
+              if self.value
+                query.where(format_predicate(attribute))
+                Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
+              else
+                query.where(format_predicate(attribute).not)
+                Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+              end
+            when 'not_cont'
+              query.where(attribute.attr.matches(formatted_values_for_attribute(attribute)))
+              Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
             else
               query.where(format_predicate(attribute).not)
               Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
@@ -315,6 +330,10 @@ module Ransack
         predicate
       end
 
+      def not_nested_condition(attribute, parent_table)
+        parent_table.class != Arel::Nodes::TableAlias && attribute.name.starts_with?(parent_table.name)
+      end
+
       private
 
       def combinator_method
@@ -324,6 +343,13 @@ module Ransack
       def format_predicate(attribute)
         arel_pred = arel_predicate_for_attribute(attribute)
         arel_values = formatted_values_for_attribute(attribute)
+        
+        # For LIKE predicates, wrap the value in Arel::Nodes.build_quoted to prevent
+        # ActiveRecord normalization from affecting wildcard patterns
+        if like_predicate?(arel_pred)
+          arel_values = Arel::Nodes.build_quoted(arel_values)
+        end
+        
         predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
 
         if in_predicate?(predicate)
@@ -340,8 +366,12 @@ module Ransack
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
       end
 
+      def like_predicate?(arel_predicate)
+        arel_predicate == 'matches' || arel_predicate == 'does_not_match'
+      end
+
       def casted_array?(predicate)
-        predicate.value.is_a?(Array) && predicate.is_a?(Arel::Nodes::Casted)
+        predicate.is_a?(Arel::Nodes::Casted) && predicate.value.is_a?(Array)
       end
 
       def format_values_for(predicate)

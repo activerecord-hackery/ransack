@@ -11,7 +11,7 @@ There are advanced searching solutions around, like ElasticSearch or Algolia. **
 
 Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
 
-Ransack is supported for Rails 7.0, 6.x on Ruby 2.6.6 and later.
+Ransack is supported for Rails 8.0, 7.2 on Ruby 3.1 and later.
 
 ## Installation
 
@@ -39,7 +39,7 @@ The [Ransack Demo application](https://github.com/activerecord-hackery/ransack_d
 
 * Before filing an issue, please read the [Contributing Guide](https://github.com/activerecord-hackery/ransack/CONTRIBUTING.md).
 * File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
-* Please consider adding a branch with a failing spec describing the problem.
+* Please consider creating a pull request with a failing test that demonstrates the problem.
 * Contributions are welcome. :smiley:
 * Please do not use the issue tracker for personal support requests. Stack Overflow is a better place for that where a wider community can help you!
 

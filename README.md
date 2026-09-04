@@ -13,7 +13,7 @@ There are advanced searching solutions around, like ElasticSearch or Algolia. **
 
 Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
 
-Ransack is supported for Rails 8.0, 7.2, 7.1 on Ruby 3.1 and later.
+Ransack is supported for Rails 8.1, 8.0, 7.2 on Ruby 3.1 and later.
 
 ## Installation
 
@@ -33,13 +33,15 @@ gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 
 ### Documentation
 
-There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site.
+There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site. Alternatively there is [AI Generated documentation](https://deepwiki.com/activerecord-hackery/ransack/1-overview) produced by [devin.ai](https://devin.ai/).
 
-## Issues tracker
+This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quick-start cheatsheet, created by [@raghubetina](https://gist.github.com/raghubetina)
+
+## Issue tracker
 
 * Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
 * File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
-* Please consider adding a branch with a failing spec describing the problem.
+* Please consider creating a pull request with a failing test that demonstrates the problem.
 * Contributions are welcome. :smiley:
 * Please do not use the issue tracker for personal support requests. Stack Overflow or [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) is a better place for that where a wider community can help you!
 

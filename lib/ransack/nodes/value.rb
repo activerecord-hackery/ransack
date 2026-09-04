@@ -24,6 +24,8 @@ module Ransack
 
       def cast(type)
         case type
+        when :enum
+          value
         when :date
           cast_to_date(value)
         when :datetime, :timestamp, :time, :timestamptz
@@ -40,14 +42,6 @@ module Ransack
           cast_to_money(value)
         else
           cast_to_string(value)
-        end
-      end
-
-      def cast_array
-        if value.is_a?(Array)
-          cast_to_date(value)
-        else
-          value
         end
       end
 

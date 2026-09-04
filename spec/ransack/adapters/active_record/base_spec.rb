@@ -193,6 +193,41 @@ module Ransack
           end
         end
 
+        context 'negative conditions on related object with HABTM associations' do
+          let(:medieval) { Tag.create!(name: 'Medieval') }
+          let(:fantasy)  { Tag.create!(name: 'Fantasy') }
+          let(:arthur)   { Article.create!(title: 'King Arthur') }
+          let(:marco)    { Article.create!(title: 'Marco Polo') }
+          let(:comment_arthur)  { marco.comments.create!(body: 'King Arthur comment') }
+          let(:comment_marco)   { arthur.comments.create!(body: 'Marco Polo comment') }
+
+          before do
+            comment_arthur.tags << medieval
+            comment_marco.tags << fantasy
+          end
+
+          it 'removes redundant joins from top query' do
+            s = Article.ransack(comments_tags_name_not_eq: "Fantasy")
+            sql = s.result.to_sql
+            expect(sql).to include('LEFT OUTER JOIN')
+          end
+
+          it 'handles != for single values' do
+            s = Article.ransack(comments_tags_name_not_eq: "Fantasy")
+            articles = s.result.to_a
+            expect(articles).to include marco
+            expect(articles).to_not include arthur
+          end
+
+          it 'handles NOT IN for multiple attributes' do
+            s = Article.ransack(comments_tags_name_not_in: ["Fantasy", "Scifi"])
+            articles = s.result.to_a
+
+            expect(articles).to include marco
+            expect(articles).to_not include arthur
+          end
+        end
+
         context 'negative conditions on self-referenced associations' do
           let(:pop) { Person.create!(name: 'Grandpa') }
           let(:dad) { Person.create!(name: 'Father') }
@@ -376,6 +411,63 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          if ::ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::Base.respond_to?(:normalizes)
+            context 'with ActiveRecord::normalizes' do
+              around(:each) do |example|
+                # Create a temporary model class with normalization for testing
+                test_class = Class.new(ActiveRecord::Base) do
+                  self.table_name = 'people'
+                  normalizes :name, with: ->(name) { name.gsub(/[^a-z0-9]/, '_') }
+
+                  def self.ransackable_attributes(auth_object = nil)
+                    Person.ransackable_attributes(auth_object)
+                  end
+
+                  def self.name
+                    'TestPersonWithNormalization'
+                  end
+                end
+
+                stub_const('TestPersonWithNormalization', test_class)
+                example.run
+              end
+
+              it 'should not apply normalization to LIKE wildcards for cont predicate' do
+                # Create a person with characters that would be normalized
+                p = TestPersonWithNormalization.create!(name: 'foo%bar')
+                expect(p.reload.name).to eq('foo_bar') # Verify normalization happened on storage
+
+                # Search should find the person using the original search term
+                s = TestPersonWithNormalization.ransack(name_cont: 'foo')
+                expect(s.result.to_a).to eq [p]
+
+                # Verify the SQL contains proper LIKE wildcards, not normalized ones
+                sql = s.result.to_sql
+                expect(sql).to include("LIKE '%foo%'")
+                expect(sql).not_to include("LIKE '_foo_'")
+              end
+
+              it 'should not apply normalization to LIKE wildcards for other LIKE predicates' do
+                p = TestPersonWithNormalization.create!(name: 'foo%bar')
+
+                # Test start predicate
+                s = TestPersonWithNormalization.ransack(name_start: 'foo')
+                expect(s.result.to_a).to eq [p]
+                expect(s.result.to_sql).to include("LIKE 'foo%'")
+
+                # Test end predicate  
+                s = TestPersonWithNormalization.ransack(name_end: 'bar')
+                expect(s.result.to_a).to eq [p]
+                expect(s.result.to_sql).to include("LIKE '%bar'")
+
+                # Test i_cont predicate
+                s = TestPersonWithNormalization.ransack(name_i_cont: 'FOO')
+                expect(s.result.to_a).to eq [p]
+                expect(s.result.to_sql).to include("LIKE '%foo%'")
+              end
+            end
+          end
+
           context 'searching by underscores' do
             # when escaping is supported right in LIKE expression without adding extra expressions
             def self.simple_escaping?
@@ -408,6 +500,15 @@ module Ransack
               s = Person.ransack(array_where_people_ids_in: [1, '2', 3])
               expect(s.result.count).to be 3
               expect(s.result.map(&:id)).to eq [3, 2, 1]
+            end
+
+            it 'should function correctly with HABTM associations' do
+              article = Article.first
+              tag = article.tags.first
+              s = Person.ransack(article_tags_in: [tag.id])
+
+              expect(s.result.count).to be 1
+              expect(s.result.map(&:id)).to eq [article.person.id]
             end
 
             it 'should function correctly when passing an array of strings' do
@@ -625,6 +726,44 @@ module Ransack
             it 'allows sort by asc' do
               search = Person.ransack(sorts: ['name_case_insensitive asc'])
               expect(search.result.to_sql).to match /ORDER BY LOWER(.*) ASC/
+            end
+          end
+
+          context 'ransacker with different types' do
+            it 'handles string type ransacker correctly' do
+              s = Person.ransack(name_case_insensitive_eq: 'test')
+              expect(s.result.to_sql).to match(/LOWER\(.*\) = 'test'/)
+            end
+
+            it 'handles integer type ransacker correctly' do
+              s = Person.ransack(sql_literal_id_eq: 1)
+              expect(s.result.to_sql).to match(/people\.id = 1/)
+            end
+          end
+
+          context 'ransacker with formatter returning nil' do
+            it 'handles formatter returning nil gracefully' do
+              # This tests the edge case where a formatter might return nil
+              s = Person.ransack(article_tags_eq: 999999) # Non-existent tag ID
+              expect { s.result.to_sql }.not_to raise_error
+            end
+          end
+
+          context 'ransacker with array formatters' do
+            it 'handles array_people_ids formatter correctly' do
+              person1 = Person.create!(name: 'Test1')
+              person2 = Person.create!(name: 'Test2')
+              
+              s = Person.ransack(array_people_ids_eq: 'test')
+              expect { s.result }.not_to raise_error
+            end
+
+            it 'handles array_where_people_ids formatter correctly' do
+              person1 = Person.create!(name: 'Test1')
+              person2 = Person.create!(name: 'Test2')
+              
+              s = Person.ransack(array_where_people_ids_eq: [person1.id, person2.id])
+              expect { s.result }.not_to raise_error
             end
           end
 
