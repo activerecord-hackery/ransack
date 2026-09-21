@@ -71,6 +71,31 @@ module Ransack
             expect(s.result.to_a).to eq []
           end
 
+          # A blank on a non-string column would be cast to nil before
+          # validation and the condition silently dropped — returning every
+          # row, which is the one outcome this option exists to prevent.
+          it 'treats a blank on an integer column as NULL' do
+            s = Search.new(Person, parent_id_eq: '')
+            field = "#{quote_table_name('people')}.#{quote_column_name('parent_id')}"
+            expect(s.result.to_sql).to include "#{field} IS NULL"
+          end
+
+          it 'treats a blank on a boolean column as NULL' do
+            s = Search.new(Person, awesome_eq: '')
+            field = "#{quote_table_name('people')}.#{quote_column_name('awesome')}"
+            expect(s.result.to_sql).to include "#{field} IS NULL"
+          end
+
+          it 'matches nothing for a blank inside an in predicate on an integer column' do
+            Person.create!(salary: 100)
+            expect(Search.new(Person, salary_in: ['']).result.to_a).to eq []
+          end
+
+          it 'matches nothing for a blank with a comparison predicate on an integer column' do
+            Person.create!(salary: 100)
+            expect(Search.new(Person, salary_gt: '').result.to_a).to eq []
+          end
+
           it 'keeps the condition on the search object' do
             s = Search.new(Person, children_name_eq: '')
             condition = s.base[:children_name_eq]

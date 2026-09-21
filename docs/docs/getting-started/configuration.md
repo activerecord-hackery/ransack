@@ -78,6 +78,11 @@ Person.ransack(id_in: []).result.to_a
 A `nil` value is ignored under either setting, so params that were never sent
 are still not turned into conditions.
 
+On a non-string column a blank has no literal to compare against, so it is
+treated as `NULL`: `parent_id_eq: ""` becomes `parent_id IS NULL`, and the
+same applies to boolean and date columns. Inside an `_in` or with a comparison
+such as `_gt`, a blank matches nothing at all rather than everything.
+
 :::caution
 
 Do not turn this off for a search backed by an HTML form. A blank text input
