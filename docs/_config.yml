@@ -13,6 +13,13 @@ permalink: pretty
 search_enabled: true
 heading_anchors: true
 
+# Every page uses the theme's layout; the theme gem does not set this itself.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
 aux_links:
   Ransack on GitHub: https://github.com/activerecord-hackery/ransack
 aux_links_new_tab: true

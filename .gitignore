@@ -8,4 +8,5 @@ coverage/*
 .byebug_history
 vendor/bundle
 .idea
-
+# The docs site's lockfile is committed so CI builds a known set of gems.
+!docs/Gemfile.lock
