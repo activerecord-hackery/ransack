@@ -425,40 +425,36 @@ module Ransack
 
           # The compound LIKE predicates take an Array of terms. Each one must be
           # escaped and quoted individually, and the ESCAPE clause must apply
-          # to every LIKE they expand into.
+          # to every LIKE they expand into. Names are prefixed per example
+          # because rows persist across examples in this file.
           it 'escapes every term of a cont_any search' do
-            hit_a = Person.create!(name: '50%off')
-            hit_b = Person.create!(name: 'a_c')
-            Person.create!(name: '50 off')
-            Person.create!(name: 'abc')
+            %w[cany-50%off cany-a_c cany-50off cany-abc].each { |n| Person.create!(name: n) }
 
-            search = Person.ransack(name_cont_any: ['50%', 'a_c'])
-            expect(search.result.to_a).to match_array [hit_a, hit_b]
+            search = Person.ransack(name_cont_any: ['cany-50%', 'cany-a_c'])
+            expect(search.result.map(&:name)).to match_array %w[cany-50%off cany-a_c]
             expect(search.result.to_sql.scan(/ESCAPE/).size).to eq 2
           end
 
           it 'escapes every term of a cont_all search' do
-            hit = Person.create!(name: '50%off')
-            Person.create!(name: '50 off')
+            %w[call-50%off call-50off].each { |n| Person.create!(name: n) }
 
-            expect(Person.ransack(name_cont_all: ['50', '%']).result.to_a).to eq [hit]
+            search = Person.ransack(name_cont_all: ['call-50', '%off'])
+            expect(search.result.map(&:name)).to eq %w[call-50%off]
           end
 
-          it 'escapes every term of a not_cont_any search' do
-            Person.create!(name: '50%off')
-            Person.create!(name: 'a_c')
-            kept = Person.create!(name: 'plain')
+          it 'escapes every term of a not_cont_all search' do
+            %w[ncall-50%off ncall-a_c ncall-plain].each { |n| Person.create!(name: n) }
 
-            result = Person.ransack(name_not_cont_any: ['50%', 'a_c']).result.to_a
-            expect(result).to include kept
-            expect(result.map(&:name)).not_to include '50%off', 'a_c'
+            names = Person.ransack(name_not_cont_all: ['50%', 'a_c']).result.map(&:name)
+            expect(names).to include 'ncall-plain'
+            expect(names).not_to include 'ncall-50%off', 'ncall-a_c'
           end
 
           it 'escapes every term of a start_any search' do
-            hit = Person.create!(name: 'a_c')
-            Person.create!(name: 'abc')
+            %w[sa_c sabc].each { |n| Person.create!(name: n) }
 
-            expect(Person.ransack(name_start_any: ['a_', 'zz']).result.to_a).to eq [hit]
+            search = Person.ransack(name_start_any: ['sa_', 'zz'])
+            expect(search.result.map(&:name)).to eq %w[sa_c]
           end
 
           it 'treats a percent sign in the search term literally' do
