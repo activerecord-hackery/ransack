@@ -41,8 +41,47 @@ Ransack.configure do |config|
 
   # Postgres has a nulls first / nulls last option, this can be configured.
   config.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
+
+  # Strip leading and trailing whitespace from string search values.
+  # Default is true.
+  config.strip_whitespace = false
 end
 ```
+
+## Whitespace stripping
+
+By default Ransack strips leading and trailing whitespace from string search
+values, so a stray space pasted into a search box does not change the result:
+
+```ruby
+Person.ransack(name_cont: "  Ernie  ").result.to_sql
+# ... WHERE "people"."name" LIKE '%Ernie%'
+```
+
+Stripping applies at every level of the parameters, including values nested
+inside `g:` groupings and `c:` conditions:
+
+```ruby
+Person.ransack(g: [{ name_cont: "  Ernie  ", m: 'or' }]).result.to_sql
+# ... WHERE "people"."name" LIKE '%Ernie%'
+```
+
+It can be turned off globally, or per search:
+
+```ruby
+Ransack.configure { |config| config.strip_whitespace = false }
+
+Person.ransack({ name_cont: "  Ernie  " }, strip_whitespace: false)
+```
+
+:::note
+
+Before Ransack 5.0 only top-level values were stripped, so the same search
+behaved differently depending on whether it was written in the shorthand or the
+grouped form. See
+[#1414](https://github.com/activerecord-hackery/ransack/issues/1414).
+
+:::
 
 ## Custom search parameter key name
 
