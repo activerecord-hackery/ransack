@@ -97,3 +97,24 @@ search term acted as a wildcard. See
 [#1581](https://github.com/activerecord-hackery/ransack/issues/1581).
 
 :::
+
+### Searching `enum` attributes
+
+An Active Record `enum` can be searched by its label rather than its underlying
+value. Ransack casts the label before building the query:
+
+```ruby
+class Person < ApplicationRecord
+  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
+end
+
+Person.ransack(temperament_eq: 'choleric').result.to_sql
+# ... WHERE "people"."temperament" = 2
+
+Person.ransack(temperament_in: ['sanguine', 'choleric']).result.to_sql
+# ... WHERE "people"."temperament" IN (1, 2)
+```
+
+This means a select built from `Person.temperaments.keys` can be posted
+straight back to Ransack without translating the labels yourself.
+
