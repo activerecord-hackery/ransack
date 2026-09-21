@@ -1,0 +1,36 @@
+<p>When making searches from polymorphic models it is necessary to specify the type of model you are searching.</p>
+
+<p>For example:</p>
+
+<p>Given two models</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">House</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">has_one</span> <span class="ss">:location</span><span class="p">,</span> <span class="ss">as: :locatable</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Location</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">belongs_to</span> <span class="ss">:locatable</span><span class="p">,</span> <span class="ss">polymorphic: </span><span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Normally (without polymorphic relationship) you would be able to search as per below:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Location</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">locatable_number_eq: </span><span class="mi">100</span><span class="p">).</span><span class="nf">result</span>
+</code></pre></div></div>
+
+<p>However when this is searched you will get the following error</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">EagerLoadPolymorphicError</span><span class="p">:</span> <span class="no">Can</span> <span class="ow">not</span> <span class="n">eagerly</span> <span class="nb">load</span> <span class="n">the</span> <span class="n">polymorphic</span> <span class="n">association</span> <span class="ss">:locatable</span>
+</code></pre></div></div>
+
+<p>In order to search for locations by house number when the relationship is polymorphic you have to specify the type of records you will be searching and construct your search as below:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Location</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">locatable_of_House_type_number_eq: </span><span class="mi">100</span><span class="p">).</span><span class="nf">result</span>
+</code></pre></div></div>
+
+<p>note the <code class="language-plaintext highlighter-rouge">_of_House_type_</code> added to the search key. This allows Ransack to correctly specify the table names in SQL join queries.</p>
+
+<p>For namespaced models you should use a quoted string containing the standard Ruby module notation</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Location</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="s1">'locatable_of_Residences::House_type_number_eq'</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">).</span><span class="nf">result</span>
+</code></pre></div></div>

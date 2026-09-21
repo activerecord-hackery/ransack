@@ -1,0 +1,64 @@
+<p>If you’d like to add your own custom Ransack predicates:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
+
+<span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'equals_diddly'</span><span class="p">,</span> <span class="c1"># Name your predicate</span>
+    <span class="c1"># What non-compound ARel predicate will it use? (eq, matches, etc)</span>
+    <span class="ss">arel_predicate: </span><span class="s1">'eq'</span><span class="p">,</span>
+    <span class="c1"># Format incoming values as you see fit. (Default: Don't do formatting)</span>
+    <span class="ss">formatter: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="s2">"</span><span class="si">#{</span><span class="n">v</span><span class="si">}</span><span class="s2">-diddly"</span> <span class="p">},</span>
+    <span class="c1"># Validate a value. An "invalid" value won't be used in a search.</span>
+    <span class="c1"># Below is default.</span>
+    <span class="ss">validator: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="p">.</span><span class="nf">present?</span> <span class="p">},</span>
+    <span class="c1"># Should compounds be created? Will use the compound (any/all) version</span>
+    <span class="c1"># of the arel_predicate to create a corresponding any/all version of</span>
+    <span class="c1"># your predicate. (Default: true)</span>
+    <span class="ss">compounds: </span><span class="kp">true</span><span class="p">,</span>
+    <span class="c1"># Force a specific column type for type-casting of supplied values.</span>
+    <span class="c1"># (Default: use type from DB column)</span>
+    <span class="ss">type: :string</span><span class="p">,</span>
+    <span class="c1"># Use LOWER(column on database).</span>
+    <span class="c1"># (Default: false)</span>
+    <span class="ss">case_insensitive: </span><span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>You can check all Arel predicates <a href="https://github.com/rails/rails/blob/main/activerecord/lib/arel/predications.rb">here</a>.</p>
+
+<h3 id="what-a-formatter-returns">What a formatter returns</h3>
+
+<p>The formatter runs once per value and its return value is quoted as a single
+literal, so it cannot build a piece of SQL. For an <code class="language-plaintext highlighter-rouge">in</code> / <code class="language-plaintext highlighter-rouge">not_in</code> predicate
+that takes one delimited string, return an <code class="language-plaintext highlighter-rouge">Array</code> and Ransack quotes each
+element:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'in_list'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'in'</span><span class="p">,</span>
+    <span class="ss">formatter: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="s1">';'</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_in_list: </span><span class="s1">'Aaron;Ernie'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... WHERE "people"."name" IN ('Aaron', 'Ernie')</span>
+</code></pre></div></div>
+
+<p>Returning <code class="language-plaintext highlighter-rouge">"Aaron','Ernie"</code> instead gives <code class="language-plaintext highlighter-rouge">IN ('Aaron'',''Ernie')</code>: the string
+is one value, and treating it as SQL would be an injection vector.</p>
+
+<p>If Arel does not have the predicate you are looking for, consider monkey patching it:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
+
+<span class="k">module</span> <span class="nn">Arel</span>
+  <span class="k">module</span> <span class="nn">Predications</span>
+    <span class="k">def</span> <span class="nf">gteq_or_null</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+      <span class="n">left</span> <span class="o">=</span> <span class="n">gteq</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+      <span class="n">right</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="kp">nil</span><span class="p">)</span>
+      <span class="n">left</span><span class="p">.</span><span class="nf">or</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'gteq_or_null'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'gteq_or_null'</span>
+<span class="k">end</span>
+</code></pre></div></div>

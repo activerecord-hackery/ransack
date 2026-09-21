@@ -1,0 +1,577 @@
+<h3 id="ransack-aliases">Ransack Aliases</h3>
+
+<p>You can customize the attribute names for your Ransack searches by using a
+<code class="language-plaintext highlighter-rouge">ransack_alias</code>. This is particularly useful for long attribute names that are
+necessary when querying associations or multiple columns.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">belongs_to</span> <span class="ss">:author</span>
+
+  <span class="c1"># Abbreviate :author_first_name_or_author_last_name to :author</span>
+  <span class="n">ransack_alias</span> <span class="ss">:author</span><span class="p">,</span> <span class="ss">:author_first_name_or_author_last_name</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Now, rather than using <code class="language-plaintext highlighter-rouge">:author_first_name_or_author_last_name_cont</code> in your
+form, you can simply use <code class="language-plaintext highlighter-rouge">:author_cont</code>. This serves to produce more expressive
+query parameters in your URLs.</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">search_form_for</span> <span class="vi">@q</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">label</span> <span class="ss">:author_cont</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">search_field</span> <span class="ss">:author_cont</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>You can also use <code class="language-plaintext highlighter-rouge">ransack_alias</code> for sorting.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">belongs_to</span> <span class="ss">:author</span>
+
+  <span class="c1"># Abbreviate :author_first_name to :author</span>
+  <span class="n">ransack_alias</span> <span class="ss">:author</span><span class="p">,</span> <span class="ss">:author_first_name</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Now, you can use <code class="language-plaintext highlighter-rouge">:author</code> instead of <code class="language-plaintext highlighter-rouge">:author_first_name</code> in a <code class="language-plaintext highlighter-rouge">sort_link</code>.</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:author</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>Note that using <code class="language-plaintext highlighter-rouge">:author_first_name_or_author_last_name_cont</code> would produce an invalid sql query. In those cases, Ransack ignores the sorting clause.</p>
+
+<h4 id="aliases-through-associations-and-in-compounds">Aliases through associations and in compounds</h4>
+
+<p>An alias is resolved wherever its name appears: on its own, as a segment of an
+<code class="language-plaintext highlighter-rouge">_or_</code> / <code class="language-plaintext highlighter-rouge">_and_</code> name, and after an association path when it is defined on
+the associated model.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Author</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">ransack_alias</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:first_name_or_last_name</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">belongs_to</span> <span class="ss">:author</span>
+  <span class="n">ransack_alias</span> <span class="ss">:text</span><span class="p">,</span> <span class="ss">:title_or_body</span>
+<span class="k">end</span>
+
+<span class="no">Post</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">author_name_cont: </span><span class="s1">'a'</span><span class="p">)</span>        <span class="c1"># first_name OR last_name on authors</span>
+<span class="no">Post</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">text_or_author_name_cont: </span><span class="s1">'a'</span><span class="p">)</span> <span class="c1"># title OR body OR first_name OR last_name</span>
+</code></pre></div></div>
+
+<p>An alias that expands to a compound joins with its own combinator, so combine
+it with the same one: <code class="language-plaintext highlighter-rouge">text_and_author_name_cont</code> would mix <code class="language-plaintext highlighter-rouge">_or_</code> and
+<code class="language-plaintext highlighter-rouge">_and_</code>, which a strict search rejects (see
+<a href="/ransack/getting-started/simple-mode/">Simple Mode</a>).</p>
+
+<p>The alias name itself does not need to be in <code class="language-plaintext highlighter-rouge">ransackable_attributes</code>; the
+attributes it expands to do. An alias whose target is not a searchable
+attribute is ignored, or raises <code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code> under
+<code class="language-plaintext highlighter-rouge">ransack!</code>, like any other unknown attribute.</p>
+
+<p>Before Ransack 6.0 an alias was only resolved on the searched model and only
+as the whole name: <code class="language-plaintext highlighter-rouge">author_name_cont</code> and <code class="language-plaintext highlighter-rouge">text_or_author_name_cont</code> produced
+SQL referring to columns that do not exist.</p>
+
+<h3 id="problem-with-distinct-selects">Problem with DISTINCT selects</h3>
+
+<p>If passed <code class="language-plaintext highlighter-rouge">distinct: true</code>, <code class="language-plaintext highlighter-rouge">result</code> will generate a <code class="language-plaintext highlighter-rouge">SELECT DISTINCT</code> to
+avoid returning duplicate rows, even if conditions on a join would otherwise
+result in some. It generates the same SQL as calling <code class="language-plaintext highlighter-rouge">uniq</code> on the relation.</p>
+
+<p>Please note that for many databases, a sort on an associated table’s columns
+may result in invalid SQL with <code class="language-plaintext highlighter-rouge">distinct: true</code> – in those cases, you
+will need to modify the result as needed to allow these queries to work.</p>
+
+<p>For example, you could call joins and includes on the result which has the
+effect of adding those tables columns to the select statement, overcoming
+the issue, like so:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">])</span>
+  <span class="vi">@people</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span><span class="p">(</span><span class="ss">distinct: </span><span class="kp">true</span><span class="p">)</span>
+              <span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:articles</span><span class="p">)</span>
+              <span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:articles</span><span class="p">)</span>
+              <span class="p">.</span><span class="nf">page</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:page</span><span class="p">])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>If the above doesn’t help, you can also use ActiveRecord’s <code class="language-plaintext highlighter-rouge">select</code> query
+to explicitly add the columns you need, which brute force’s adding the
+columns you need that your SQL engine is complaining about, you need to
+make sure you give all of the columns you care about, for example:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">])</span>
+  <span class="vi">@people</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span><span class="p">(</span><span class="ss">distinct: </span><span class="kp">true</span><span class="p">)</span>
+              <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="s1">'people.*, articles.name, articles.description'</span><span class="p">)</span>
+              <span class="p">.</span><span class="nf">page</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:page</span><span class="p">])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Another method to approach this when using Postgresql is to use ActiveRecords’s <code class="language-plaintext highlighter-rouge">.includes</code> in combination with <code class="language-plaintext highlighter-rouge">.group</code> instead of <code class="language-plaintext highlighter-rouge">distinct: true</code>.</p>
+
+<p>For example:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">])</span>
+  <span class="vi">@people</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span>
+              <span class="p">.</span><span class="nf">group</span><span class="p">(</span><span class="s1">'persons.id'</span><span class="p">)</span>
+              <span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:articles</span><span class="p">)</span>
+              <span class="p">.</span><span class="nf">page</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:page</span><span class="p">])</span>
+<span class="k">end</span>
+
+</code></pre></div></div>
+
+<p>A final way of last resort is to call <code class="language-plaintext highlighter-rouge">to_a.uniq</code> on the collection at the end
+with the caveat that the de-duping is taking place in Ruby instead of in SQL,
+which is potentially slower and uses more memory, and that it may display
+awkwardly with pagination if the number of results is greater than the page size.</p>
+
+<p>For example:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">])</span>
+  <span class="vi">@people</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:articles</span><span class="p">).</span><span class="nf">page</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:page</span><span class="p">]).</span><span class="nf">to_a</span><span class="p">.</span><span class="nf">uniq</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="problem-with-globalized-attributes-and-sorting">Problem with Globalized Attributes and Sorting</h3>
+
+<p>When using internationalization gems like <a href="https://github.com/globalize/globalize">Globalize</a>, you may encounter issues when trying to sort on translated attributes of associations while also having pre-existing joins to translation tables.</p>
+
+<p><strong>Problem scenario:</strong></p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># This may fail to generate proper joins:</span>
+<span class="no">Book</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:translations</span><span class="p">).</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">s: </span><span class="p">[</span><span class="s1">'category_translations_name asc'</span><span class="p">]</span> <span class="p">}).</span><span class="nf">result</span>
+</code></pre></div></div>
+
+<p><strong>Solution:</strong>
+The simplest and most effective approach is to use the <code class="language-plaintext highlighter-rouge">sort_link</code> helper directly with the translation attribute:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- This works perfectly for sorting on translated attributes --&gt;</span>
+<span class="cp">&lt;%=</span> <span class="n">sort_link</span> <span class="vi">@search</span><span class="p">,</span> <span class="ss">:translations_name</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%=</span> <span class="n">sort_link</span> <span class="vi">@search</span><span class="p">,</span> <span class="ss">:category_translations_name</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>For programmatic sorting, let Ransack establish the sorting joins first, then add your additional joins:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Let Ransack handle the sorting joins first</span>
+<span class="n">search</span> <span class="o">=</span> <span class="no">Book</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">s: </span><span class="p">[</span><span class="s1">'category_translations_name asc'</span><span class="p">]</span> <span class="p">})</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">.</span><span class="nf">result</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:translations</span><span class="p">)</span>
+
+<span class="c1"># Or use includes for complex scenarios</span>
+<span class="n">search</span> <span class="o">=</span> <span class="no">Book</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">s: </span><span class="p">[</span><span class="s1">'category_translations_name asc'</span><span class="p">]</span> <span class="p">})</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">.</span><span class="nf">result</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:translations</span><span class="p">,</span> <span class="ss">category: :translations</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This ensures that Ransack properly handles the join dependencies between your main model’s translations and the associated model’s translations.</p>
+
+<h4 id="pgundefinedfunction-error-could-not-identify-an-equality-operator-for-type-json"><code class="language-plaintext highlighter-rouge">PG::UndefinedFunction: ERROR: could not identify an equality operator for type json</code></h4>
+
+<p>If you get the above error while using <code class="language-plaintext highlighter-rouge">distinct: true</code> that means that
+one of the columns that Ransack is selecting is a <code class="language-plaintext highlighter-rouge">json</code> column.
+PostgreSQL does not provide comparison operators for the <code class="language-plaintext highlighter-rouge">json</code> type.  While
+it is possible to work around this, in practice it’s much better to convert those
+to <code class="language-plaintext highlighter-rouge">jsonb</code>, as <a href="https://www.postgresql.org/docs/9.6/static/datatype-json.html">recommended by the PostgreSQL documentation</a>.</p>
+
+<h3 id="authorization-allowlistingdenylisting">Authorization (allowlisting/denylisting)</h3>
+
+<p>By default, searching and sorting are not authorized on any column of your model
+and no class methods/scopes are allowlisted.</p>
+
+<p>Ransack adds four methods to <code class="language-plaintext highlighter-rouge">ActiveRecord::Base</code> that you can redefine as
+class methods in your models to apply selective authorization:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ransackable_attributes</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ransackable_associations</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ransackable_scopes</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ransortable_attributes</code></li>
+</ul>
+
+<p>Here is how these four methods could be implemented in your application:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1"># `ransackable_attributes` returns searchable column names</span>
+  <span class="c1"># and any defined ransackers as an array of strings.</span>
+  <span class="c1">#</span>
+  <span class="k">def</span> <span class="nf">ransackable_attributes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="sx">%w(title body)</span> <span class="o">+</span> <span class="n">_ransackers</span><span class="p">.</span><span class="nf">keys</span>
+  <span class="k">end</span>
+
+  <span class="c1"># `ransackable_associations` returns the names</span>
+  <span class="c1"># of searchable associations as an array of strings.</span>
+  <span class="c1">#</span>
+  <span class="k">def</span> <span class="nf">ransackable_associations</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="sx">%w[author]</span>
+  <span class="k">end</span>
+
+  <span class="c1"># `ransortable_attributes` by default returns the names</span>
+  <span class="c1"># of all attributes available for sorting as an array of strings.</span>
+  <span class="c1">#</span>
+  <span class="k">def</span> <span class="nf">ransortable_attributes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="n">ransackable_attributes</span><span class="p">(</span><span class="n">auth_object</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="c1"># `ransackable_scopes` by default returns an empty array</span>
+  <span class="c1"># i.e. no class methods/scopes are authorized.</span>
+  <span class="c1"># For overriding with an allowlist, return an array of *symbols*.</span>
+  <span class="c1">#</span>
+  <span class="k">def</span> <span class="nf">ransackable_scopes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="p">[]</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<p>Any values not returned from these methods will be ignored by Ransack, i.e.
+they are not authorized.</p>
+
+<h4 id="searching-everything">Searching everything</h4>
+
+<p>Ransack also defines <code class="language-plaintext highlighter-rouge">authorizable_ransackable_attributes</code> and
+<code class="language-plaintext highlighter-rouge">authorizable_ransackable_associations</code>, which return every column, ransacker
+and alias, and every association. To restore the pre-4.0 behaviour where
+everything is searchable, delegate to them once in the base class:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ApplicationRecord</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">primary_abstract_class</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_attributes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="n">authorizable_ransackable_attributes</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_associations</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="n">authorizable_ransackable_associations</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Think before doing this in an application that exposes search params to
+users: it makes <code class="language-plaintext highlighter-rouge">encrypted_password</code>, <code class="language-plaintext highlighter-rouge">reset_token</code> and every other column
+searchable. They are also a convenient base for an exclusion list:
+<code class="language-plaintext highlighter-rouge">authorizable_ransackable_attributes - %w[encrypted_password]</code>.</p>
+
+<p>For models that inherit from <code class="language-plaintext highlighter-rouge">ActiveRecord::Base</code> directly (some gems define
+their own), put the two methods in a module and extend every model with it
+from an initializer: <code class="language-plaintext highlighter-rouge">ActiveSupport.on_load(:active_record) { extend TheModule }</code>.</p>
+
+<p>All four methods can receive a single optional parameter, <code class="language-plaintext highlighter-rouge">auth_object</code>. When
+you call the search or ransack method on your model, you can provide a value
+for an <code class="language-plaintext highlighter-rouge">auth_object</code> key in the options hash which can be used by your own
+overridden methods.</p>
+
+<p>Here is an example that puts all this together, adapted from
+<a href="https://ernie.io/2012/05/11/why-your-ruby-class-macros-might-suck-mine-did/">this blog post by Ernie Miller</a>.
+In an <code class="language-plaintext highlighter-rouge">Article</code> model, add the following <code class="language-plaintext highlighter-rouge">ransackable_attributes</code> class method
+(preferably private):</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Article</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_attributes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">auth_object</span> <span class="o">==</span> <span class="ss">:admin</span>
+      <span class="c1"># allow all attributes for admin</span>
+      <span class="n">column_names</span> <span class="o">+</span> <span class="n">_ransackers</span><span class="p">.</span><span class="nf">keys</span>
+    <span class="k">else</span>
+      <span class="c1"># allow only the title and body attributes for other users</span>
+      <span class="sx">%w(title body)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="nb">private_class_method</span> <span class="ss">:ransackable_attributes</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The allowlists may be given as strings or as symbols — <code class="language-plaintext highlighter-rouge">%w[title body]</code> and
+<code class="language-plaintext highlighter-rouge">%i[title body]</code> behave identically.</p>
+
+<blockquote class="note">
+  <p>Before Ransack 5.0 a symbol allowlist was compared against strings without
+normalising, so <code class="language-plaintext highlighter-rouge">%i[title body]</code> matched nothing and every search on those
+attributes was silently ignored. See
+<a href="https://github.com/activerecord-hackery/ransack/issues/1538">#1538</a>.
+Here is example code for the <code class="language-plaintext highlighter-rouge">articles_controller</code>:</p>
+</blockquote>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ArticlesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="k">def</span> <span class="nf">index</span>
+    <span class="vi">@q</span> <span class="o">=</span> <span class="no">Article</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">],</span> <span class="ss">auth_object: </span><span class="n">set_ransack_auth_object</span><span class="p">)</span>
+    <span class="vi">@articles</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span>
+  <span class="k">end</span>
+
+  <span class="kp">private</span>
+
+  <span class="k">def</span> <span class="nf">set_ransack_auth_object</span>
+    <span class="n">current_user</span><span class="p">.</span><span class="nf">admin?</span> <span class="p">?</span> <span class="ss">:admin</span> <span class="p">:</span> <span class="kp">nil</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Trying it out in <code class="language-plaintext highlighter-rouge">rails console</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="no">Article</span>
+<span class="o">=&gt;</span> <span class="no">Article</span><span class="p">(</span><span class="ss">id: </span><span class="n">integer</span><span class="p">,</span> <span class="ss">person_id: </span><span class="n">integer</span><span class="p">,</span> <span class="ss">title: </span><span class="n">string</span><span class="p">,</span> <span class="ss">body: </span><span class="n">text</span><span class="p">)</span>
+
+<span class="o">&gt;</span> <span class="no">Article</span><span class="p">.</span><span class="nf">ransackable_attributes</span>
+<span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">]</span>
+
+<span class="o">&gt;</span> <span class="no">Article</span><span class="p">.</span><span class="nf">ransackable_attributes</span><span class="p">(</span><span class="ss">:admin</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"person_id"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">]</span>
+
+<span class="o">&gt;</span> <span class="no">Article</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">id_eq: </span><span class="mi">1</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"articles"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"articles"</span>  <span class="c1"># Note that search param was ignored!</span>
+
+<span class="o">&gt;</span> <span class="no">Article</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">id_eq: </span><span class="mi">1</span> <span class="p">},</span> <span class="p">{</span> <span class="ss">auth_object: </span><span class="kp">nil</span> <span class="p">}).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"articles"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"articles"</span>  <span class="c1"># Search param still ignored!</span>
+
+<span class="o">&gt;</span> <span class="no">Article</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">id_eq: </span><span class="mi">1</span> <span class="p">},</span> <span class="p">{</span> <span class="ss">auth_object: :admin</span> <span class="p">}).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"articles"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"articles"</span>  <span class="no">WHERE</span> <span class="s2">"articles"</span><span class="o">.</span><span class="s2">"id"</span> <span class="o">=</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<p>That’s it! Now you know how to allow/block various elements in Ransack.</p>
+
+<h3 id="searching-action-text">Searching Action Text</h3>
+
+<p>A rich text attribute is an ordinary <code class="language-plaintext highlighter-rouge">has_one</code> association to
+<code class="language-plaintext highlighter-rouge">ActionText::RichText</code>, so it is searched like any association once both sides
+are allowlisted:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
+<span class="no">ActiveSupport</span><span class="p">.</span><span class="nf">on_load</span><span class="p">(</span><span class="ss">:action_text_rich_text</span><span class="p">)</span> <span class="k">do</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_attributes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="sx">%w[body]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">has_rich_text</span> <span class="ss">:content</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_associations</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="sx">%w[rich_text_content]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Post</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">rich_text_content_body_cont: </span><span class="s1">'hello'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The body is stored as HTML, so tag names and attributes match too. Keep a
+plain-text column alongside if that matters.</p>
+
+<h3 id="encrypted-attributes">Encrypted attributes</h3>
+
+<p>A column declared with <code class="language-plaintext highlighter-rouge">encrypts :email, deterministic: true</code> can be searched
+with the equality predicates (<code class="language-plaintext highlighter-rouge">eq</code>, <code class="language-plaintext highlighter-rouge">not_eq</code>, <code class="language-plaintext highlighter-rouge">in</code>, <code class="language-plaintext highlighter-rouge">not_in</code>): Ransack casts
+the value through the attribute type, so Active Record encrypts it before the
+comparison. The <code class="language-plaintext highlighter-rouge">LIKE</code> predicates (<code class="language-plaintext highlighter-rouge">cont</code>, <code class="language-plaintext highlighter-rouge">start</code>, <code class="language-plaintext highlighter-rouge">end</code> and the <code class="language-plaintext highlighter-rouge">i_</code> forms)
+cannot match part of a ciphertext, and a non-deterministic column cannot be
+searched at all. Neither is something Ransack can change.</p>
+
+<h3 id="handling-unknown-predicates-or-attributes">Handling unknown predicates or attributes</h3>
+
+<p>By default, Ransack will ignore any unknown predicates or attributes:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Article</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">unknown_attr_eq: </span><span class="s1">'Ernie'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"articles"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"articles"</span>
+</code></pre></div></div>
+
+<p>Ransack may be configured to raise an error if passed an unknown predicate or
+attributes, by setting the <code class="language-plaintext highlighter-rouge">ignore_unknown_conditions</code> option to <code class="language-plaintext highlighter-rouge">false</code> in your
+Ransack initializer file at <code class="language-plaintext highlighter-rouge">config/initializers/ransack.rb</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="c1"># Raise errors if a query contains an unknown predicate or attribute.</span>
+  <span class="c1"># Default is true (do not raise error on unknown conditions).</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">ignore_unknown_conditions</span> <span class="o">=</span> <span class="kp">false</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Article</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">unknown_attr_eq: </span><span class="s1">'Ernie'</span><span class="p">)</span>
+<span class="c1"># Ransack::InvalidSearchError (Invalid search term unknown_attr_eq)</span>
+</code></pre></div></div>
+
+<p>As an alternative to setting a global configuration option, the <code class="language-plaintext highlighter-rouge">.ransack!</code>
+class method also raises an error if passed an unknown condition:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Article</span><span class="p">.</span><span class="nf">ransack!</span><span class="p">(</span><span class="ss">unknown_attr_eq: </span><span class="s1">'Ernie'</span><span class="p">)</span>
+<span class="c1"># Ransack::InvalidSearchError: Invalid search term unknown_attr_eq</span>
+</code></pre></div></div>
+
+<p>This is equivalent to the <code class="language-plaintext highlighter-rouge">ignore_unknown_conditions</code> configuration option,
+except it may be applied on a case-by-case basis.</p>
+
+<h3 id="using-scopesclass-methods">Using Scopes/Class Methods</h3>
+
+<p>Continuing on from the preceding section, searching by scopes requires defining
+a whitelist of <code class="language-plaintext highlighter-rouge">ransackable_scopes</code> on the model class. The whitelist should be
+an array of <em>symbols</em>. By default, all class methods (e.g. scopes) are ignored.
+Scopes will be applied for matching <code class="language-plaintext highlighter-rouge">true</code> values, or for given values if the
+scope accepts a value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Employee</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">scope</span> <span class="ss">:activated</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">boolean</span> <span class="o">=</span> <span class="kp">true</span><span class="p">)</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">active: </span><span class="n">boolean</span><span class="p">)</span> <span class="p">}</span>
+  <span class="n">scope</span> <span class="ss">:salary_gt</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="s1">'salary &gt; ?'</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span> <span class="p">}</span>
+
+  <span class="c1"># Scopes are just syntactical sugar for class methods, which may also be used:</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">hired_since</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+    <span class="n">where</span><span class="p">(</span><span class="s1">'start_date &gt;= ?'</span><span class="p">,</span> <span class="n">date</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_scopes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">auth_object</span><span class="p">.</span><span class="nf">try</span><span class="p">(</span><span class="ss">:admin?</span><span class="p">)</span>
+      <span class="c1"># allow admin users access to all three methods</span>
+      <span class="sx">%i(activated hired_since salary_gt)</span>
+    <span class="k">else</span>
+      <span class="c1"># allow other users to search on `activated` and `hired_since` only</span>
+      <span class="sx">%i(activated hired_since)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Employee</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">activated: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">hired_since: </span><span class="s1">'2013-01-01'</span> <span class="p">})</span>
+
+<span class="no">Employee</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">salary_gt: </span><span class="mi">100_000</span> <span class="p">},</span> <span class="p">{</span> <span class="ss">auth_object: </span><span class="n">current_user</span> <span class="p">})</span>
+</code></pre></div></div>
+
+<p>In Rails 3 and 4, if the <code class="language-plaintext highlighter-rouge">true</code> value is being passed via url params or some
+other mechanism that will convert it to a string, the true value may not be
+passed to the ransackable scope unless you wrap it in an array
+(i.e. <code class="language-plaintext highlighter-rouge">activated: ['true']</code>). Ransack will take care of changing ‘true’ into a
+boolean. This is currently resolved in Rails 5 :smiley:</p>
+
+<p>However, perhaps you have <code class="language-plaintext highlighter-rouge">user_id: [1]</code> and you do not want Ransack to convert
+1 into a boolean. (Values sanitized to booleans can be found in the
+<a href="https://github.com/activerecord-hackery/ransack/blob/master/lib/ransack/constants.rb#L28">constants.rb</a>).
+To turn this off globally, and handle type conversions yourself, set
+<code class="language-plaintext highlighter-rouge">sanitize_custom_scope_booleans</code> to false in an initializer file like
+config/initializers/ransack.rb:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">sanitize_custom_scope_booleans</span> <span class="o">=</span> <span class="kp">false</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>To turn this off on a per-scope basis Ransack adds the following method to
+<code class="language-plaintext highlighter-rouge">ActiveRecord::Base</code> that you can redefine to selectively override sanitization:</p>
+
+<p><code class="language-plaintext highlighter-rouge">ransackable_scopes_skip_sanitize_args</code></p>
+
+<p>Add the scope you wish to bypass this behavior to ransackable_scopes_skip_sanitize_args:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_scopes_skip_sanitize_args</span>
+  <span class="p">[</span><span class="ss">:scope_to_skip_sanitize_args</span><span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="scopes-and-false">Scopes and <code class="language-plaintext highlighter-rouge">false</code></h4>
+
+<p>A bare <code class="language-plaintext highlighter-rouge">false</code> (or <code class="language-plaintext highlighter-rouge">'0'</code> / <code class="language-plaintext highlighter-rouge">'false'</code>, which are sanitized to <code class="language-plaintext highlighter-rouge">false</code>) is taken
+to mean “this checkbox was not ticked”, and the scope is not applied at all.
+That is right for a scope with no argument, but wrong for a scope such as
+<code class="language-plaintext highlighter-rouge">activated(boolean)</code> driven by a yes / no / any select, which needs to receive
+<code class="language-plaintext highlighter-rouge">false</code>. List that scope in <code class="language-plaintext highlighter-rouge">ransackable_scopes_skip_sanitize_args</code>: it then
+receives every value as given, including <code class="language-plaintext highlighter-rouge">false</code>, and can cast for itself:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Employee</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="c1"># `true` is passed as a bare call, so the argument needs a default.</span>
+  <span class="n">scope</span> <span class="ss">:activated</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="kp">true</span><span class="p">)</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">active: </span><span class="no">ActiveModel</span><span class="o">::</span><span class="no">Type</span><span class="o">::</span><span class="no">Boolean</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">cast</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="p">}</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_scopes</span><span class="p">(</span><span class="n">auth_object</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="sx">%i(activated)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ransackable_scopes_skip_sanitize_args</span>
+    <span class="sx">%i(activated)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Employee</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">activated: </span><span class="kp">false</span><span class="p">).</span><span class="nf">result</span>   <span class="c1"># WHERE "employees"."active" = FALSE</span>
+<span class="no">Employee</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">activated: </span><span class="s1">'0'</span><span class="p">).</span><span class="nf">result</span>     <span class="c1"># the same, from a form</span>
+</code></pre></div></div>
+
+<p>Wrapping the value in an array (<code class="language-plaintext highlighter-rouge">activated: [false]</code>) has always passed it
+through and still does.</p>
+
+<p>Scopes are a recent addition to Ransack and currently have a few caveats:
+First, a scope involving child associations needs to be defined in the parent
+table model, not in the child model. Second, scopes with an array as an
+argument are not easily usable yet, because the array currently needs to be
+wrapped in an array to function (see
+<a href="https://github.com/activerecord-hackery/ransack/issues/404">this issue</a>),
+which is not compatible with Ransack form helpers. For this use case, it may be
+better for now to use <a href="https://activerecord-hackery.github.io/ransack/going-further/ransackers">ransackers</a> instead,
+where feasible. Pull requests with solutions and tests are welcome!</p>
+
+<h4 id="scopes-are-always-anded">Scopes are always <code class="language-plaintext highlighter-rouge">AND</code>ed</h4>
+
+<p>A scope is applied by chaining it onto the relation, outside the condition
+tree that <code class="language-plaintext highlighter-rouge">m: 'or'</code> and groupings govern, so it is always <code class="language-plaintext highlighter-rouge">AND</code>ed with the
+rest of the search:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">active: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">name_cont: </span><span class="s1">'foo'</span><span class="p">,</span> <span class="ss">m: </span><span class="s1">'or'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... WHERE (active = 1) AND "people"."name" LIKE '%foo%' ESCAPE '\'</span>
+</code></pre></div></div>
+
+<p>For something that must take part in an <code class="language-plaintext highlighter-rouge">OR</code>, use a
+<a href="/ransack/going-further/ransackers/">ransacker</a> or a <a href="/ransack/going-further/custom-predicates/">custom predicate</a>
+instead of a scope.</p>
+
+<h3 id="grouping-queries-by-or-instead-of-and">Grouping queries by OR instead of AND</h3>
+
+<p>The default <code class="language-plaintext highlighter-rouge">AND</code> grouping can be changed to <code class="language-plaintext highlighter-rouge">OR</code> by adding <code class="language-plaintext highlighter-rouge">m: 'or'</code> to the
+query hash.</p>
+
+<p>You can easily try it in your controller code by changing <code class="language-plaintext highlighter-rouge">params[:q]</code> in the
+<code class="language-plaintext highlighter-rouge">index</code> action to <code class="language-plaintext highlighter-rouge">params[:q].try(:merge, m: 'or')</code> as follows:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Artist</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">].</span><span class="nf">try</span><span class="p">(</span><span class="ss">:merge</span><span class="p">,</span> <span class="ss">m: </span><span class="s1">'or'</span><span class="p">))</span>
+  <span class="vi">@artists</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Normally, if you wanted users to be able to toggle between <code class="language-plaintext highlighter-rouge">AND</code> and <code class="language-plaintext highlighter-rouge">OR</code>
+query grouping, you would probably set up your search form so that <code class="language-plaintext highlighter-rouge">m</code> was in
+the URL params hash, but here we assigned <code class="language-plaintext highlighter-rouge">m</code> manually just to try it out
+quickly.</p>
+
+<p>Alternatively, trying it in the Rails console:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">artists</span> <span class="o">=</span> <span class="no">Artist</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_cont: </span><span class="s1">'foo'</span><span class="p">,</span> <span class="ss">style_cont: </span><span class="s1">'bar'</span><span class="p">,</span> <span class="ss">m: </span><span class="s1">'or'</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="no">Ransack</span><span class="o">::</span><span class="no">Search</span><span class="o">&lt;</span><span class="ss">class: </span><span class="no">Artist</span><span class="p">,</span> <span class="ss">base: </span><span class="no">Grouping</span> <span class="o">&lt;</span><span class="ss">conditions: </span><span class="p">[</span>
+  <span class="no">Condition</span> <span class="o">&lt;</span><span class="ss">attributes: </span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="ss">predicate: </span><span class="n">cont</span><span class="p">,</span> <span class="ss">values: </span><span class="p">[</span><span class="s2">"foo"</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="no">Condition</span> <span class="o">&lt;</span><span class="ss">attributes: </span><span class="p">[</span><span class="s2">"style"</span><span class="p">],</span> <span class="ss">predicate: </span><span class="n">cont</span><span class="p">,</span> <span class="ss">values: </span><span class="p">[</span><span class="s2">"bar"</span><span class="p">]</span><span class="o">&gt;</span>
+  <span class="p">],</span> <span class="ss">combinator: </span><span class="ow">or</span><span class="o">&gt;&gt;</span>
+
+<span class="n">artists</span><span class="p">.</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="s2">"SELECT </span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">.* FROM </span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">
+    WHERE ((</span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">name</span><span class="se">\"</span><span class="s2"> LIKE '%foo%'
+    OR </span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">style</span><span class="se">\"</span><span class="s2"> LIKE '%bar%'))"</span>
+</code></pre></div></div>
+
+<p>The combinator becomes <code class="language-plaintext highlighter-rouge">or</code> instead of the default <code class="language-plaintext highlighter-rouge">and</code>, and the SQL query
+becomes <code class="language-plaintext highlighter-rouge">WHERE...OR</code> instead of <code class="language-plaintext highlighter-rouge">WHERE...AND</code>.</p>
+
+<p>This works with associations as well. Imagine an Artist model that has many
+Memberships, and many Musicians through Memberships:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">artists</span> <span class="o">=</span> <span class="no">Artist</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_cont: </span><span class="s1">'foo'</span><span class="p">,</span> <span class="ss">musicians_email_cont: </span><span class="s1">'bar'</span><span class="p">,</span> <span class="ss">m: </span><span class="s1">'or'</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="no">Ransack</span><span class="o">::</span><span class="no">Search</span><span class="o">&lt;</span><span class="ss">class: </span><span class="no">Artist</span><span class="p">,</span> <span class="ss">base: </span><span class="no">Grouping</span> <span class="o">&lt;</span><span class="ss">conditions: </span><span class="p">[</span>
+  <span class="no">Condition</span> <span class="o">&lt;</span><span class="ss">attributes: </span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="ss">predicate: </span><span class="n">cont</span><span class="p">,</span> <span class="ss">values: </span><span class="p">[</span><span class="s2">"foo"</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="no">Condition</span> <span class="o">&lt;</span><span class="ss">attributes: </span><span class="p">[</span><span class="s2">"musicians_email"</span><span class="p">],</span> <span class="ss">predicate: </span><span class="n">cont</span><span class="p">,</span> <span class="ss">values: </span><span class="p">[</span><span class="s2">"bar"</span><span class="p">]</span><span class="o">&gt;</span>
+  <span class="p">],</span> <span class="ss">combinator: </span><span class="ow">or</span><span class="o">&gt;&gt;</span>
+
+<span class="n">artists</span><span class="p">.</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="s2">"SELECT </span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">.* FROM </span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">
+    LEFT OUTER JOIN </span><span class="se">\"</span><span class="s2">memberships</span><span class="se">\"</span><span class="s2">
+      ON </span><span class="se">\"</span><span class="s2">memberships</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">artist_id</span><span class="se">\"</span><span class="s2"> = </span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">id</span><span class="se">\"</span><span class="s2">
+    LEFT OUTER JOIN </span><span class="se">\"</span><span class="s2">musicians</span><span class="se">\"</span><span class="s2">
+      ON </span><span class="se">\"</span><span class="s2">musicians</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">id</span><span class="se">\"</span><span class="s2"> = </span><span class="se">\"</span><span class="s2">memberships</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">musician_id</span><span class="se">\"</span><span class="s2">
+    WHERE ((</span><span class="se">\"</span><span class="s2">artists</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">name</span><span class="se">\"</span><span class="s2"> LIKE '%foo%'
+    OR </span><span class="se">\"</span><span class="s2">musicians</span><span class="se">\"</span><span class="s2">.</span><span class="se">\"</span><span class="s2">email</span><span class="se">\"</span><span class="s2"> LIKE '%bar%'))"</span>
+</code></pre></div></div>
+
+<h3 id="using-simpleform">Using SimpleForm</h3>
+
+<p>If you would like to combine the Ransack and SimpleForm form builders, set the
+<code class="language-plaintext highlighter-rouge">RANSACK_FORM_BUILDER</code> environment variable before Rails boots up, e.g. in
+<code class="language-plaintext highlighter-rouge">config/application.rb</code> before <code class="language-plaintext highlighter-rouge">require 'rails/all'</code> as shown below (and add
+<code class="language-plaintext highlighter-rouge">gem 'simple_form'</code> in your Gemfile).</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="no">File</span><span class="p">.</span><span class="nf">expand_path</span><span class="p">(</span><span class="s1">'../boot'</span><span class="p">,</span> <span class="kp">__FILE__</span><span class="p">)</span>
+<span class="no">ENV</span><span class="p">[</span><span class="s1">'RANSACK_FORM_BUILDER'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'::SimpleForm::FormBuilder'</span>
+<span class="nb">require</span> <span class="s1">'rails/all'</span>
+</code></pre></div></div>

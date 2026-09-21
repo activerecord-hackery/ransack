@@ -965,11 +965,12 @@ module Ransack
       end
 
       it 'is applied through the writer as well as the params hash' do
-        expect(model.ransack(salary: 100).result.to_sql).to include('salary > 100')
+        # MySQL renders a bound integer as '100'.
+        expect(model.ransack(salary: 100).result.to_sql).to match(/salary > '?100'?/)
 
         search = model.ransack
         search.salary = 100
-        expect(search.result.to_sql).to include('salary > 100')
+        expect(search.result.to_sql).to match(/salary > '?100'?/)
         expect(search.salary).to eq 100
       end
     end

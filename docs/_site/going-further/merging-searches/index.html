@@ -1,0 +1,34 @@
+<p>To find records that match multiple searches, it’s possible to merge all the ransack search conditions into an ActiveRecord relation to perform a single query. In order to avoid conflicts between joined table names it’s necessary to set up a shared context to track table aliases used across all the conditions before initializing the searches:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">shared_context</span> <span class="o">=</span> <span class="no">Ransack</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">for</span><span class="p">(</span><span class="no">Person</span><span class="p">)</span>
+
+<span class="n">search_parents</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span>
+  <span class="p">{</span> <span class="ss">parent_name_eq: </span><span class="s2">"A"</span> <span class="p">},</span> <span class="ss">context: </span><span class="n">shared_context</span>
+<span class="p">)</span>
+
+<span class="n">search_children</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span>
+  <span class="p">{</span> <span class="ss">children_name_eq: </span><span class="s2">"B"</span> <span class="p">},</span> <span class="ss">context: </span><span class="n">shared_context</span>
+<span class="p">)</span>
+
+<span class="n">shared_conditions</span> <span class="o">=</span> <span class="p">[</span><span class="n">search_parents</span><span class="p">,</span> <span class="n">search_children</span><span class="p">].</span><span class="nf">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">search</span><span class="o">|</span>
+  <span class="no">Ransack</span><span class="o">::</span><span class="no">Visitor</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">accept</span><span class="p">(</span><span class="n">search</span><span class="p">.</span><span class="nf">base</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="n">shared_context</span><span class="p">.</span><span class="nf">join_sources</span><span class="p">)</span>
+  <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">shared_conditions</span><span class="p">.</span><span class="nf">reduce</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:or</span><span class="p">))</span>
+  <span class="p">.</span><span class="nf">to_sql</span>
+</code></pre></div></div>
+<p>Produces:</p>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="nv">"people"</span><span class="p">.</span><span class="o">*</span>
+<span class="k">FROM</span> <span class="nv">"people"</span>
+<span class="k">LEFT</span> <span class="k">OUTER</span> <span class="k">JOIN</span> <span class="nv">"people"</span> <span class="nv">"parents_people"</span>
+  <span class="k">ON</span> <span class="nv">"parents_people"</span><span class="p">.</span><span class="nv">"id"</span> <span class="o">=</span> <span class="nv">"people"</span><span class="p">.</span><span class="nv">"parent_id"</span>
+<span class="k">LEFT</span> <span class="k">OUTER</span> <span class="k">JOIN</span> <span class="nv">"people"</span> <span class="nv">"children_people"</span>
+  <span class="k">ON</span> <span class="nv">"children_people"</span><span class="p">.</span><span class="nv">"parent_id"</span> <span class="o">=</span> <span class="nv">"people"</span><span class="p">.</span><span class="nv">"id"</span>
+<span class="k">WHERE</span> <span class="p">(</span>
+  <span class="p">(</span><span class="nv">"parents_people"</span><span class="p">.</span><span class="nv">"name"</span> <span class="o">=</span> <span class="s1">'A'</span> <span class="k">OR</span> <span class="nv">"children_people"</span><span class="p">.</span><span class="nv">"name"</span> <span class="o">=</span> <span class="s1">'B'</span><span class="p">)</span>
+  <span class="p">)</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="nv">"people"</span><span class="p">.</span><span class="nv">"id"</span> <span class="k">DESC</span>
+</code></pre></div></div>
+
+<p>Admittedly this is not as simple as it should be, but it’s workable for now. (Implementing <a href="https://github.com/activerecord-hackery/ransack/issues/417">issue 417</a> could make this more straightforward.)</p>

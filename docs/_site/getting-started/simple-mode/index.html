@@ -1,0 +1,298 @@
+<h1 id="simple-mode">Simple Mode</h1>
+
+<p>Ransack can be used in one of two modes, simple or advanced. For
+searching/filtering not requiring complex boolean logic, Ransack’s simple
+mode should meet your needs.</p>
+
+<h2 id="in-your-controller">In your controller</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">])</span>
+  <span class="vi">@people</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span><span class="p">(</span><span class="ss">distinct: </span><span class="kp">true</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>or without <code class="language-plaintext highlighter-rouge">distinct: true</code>, for sorting on an associated table’s columns (in
+this example, with preloading each Person’s Articles and pagination):</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">])</span>
+  <span class="vi">@people</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:articles</span><span class="p">).</span><span class="nf">page</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:page</span><span class="p">])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<blockquote class="caution">
+  <p>As of v4.0, searching and sorting are not authorized on <em>any</em> column of your model by default. See <a href="/ransack/going-further/other-notes/#authorization-allowlistingdenylisting">Authorization (allowlisting/denylisting)</a> on how to define searchable attributes.
+Prior to v4.0, searching and sorting were authorized on any column of your model by default.</p>
+  <h3 id="default-search-options">Default search options</h3>
+</blockquote>
+
+<h4 id="search-parameter">Search parameter</h4>
+
+<p>Ransack uses a default <code class="language-plaintext highlighter-rouge">:q</code> param key for search params. This may be changed by
+setting the <code class="language-plaintext highlighter-rouge">search_key</code> option in a Ransack initializer file (typically
+<code class="language-plaintext highlighter-rouge">config/initializers/ransack.rb</code>):</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="c1"># Change default search parameter key name.</span>
+  <span class="c1"># Default key name is :q</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">search_key</span> <span class="o">=</span> <span class="ss">:query</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="string-search">String search</h4>
+
+<p>After version 2.4.0 when searching a string query Ransack by default strips all whitespace around the query string.
+This may be disabled by setting the <code class="language-plaintext highlighter-rouge">strip_whitespace</code> option in a Ransack initializer file:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="c1"># Change whitespace stripping behavior.</span>
+  <span class="c1"># Default is true</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">strip_whitespace</span> <span class="o">=</span> <span class="kp">false</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="in-your-view">In your view</h2>
+
+<p>The two primary Ransack view helpers are <code class="language-plaintext highlighter-rouge">search_form_for</code> and <code class="language-plaintext highlighter-rouge">sort_link</code>,
+which are defined in
+<a href="https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/helpers/form_helper.rb">Ransack::Helpers::FormHelper</a>.</p>
+
+<h3 id="form-helper">Form helper</h3>
+
+<p>Ransack’s <code class="language-plaintext highlighter-rouge">search_form_for</code> helper replaces <code class="language-plaintext highlighter-rouge">form_for</code> for creating the view search form</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">search_form_for</span> <span class="vi">@q</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+
+  # Search if the name field contains...
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">label</span> <span class="ss">:name_cont</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">search_field</span> <span class="ss">:name_cont</span> <span class="cp">%&gt;</span>
+
+  # Search if an associated articles.title starts with...
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">label</span> <span class="ss">:articles_title_start</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">search_field</span> <span class="ss">:articles_title_start</span> <span class="cp">%&gt;</span>
+
+  # Attributes may be chained. Search multiple attributes for one value...
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">label</span> <span class="ss">:name_or_description_or_email_or_articles_title_cont</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">search_field</span> <span class="ss">:name_or_description_or_email_or_articles_title_cont</span> <span class="cp">%&gt;</span>
+
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>The argument of <code class="language-plaintext highlighter-rouge">f.search_field</code> has to be in this form:
+ <code class="language-plaintext highlighter-rouge">attribute_name[_or_attribute_name]..._predicate</code></p>
+
+<p>where <code class="language-plaintext highlighter-rouge">[_or_another_attribute_name]...</code> means any repetition of <code class="language-plaintext highlighter-rouge">_or_</code> plus the name of the attribute.</p>
+
+<p><code class="language-plaintext highlighter-rouge">_and_</code> works the same way, but a single name uses one or the other, not both:
+there is no precedence rule for <code class="language-plaintext highlighter-rouge">a_or_b_and_c</code>. A strict search (<code class="language-plaintext highlighter-rouge">ransack!</code>,
+or <code class="language-plaintext highlighter-rouge">ignore_unknown_conditions = false</code>) raises <code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code>
+for a name that mixes them; a permissive search applies the first combinator
+it finds to every attribute. For mixed logic use
+<a href="/ransack/getting-started/advanced-mode/">groupings</a>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">cont</code> (contains) and <code class="language-plaintext highlighter-rouge">start</code> (starts with) are just two of the available
+search predicates.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">search_form_for</code> answer format can be set like this:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">search_form_for</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">format: :pdf</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+
+<span class="cp">&lt;%=</span> <span class="n">search_form_for</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">format: :json</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h3 id="turbo-enabled-search-form">Turbo-enabled search form</h3>
+
+<p>For applications using Turbo (Hotwire), Ransack provides <code class="language-plaintext highlighter-rouge">turbo_search_form_for</code> helper which submits forms via turbo streams instead of traditional HTML GET requests. This is particularly useful when integrating with paginated results or other turbo-enabled components:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">turbo_search_form_for</span> <span class="vi">@q</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">label</span> <span class="ss">:name_cont</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">search_field</span> <span class="ss">:name_cont</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>The turbo form helper supports the same options as <code class="language-plaintext highlighter-rouge">search_form_for</code>, plus additional turbo-specific options:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Target a specific turbo frame
+<span class="cp">&lt;%=</span> <span class="n">turbo_search_form_for</span> <span class="vi">@q</span><span class="p">,</span> <span class="ss">turbo_frame: </span><span class="s1">'search_results'</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  # form fields
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+
+# Use a custom HTTP method (defaults to POST)
+<span class="cp">&lt;%=</span> <span class="n">turbo_search_form_for</span> <span class="vi">@q</span><span class="p">,</span> <span class="ss">method: :patch</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  # form fields
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+
+# Set turbo action behavior
+<span class="cp">&lt;%=</span> <span class="n">turbo_search_form_for</span> <span class="vi">@q</span><span class="p">,</span> <span class="ss">turbo_action: </span><span class="s1">'replace'</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  # form fields
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>This eliminates the need for complex controller logic to handle different request formats when combining search with pagination.</p>
+
+<h3 id="search-link-helper">Search link helper</h3>
+
+<p>Ransack’s <code class="language-plaintext highlighter-rouge">sort_link</code> helper creates table headers that are sortable links</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+<p>Additional options can be passed after the column parameter, like a different
+column title or a default sort order.</p>
+
+<p>If the first option after the column parameter is a String, it’s considered a
+custom label for the link:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="s1">'Last Name'</span><span class="p">,</span> <span class="ss">default_order: :desc</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>You can use a block if the link markup is hard to fit into the label parameter:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span> <span class="k">do</span> <span class="cp">%&gt;</span>
+  <span class="nt">&lt;strong&gt;</span>Player Name<span class="nt">&lt;/strong&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>With a polymorphic association, you may need to specify the name of the link
+explicitly to avoid an <code class="language-plaintext highlighter-rouge">uninitialized constant Model::Xxxable</code> error (see issue
+<a href="https://github.com/activerecord-hackery/ransack/issues/421">#421</a>):</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:xxxable_of_Ymodel_type_some_attribute</span><span class="p">,</span> <span class="s1">'Attribute Name'</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>If the first option after the column parameter and/or the label parameter is an
+Array, it will be used for sorting on multiple fields:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">,</span> <span class="p">[</span><span class="ss">:last_name</span><span class="p">,</span> <span class="s1">'first_name asc'</span><span class="p">],</span> <span class="s1">'Last Name'</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>In the example above, clicking the link will sort by <code class="language-plaintext highlighter-rouge">last_name</code> and then
+<code class="language-plaintext highlighter-rouge">first_name</code>. Specifying the sort direction on a field in the array tells
+Ransack to <em>always</em> sort that particular field in the specified direction.</p>
+
+<p>Multiple <code class="language-plaintext highlighter-rouge">default_order</code> fields may also be specified with a trailing options
+Hash:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">,</span> <span class="sx">%i(last_name first_name)</span><span class="p">,</span>
+  <span class="ss">default_order: </span><span class="p">{</span> <span class="ss">last_name: </span><span class="s1">'asc'</span><span class="p">,</span> <span class="ss">first_name: </span><span class="s1">'desc'</span> <span class="p">})</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>This example toggles the sort directions of both fields, by default
+initially sorting the <code class="language-plaintext highlighter-rouge">last_name</code> field by ascending order, and the
+<code class="language-plaintext highlighter-rouge">first_name</code> field by descending order.</p>
+
+<p>In the case that you wish to sort by some complex value, such as the result
+of a SQL function, you may do so using scopes. In your model, define scopes
+whose names line up with the name of the virtual field you wish to sort by,
+as so:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Person</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">scope</span> <span class="ss">:sort_by_reverse_name_asc</span><span class="p">,</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s2">"REVERSE(name) ASC"</span><span class="p">)</span> <span class="p">}</span>
+  <span class="n">scope</span> <span class="ss">:sort_by_reverse_name_desc</span><span class="p">,</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s2">"REVERSE(name) DESC"</span><span class="p">)</span> <span class="p">}</span>
+<span class="o">...</span>
+</code></pre></div></div>
+
+<p>and you can then sort by this virtual field:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:reverse_name</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>The trailing options Hash can also be used for passing additional options to the
+generated link, like <code class="language-plaintext highlighter-rouge">class:</code>.</p>
+
+<p>The sort link order indicator arrows may be globally customized by setting a
+<code class="language-plaintext highlighter-rouge">custom_arrows</code> option in an initializer file like
+<code class="language-plaintext highlighter-rouge">config/initializers/ransack.rb</code>.</p>
+
+<p>You can also enable a <code class="language-plaintext highlighter-rouge">default_arrow</code> which is displayed on all sortable fields
+which are not currently used in the sorting. This is disabled by default so
+nothing will be displayed:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">custom_arrows</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">up_arrow: </span><span class="s1">'&lt;i class="custom-up-arrow-icon"&gt;&lt;/i&gt;'</span><span class="p">,</span>
+    <span class="ss">down_arrow: </span><span class="s1">'U+02193'</span><span class="p">,</span>
+    <span class="ss">default_arrow: </span><span class="s1">'&lt;i class="default-arrow-icon"&gt;&lt;/i&gt;'</span>
+  <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>All sort links may be displayed without the order indicator
+arrows by setting <code class="language-plaintext highlighter-rouge">hide_sort_order_indicators</code> to true in the initializer file.
+Note that this hides the arrows even if they were customized:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">hide_sort_order_indicators</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Without setting it globally, individual sort links may be displayed without
+the order indicator arrow by passing <code class="language-plaintext highlighter-rouge">hide_indicator: true</code> in the sort link:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">hide_indicator: </span><span class="kp">true</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h3 id="sort_url">sort_url</h3>
+
+<p>Ransack’s <code class="language-plaintext highlighter-rouge">sort_url</code> helper is like a <code class="language-plaintext highlighter-rouge">sort_link</code> but returns only the url</p>
+
+<p><code class="language-plaintext highlighter-rouge">sort_url</code> has the same API as <code class="language-plaintext highlighter-rouge">sort_link</code>:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_url</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">default_order: :desc</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_url</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">,</span> <span class="p">[</span><span class="ss">:last_name</span><span class="p">,</span> <span class="s1">'first_name asc'</span><span class="p">])</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">sort_url</span><span class="p">(</span><span class="vi">@q</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">,</span> <span class="sx">%i(last_name first_name)</span><span class="p">,</span>
+  <span class="ss">default_order: </span><span class="p">{</span> <span class="ss">last_name: </span><span class="s1">'asc'</span><span class="p">,</span> <span class="ss">first_name: </span><span class="s1">'desc'</span> <span class="p">})</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h3 id="fields-sort-option">Fields sort option</h3>
+
+<p>Does not work for MySQL.
+The <code class="language-plaintext highlighter-rouge">NULLS FIRST</code> and <code class="language-plaintext highlighter-rouge">NULLS LAST</code> options can be used to determine whether nulls appear before or after non-null values in the sort ordering.</p>
+
+<p>You may want to configure it like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">fields_sort_option</span> <span class="o">=</span> <span class="ss">:nulls_first</span> <span class="c1"># or :nulls_last</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>To treat nulls as having the lowest or highest value respectively. To force nulls to always be first or last, use</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">fields_sort_option</span> <span class="o">=</span> <span class="ss">:nulls_always_first</span> <span class="c1"># or :nulls_always_last</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>See this feature: https://www.postgresql.org/docs/13/queries-order.html</p>
+
+<h4 id="case-insensitive-sorting-in-postgresql">Case Insensitive Sorting in PostgreSQL</h4>
+
+<p>In order to request PostgreSQL to do a case insensitive sort for all string columns of a model at once, Ransack can be extended by using this approach:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">RansackObject</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+    <span class="n">base</span><span class="p">.</span><span class="nf">columns</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">column</span><span class="o">|</span>
+      <span class="k">if</span> <span class="n">column</span><span class="p">.</span><span class="nf">type</span> <span class="o">==</span> <span class="ss">:string</span>
+        <span class="n">base</span><span class="p">.</span><span class="nf">ransacker</span> <span class="n">column</span><span class="p">.</span><span class="nf">name</span><span class="p">.</span><span class="nf">to_sym</span><span class="p">,</span> <span class="ss">type: :string</span> <span class="k">do</span>
+          <span class="no">Arel</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="s2">"lower(</span><span class="si">#{</span><span class="n">base</span><span class="p">.</span><span class="nf">table_name</span><span class="si">}</span><span class="s2">.</span><span class="si">#{</span><span class="n">column</span><span class="p">.</span><span class="nf">name</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">UserWithManyAttributes</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="kp">include</span> <span class="no">RansackObject</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>If this approach is taken, it is advisable to <a href="https://www.postgresql.org/docs/13/citext.html">add a functional index</a>.</p>
+
+<p>This was originally asked in <a href="https://github.com/activerecord-hackery/ransack/issues/1201">a Ransack issue</a> and a solution was found on <a href="https://stackoverflow.com/a/34677378">Stack Overflow</a>.</p>

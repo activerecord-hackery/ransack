@@ -1,0 +1,53 @@
+<p>Searching on Postgres-specific column types.</p>
+
+<h2 id="postgres-array-searches">Postgres Array searches</h2>
+
+<p>See <a href="https://github.com/activerecord-hackery/ransack/issues/321">this issue</a> for details.</p>
+
+<h2 id="postgresql-jsonb-searches">PostgreSQL JSONB searches</h2>
+
+<h3 id="using-a-fixed-key">Using a fixed key</h3>
+
+<p>See here for searching on a fixed key in a JSONB column: https://activerecord-hackery.github.io/ransack/going-further/ransackers/#postgres-columns</p>
+
+<h3 id="using-the-jsonb-contains-operator">Using the JSONB contains operator</h3>
+
+<p>To fully use the power of the JSONB column you may want to filter on any key though:</p>
+
+<p>Install the <a href="https://github.com/GeorgeKaraszi/ActiveRecordExtended">ActiveRecordExtended</a> gem to add the <code class="language-plaintext highlighter-rouge">contains</code> arel predicate to your project. It let’s you use the <a href="https://www.postgresql.org/docs/12/functions-json.html#FUNCTIONS-JSONB-OP-TABLE">Postgres contains operator @&gt;</a>.</p>
+
+<p>Add a custom predicate in the <code class="language-plaintext highlighter-rouge">config/initializers/ransack.rb</code> file:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'jcont'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'contains'</span><span class="p">,</span> <span class="ss">formatter: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="no">JSON</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Now you can ransack the JSONB columns using the _jcont predicate. For example the Person model has a <code class="language-plaintext highlighter-rouge">data</code> JSONB column, find entries where the column contains the {“group”: “experts”} key-value pair:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Person.ransack(data_jcont: '{"group": "experts"}').result.to_sql
+
+SELECT "persons".* FROM "persons" WHERE "persons"."data" @&gt; '"{\"group\": \"experts\"}"'
+</code></pre></div></div>
+
+<p>If you have a GIN index on that column, the database will quickly be able to find that result.</p>
+
+<h3 id="treating-the-column-as-a-string">Treating the column as a string</h3>
+
+<p>Warning: This method converts the column to a string and matches the given string to the result. This will be slow on large data_sets and does not make good use of the JSONB capabilities of Postgres, such as indexes.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Contact</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">ransacker</span> <span class="ss">:within_json</span> <span class="k">do</span> <span class="o">|</span><span class="n">parent</span><span class="o">|</span>
+    <span class="no">Arel</span><span class="p">.</span><span class="nf">sql</span><span class="p">(</span><span class="s2">"table.jsonb_data::text"</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Contact</span><span class="p">.</span><span class="nf">all</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="s2">"within_json_cont"</span> <span class="o">=&gt;</span> <span class="s2">"my"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Will generate</p>
+
+<p><code class="language-plaintext highlighter-rouge">SELECT "contacts".* FROM "contacts" WHERE contacts.json_data LIKE '%my%' ESCAPE '\'</code></p>
+
+<p>(<code class="language-plaintext highlighter-rouge">within_json_i_cont</code> gives <code class="language-plaintext highlighter-rouge">ILIKE</code> for a match that ignores case.)</p>
+
+<p>Note that this search treats the entire JSON as string, including parens, etc. i.e. you can search for e.g.: <code class="language-plaintext highlighter-rouge">Contact.all.ransack("within_json_cont" =&gt; '{"key": "value"}')</code></p>

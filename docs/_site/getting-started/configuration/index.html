@@ -1,0 +1,227 @@
+<p>Ransack may be easily configured. The best place to put configuration is in an initializer file at <code class="language-plaintext highlighter-rouge">config/initializers/ransack.rb</code>, containing code such as:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+
+  <span class="c1"># Change default search parameter key name.</span>
+  <span class="c1"># Default key name is :q</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">search_key</span> <span class="o">=</span> <span class="ss">:query</span>
+
+  <span class="c1"># Raise errors if a query contains an unknown predicate, attribute, combinator</span>
+  <span class="c1"># or sort. Default is true (do not raise error on unknown conditions).</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">ignore_unknown_conditions</span> <span class="o">=</span> <span class="kp">false</span>
+
+  <span class="c1"># Globally display sort links without the order indicator arrow.</span>
+  <span class="c1"># Default is false (sort order indicators are displayed).</span>
+  <span class="c1"># This can also be configured individually in each sort link (see the README).</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">hide_sort_order_indicators</span> <span class="o">=</span> <span class="kp">true</span>
+
+  <span class="c1"># By default, Ransack displays sort order indicator arrows with HTML codes, but</span>
+  <span class="c1"># these can be overridden. `up_arrow` is shown when the column is sorted</span>
+  <span class="c1"># descending and `down_arrow` when it is sorted ascending: the arrow names the</span>
+  <span class="c1"># direction the link will sort in next, not the current one.</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">custom_arrows</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">up_arrow:   </span><span class="s1">'&lt;i class="fa fa-long-arrow-up"&gt;&lt;/i&gt;'</span><span class="p">,</span> <span class="c1"># default: '&amp;#9660;'</span>
+    <span class="ss">down_arrow: </span><span class="s1">'U+02193'</span><span class="p">,</span>                             <span class="c1"># default: '&amp;#9650;'</span>
+    <span class="ss">default_arrow: </span><span class="s1">'U+11047'</span>                           <span class="c1"># default: nil </span>
+  <span class="p">}</span>
+
+  <span class="c1"># Ransack sanitizes many values in your custom scopes into booleans.</span>
+  <span class="c1"># You can turn this off for custom scopes.</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">sanitize_custom_scope_booleans</span> <span class="o">=</span> <span class="kp">false</span>
+
+  <span class="c1"># Configure a default predicate if an unknown predicate is passed; setting it to</span>
+  <span class="c1"># e.g. 'eq' allows for allowing for exact matches by just the attribute name.</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">default_predicate</span> <span class="o">=</span> <span class="s1">'eq'</span>
+
+  <span class="c1"># Where NULLs are placed when sorting.</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">fields_sort_option</span> <span class="o">=</span> <span class="ss">:nulls_first</span> <span class="c1"># or e.g. :nulls_always_last</span>
+
+  <span class="c1"># Strip leading and trailing whitespace from string search values.</span>
+  <span class="c1"># Default is true.</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">strip_whitespace</span> <span class="o">=</span> <span class="kp">false</span>
+
+  <span class="c1"># Treat blank values as conditions to search for, rather than as absent.</span>
+  <span class="c1"># Default is true (blank values are ignored).</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">ignore_blank_values</span> <span class="o">=</span> <span class="kp">false</span>
+
+  <span class="c1"># Name the SQL dialect explicitly instead of detecting it from the adapter.</span>
+  <span class="c1"># Default is nil (detect). One of :postgresql, :mysql, :sqlite, :generic.</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">dialect</span> <span class="o">=</span> <span class="ss">:postgresql</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="sql-dialect">SQL dialect</h2>
+
+<p>Nearly everything Ransack generates goes through Arel, which renders it for
+whichever database the connection uses. Two things depend on the database
+directly: whether a case-insensitive predicate such as <code class="language-plaintext highlighter-rouge">i_cont</code> needs the
+column wrapped in <code class="language-plaintext highlighter-rouge">LOWER()</code> (PostgreSQL has <code class="language-plaintext highlighter-rouge">ILIKE</code>, so it does not), and
+which function the <code class="language-plaintext highlighter-rouge">length_*</code> predicates call (<code class="language-plaintext highlighter-rouge">CHAR_LENGTH</code> on PostgreSQL
+and MySQL, <code class="language-plaintext highlighter-rouge">LENGTH</code> elsewhere).</p>
+
+<p>Ransack decides these from the class of the model’s connection adapter, and
+an adapter that subclasses one of Rails’ own inherits its dialect: the
+<code class="language-plaintext highlighter-rouge">postgis</code> adapter is a subclass of the PostgreSQL adapter and is treated as
+PostgreSQL, <code class="language-plaintext highlighter-rouge">trilogy</code> and <code class="language-plaintext highlighter-rouge">mysql2</code> share a parent and are both MySQL. Any
+other adapter gets the <code class="language-plaintext highlighter-rouge">:generic</code> dialect, which uses only standard SQL.</p>
+
+<p>If an adapter speaks a known dialect without inheriting from the Rails adapter
+for it, name the dialect:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="p">{</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span> <span class="n">config</span><span class="p">.</span><span class="nf">dialect</span> <span class="o">=</span> <span class="ss">:postgresql</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>The setting is global, so it is not suitable for an application that connects
+to different kinds of database from different models; there, rely on
+detection.</p>
+
+<h2 id="whitespace-stripping">Whitespace stripping</h2>
+
+<p>By default Ransack strips leading and trailing whitespace from string search
+values, so a stray space pasted into a search box does not change the result:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_cont: </span><span class="s2">"  Ernie  "</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... WHERE "people"."name" LIKE '%Ernie%'</span>
+</code></pre></div></div>
+
+<p>Stripping applies at every level of the parameters, including values nested
+inside <code class="language-plaintext highlighter-rouge">g:</code> groupings and <code class="language-plaintext highlighter-rouge">c:</code> conditions:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">g: </span><span class="p">[{</span> <span class="ss">name_cont: </span><span class="s2">"  Ernie  "</span><span class="p">,</span> <span class="ss">m: </span><span class="s1">'or'</span> <span class="p">}]).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... WHERE "people"."name" LIKE '%Ernie%'</span>
+</code></pre></div></div>
+
+<p>It can be turned off globally, or per search:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="p">{</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span> <span class="n">config</span><span class="p">.</span><span class="nf">strip_whitespace</span> <span class="o">=</span> <span class="kp">false</span> <span class="p">}</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">name_cont: </span><span class="s2">"  Ernie  "</span> <span class="p">},</span> <span class="ss">strip_whitespace: </span><span class="kp">false</span><span class="p">)</span>
+</code></pre></div></div>
+
+<blockquote class="note">
+  <p>Before Ransack 5.0 only top-level values were stripped, so the same search
+behaved differently depending on whether it was written in the shorthand or the
+grouped form. See
+<a href="https://github.com/activerecord-hackery/ransack/issues/1414">#1414</a>.</p>
+  <h2 id="blank-values">Blank values</h2>
+</blockquote>
+
+<p>By default Ransack ignores a condition whose value is blank — an empty string,
+or an array of only blank values. This is what makes an HTML search form behave
+sensibly: a form submitted with its fields left empty returns every record
+rather than none.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_eq: </span><span class="s2">""</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># =&gt; SELECT "people".* FROM "people"</span>
+</code></pre></div></div>
+
+<p>For a JSON API this is often the wrong default, because there an empty value is
+usually an explicit filter rather than an untouched form field. Setting
+<code class="language-plaintext highlighter-rouge">ignore_blank_values</code> to <code class="language-plaintext highlighter-rouge">false</code> makes Ransack search for the blank value
+instead of dropping it:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="p">{</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span> <span class="n">config</span><span class="p">.</span><span class="nf">ignore_blank_values</span> <span class="o">=</span> <span class="kp">false</span> <span class="p">}</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_eq: </span><span class="s2">""</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># =&gt; SELECT "people".* FROM "people" WHERE "people"."name" = ''</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">id_in: </span><span class="p">[]).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_a</span>
+<span class="c1"># =&gt; []   (an empty allowlist matches nothing, rather than matching everything)</span>
+</code></pre></div></div>
+
+<p>A <code class="language-plaintext highlighter-rouge">nil</code> value is ignored under either setting, so params that were never sent
+are still not turned into conditions.</p>
+
+<p>On a non-string column a blank has no literal to compare against, so it is
+treated as <code class="language-plaintext highlighter-rouge">NULL</code>: <code class="language-plaintext highlighter-rouge">parent_id_eq: ""</code> becomes <code class="language-plaintext highlighter-rouge">parent_id IS NULL</code>, and the
+same applies to boolean and date columns. Inside an <code class="language-plaintext highlighter-rouge">_in</code> or with a comparison
+such as <code class="language-plaintext highlighter-rouge">_gt</code>, a blank matches nothing at all rather than everything.</p>
+
+<blockquote class="caution">
+  <p>Do not turn this off for a search backed by an HTML form. A blank text input
+posts <code class="language-plaintext highlighter-rouge">""</code>, so with <code class="language-plaintext highlighter-rouge">ignore_blank_values = false</code> an untouched field becomes
+<code class="language-plaintext highlighter-rouge">WHERE column = ''</code> and the form returns nothing.</p>
+  <h2 id="sorting-nulls">Sorting NULLs</h2>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">fields_sort_option</code> controls where <code class="language-plaintext highlighter-rouge">NULL</code>s are placed when sorting:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Ascending</th>
+      <th>Descending</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">nil</code> (default)</td>
+      <td>backend default</td>
+      <td>backend default</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">:nulls_first</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS FIRST</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS LAST</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">:nulls_last</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS LAST</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS FIRST</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">:nulls_always_first</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS FIRST</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS FIRST</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">:nulls_always_last</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS LAST</code></td>
+      <td><code class="language-plaintext highlighter-rouge">NULLS LAST</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="p">{</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span> <span class="n">config</span><span class="p">.</span><span class="nf">fields_sort_option</span> <span class="o">=</span> <span class="ss">:nulls_first</span> <span class="p">}</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">s: </span><span class="s1">'name asc'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... ORDER BY "people"."name" ASC NULLS FIRST</span>
+</code></pre></div></div>
+
+<blockquote class="note">
+  <p>This was called <code class="language-plaintext highlighter-rouge">postgres_fields_sort_option</code> before Ransack 5.0, and was built
+by interpolating SQL fragments. It now goes through Arel’s <code class="language-plaintext highlighter-rouge">nulls_first</code> /
+<code class="language-plaintext highlighter-rouge">nulls_last</code> nodes, so it works on every database Arel renders them for,
+including MySQL, where Arel emulates them as <code class="language-plaintext highlighter-rouge">ORDER BY col IS NULL, col</code>
+(Rails 7.2 and later). The old name still works.</p>
+  <h2 id="custom-search-parameter-key-name">Custom search parameter key name</h2>
+</blockquote>
+
+<p>Sometimes there are situations when the default search parameter name cannot be used, for instance,
+if there are two searches on one page. Another name may be set using the <code class="language-plaintext highlighter-rouge">search_key</code> option in the <code class="language-plaintext highlighter-rouge">ransack</code> or <code class="language-plaintext highlighter-rouge">search</code> methods in the controller, and in the <code class="language-plaintext highlighter-rouge">@search_form_for</code> method in the view.</p>
+
+<h3 id="in-the-controller">In the controller</h3>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="vi">@search</span> <span class="o">=</span> <span class="no">Log</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:log_search</span><span class="p">],</span> <span class="ss">search_key: :log_search</span><span class="p">)</span>
+<span class="c1"># or</span>
+<span class="vi">@search</span> <span class="o">=</span> <span class="no">Log</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:log_search</span><span class="p">],</span> <span class="ss">search_key: :log_search</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="in-the-view">In the view</h3>
+
+<p>The form helpers read the key from the search object, so nothing extra is
+needed:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">search_form_for</span> <span class="vi">@search</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%=</span> <span class="n">sort_link</span><span class="p">(</span><span class="vi">@search</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>This emits <code class="language-plaintext highlighter-rouge">log_search[...]</code> field names rather than the default <code class="language-plaintext highlighter-rouge">q[...]</code>.</p>
+
+<blockquote class="note">
+  <p>Before Ransack 5.0 the form helpers ignored a per-search <code class="language-plaintext highlighter-rouge">search_key</code> and always
+used the global default, so the key had to be repeated as <code class="language-plaintext highlighter-rouge">as: :log_search</code>
+(<code class="language-plaintext highlighter-rouge">scope:</code> for <code class="language-plaintext highlighter-rouge">search_form_with</code>). Passing it explicitly still works and still
+wins. See <a href="https://github.com/activerecord-hackery/ransack/issues/1118">#1118</a>.</p>
+</blockquote>

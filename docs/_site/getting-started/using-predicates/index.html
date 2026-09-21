@@ -1,0 +1,252 @@
+<p>The primary method of searching in Ransack is by using what is known as <em>predicates</em>.</p>
+
+<p>Predicates are used within Ransack search queries to determine what information to
+match. For instance, the <code class="language-plaintext highlighter-rouge">cont</code> predicate will check to see if an attribute called
+“first_name” contains a value using a wildcard query:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_cont: </span><span class="s1">'Rya'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'%Rya%'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>You can also combine predicates for OR queries:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_or_last_name_cont: </span><span class="s1">'Rya'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'%Rya%'</span>
+   <span class="no">OR</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"last_name"</span> <span class="no">LIKE</span> <span class="s1">'%Rya%'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The syntax for <code class="language-plaintext highlighter-rouge">OR</code> queries on an associated model is not immediately obvious, but makes sense. Assuming a <code class="language-plaintext highlighter-rouge">User</code> <code class="language-plaintext highlighter-rouge">has_one</code> <code class="language-plaintext highlighter-rouge">Account</code> and the <code class="language-plaintext highlighter-rouge">Account</code> has <code class="language-plaintext highlighter-rouge">attributes</code> <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">bar</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">account_foo_or_account_bar_cont: </span><span class="s1">'val'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span> <span class="no">INNER</span> <span class="no">JOIN</span> <span class="n">accounts</span> <span class="no">ON</span> <span class="n">accounts</span><span class="p">.</span><span class="nf">user_id</span> <span class="o">=</span> <span class="n">users</span><span class="p">.</span><span class="nf">id</span> <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"accounts.foo LIKE '%val%' OR accounts.bar LIKE '%val%')
+</span></code></pre></div></div>
+
+<p>Below is a list of the built-in predicates of Ransack and their opposites. You may already
+be familiar with some of the predicates, as they also exist in the ARel library.</p>
+
+<p>If you want to add your own, please
+see the [[Custom-Predicates|Custom Predicates]] page.</p>
+
+<p><strong>Please note:</strong> any attempt to use a predicate for an attribute that does not exist will
+<em>silently fail</em>. For instance, this will not work when there is no <code class="language-plaintext highlighter-rouge">name</code> attribute:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_cont: </span><span class="s1">'Rya'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="s2">"SELECT "</span><span class="n">users</span><span class="s2">".* FROM "</span><span class="n">users</span><span class="s2">"
+</span></code></pre></div></div>
+
+<h2 id="eq-equals">eq (equals)</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">eq</code> predicate returns all records where a field is <em>exactly</em> equal to a given value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_eq: </span><span class="s1">'Ryan'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span> <span class="no">WHERE</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="o">=</span> <span class="s1">'Ryan'</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_eq</code></strong></p>
+
+<h2 id="matches">matches</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">matches</code> predicate returns all records where a field is like a given value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_matches: </span><span class="s1">'Ryan'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span> <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'Ryan'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">matches</code> is case-sensitive on PostgreSQL; MySQL and SQLite apply their
+collation’s rules. Use <code class="language-plaintext highlighter-rouge">i_cont</code> for a match that ignores case everywhere.</p>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">does_not_match</code></strong></p>
+
+<p><em>Note: If you want to do wildcard matching, you may be looking for the <code class="language-plaintext highlighter-rouge">cont</code>/<code class="language-plaintext highlighter-rouge">not_cont</code>
+predicates instead.</em></p>
+
+<h2 id="lt-less-than">lt (less than)</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">lt</code> predicate returns all records where a field is less than a given value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">age_lt: </span><span class="mi">25</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span> <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"age"</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">gteq</code> (greater than or equal to)</strong></p>
+
+<h2 id="lteq-less-than-or-equal-to">lteq (less than or equal to)</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">lteq</code> predicate returns all records where a field is less than <em>or equal to</em> a given value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">age_lteq: </span><span class="mi">25</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span> <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"age"</span> <span class="o">&lt;=</span> <span class="mi">25</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">gt</code> (greater than)</strong></p>
+
+<h2 id="in">in</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">in</code> predicate returns all records where a field is within a specified list:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">age_in: </span><span class="mi">20</span><span class="o">..</span><span class="mi">25</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span> <span class="no">WHERE</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"age"</span> <span class="no">IN</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>It can also take an array:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">age_in: </span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">]).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span> <span class="no">WHERE</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"age"</span> <span class="no">IN</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_in</code></strong></p>
+
+<h2 id="cont">cont</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">cont</code> predicate returns all records where a field contains a given value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_cont: </span><span class="s1">'Rya'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'%Rya%'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_cont</code></strong></p>
+
+<h2 id="cont_any-contains-any">cont_any (contains any)</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">cont_any</code> predicate returns all records where a field contains any of the given values:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_cont_any: </span><span class="sx">%w(Rya Lis)</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">((</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'%Rya%'</span> <span class="no">OR</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'%Lis%'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_cont_any</code></strong></p>
+
+<h2 id="cont_all-contains-all">cont_all (contains all)</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">cont_all</code> predicate returns all records where a field contains all of the given values:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">city_cont_all: </span><span class="sx">%w(Grand Rapids)</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">((</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"city"</span> <span class="no">LIKE</span> <span class="s1">'%Grand%'</span> <span class="no">AND</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"city"</span> <span class="no">LIKE</span> <span class="s1">'%Rapids%'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_cont_all</code></strong></p>
+
+<h2 id="i_cont">i_cont</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">i_cont</code> case-insensitive predicate returns all records where a field contains a given value and ignores case:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_i_cont: </span><span class="s1">'Rya'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="no">LOWER</span><span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span><span class="p">)</span> <span class="no">LIKE</span> <span class="s1">'%rya%'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_i_cont</code></strong></p>
+
+<h2 id="i_cont_any">i_cont_any</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">i_cont_any</code> case-insensitive predicate returns all records where a field contains any of the given values and ignores case:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_i_cont_any: </span><span class="sx">%w(Rya Lis)</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">((</span><span class="no">LOWER</span><span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span><span class="p">)</span> <span class="no">LIKE</span> <span class="s1">'%rya%'</span> <span class="no">OR</span> <span class="no">LOWER</span><span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span><span class="p">)</span> <span class="no">LIKE</span> <span class="s1">'%lis%'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_i_cont_any</code></strong></p>
+
+<h2 id="i_cont_all">i_cont_all</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">i_cont_all</code> case-insensitive predicate returns all records where a field contains all of the given values and ignores case:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">city_i_cont_all: </span><span class="sx">%w(Grand Rapids)</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">((</span><span class="no">LOWER</span><span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"city"</span><span class="p">)</span> <span class="no">LIKE</span> <span class="s1">'%grand%'</span> <span class="no">AND</span> <span class="no">LOWER</span><span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"city"</span><span class="p">)</span> <span class="no">LIKE</span> <span class="s1">'%rapids%'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_i_cont_all</code></strong></p>
+
+<h2 id="start-starts-with">start (starts with)</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">start</code> predicate returns all records where a field begins with a given value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_start: </span><span class="s1">'Rya'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'Rya%'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_start</code></strong></p>
+
+<h2 id="end-ends-with">end (ends with)</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">end</code> predicate returns all records where a field ends with a given value:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_end: </span><span class="s1">'yan'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">LIKE</span> <span class="s1">'%yan'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_end</code></strong></p>
+
+<h2 id="true">true</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">true</code> predicate returns all records where a field is true. The ‘1’ indicates that
+to Ransack that you indeed want to check the truthiness of this field. The other truthy
+values are ‘true’, ‘TRUE’, ‘t’ or ‘T’.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">awesome_true: </span><span class="s1">'1'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"awesome"</span> <span class="o">=</span> <span class="s1">'t'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><em>Note: different database systems use different values to represent truth. In the above
+example, we are using SQLite3.</em></p>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_true</code></strong></p>
+
+<h2 id="false">false</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">false</code> predicate returns all records where a field is false.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">awesome_false: </span><span class="s1">'1'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"awesome"</span> <span class="o">=</span> <span class="s1">'f'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_false</code></strong></p>
+
+<p><em>Note: the <code class="language-plaintext highlighter-rouge">false</code> predicate may be considered the opposite of the <code class="language-plaintext highlighter-rouge">true</code> predicate if the field does not contain <code class="language-plaintext highlighter-rouge">null</code> values. Otherwise, use <code class="language-plaintext highlighter-rouge">not_false</code>.</em></p>
+
+<h2 id="present">present</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">present</code> predicate returns all records where a field is present (not null and not a
+blank string).</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_present: </span><span class="s1">'1'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">((</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">IS</span> <span class="no">NOT</span> <span class="no">NULL</span> <span class="no">AND</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="o">!=</span> <span class="s1">''</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">blank</code></strong></p>
+
+<h2 id="null">null</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">null</code> predicate returns all records where a field is null:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_null: </span><span class="mi">1</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span> <span class="no">IS</span> <span class="no">NULL</span>
+</code></pre></div></div>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_null</code></strong></p>
+
+<h1 id="url-parameter-structure">URL parameter structure</h1>
+
+<p>The search parameters are passed to ransack as a hash. The URL representation of this hash uses the bracket notation: <code class="language-plaintext highlighter-rouge">hash_name[key]=value</code>. The hash_name is the parameter which is defined in the controller, for instance <code class="language-plaintext highlighter-rouge">q</code>. The key is the attribute and search predicate compound, for instance <code class="language-plaintext highlighter-rouge">first_name_cont</code>, the value is the search parameter. When searching without using the search form helpers this URL structure needs to be created manually.</p>
+
+<p>For example, the URL layout for searching and sorting users could looks like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/users.json?q[first_name_cont]=pete&amp;q[last_name_cont]=jack&amp;q[s]=created_at+desc
+</code></pre></div></div>
+
+<p><em>Note that the sorting parameter <code class="language-plaintext highlighter-rouge">s</code> is nested within the <code class="language-plaintext highlighter-rouge">q</code> hash.</em></p>
+
+<p>When using JavaScript to create such a URL, a matching jQuery request could look like this:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">$</span><span class="p">.</span><span class="nf">ajax</span><span class="p">({</span>
+  <span class="na">url</span><span class="p">:</span> <span class="dl">"</span><span class="s2">/users.json</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">q</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">first_name_cont</span><span class="p">:</span> <span class="dl">"</span><span class="s2">pete</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">last_name_cont</span><span class="p">:</span> <span class="dl">"</span><span class="s2">jack</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">s</span><span class="p">:</span> <span class="dl">"</span><span class="s2">created_at desc</span><span class="dl">"</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="na">success</span><span class="p">:</span> <span class="nf">function </span><span class="p">(</span><span class="nx">data</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div></div>

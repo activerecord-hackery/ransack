@@ -1,0 +1,74 @@
+<h2 id="ransack-memory-gem">Ransack Memory Gem</h2>
+
+<p>The <a href="https://github.com/richardrails/ransack_memory">Ransack Memory</a> gem accomplishes this.</p>
+
+<h2 id="custom-solution">Custom solution</h2>
+
+<p>If you want a custom solution, you can build it yourself. My ransack AJAX searching doesn’t save your search parameters across transactions. In this post I’ll show you how to easily add this capability in a generic way.</p>
+
+<p>In this example I added AJAX search ability to index pages.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@search</span> <span class="o">=</span> <span class="no">ComponentDefinition</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">search_params</span><span class="p">)</span>
+  <span class="c1"># make name the default sort column</span>
+  <span class="vi">@search</span><span class="p">.</span><span class="nf">sorts</span> <span class="o">=</span> <span class="s1">'name'</span> <span class="k">if</span> <span class="vi">@search</span><span class="p">.</span><span class="nf">sorts</span><span class="p">.</span><span class="nf">empty?</span>
+  <span class="vi">@component_definitions</span> <span class="o">=</span> <span class="vi">@search</span><span class="p">.</span><span class="nf">result</span><span class="p">().</span><span class="nf">page</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:page</span><span class="p">])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>I added methods(search_params, clear_search_index) in the ApplicationController to add a level of abstraction from the search gem I was using. Turns out this made things super easy, especially considering I won’t have to update my code generation tools for index pages.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="k">def</span> <span class="nf">search_params</span>
+    <span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">]</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="nf">clear_search_index</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:search_cancel</span><span class="p">]</span>
+      <span class="n">params</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="ss">:search_cancel</span><span class="p">)</span>
+      <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">search_params</span><span class="p">.</span><span class="nf">nil?</span><span class="p">)</span>
+        <span class="n">search_params</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">param</span><span class="o">|</span>
+          <span class="n">search_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kp">nil</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>I decided to store the ransack search parameters, params[:q], in the session. To make the session parameter unique I used a key creed from the controllers name and “_search”.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+
+  <span class="c1"># CHECK THE SESSION FOR SEARCH PARAMETERS IS THEY AREN'T IN THE REQUEST</span>
+  <span class="k">def</span> <span class="nf">search_params</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">]</span> <span class="o">==</span> <span class="kp">nil</span>
+        <span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="n">search_key</span><span class="p">]</span>
+    <span class="k">end</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">]</span>
+          <span class="n">session</span><span class="p">[</span><span class="n">search_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">]</span>
+        <span class="k">end</span>
+        <span class="n">params</span><span class="p">[</span><span class="ss">:q</span><span class="p">]</span>
+  <span class="k">end</span>
+  <span class="c1"># DELETE SEARCH PARAMETERS FROM THE SESSION</span>
+  <span class="k">def</span> <span class="nf">clear_search_index</span>
+      <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:search_cancel</span><span class="p">]</span>
+        <span class="n">params</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="ss">:search_cancel</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">search_params</span><span class="p">.</span><span class="nf">nil?</span><span class="p">)</span>
+            <span class="n">search_params</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">param</span><span class="o">|</span>
+                <span class="n">search_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kp">nil</span>
+            <span class="k">end</span>
+        <span class="k">end</span>
+        <span class="c1"># REMOVE FROM SESSION</span>
+        <span class="n">session</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="n">search_key</span><span class="p">)</span>
+      <span class="k">end</span>
+  <span class="k">end</span>
+
+<span class="kp">protected</span>
+  <span class="c1"># GENERATE A GENERIC SESSION KEY BASED ON THE CONTROLLER NAME</span>
+  <span class="k">def</span> <span class="nf">search_key</span>
+    <span class="s2">"</span><span class="si">#{</span><span class="n">controller_name</span><span class="si">}</span><span class="s2">_search"</span><span class="p">.</span><span class="nf">to_sym</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Based on <a href="https://techbrownbags.wordpress.com/2015/02/18/rails-save-ransack-search-queries/">Saving queries</a></p>

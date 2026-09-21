@@ -1,0 +1,162 @@
+<p>“Advanced” searches Rails’s nested attributes functionality in order to
+generate complex queries with nested AND/OR groupings, etc. This takes a bit
+more work but can generate some pretty cool search interfaces that put a lot of
+power in the hands of your users.</p>
+
+<p>A notable drawback with these searches is
+that the increased size of the parameter string will typically force you to use
+the HTTP POST method instead of GET.</p>
+
+<h2 id="the-search-parameter-structure">The search parameter structure</h2>
+
+<p>An advanced search is expressed as nested groupings. Each key has a short and a
+long spelling, and the two are interchangeable:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Short</th>
+      <th>Long</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">g</code></td>
+      <td><code class="language-plaintext highlighter-rouge">groupings</code></td>
+      <td>Nested groupings</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">c</code></td>
+      <td><code class="language-plaintext highlighter-rouge">conditions</code></td>
+      <td>The conditions in a grouping</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">m</code></td>
+      <td><code class="language-plaintext highlighter-rouge">combinator</code></td>
+      <td>How this grouping’s members are joined</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">a</code></td>
+      <td><code class="language-plaintext highlighter-rouge">attributes</code></td>
+      <td>The attributes a condition applies to</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">p</code></td>
+      <td><code class="language-plaintext highlighter-rouge">predicate</code></td>
+      <td>The predicate to apply (<code class="language-plaintext highlighter-rouge">predicate_name</code> is accepted too)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">v</code></td>
+      <td><code class="language-plaintext highlighter-rouge">values</code></td>
+      <td>The values to match against</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span>
+  <span class="ss">g: </span><span class="p">[</span>
+    <span class="p">{</span> <span class="ss">m: </span><span class="s1">'or'</span><span class="p">,</span> <span class="ss">name_cont: </span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="ss">email_cont: </span><span class="s1">'ernie'</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Groupings nest, so you can express <code class="language-plaintext highlighter-rouge">(A OR B) AND (C OR D)</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span>
+  <span class="ss">m: </span><span class="s1">'and'</span><span class="p">,</span>
+  <span class="ss">g: </span><span class="p">[</span>
+    <span class="p">{</span> <span class="ss">m: </span><span class="s1">'or'</span><span class="p">,</span> <span class="ss">name_cont: </span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="ss">email_cont: </span><span class="s1">'ernie'</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="ss">m: </span><span class="s1">'or'</span><span class="p">,</span> <span class="ss">salary_gteq: </span><span class="mi">50_000</span><span class="p">,</span> <span class="ss">parent_name_eq: </span><span class="s1">'Ruby'</span> <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="combinators">Combinators</h2>
+
+<p><code class="language-plaintext highlighter-rouge">m</code> (or <code class="language-plaintext highlighter-rouge">combinator</code>) takes <code class="language-plaintext highlighter-rouge">'and'</code> or <code class="language-plaintext highlighter-rouge">'or'</code>, and defaults to <code class="language-plaintext highlighter-rouge">'and'</code>. Case and
+Symbols are accepted, so <code class="language-plaintext highlighter-rouge">'or'</code>, <code class="language-plaintext highlighter-rouge">'OR'</code>, <code class="language-plaintext highlighter-rouge">'Or'</code> and <code class="language-plaintext highlighter-rouge">:or</code> all mean the same:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">g: </span><span class="p">[{</span> <span class="ss">m: </span><span class="s1">'OR'</span><span class="p">,</span> <span class="ss">name_eq: </span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="ss">email_eq: </span><span class="s1">'ernie@example.com'</span> <span class="p">}])</span>
+<span class="c1"># ... WHERE ("people"."name" = 'Ernie' OR "people"."email" = 'ernie@example.com')</span>
+</code></pre></div></div>
+
+<p>An unrecognised combinator is ignored and the grouping falls back to <code class="language-plaintext highlighter-rouge">'and'</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">g: </span><span class="p">[{</span> <span class="ss">m: </span><span class="s1">'nand'</span><span class="p">,</span> <span class="ss">name_eq: </span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="ss">email_eq: </span><span class="s1">'ernie@example.com'</span> <span class="p">}])</span>
+<span class="c1"># ... WHERE ("people"."name" = 'Ernie' AND "people"."email" = 'ernie@example.com')</span>
+</code></pre></div></div>
+
+<p>This is deliberate — a search built from user input should not blow up on a bad
+parameter. If you would rather hear about it, use <code class="language-plaintext highlighter-rouge">ransack!</code>, or set
+<code class="language-plaintext highlighter-rouge">ignore_unknown_conditions</code> to <code class="language-plaintext highlighter-rouge">false</code>, and an unrecognised combinator raises
+just as an unknown predicate or attribute does — at any level of nesting:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack!</span><span class="p">(</span><span class="ss">name_eq: </span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="ss">combinator: </span><span class="s1">'nand'</span><span class="p">)</span>
+<span class="c1"># Ransack::InvalidSearchError: Invalid combinator nand</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack!</span><span class="p">(</span><span class="ss">g: </span><span class="p">[{</span> <span class="ss">m: </span><span class="s1">'nand'</span><span class="p">,</span> <span class="ss">name_eq: </span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="ss">email_eq: </span><span class="s1">'ernie@example.com'</span> <span class="p">}])</span>
+<span class="c1"># Ransack::InvalidSearchError: Invalid combinator nand</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code> is a subclass of <code class="language-plaintext highlighter-rouge">ArgumentError</code>, so existing
+<code class="language-plaintext highlighter-rouge">rescue ArgumentError</code> handlers still catch it. A blank combinator, as a form
+submits for an untouched field, is never an error.</p>
+
+<blockquote class="note">
+  <p>Before Ransack 5.0, <code class="language-plaintext highlighter-rouge">'OR'</code> and <code class="language-plaintext highlighter-rouge">:or</code> were not recognised and silently fell back
+to <code class="language-plaintext highlighter-rouge">'and'</code> — a search that looked correct returned the wrong rows. See
+<a href="https://github.com/activerecord-hackery/ransack/pull/1465">#1465</a>.</p>
+  <h2 id="blank-values">Blank values</h2>
+
+  <p>A condition whose value is blank is dropped before the query is built, so a
+search form submitted with empty fields returns every record rather than none.
+This applies to the low-level <code class="language-plaintext highlighter-rouge">c:</code> form as well as the shorthand:</p>
+
+  <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">children_name_eq: </span><span class="s1">''</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># =&gt; SELECT "people".* FROM "people"</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">c: </span><span class="p">{</span> <span class="s1">'0'</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">a: </span><span class="p">[</span><span class="s1">'children_name'</span><span class="p">],</span> <span class="ss">p: </span><span class="s1">'eq'</span><span class="p">,</span> <span class="ss">v: </span><span class="p">[</span><span class="s1">''</span><span class="p">]</span> <span class="p">}</span> <span class="p">}).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># =&gt; SELECT "people".* FROM "people"</span>
+</code></pre></div>  </div>
+
+  <p>Both forms drop the condition, so neither contributes a join. This applies at
+any depth of nested groupings, under the short or long key spellings.</p>
+
+  <p>To search <em>for</em> a blank value instead of ignoring it, see
+<a href="/ransack/getting-started/configuration/#blank-values"><code class="language-plaintext highlighter-rouge">ignore_blank_values</code></a>.</p>
+
+  <p>:::note</p>
+
+  <p>Before Ransack 5.0 only the shorthand form was pruned. A <code class="language-plaintext highlighter-rouge">c:</code> condition with an
+empty value still built its attribute and contributed a join, producing a
+<code class="language-plaintext highlighter-rouge">LEFT OUTER JOIN</code> with no <code class="language-plaintext highlighter-rouge">WHERE</code> clause to go with it. See
+<a href="https://github.com/activerecord-hackery/ransack/pull/1653">#1653</a>.</p>
+  <h2 id="tweak-your-routes">Tweak your routes</h2>
+</blockquote>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">resources</span> <span class="ss">:people</span> <span class="k">do</span>
+  <span class="n">collection</span> <span class="k">do</span>
+    <span class="n">match</span> <span class="s1">'search'</span> <span class="o">=&gt;</span> <span class="s1">'people#search'</span><span class="p">,</span> <span class="ss">via: </span><span class="p">[</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:post</span><span class="p">],</span> <span class="ss">as: :search</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="add-a-controller-action">Add a controller action</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">search</span>
+  <span class="n">index</span>
+  <span class="n">render</span> <span class="ss">:index</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="update-your-form">Update your form</h2>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">search_form_for</span> <span class="vi">@q</span><span class="p">,</span> <span class="ss">url: </span><span class="n">search_people_path</span><span class="p">,</span>
+                        <span class="ss">html: </span><span class="p">{</span> <span class="ss">method: :post</span> <span class="p">}</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>Once you’ve done so, you can make use of the helpers in <a href="https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/helpers/form_builder.rb">Ransack::Helpers::FormBuilder</a> to
+construct much more complex search forms, such as the one on the
+<a href="http://ransack-demo.herokuapp.com/users/advanced_search">demo app</a>
+(source code <a href="https://github.com/activerecord-hackery/ransack_demo">here</a>).</p>

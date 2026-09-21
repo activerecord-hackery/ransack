@@ -1,0 +1,147 @@
+<p>Ransack follows <a href="/ransack/going-further/release_process/#semantic-versioning">semantic versioning</a>:
+a major release is the only place a breaking change can land. This page lists
+what changed in each major release and what to do about it. The full list of
+changes in every release is in the
+<a href="https://github.com/activerecord-hackery/ransack/releases">GitHub release notes</a>.</p>
+
+<h2 id="upgrading-to-60">Upgrading to 6.0</h2>
+
+<h3 id="ruby-32-or-later-is-required">Ruby 3.2 or later is required</h3>
+
+<p>Ruby 3.1 reached end of life in March 2025 and no longer receives security
+fixes. Ransack 6.0 requires Ruby 3.2 or later, which is also the floor for
+Rails 8.0. If you are on Ruby 3.1 you are already limited to Rails 7.2; stay on
+Ransack 5.x until you can upgrade Ruby.</p>
+
+<h3 id="cont-is-case-sensitive-on-postgresql"><code class="language-plaintext highlighter-rouge">cont</code> is case-sensitive on PostgreSQL</h3>
+
+<p>Ransack never told Arel whether a <code class="language-plaintext highlighter-rouge">LIKE</code> should be case-sensitive, and Arel’s
+PostgreSQL visitor renders the default as <code class="language-plaintext highlighter-rouge">ILIKE</code>. So on PostgreSQL <code class="language-plaintext highlighter-rouge">cont</code>,
+<code class="language-plaintext highlighter-rouge">start</code>, <code class="language-plaintext highlighter-rouge">end</code> and <code class="language-plaintext highlighter-rouge">matches</code> all ignored case, while the docs said <code class="language-plaintext highlighter-rouge">cont</code> used
+<code class="language-plaintext highlighter-rouge">LIKE</code>. They now do: <code class="language-plaintext highlighter-rouge">cont</code> is <code class="language-plaintext highlighter-rouge">LIKE</code> and <code class="language-plaintext highlighter-rouge">i_cont</code> is <code class="language-plaintext highlighter-rouge">ILIKE</code>. A PostgreSQL
+application that relied on <code class="language-plaintext highlighter-rouge">cont</code> ignoring case should switch those searches
+to <code class="language-plaintext highlighter-rouge">i_cont</code>. MySQL and SQLite are unaffected; their <code class="language-plaintext highlighter-rouge">LIKE</code> follows the
+column’s collation as before. See
+<a href="/ransack/getting-started/search-matches/#case-sensitivity">Search Matchers</a>.</p>
+
+<h3 id="database-dialects-are-detected-from-the-adapter-class">Database dialects are detected from the adapter class</h3>
+
+<p>A few places generate different SQL per database. They used to compare the
+adapter’s name against a list (<code class="language-plaintext highlighter-rouge">"PostgreSQL"</code>, <code class="language-plaintext highlighter-rouge">"PostGIS"</code>, <code class="language-plaintext highlighter-rouge">"Mysql2"</code>,
+<code class="language-plaintext highlighter-rouge">"Trilogy"</code>), so an adapter that was not on the list — even one built on a
+known adapter — got the wrong SQL, and PostGIS was carried as a development
+dependency just to keep it on the list. The dialect is now read from the
+adapter class’s ancestry, so PostGIS is PostgreSQL without being named, and
+<code class="language-plaintext highlighter-rouge">config.dialect</code> overrides the detection. The <code class="language-plaintext highlighter-rouge">activerecord-postgis-adapter</code>
+development dependency and its CI job are gone. See
+<a href="/ransack/getting-started/configuration/#sql-dialect">Configuration</a>.</p>
+
+<h3 id="strict-searches-check-more">Strict searches check more</h3>
+
+<p>Under <code class="language-plaintext highlighter-rouge">ransack!</code> or <code class="language-plaintext highlighter-rouge">ignore_unknown_conditions = false</code>, two things that were
+silently accepted now raise <code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code>:</p>
+
+<ul>
+  <li>a sort on an attribute that is not ransortable or does not exist, which used
+to drop the whole <code class="language-plaintext highlighter-rouge">ORDER BY</code> (see <a href="/ransack/getting-started/sorting/#unknown-sorts">Sorting</a>);</li>
+  <li>a condition name that mixes <code class="language-plaintext highlighter-rouge">_and_</code> and <code class="language-plaintext highlighter-rouge">_or_</code>, which used to apply the
+first combinator to every attribute (see <a href="/ransack/getting-started/simple-mode/">Simple Mode</a>).</li>
+</ul>
+
+<p>Permissive searches are unchanged.</p>
+
+<h3 id="values-are-cast-by-the-declared-attribute-type">Values are cast by the declared attribute type</h3>
+
+<p>A column redeclared with <code class="language-plaintext highlighter-rouge">attribute :name, :datetime</code> is now cast as a
+datetime; before, the schema column’s type won. A <code class="language-plaintext highlighter-rouge">Date</code> given for a datetime
+column now means midnight in <code class="language-plaintext highlighter-rouge">Time.zone</code>; before, it was midnight in the
+server’s system time zone, which moved the day boundary when the two differed.
+See <a href="/ransack/getting-started/search-matches/#attribute-types">Search Matchers</a>.</p>
+
+<h3 id="scopes-that-skip-sanitizing-receive-false">Scopes that skip sanitizing receive <code class="language-plaintext highlighter-rouge">false</code></h3>
+
+<p>A scope listed in <code class="language-plaintext highlighter-rouge">ransackable_scopes_skip_sanitize_args</code> now receives a bare
+<code class="language-plaintext highlighter-rouge">false</code> instead of being skipped, so it can be driven by a yes / no / any
+select. Other scopes still treat <code class="language-plaintext highlighter-rouge">false</code> as an unticked checkbox. See
+<a href="/ransack/going-further/other-notes/#scopes-and-false">Other notes</a>.</p>
+
+<h3 id="joins-already-on-the-relation-are-reused">Joins already on the relation are reused</h3>
+
+<p>A search on a relation that already joins a table, through <code class="language-plaintext highlighter-rouge">joins</code>,
+<code class="language-plaintext highlighter-rouge">left_outer_joins</code>, an eager-loaded <code class="language-plaintext highlighter-rouge">includes</code> or a previous search, now
+reuses that join. Before, the association was joined again under a fresh
+alias, which multiplied rows for a <code class="language-plaintext highlighter-rouge">has_many</code> and could bind a condition to
+the wrong one of two joins to the same table. A query that depended on the
+duplicate is unlikely, but row counts from such searches will change. The
+joins Ransack adds are now stashed on the relation’s <code class="language-plaintext highlighter-rouge">left_outer_joins</code>
+rather than its <code class="language-plaintext highlighter-rouge">joins</code>; code that inspected <code class="language-plaintext highlighter-rouge">joins_values</code> for them should
+look at <code class="language-plaintext highlighter-rouge">left_outer_joins_values</code>. See
+<a href="/ransack/going-further/associations/#searching-a-relation-that-already-has-joins">Associations</a>.</p>
+
+<h3 id="sorts-replaces-instead-of-appending"><code class="language-plaintext highlighter-rouge">sorts=</code> replaces instead of appending</h3>
+
+<p><code class="language-plaintext highlighter-rouge">search.sorts = 'name asc'</code> now sets exactly that sort; before, it added to
+whatever sorts the search already had, and <code class="language-plaintext highlighter-rouge">sorts = []</code> did nothing. Code that
+relied on the append should call <code class="language-plaintext highlighter-rouge">build_sort</code> for each additional sort. See
+<a href="/ransack/getting-started/sorting/#assigning-sorts">Sorting</a>.</p>
+
+<h3 id="a-scope-wins-over-an-attribute-of-the-same-name-in-the-writer">A scope wins over an attribute of the same name in the writer</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Search#build</code> already applied a <code class="language-plaintext highlighter-rouge">ransackable_scopes</code> entry before looking for
+an attribute of the same name; the attribute writer and reader used by form
+builders (<code class="language-plaintext highlighter-rouge">search.salary = 100</code>, <code class="language-plaintext highlighter-rouge">f.check_box :salary</code>) checked attributes
+first and silently skipped the scope. They agree now.</p>
+
+<h3 id="ransack_alias-resolves-through-associations-and-in-compounds"><code class="language-plaintext highlighter-rouge">ransack_alias</code> resolves through associations and in compounds</h3>
+
+<p><code class="language-plaintext highlighter-rouge">author_name_cont</code> (alias on <code class="language-plaintext highlighter-rouge">Author</code>) and <code class="language-plaintext highlighter-rouge">text_or_author_name_cont</code> used to
+produce SQL referring to columns that do not exist; they now expand the alias.
+The alias name itself no longer needs to be in <code class="language-plaintext highlighter-rouge">ransackable_attributes</code>, and an
+alias whose target does not exist raises under <code class="language-plaintext highlighter-rouge">ransack!</code> like any unknown
+attribute. See
+<a href="/ransack/going-further/other-notes/#aliases-through-associations-and-in-compounds">Ransack Aliases</a>.</p>
+
+<h3 id="polyamorous-is-gone-ransackadaptersactiverecord-is-deprecated"><code class="language-plaintext highlighter-rouge">Polyamorous</code> is gone; <code class="language-plaintext highlighter-rouge">Ransack::Adapters::ActiveRecord</code> is deprecated</h3>
+
+<p>The Active Record integration now lives under <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord</code>. See
+<a href="/ransack/going-further/architecture/">How Ransack is built</a> for the layout.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Ransack::Adapters::ActiveRecord::Base</code> and <code class="language-plaintext highlighter-rouge">::Context</code> still resolve, with a
+deprecation warning, and will be removed in 7.0. An initializer that reopens
+<code class="language-plaintext highlighter-rouge">Ransack::Adapters::ActiveRecord::Base</code> to change the <code class="language-plaintext highlighter-rouge">ransackable_*</code>
+defaults should reopen <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Base</code> instead.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">Polyamorous</code> namespace and the <code class="language-plaintext highlighter-rouge">polyamorous/polyamorous</code> require path
+are removed. <code class="language-plaintext highlighter-rouge">Polyamorous::Join</code> is <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Join</code>;
+<code class="language-plaintext highlighter-rouge">Polyamorous::InnerJoin</code> and <code class="language-plaintext highlighter-rouge">OuterJoin</code> were aliases for
+<code class="language-plaintext highlighter-rouge">Arel::Nodes::InnerJoin</code> and <code class="language-plaintext highlighter-rouge">Arel::Nodes::OuterJoin</code>, so use those.</li>
+  <li><code class="language-plaintext highlighter-rouge">Ransack::SUPPORTS_ATTRIBUTE_ALIAS</code> is removed; every supported Active Record
+version supports attribute aliases.</li>
+  <li><code class="language-plaintext highlighter-rouge">Ransack::Context.for_class</code> and <code class="language-plaintext highlighter-rouge">for_object</code> are replaced by a resolver
+registry, <code class="language-plaintext highlighter-rouge">Ransack::Context.register</code>, so another ORM can plug in without
+patching Ransack.</li>
+</ul>
+
+<h2 id="upgrading-to-50">Upgrading to 5.0</h2>
+
+<p>Ransack 5.0 shipped on 2026-09-21 with these behaviour changes. Each is
+described in more detail on the page it links to.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">LIKE</code> wildcards (<code class="language-plaintext highlighter-rouge">%</code> and <code class="language-plaintext highlighter-rouge">_</code>) in search values are escaped on every database,
+and every <code class="language-plaintext highlighter-rouge">LIKE</code> carries an explicit <code class="language-plaintext highlighter-rouge">ESCAPE</code> clause. A value of <code class="language-plaintext highlighter-rouge">100%</code> now
+matches the literal text <code class="language-plaintext highlighter-rouge">100%</code>. See <a href="/ransack/getting-started/search-matches/">Search Matchers</a>.</li>
+  <li>Empty arrays and blank strings can be treated as real filter values with
+<code class="language-plaintext highlighter-rouge">config.ignore_blank_values = false</code>. See <a href="/ransack/getting-started/configuration/">Configuration</a>.</li>
+  <li>An unknown combinator (<code class="language-plaintext highlighter-rouge">m:</code>) raises under <code class="language-plaintext highlighter-rouge">ransack!</code> or
+<code class="language-plaintext highlighter-rouge">ignore_unknown_conditions: false</code> rather than silently meaning <code class="language-plaintext highlighter-rouge">and</code>, and
+<code class="language-plaintext highlighter-rouge">OR</code> / <code class="language-plaintext highlighter-rouge">:or</code> are normalised to <code class="language-plaintext highlighter-rouge">or</code>. See <a href="/ransack/getting-started/advanced-mode/">Advanced Mode</a>.</li>
+  <li><code class="language-plaintext highlighter-rouge">config.postgres_fields_sort_option</code> is renamed <code class="language-plaintext highlighter-rouge">config.fields_sort_option</code>,
+because <code class="language-plaintext highlighter-rouge">NULLS FIRST</code> / <code class="language-plaintext highlighter-rouge">NULLS LAST</code> are emitted through Arel and work on
+every database that supports them. The old name still works. See
+<a href="/ransack/getting-started/sorting/">Sorting</a>.</li>
+  <li>The monkey patch on <code class="language-plaintext highlighter-rouge">ActionView::Helpers::Tags::Base#value</code> is gone. Form
+fields read their values through the search object’s own readers, so nothing
+changes for <code class="language-plaintext highlighter-rouge">search_form_for</code>, but code that depended on the patch
+indirectly should be checked.</li>
+</ul>
