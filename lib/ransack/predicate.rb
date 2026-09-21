@@ -3,6 +3,17 @@ module Ransack
     attr_reader :name, :arel_predicate, :type, :formatter, :validator,
                 :compound, :wants_array, :case_insensitive
 
+    # Consulted at search time rather than captured at predicate-definition
+    # time, so that `Ransack.options[:ignore_blank_values]` set in an
+    # initializer applies to the predicates registered before it ran.
+    DEFAULT_VALIDATOR = lambda do |v|
+      if Ransack.options[:ignore_blank_values]
+        v.respond_to?(:empty?) ? !v.empty? : !v.nil?
+      else
+        !v.nil?
+      end
+    end
+
     class << self
 
       def names
@@ -37,8 +48,7 @@ module Ransack
       @arel_predicate = opts[:arel_predicate]
       @type = opts[:type]
       @formatter = opts[:formatter]
-      @validator = opts[:validator] ||
-        lambda { |v| v.respond_to?(:empty?) ? !v.empty? : !v.nil? }
+      @validator = opts[:validator] || DEFAULT_VALIDATOR
       @compound = opts[:compound]
       @wants_array = opts.fetch(:wants_array,
         @compound || Constants::IN_NOT_IN.include?(@arel_predicate))
@@ -64,7 +74,18 @@ module Ransack
     end
 
     def validate(vals, type = @type)
-      vals.any? { |v| validator.call(type ? v.cast(type) : v.value) }
+      # An explicitly empty array is a meaningful filter (matching nothing)
+      # rather than an absent one, but only when blank values are not ignored.
+      return true if vals.empty? && wants_array &&
+                     !Ransack.options[:ignore_blank_values]
+
+      # When blank values are meaningful, validate the value as given. Casting
+      # first would turn '' into nil for an integer or boolean column and the
+      # explicit blank would be dropped — leaving no condition at all.
+      vals.any? do |v|
+        value = type && Ransack.options[:ignore_blank_values] ? v.cast(type) : v.value
+        validator.call(value)
+      end
     end
 
     def negative?

@@ -177,11 +177,18 @@ module Ransack
       attrs
     end
 
-    # True when every element of a condition's value is blank, i.e. the field
-    # was submitted empty. `false` is a real value, and an explicit nil is kept
-    # so `name_in: [nil]` still reaches the query.
+    # True when a condition's value should be dropped before building. With
+    # `ignore_blank_values` on (the default) a blank value means "this form
+    # field was left empty"; with it off, only nil is treated that way and a
+    # blank value is a value to search for. `false` is always a real value, and
+    # an explicit nil inside an array is kept so `name_in: [nil]` still reaches
+    # the query. The `c:` pruning below shares this, so it follows the option.
     def blank_condition_value?(value)
-      [*value].all? { |i| i.blank? && i != false && !i.nil? }
+      if Ransack.options[:ignore_blank_values]
+        [*value].all? { |i| i.blank? && i != false && !i.nil? }
+      else
+        value.nil? || (value.is_a?(Array) && !value.empty? && value.all?(&:nil?))
+      end
     end
 
     # The low-level `c:` API nests its values a level deeper than the shorthand
