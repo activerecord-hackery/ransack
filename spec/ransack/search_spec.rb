@@ -949,6 +949,32 @@ module Ransack
       end
     end
 
+    describe 'a scope that shares a column name' do
+      # Search#build already preferred the scope; the writer and reader used
+      # by form builders went through method_missing, which did not (#1472).
+      let(:model) do
+        Class.new(Person) do
+          def self.name
+            'PersonWithSalaryScope'
+          end
+          scope :salary, ->(amount) { where('salary > ?', amount) }
+          def self.ransackable_scopes(_auth_object = nil)
+            %i[salary]
+          end
+        end
+      end
+
+      it 'is applied through the writer as well as the params hash' do
+        # MySQL renders a bound integer as '100'.
+        expect(model.ransack(salary: 100).result.to_sql).to match(/salary > '?100'?/)
+
+        search = model.ransack
+        search.salary = 100
+        expect(search.result.to_sql).to match(/salary > '?100'?/)
+        expect(search.salary).to eq 100
+      end
+    end
+
     describe 'the long-form condition keys' do
       let(:attributes) { { '0' => { name: 'with_arguments', ransacker_args: [10, 100] } } }
 
@@ -999,6 +1025,26 @@ module Ransack
       it 'drops an unknown sort under a permissive search' do
         s = Person.ransack(s: 'only_search asc')
         expect(s.result.to_sql).not_to include('only_search')
+      end
+
+      # Each assignment used to append, so sorts could not be reset (#994).
+      it 'replaces the sorts on each assignment' do
+        @s.sorts = 'id asc'
+        @s.sorts = 'name asc'
+        expect(@s.sorts.map(&:name)).to eq ['name']
+
+        @s.sorts = []
+        expect(@s.sorts).to be_empty
+        expect(@s.result.to_sql).not_to include(quote_column_name('name'))
+
+        @s.sorts = ['id asc', 'name desc']
+        expect(@s.sorts.map(&:name)).to eq %w[id name]
+      end
+
+      it 'still adds with build_sort' do
+        @s.sorts = 'id asc'
+        @s.build_sort(name: 'name', dir: 'desc')
+        expect(@s.sorts.map(&:name)).to eq %w[id name]
       end
 
       it 'doesn\'t creates sorts' do

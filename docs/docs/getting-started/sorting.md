@@ -127,3 +127,18 @@ Person.ransack!(s: 'secret_column asc')
 
 Before Ransack 6.0 a strict search checked only conditions, and an invalid sort
 was dropped silently.
+
+## Assigning sorts
+
+`sorts=` replaces the current sorts, so `@q.sorts = []` clears them and
+assigning twice keeps only the second assignment. Use `build_sort` to add
+one:
+
+```ruby
+@q.sorts = ['title asc', 'created_at desc']
+@q.build_sort(name: 'id', dir: 'asc')   # title, created_at, id
+@q.sorts = []                            # no ORDER BY
+```
+
+Before Ransack 6.0 every assignment appended to the list, so sorts could only
+be reset with `@q.sorts.clear`.

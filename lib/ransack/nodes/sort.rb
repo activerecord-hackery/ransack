@@ -30,7 +30,7 @@ module Ransack
       end
 
       def name=(name)
-        @name = context.ransackable_alias(name) || name
+        @name = context.resolve_aliases(name.to_s)
         context.bind(self, @name)
       end
 

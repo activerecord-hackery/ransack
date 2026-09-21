@@ -81,6 +81,29 @@ rather than its `joins`; code that inspected `joins_values` for them should
 look at `left_outer_joins_values`. See
 [Associations](../going-further/associations.md#searching-a-relation-that-already-has-joins).
 
+### `sorts=` replaces instead of appending
+
+`search.sorts = 'name asc'` now sets exactly that sort; before, it added to
+whatever sorts the search already had, and `sorts = []` did nothing. Code that
+relied on the append should call `build_sort` for each additional sort. See
+[Sorting](./sorting.md#assigning-sorts).
+
+### A scope wins over an attribute of the same name in the writer
+
+`Search#build` already applied a `ransackable_scopes` entry before looking for
+an attribute of the same name; the attribute writer and reader used by form
+builders (`search.salary = 100`, `f.check_box :salary`) checked attributes
+first and silently skipped the scope. They agree now.
+
+### `ransack_alias` resolves through associations and in compounds
+
+`author_name_cont` (alias on `Author`) and `text_or_author_name_cont` used to
+produce SQL referring to columns that do not exist; they now expand the alias.
+The alias name itself no longer needs to be in `ransackable_attributes`, and an
+alias whose target does not exist raises under `ransack!` like any unknown
+attribute. See
+[Ransack Aliases](../going-further/other-notes.md#aliases-through-associations-and-in-compounds).
+
 ### `Polyamorous` is gone; `Ransack::Adapters::ActiveRecord` is deprecated
 
 The Active Record integration now lives under `Ransack::ActiveRecord`. See
