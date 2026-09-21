@@ -230,8 +230,7 @@ module Ransack
         expect(condition.value).to eq 'Ernie'
       end
 
-      it 'creates conditions for aliased attributes',
-      if: Ransack::SUPPORTS_ATTRIBUTE_ALIAS do
+      it 'creates conditions for aliased attributes' do
         s = Search.new(Person, full_name_eq: 'Ernie')
         condition = s.base[:full_name_eq]
         expect(condition).to be_a Nodes::Condition
@@ -791,7 +790,7 @@ module Ransack
 
       it 'evaluates conditions contextually' do
         s = Search.new(Person, children_name_eq: 'Ernie')
-        expect(s.result).to be_an ActiveRecord::Relation
+        expect(s.result).to be_an ::ActiveRecord::Relation
         expect(s.result.to_sql).to match /#{
           children_people_name_field} = 'Ernie'/
       end
@@ -828,7 +827,7 @@ module Ransack
           person_name_eq: 'Ernie',
           target_person_parent_name_eq: 'Test'
         ).result
-        expect(s).to be_an ActiveRecord::Relation
+        expect(s).to be_an ::ActiveRecord::Relation
         real_query = remove_quotes_and_backticks(s.to_sql)
         expected_query = <<-SQL
           SELECT recommendations.* FROM recommendations
@@ -847,14 +846,14 @@ module Ransack
 
       it 'evaluates compound conditions contextually' do
         s = Search.new(Person, children_name_or_name_eq: 'Ernie').result
-        expect(s).to be_an ActiveRecord::Relation
+        expect(s).to be_an ::ActiveRecord::Relation
         expect(s.to_sql).to match /#{children_people_name_field
           } = 'Ernie' OR #{people_name_field} = 'Ernie'/
       end
 
       it 'evaluates polymorphic belongs_to association conditions contextually' do
         s = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie').result
-        expect(s).to be_an ActiveRecord::Relation
+        expect(s).to be_an ::ActiveRecord::Relation
         expect(s.to_sql).to match /#{people_name_field} = 'Ernie'/
         expect(s.to_sql).to match /#{notable_type_field} = 'Person'/
       end
@@ -865,7 +864,7 @@ module Ransack
             { m: 'or', name_eq: 'Ernie', children_children_name_eq: 'Ernie' }
           ]
         ).result
-        expect(s).to be_an ActiveRecord::Relation
+        expect(s).to be_an ::ActiveRecord::Relation
         first, last = s.to_sql.split(/ AND /)
         expect(first).to match /#{children_people_name_field} = 'Ernie'/
         expect(last).to match /#{
@@ -881,7 +880,7 @@ module Ransack
             { m: 'or', name_eq: 'Bert', children_name_eq: 'Bert' }
           ]
         ).result
-        expect(s).to be_an ActiveRecord::Relation
+        expect(s).to be_an ::ActiveRecord::Relation
         first, last = s.to_sql.split(/ AND /)
         expect(first).to match /#{people_name_field} = 'Ernie' OR #{
           children_people_name_field} = 'Ernie'/
@@ -907,7 +906,7 @@ module Ransack
 
       it 'evaluates joins with belongs_to join' do
         s = Person.joins(:parent).ransack(parent_name_eq: 'Ernie').result(distinct: true)
-        expect(s).to be_an ActiveRecord::Relation
+        expect(s).to be_an ::ActiveRecord::Relation
       end
 
       private

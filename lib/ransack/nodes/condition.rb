@@ -271,7 +271,7 @@ module Ransack
       end
 
       def attr_value_for_attribute(attr)
-        return attr.attr if ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL"
+        return attr.attr if ::ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL"
 
         predicate.case_insensitive ? attr.attr.lower : attr.attr
       rescue
@@ -455,7 +455,7 @@ module Ransack
 
       def length_function_for_attribute(attribute)
         function_name =
-          if CHAR_LENGTH_ADAPTERS.include?(ActiveRecord::Base.adapter_class::ADAPTER_NAME)
+          if CHAR_LENGTH_ADAPTERS.include?(::ActiveRecord::Base.adapter_class::ADAPTER_NAME)
             'CHAR_LENGTH'.freeze
           else
             'LENGTH'.freeze

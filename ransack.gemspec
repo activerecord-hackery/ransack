@@ -24,8 +24,11 @@ Gem::Specification.new do |s|
 
   s.metadata['changelog_uri'] = 'https://github.com/activerecord-hackery/ransack/blob/main/CHANGELOG.md'
 
-  s.add_dependency 'activerecord', '>= 7.2'
-  s.add_dependency 'activesupport', '>= 7.2'
+  # 7.2.2.1 is where Active Record's JoinAssociation took its current shape;
+  # supporting the four earlier 7.2 patch releases needed a second copy of
+  # Ransack's join-building code.
+  s.add_dependency 'activerecord', '>= 7.2.2.1'
+  s.add_dependency 'activesupport', '>= 7.2.2.1'
   s.add_dependency 'i18n'
 
   s.files         = Dir["README.md", "LICENSE", "lib/**/*"]

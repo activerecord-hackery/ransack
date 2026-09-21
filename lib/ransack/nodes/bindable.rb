@@ -44,7 +44,6 @@ module Ransack
       end
 
       def is_alias_attribute?
-        Ransack::SUPPORTS_ATTRIBUTE_ALIAS &&
         parent.base_klass.attribute_aliases.key?(attr_name)
       end
     end

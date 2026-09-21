@@ -25,7 +25,7 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     message = "Running Ransack specs with #{
-      ActiveRecord::Base.adapter_class::ADAPTER_NAME
+      ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
       }, Active Record #{::ActiveRecord::VERSION::STRING}, Arel #{Arel::VERSION
       } and Ruby #{RUBY_VERSION}"
     line = '=' * message.length
@@ -35,7 +35,7 @@ RSpec.configure do |config|
   end
 
   config.include RansackHelper
-  config.include PolyamorousHelper
+  config.include JoinHelper
 end
 
 RSpec::Matchers.define :be_like do |expected|

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Polyamorous
+module Ransack::ActiveRecord
   describe "ActiveRecord Compatibility" do
     it 'works with self joins and includes' do
       trade_account = Account.create!

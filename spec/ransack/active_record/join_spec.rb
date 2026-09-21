@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Polyamorous
+module Ransack::ActiveRecord
   describe Join do
     it 'is a tree node' do
       join = new_join(:articles, :outer)
