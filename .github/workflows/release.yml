@@ -1,0 +1,47 @@
+name: Release to RubyGems
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish, e.g. v5.0.0"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  push:
+    name: Push gem to RubyGems.org
+    runs-on: ubuntu-latest
+    environment: rubygems
+
+    permissions:
+      contents: read
+      # Required for the OIDC token exchange with RubyGems.org.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: false
+
+      - name: Check the tag matches lib/ransack/version.rb
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          version=$(ruby -r ./lib/ransack/version.rb -e 'print Ransack::VERSION')
+          if [ "$tag" != "v$version" ]; then
+            echo "::error::Tag $tag does not match Ransack::VERSION ($version). Refusing to publish."
+            exit 1
+          fi
+          echo "Publishing ransack $version from tag $tag"
+
+      - uses: rubygems/release-gem@v1
