@@ -181,6 +181,16 @@ module Ransack
       end
 
       def read_attribute(name)
+        # A field built from an aliased attribute writes its value under the real
+        # name but reads it back under the alias. Resolve the alias so the
+        # value survives a form round-trip (#689).
+        if self[name].nil?
+          stripped_name = name.dup
+          predicate = Predicate.detect_and_strip_from_string!(stripped_name)
+          aliased_attribute = context.ransackable_alias(stripped_name)
+          name = "#{aliased_attribute}_#{predicate}" unless aliased_attribute == stripped_name
+        end
+
         if self[name].respond_to?(:value)
           self[name].value
         else

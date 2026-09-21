@@ -9,6 +9,23 @@ module Ransack
       describe Context do
         subject { Context.new(Person) }
 
+        describe '#type_for' do
+          # The metadata lookup goes through the pool's schema cache rather than
+          # a leased connection, so an application that avoids permanent
+          # connection checkouts is not handed one behind its back.
+          it 'reads column metadata without leasing a connection' do
+            pool = ::ActiveRecord::Base.connection_pool
+            pool.release_connection
+            expect(pool.active_connection?).to be_falsey
+
+            search = Search.new(Person, name_eq: 'x', context: subject)
+            attribute = search.base.conditions.first.attributes.first
+
+            expect(subject.type_for(attribute)).to eq :string
+            expect(pool.active_connection?).to be_falsey
+          end
+        end
+
         it 'has an Active Record alias tracker method' do
           expect(subject.alias_tracker)
           .to be_an ::ActiveRecord::Associations::AliasTracker

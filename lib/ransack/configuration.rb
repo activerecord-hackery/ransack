@@ -35,7 +35,8 @@ module Ransack
       default_arrow: nil,
       sanitize_scope_args: true,
       fields_sort_option: nil,
-      strip_whitespace: true
+      strip_whitespace: true,
+      ignore_blank_values: true
     }
 
     def configure
@@ -206,6 +207,27 @@ module Ransack
     #
     def strip_whitespace=(boolean)
       self.options[:strip_whitespace] = boolean
+    end
+
+    # By default, Ransack ignores search conditions whose value is blank — an
+    # empty string, or an array containing only blank values. This is what makes
+    # a search form submitted with empty fields return every record rather than
+    # none, and it is almost always what an HTML form wants.
+    #
+    # Set this to false to treat a blank value as a value to search *for*:
+    # `name_eq: ''` then generates `WHERE name = ''`, and `id_in: []` generates a
+    # condition matching nothing rather than being dropped. This is usually what
+    # a JSON API wants, where an empty value is an explicit filter rather than an
+    # untouched form field.
+    #
+    # A `nil` value is ignored either way.
+    #
+    # Ransack.configure do |config|
+    #   config.ignore_blank_values = false
+    # end
+    #
+    def ignore_blank_values=(boolean)
+      self.options[:ignore_blank_values] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

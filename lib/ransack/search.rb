@@ -24,9 +24,13 @@ module Ransack
       strip_whitespace = options.fetch(:strip_whitespace, Ransack.options[:strip_whitespace])
       params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
       if params.is_a? Hash
-        params = params.dup
-        params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
-        params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false && !i.nil? } }
+        # deep_transform_values rebuilds every nested hash and array, which
+        # also gives the pruning below a private copy to edit — the caller's
+        # params come back untouched. Values nested inside `g:` groupings and
+        # `c:` conditions are stripped too, not just the top level.
+        params = params.deep_transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
+        params.delete_if { |_k, v| blank_condition_value?(v) }
+        prune_blank_advanced_conditions!(params)
       else
         params = {}
       end
@@ -173,5 +177,61 @@ module Ransack
       attrs
     end
 
+    # True when a condition's value should be dropped before building. With
+    # `ignore_blank_values` on (the default) a blank value means "this form
+    # field was left empty"; with it off, only nil is treated that way and a
+    # blank value is a value to search for. `false` is always a real value, and
+    # an explicit nil inside an array is kept so `name_in: [nil]` still reaches
+    # the query. The `c:` pruning below shares this, so it follows the option.
+    def blank_condition_value?(value)
+      if Ransack.options[:ignore_blank_values]
+        [*value].all? { |i| i.blank? && i != false && !i.nil? }
+      else
+        value.nil? || (value.is_a?(Array) && !value.empty? && value.all?(&:nil?))
+      end
+    end
+
+    # The low-level `c:` API nests its values a level deeper than the shorthand
+    # form, so the filter above never sees them. Left in place, a condition with
+    # an empty value still builds its attribute and contributes a join, giving a
+    # LEFT OUTER JOIN with no WHERE clause to go with it.
+    def prune_blank_advanced_conditions!(node)
+      return unless node.is_a?(Hash)
+
+      conditions = fetch_either(node, :c, :conditions)
+      case conditions
+      when Array then conditions.delete_if { |c| blank_advanced_condition?(c) }
+      when Hash  then conditions.delete_if { |_k, c| blank_advanced_condition?(c) }
+      end
+
+      # Groupings nest to any depth and carry their own conditions, so descend
+      # into each of them too.
+      groupings = fetch_either(node, :g, :groupings)
+      groupings = groupings.values if groupings.is_a?(Hash)
+      Array(groupings).each { |grouping| prune_blank_advanced_conditions!(grouping) }
+    end
+
+    # Params are not yet indifferent-access here, so look under both spellings
+    # of a key and both its short and long forms.
+    def fetch_either(hash, short, long)
+      hash[short] || hash[short.to_s] || hash[long] || hash[long.to_s]
+    end
+
+    def blank_advanced_condition?(condition)
+      return false unless condition.is_a?(Hash)
+
+      values = condition[:v] || condition['v']
+
+      case values
+      when Array then values.all? { |v| blank_condition_value?(unwrap_value(v)) }
+      when Hash  then values.all? { |_k, v| blank_condition_value?(unwrap_value(v)) }
+      end
+    end
+
+    # Values in the `c:` API may be given bare or wrapped in a `{ value: ... }`
+    # envelope, the same two forms `Condition#values=` accepts.
+    def unwrap_value(value)
+      value.is_a?(Hash) ? (value[:value] || value['value']) : value
+    end
   end
 end
