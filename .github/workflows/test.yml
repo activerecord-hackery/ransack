@@ -21,12 +21,6 @@ jobs:
           - 3.4.8
           - 3.3.10
           - 3.2.2
-          - 3.1.4
-        exclude:
-          - rails: 8-1-stable
-            ruby: 3.1.4
-          - rails: 8-0-stable
-            ruby: 3.1.4
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -50,11 +44,6 @@ jobs:
           - 7-2-stable
         ruby:
           - 3.2.2
-          - 3.1.4
-        exclude:
-          - rails: 8-0-stable
-            ruby: 3.1.4
-
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -120,7 +109,6 @@ jobs:
           - 7-2-stable
         ruby:
           - 3.2.2
-          - 3.1.4
     env:
       DB: postgis
       RAILS: ${{ matrix.rails }}
@@ -165,10 +153,6 @@ jobs:
           - 7-2-stable
         ruby:
           - 3.2.2
-          - 3.1.4
-        exclude:
-          - rails: 8-0-stable
-            ruby: 3.1.4
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}

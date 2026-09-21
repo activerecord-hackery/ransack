@@ -11,7 +11,7 @@ There are advanced searching solutions around, like ElasticSearch or Algolia. **
 
 Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
 
-Ransack is supported for Rails 8.0, 7.2 on Ruby 3.1 and later.
+Ransack is supported for Rails 8.1, 8.0, 7.2 on Ruby 3.2 and later.
 
 ## Installation
 

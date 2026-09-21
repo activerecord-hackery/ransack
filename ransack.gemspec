@@ -12,9 +12,10 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/activerecord-hackery/ransack"
   s.summary     = %q{Object-based searching for Active Record.}
   s.description = %q{Powerful object-based searching and filtering for Active Record with advanced features like complex boolean queries, association searching, custom predicates and i18n support.}
-  # BREAKING CHANGE: Ruby version requirement changed from >= 3.0 to >= 3.1.
-  # Be sure to mention this breaking change in the PR description and changelog.
-  s.required_ruby_version = '>= 3.1'
+  # Ruby 3.1 reached end of life in March 2025 and its ecosystem has moved on
+  # (no sqlite3 with the CVE-2026-54619 fix supports it). Raising this floor
+  # is a breaking change and belongs in a major release only.
+  s.required_ruby_version = '>= 3.2'
   s.license     = 'MIT'
   
   s.metadata = {
