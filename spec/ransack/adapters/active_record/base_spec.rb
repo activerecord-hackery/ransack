@@ -362,6 +362,73 @@ module Ransack
             expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
           end
 
+          it 'should remove empty key value pairs from the complex params hash' do
+            s = Person.ransack(
+              c: {
+                '0' => {
+                        a: ['children_name'],
+                        p: 'eq', v: ['']
+                      }
+              })
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty key value pairs from a string-keyed complex hash' do
+            s = Person.ransack(
+              'c' => {
+                '0' => { 'a' => ['children_name'], 'p' => 'eq', 'v' => [''] }
+              })
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty conditions inside a nested grouping' do
+            s = Person.ransack(
+              g: [{ c: { '0' => { a: ['children_name'], p: 'eq', v: [''] } } }])
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty conditions inside a doubly nested grouping' do
+            s = Person.ransack(
+              g: [{ g: [{ c: [{ a: ['children_name'], p: 'eq', v: [''] }] }] }])
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty conditions under the long-form grouping keys' do
+            s = Person.ransack(
+              groupings: [{ conditions: [{ a: ['children_name'], p: 'eq', v: [''] }] }])
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should not modify nested parameters while pruning' do
+            params = { g: [{ c: [{ a: ['children_name'], p: 'eq', v: [''] }] }] }
+            original = params.deep_dup
+
+            Person.ransack(params)
+
+            expect(params).to eq original
+          end
+
+          # The `v:` values of a `c:` condition may be given bare or wrapped in
+          # a `{ value: ... }` envelope. Both carry real values that must
+          # survive the blank-pruning above — dropping them silently turns a
+          # filtered search into an unfiltered one.
+          it 'should keep a populated Hash-form value in the complex params hash' do
+            s = Person.ransack(
+              c: {
+                '0' => {
+                        a: ['name'],
+                        p: 'eq', v: { '0' => { value: 'Ernie' } }
+                      }
+              })
+            expect(s.result.to_sql).to match(/= 'Ernie'/)
+          end
+
+          it 'should keep a populated Array-form value in the complex params hash' do
+            s = Person.ransack(
+              c: { '0' => { a: ['name'], p: 'eq', v: ['Ernie'] } })
+            expect(s.result.to_sql).to match(/= 'Ernie'/)
+          end
+
           it 'should keep proper key value pairs in the params hash' do
             s = Person.ransack(children_reversed_name_eq: 'Testing')
             expect(s.result.to_sql).to match /LEFT OUTER JOIN/
