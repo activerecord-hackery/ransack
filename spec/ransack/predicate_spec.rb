@@ -9,15 +9,23 @@ module Ransack
       @s = Search.new(Person)
     end
 
-    shared_examples 'wildcard escaping' do |method, regexp|
+    # The LIKE wildcards `%` and `_`, and the escape character itself, must be
+    # escaped so they match literally. `.` is not a LIKE wildcard and is left
+    # alone. The escaping only means anything because of the ESCAPE clause —
+    # without it SQLite treats the backslash as an ordinary character.
+    # See https://github.com/activerecord-hackery/ransack/issues/1581
+    shared_examples 'wildcard escaping' do |method, column_and_operator|
       it 'automatically converts integers to strings' do
         subject.parent_id_cont = 1
         expect { subject.result }.to_not raise_error
       end
 
-      it "escapes '%', '.', '_' and '\\\\' in value" do
+      it "escapes '%', '_' and '\\\\' in value and emits an ESCAPE clause" do
         subject.send(:"#{method}=", '%._\\')
-        expect(subject.result.to_sql).to match(regexp)
+        expect(subject.result.to_sql).to include(
+          "#{column_and_operator} #{quote_value('%\\%.\\_\\\\%')} " \
+          "ESCAPE #{quote_value('\\')}"
+        )
       end
     end
 
@@ -158,12 +166,9 @@ module Ransack
     describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
         (case ActiveRecord::Base.connection.adapter_name
-        when "PostGIS", "PostgreSQL"
-          /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        when "Mysql2"
-          /`people`.`name` LIKE '%\\\\%.\\\\_\\\\\\\\%'/
-        else
-         /"people"."name" LIKE '%%._\\%'/
+        when "PostGIS", "PostgreSQL" then %{"people"."name" ILIKE}
+        when "Mysql2"                then %{`people`.`name` LIKE}
+        else                              %{"people"."name" LIKE}
         end) do
         subject { @s }
       end
@@ -178,12 +183,9 @@ module Ransack
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont,
         (case ActiveRecord::Base.connection.adapter_name
-        when "PostGIS", "PostgreSQL"
-          /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        when  "Mysql2"
-          /`people`.`name` NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
-        else
-         /"people"."name" NOT LIKE '%%._\\%'/
+        when "PostGIS", "PostgreSQL" then %{"people"."name" NOT ILIKE}
+        when "Mysql2"                then %{`people`.`name` NOT LIKE}
+        else                              %{"people"."name" NOT LIKE}
         end) do
         subject { @s }
       end
@@ -198,14 +200,10 @@ module Ransack
     describe 'i_cont' do
       it_has_behavior 'wildcard escaping', :name_i_cont,
         (case ActiveRecord::Base.connection.adapter_name
-        when "PostGIS"
-          /LOWER\("people"."name"\) ILIKE '%\\%\\.\\_\\\\%'/
-        when "PostgreSQL"
-          /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        when "Mysql2"
-          /LOWER\(`people`.`name`\) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
-        else
-         /LOWER\("people"."name"\) LIKE '%%._\\%'/
+        when "PostGIS"    then %{LOWER("people"."name") ILIKE}
+        when "PostgreSQL" then %{"people"."name" ILIKE}
+        when "Mysql2"     then %{LOWER(`people`.`name`) LIKE}
+        else                   %{LOWER("people"."name") LIKE}
         end) do
         subject { @s }
       end
@@ -220,14 +218,10 @@ module Ransack
     describe 'not_i_cont' do
       it_has_behavior 'wildcard escaping', :name_not_i_cont,
         (case ActiveRecord::Base.connection.adapter_name
-        when "PostGIS"
-          /LOWER\("people"."name"\) NOT ILIKE '%\\%\\.\\_\\\\%'/
-        when "PostgreSQL"
-          /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        when "Mysql2"
-          /LOWER\(`people`.`name`\) NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
-        else
-         /LOWER\("people"."name"\) NOT LIKE '%%._\\%'/
+        when "PostGIS"    then %{LOWER("people"."name") NOT ILIKE}
+        when "PostgreSQL" then %{"people"."name" NOT ILIKE}
+        when "Mysql2"     then %{LOWER(`people`.`name`) NOT LIKE}
+        else                   %{LOWER("people"."name") NOT LIKE}
         end) do
         subject { @s }
       end

@@ -357,12 +357,18 @@ module Ransack
         end
 
         # For LIKE predicates, wrap the value in Arel::Nodes.build_quoted to prevent
-        # ActiveRecord normalization from affecting wildcard patterns
+        # ActiveRecord normalization from affecting wildcard patterns, and pass
+        # the escape character so the escaping done by `escape_wildcards` is
+        # actually honoured. Without an explicit ESCAPE clause, SQLite treats a
+        # backslash as a literal character rather than an escape.
+        # See https://github.com/activerecord-hackery/ransack/issues/1581
         if like_predicate?(arel_pred)
           arel_values = Arel::Nodes.build_quoted(arel_values)
+          predicate = attr_value_for_attribute(attribute)
+                      .public_send(arel_pred, arel_values, Constants::LIKE_ESCAPE_CHARACTER)
+        else
+          predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
         end
-
-        predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
 
         if in_predicate?(predicate)
           predicate.right = predicate.right.map do |pr|
@@ -378,8 +384,13 @@ module Ransack
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
       end
 
+      LIKE_PREDICATES = %w[
+        matches matches_any matches_all
+        does_not_match does_not_match_any does_not_match_all
+      ].freeze
+
       def like_predicate?(arel_predicate)
-        arel_predicate == 'matches' || arel_predicate == 'does_not_match'
+        LIKE_PREDICATES.include?(arel_predicate)
       end
 
       STRING_LIKE_TYPES = %i[string text citext].freeze

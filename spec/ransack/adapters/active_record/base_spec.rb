@@ -411,6 +411,25 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          # Regression test for
+          # https://github.com/activerecord-hackery/ransack/issues/1581
+          # `_` is a single-character LIKE wildcard. Escaping it only takes
+          # effect when an ESCAPE clause is emitted, which SQLite and other
+          # backends with no default escape character require.
+          it 'treats an underscore in the search term literally' do
+            match = Person.create!(name: 'a_c')
+            Person.create!(name: 'abc')
+
+            expect(Person.ransack(name_cont: 'a_c').result.to_a).to eq [match]
+          end
+
+          it 'treats a percent sign in the search term literally' do
+            match = Person.create!(name: 'dis%count')
+            Person.create!(name: 'discount')
+
+            expect(Person.ransack(name_cont: 'dis%count').result.to_a).to eq [match]
+          end
+
           if ::ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::Base.respond_to?(:normalizes)
             context 'with ActiveRecord::normalizes' do
               around(:each) do |example|
