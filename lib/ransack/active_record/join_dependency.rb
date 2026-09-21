@@ -53,29 +53,43 @@ module Ransack
         }
       end
 
-      def construct_tables_for_association!(join_root, association)
-        tables = table_aliases_for(join_root, association)
+      def construct_tables_for_association!(join_root, association, join_type = self.join_type)
+        tables = table_aliases_for(join_root, association, join_type)
         association.table = tables.first
         tables
       end
 
       private
 
-      def table_aliases_for(parent, node)
+      # The tables for a node's reflection chain, assigned the way Active
+      # Record's JoinDependency#make_constraints assigns them, so that the
+      # aliases Ransack binds conditions to are the ones the query will have.
+      # Once a chain tail has been joined before, Active Record stops
+      # aliasing and reuses that join; the remaining positions here are
+      # filled from the same record for the correlated-subquery builder.
+      def table_aliases_for(parent, node, join_type)
         @joined_tables ||= {}
-        node.reflection.chain.map { |reflection|
-          table, terminated = @joined_tables[reflection]
+        chain = node.reflection.chain
+        terminated_at = nil
+
+        chain.each_with_index.map { |reflection, index|
+          remaining = chain[index..]
+          table, terminated = @joined_tables[remaining]
           root = reflection == node.reflection
 
-          if table && (!root || !terminated)
-            @joined_tables[reflection] = [table, true] if root
+          if terminated_at
+            table || reflection.klass.arel_table
+          elsif table && (!root || !terminated)
+            @joined_tables[remaining] = [table, root] if root
+            terminated_at = index
             table
           else
-            table = alias_tracker.aliased_table_for(reflection.klass.arel_table) do
+            table_name = @references && @references[reflection.name.to_sym]&.to_s
+            table = alias_tracker.aliased_table_for(reflection.klass.arel_table, table_name) do
               name = reflection.alias_candidate(parent.table_name)
               root ? name : "#{name}_join"
             end
-            @joined_tables[reflection] ||= [table, root] if join_type == Arel::Nodes::OuterJoin
+            @joined_tables[remaining] ||= [table, root] if join_type == Arel::Nodes::OuterJoin
             table
           end
         }
