@@ -362,7 +362,13 @@ module Ransack
           arel_values = Arel::Nodes.build_quoted(arel_values)
         end
 
-        predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
+        attr_value = if length_predicate?
+          length_function_for_attribute(attribute)
+        else
+          attr_value_for_attribute(attribute)
+        end
+
+        predicate = attr_value.public_send(arel_pred, arel_values)
 
         if in_predicate?(predicate)
           predicate.right = predicate.right.map do |pr|
@@ -410,6 +416,28 @@ module Ransack
         relation, name = arel_node.attribute.values
         attribute_type = relation.type_for_attribute(name).type
         attribute_type == :integer && arel_node.value.is_a?(Integer)
+      end
+
+      def length_predicate?
+        predicate_name.to_s.start_with?('length_')
+      end
+
+      # CHAR_LENGTH counts characters and is the SQL standard spelling; SQLite
+      # has no CHAR_LENGTH and its LENGTH already counts characters for text.
+      CHAR_LENGTH_ADAPTERS = %w[PostgreSQL PostGIS Mysql2 Trilogy].freeze
+
+      def length_function_for_attribute(attribute)
+        function_name =
+          if CHAR_LENGTH_ADAPTERS.include?(ActiveRecord::Base.adapter_class::ADAPTER_NAME)
+            'CHAR_LENGTH'.freeze
+          else
+            'LENGTH'.freeze
+          end
+
+        Arel::Nodes::NamedFunction.new(
+          function_name,
+          [attr_value_for_attribute(attribute)]
+        )
       end
 
       def valid_combinator?
