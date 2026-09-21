@@ -368,6 +368,31 @@ module Ransack
         end
       end
 
+      # `alias :m= :combinator=` used to be declared before the normalising
+      # writer existed, so it bound to the plain attribute writer and `m:`
+      # skipped normalisation entirely — `g: [{ m: 'OR' }]` silently became AND.
+      context 'with a combinator that needs normalising' do
+        ['or', 'OR', 'Or', :or, :OR].each do |combinator|
+          it "treats #{combinator.inspect} as 'or'" do
+            search = Search.new(
+              Person, g: [{ m: combinator, name_eq: 'a', email_eq: 'b' }]
+            )
+
+            expect(search.result.to_sql).to include ' OR '
+          end
+        end
+
+        ['and', 'AND', :and].each do |combinator|
+          it "treats #{combinator.inspect} as 'and'" do
+            search = Search.new(
+              Person, g: [{ m: combinator, name_eq: 'a', email_eq: 'b' }]
+            )
+
+            expect(search.result.to_sql).to include ' AND '
+          end
+        end
+      end
+
       context 'with an invalid combinator' do
         subject { Search.new(Person, name_eq: 'foobar', combinator: 'unknown') }
 

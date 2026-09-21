@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Ransack
   describe Visitor do
-
     let(:viz) { Visitor.new }
 
     shared_examples 'an or combinator' do | combinator |
