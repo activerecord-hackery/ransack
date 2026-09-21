@@ -68,6 +68,19 @@ A scope listed in `ransackable_scopes_skip_sanitize_args` now receives a bare
 select. Other scopes still treat `false` as an unticked checkbox. See
 [Other notes](../going-further/other-notes.md#scopes-and-false).
 
+### Joins already on the relation are reused
+
+A search on a relation that already joins a table, through `joins`,
+`left_outer_joins`, an eager-loaded `includes` or a previous search, now
+reuses that join. Before, the association was joined again under a fresh
+alias, which multiplied rows for a `has_many` and could bind a condition to
+the wrong one of two joins to the same table. A query that depended on the
+duplicate is unlikely, but row counts from such searches will change. The
+joins Ransack adds are now stashed on the relation's `left_outer_joins`
+rather than its `joins`; code that inspected `joins_values` for them should
+look at `left_outer_joins_values`. See
+[Associations](../going-further/associations.md#searching-a-relation-that-already-has-joins).
+
 ### `Polyamorous` is gone; `Ransack::Adapters::ActiveRecord` is deprecated
 
 The Active Record integration now lives under `Ransack::ActiveRecord`. See

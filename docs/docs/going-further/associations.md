@@ -68,3 +68,38 @@ end
 If you have trouble sorting on associations, try using an SQL string with the
 pluralized table (`'departments.title'`,`'employees.last_name'`) instead of the
 symbolized association (`:department_title)`, `:employees_last_name`).
+
+### Searching a relation that already has joins
+
+A search can start from a relation rather than a model, and the relation may
+already join the tables the search needs — through `joins`,
+`left_outer_joins`, an `includes` that will be eager loaded, or a previous
+search. Ransack reuses those joins: the condition is bound to the alias
+Active Record gives the existing join, and no second join is added.
+
+```ruby
+Supervisor.joins(:department).where(departments: { title: 'Sales' })
+          .ransack(department_title_cont: 'Eng').result.to_sql
+# ... INNER JOIN "departments" ON ... WHERE "departments"."title" = 'Sales'
+#     AND "departments"."title" LIKE '%Eng%' ESCAPE '\'
+
+Supervisor.joins(:department, :backup_department)   # both belongs_to Department
+          .ransack(backup_department_title_eq: 'Ops').result.to_sql
+# ... INNER JOIN "departments" ON ...
+#     INNER JOIN "departments" AS "backup_departments_supervisors" ON ...
+#     WHERE "backup_departments_supervisors"."title" = 'Ops'
+```
+
+This also covers the alias Active Record picks when a `where` hash is keyed by
+the association name (`where(department: { ... })` joins `departments` as
+`department`), and a search chained onto the result of another search.
+
+Before Ransack 6.0 the join tree was built from the model class alone, so a
+join already on the relation was joined a second time under a new alias, which
+multiplied rows for a `has_many`, and a condition could land on the wrong one
+of two joins to the same table.
+
+The joins Ransack adds itself are `LEFT OUTER JOIN`s, so a search on an
+association does not drop records that have nothing associated unless the
+condition itself does. To search with inner joins, join the association on the
+relation first.

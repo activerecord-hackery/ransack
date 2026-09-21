@@ -38,12 +38,12 @@ module Ransack
     def initialize(object, options = {})
       @object = relation_for(object)
       @klass = @object.klass
-      @join_dependency = join_dependency(@object)
       @join_type = options[:join_type] || Arel::Nodes::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @associations_pot = {}
       @tables_pot = {}
       @lock_associations = []
+      @join_dependency = join_dependency(@object)
 
       @base = @join_dependency.instance_variable_get(:@join_root)
     end
