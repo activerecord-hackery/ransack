@@ -14,10 +14,9 @@
   <style id="jtd-nav-activation">
   
 
-    .site-nav > ul.nav-list:first-child > li > a,
     
-    .site-nav > ul.nav-list:first-child > li > ul > li:not(:nth-child(2)) > a,
-    .site-nav > ul.nav-list:first-child > li > ul > li > ul > li a {
+    .site-nav > ul.nav-list:first-child > li:not(:nth-child(2)) > a,
+    .site-nav > ul.nav-list:first-child > li > ul > li a {
       background-image: none;
     }
 
@@ -26,14 +25,12 @@
       background-image: none;
     }
 
-    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(2) > a {
+    .site-nav > ul.nav-list:first-child > li:nth-child(2) > a {
       font-weight: 600;
       text-decoration: none;
-    }.site-nav > ul.nav-list:first-child > li:nth-child(3) > button svg,
-    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(2) > button svg {
+    }.site-nav > ul.nav-list:first-child > li:nth-child(2) > button svg {
       transform: rotate(-90deg);
-    }.site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(3) > ul.nav-list,
-    .site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(3) > ul.nav-list > li.nav-list-item:nth-child(2) > ul.nav-list {
+    }.site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(2) > ul.nav-list {
       display: block;
     }
   </style>
@@ -55,20 +52,20 @@
 
 
   <!-- Begin Jekyll SEO tag v2.9.0 -->
-<title>Custom predicates | Ransack</title>
+<title>Getting started | Ransack</title>
 <meta name="generator" content="Jekyll v4.4.1" />
-<meta property="og:title" content="Custom predicates" />
+<meta property="og:title" content="Getting started" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Object-based searching for Active Record" />
 <meta name="twitter:description" property="og:description" content="Object-based searching for Active Record" />
-<link rel="canonical" href="https://activerecord-hackery.github.io/ransack/going-further/custom-predicates/" />
-<meta property="og:url" content="https://activerecord-hackery.github.io/ransack/going-further/custom-predicates/" />
+<link rel="canonical" href="https://activerecord-hackery.github.io/ransack/getting-started/" />
+<meta property="og:url" content="https://activerecord-hackery.github.io/ransack/getting-started/" />
 <meta property="og:site_name" content="Ransack" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Custom predicates" />
+<meta name="twitter:title" content="Getting started" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","description":"Object-based searching for Active Record","headline":"Custom predicates","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://activerecord-hackery.github.io/ransack/assets/logo/ransack-h.png"}},"url":"https://activerecord-hackery.github.io/ransack/going-further/custom-predicates/"}</script>
+{"@context":"https://schema.org","@type":"WebPage","description":"Object-based searching for Active Record","headline":"Getting started","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://activerecord-hackery.github.io/ransack/assets/logo/ransack-h.png"}},"url":"https://activerecord-hackery.github.io/ransack/getting-started/"}</script>
 <!-- End Jekyll SEO tag -->
 
 
@@ -214,92 +211,55 @@
 </div>
 
     <div class="main-content-wrap">
-      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
-  <ol class="breadcrumb-nav-list">
-    <li class="breadcrumb-nav-list-item"><a href="/ransack/going-further/">Going further</a></li>
-    <li class="breadcrumb-nav-list-item"><span>Custom predicates</span></li>
-  </ol>
-</nav>
-
-
+      
       <div id="main-content" class="main-content">
         <main>
           
-            <p>If you’d like to add your own custom Ransack predicates:</p>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
-
-<span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'equals_diddly'</span><span class="p">,</span> <span class="c1"># Name your predicate</span>
-    <span class="c1"># What non-compound ARel predicate will it use? (eq, matches, etc)</span>
-    <span class="ss">arel_predicate: </span><span class="s1">'eq'</span><span class="p">,</span>
-    <span class="c1"># Format incoming values as you see fit. (Default: Don't do formatting)</span>
-    <span class="ss">formatter: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="s2">"</span><span class="si">#{</span><span class="n">v</span><span class="si">}</span><span class="s2">-diddly"</span> <span class="p">},</span>
-    <span class="c1"># Validate a value. An "invalid" value won't be used in a search.</span>
-    <span class="c1"># Below is default.</span>
-    <span class="ss">validator: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="p">.</span><span class="nf">present?</span> <span class="p">},</span>
-    <span class="c1"># Should compounds be created? Will use the compound (any/all) version</span>
-    <span class="c1"># of the arel_predicate to create a corresponding any/all version of</span>
-    <span class="c1"># your predicate. (Default: true)</span>
-    <span class="ss">compounds: </span><span class="kp">true</span><span class="p">,</span>
-    <span class="c1"># Force a specific column type for type-casting of supplied values.</span>
-    <span class="c1"># (Default: use type from DB column)</span>
-    <span class="ss">type: :string</span><span class="p">,</span>
-    <span class="c1"># Use LOWER(column on database).</span>
-    <span class="c1"># (Default: false)</span>
-    <span class="ss">case_insensitive: </span><span class="kp">true</span>
-<span class="k">end</span>
-</code></pre></div></div>
-<p>You can check all Arel predicates <a href="https://github.com/rails/rails/blob/main/activerecord/lib/arel/predications.rb">here</a>.</p>
-<h3 id="what-a-formatter-returns">
+            <h1 id="getting-started">
   
   
-    <a href="#what-a-formatter-returns" class="anchor-heading" aria-labelledby="what-a-formatter-returns"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> What a formatter returns
+    <a href="#getting-started" class="anchor-heading" aria-labelledby="getting-started"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Getting started
   
   
-</h3>
-    
-
-<p>The formatter runs once per value and its return value is quoted as a single
-literal, so it cannot build a piece of SQL. For an <code class="language-plaintext highlighter-rouge">in</code> / <code class="language-plaintext highlighter-rouge">not_in</code> predicate
-that takes one delimited string, return an <code class="language-plaintext highlighter-rouge">Array</code> and Ransack quotes each
-element:</p>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'in_list'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'in'</span><span class="p">,</span>
-    <span class="ss">formatter: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="s1">';'</span><span class="p">)</span> <span class="p">}</span>
-<span class="k">end</span>
-
-<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_in_list: </span><span class="s1">'Aaron;Ernie'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
-<span class="c1"># ... WHERE "people"."name" IN ('Aaron', 'Ernie')</span>
-</code></pre></div></div>
-
-<p>Returning <code class="language-plaintext highlighter-rouge">"Aaron','Ernie"</code> instead gives <code class="language-plaintext highlighter-rouge">IN ('Aaron'',''Ernie')</code>: the string
-is one value, and treating it as SQL would be an injection vector.</p>
-
-<p>If Arel does not have the predicate you are looking for, consider monkey patching it:</p>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
-
-<span class="k">module</span> <span class="nn">Arel</span>
-  <span class="k">module</span> <span class="nn">Predications</span>
-    <span class="k">def</span> <span class="nf">gteq_or_null</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-      <span class="n">left</span> <span class="o">=</span> <span class="n">gteq</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-      <span class="n">right</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="kp">nil</span><span class="p">)</span>
-      <span class="n">left</span><span class="p">.</span><span class="nf">or</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
-    <span class="k">end</span>
-  <span class="k">end</span>
-<span class="k">end</span>
-
-<span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'gteq_or_null'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'gteq_or_null'</span>
-<span class="k">end</span>
-</code></pre></div></div>
+</h1>
 
           
 
           
-            
+            <hr>
+<h2 class="text-delta">Table of contents</h2>
+
+<ul>
+  
+  <li>
+    <a href="/ransack/getting-started/simple-mode/">Simple mode</a>
+  </li>
+  
+  <li>
+    <a href="/ransack/getting-started/advanced-mode/">Advanced Mode</a>
+  </li>
+  
+  <li>
+    <a href="/ransack/getting-started/using-predicates/">Using Predicates</a>
+  </li>
+  
+  <li>
+    <a href="/ransack/getting-started/search-matches/">Search Matchers</a>
+  </li>
+  
+  <li>
+    <a href="/ransack/getting-started/sorting/">Sorting</a>
+  </li>
+  
+  <li>
+    <a href="/ransack/getting-started/configuration/">Configuration</a>
+  </li>
+  
+  <li>
+    <a href="/ransack/getting-started/upgrading/">Upgrading</a>
+  </li>
+  
+</ul>
           
         </main>
         
@@ -314,7 +274,7 @@ is one value, and treating it as SQL would be an injection vector.</p>
       
       
         <p class="text-small mb-0">
-          <a href="https://github.com/activerecord-hackery/ransack/edit/main/docs/going-further/custom-predicates.md" id="edit-this-page">Edit this page on GitHub</a>
+          <a href="https://github.com/activerecord-hackery/ransack/edit/main/docs/getting-started/index.md" id="edit-this-page">Edit this page on GitHub</a>
         </p>
       
     </div>

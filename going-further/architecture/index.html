@@ -16,7 +16,7 @@
 
     .site-nav > ul.nav-list:first-child > li > a,
     
-    .site-nav > ul.nav-list:first-child > li > ul > li:not(:nth-child(2)) > a,
+    .site-nav > ul.nav-list:first-child > li > ul > li:not(:nth-child(12)) > a,
     .site-nav > ul.nav-list:first-child > li > ul > li > ul > li a {
       background-image: none;
     }
@@ -26,14 +26,14 @@
       background-image: none;
     }
 
-    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(2) > a {
+    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(12) > a {
       font-weight: 600;
       text-decoration: none;
     }.site-nav > ul.nav-list:first-child > li:nth-child(3) > button svg,
-    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(2) > button svg {
+    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(12) > button svg {
       transform: rotate(-90deg);
     }.site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(3) > ul.nav-list,
-    .site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(3) > ul.nav-list > li.nav-list-item:nth-child(2) > ul.nav-list {
+    .site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(3) > ul.nav-list > li.nav-list-item:nth-child(12) > ul.nav-list {
       display: block;
     }
   </style>
@@ -55,20 +55,20 @@
 
 
   <!-- Begin Jekyll SEO tag v2.9.0 -->
-<title>Custom predicates | Ransack</title>
+<title>How Ransack is built | Ransack</title>
 <meta name="generator" content="Jekyll v4.4.1" />
-<meta property="og:title" content="Custom predicates" />
+<meta property="og:title" content="How Ransack is built" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Object-based searching for Active Record" />
 <meta name="twitter:description" property="og:description" content="Object-based searching for Active Record" />
-<link rel="canonical" href="https://activerecord-hackery.github.io/ransack/going-further/custom-predicates/" />
-<meta property="og:url" content="https://activerecord-hackery.github.io/ransack/going-further/custom-predicates/" />
+<link rel="canonical" href="https://activerecord-hackery.github.io/ransack/going-further/architecture/" />
+<meta property="og:url" content="https://activerecord-hackery.github.io/ransack/going-further/architecture/" />
 <meta property="og:site_name" content="Ransack" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Custom predicates" />
+<meta name="twitter:title" content="How Ransack is built" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","description":"Object-based searching for Active Record","headline":"Custom predicates","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://activerecord-hackery.github.io/ransack/assets/logo/ransack-h.png"}},"url":"https://activerecord-hackery.github.io/ransack/going-further/custom-predicates/"}</script>
+{"@context":"https://schema.org","@type":"WebPage","description":"Object-based searching for Active Record","headline":"How Ransack is built","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://activerecord-hackery.github.io/ransack/assets/logo/ransack-h.png"}},"url":"https://activerecord-hackery.github.io/ransack/going-further/architecture/"}</script>
 <!-- End Jekyll SEO tag -->
 
 
@@ -217,7 +217,7 @@
       <nav aria-label="Breadcrumb" class="breadcrumb-nav">
   <ol class="breadcrumb-nav-list">
     <li class="breadcrumb-nav-list-item"><a href="/ransack/going-further/">Going further</a></li>
-    <li class="breadcrumb-nav-list-item"><span>Custom predicates</span></li>
+    <li class="breadcrumb-nav-list-item"><span>How Ransack is built</span></li>
   </ol>
 </nav>
 
@@ -225,76 +225,160 @@
       <div id="main-content" class="main-content">
         <main>
           
-            <p>If you’d like to add your own custom Ransack predicates:</p>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
-
-<span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'equals_diddly'</span><span class="p">,</span> <span class="c1"># Name your predicate</span>
-    <span class="c1"># What non-compound ARel predicate will it use? (eq, matches, etc)</span>
-    <span class="ss">arel_predicate: </span><span class="s1">'eq'</span><span class="p">,</span>
-    <span class="c1"># Format incoming values as you see fit. (Default: Don't do formatting)</span>
-    <span class="ss">formatter: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="s2">"</span><span class="si">#{</span><span class="n">v</span><span class="si">}</span><span class="s2">-diddly"</span> <span class="p">},</span>
-    <span class="c1"># Validate a value. An "invalid" value won't be used in a search.</span>
-    <span class="c1"># Below is default.</span>
-    <span class="ss">validator: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="p">.</span><span class="nf">present?</span> <span class="p">},</span>
-    <span class="c1"># Should compounds be created? Will use the compound (any/all) version</span>
-    <span class="c1"># of the arel_predicate to create a corresponding any/all version of</span>
-    <span class="c1"># your predicate. (Default: true)</span>
-    <span class="ss">compounds: </span><span class="kp">true</span><span class="p">,</span>
-    <span class="c1"># Force a specific column type for type-casting of supplied values.</span>
-    <span class="c1"># (Default: use type from DB column)</span>
-    <span class="ss">type: :string</span><span class="p">,</span>
-    <span class="c1"># Use LOWER(column on database).</span>
-    <span class="c1"># (Default: false)</span>
-    <span class="ss">case_insensitive: </span><span class="kp">true</span>
-<span class="k">end</span>
-</code></pre></div></div>
-<p>You can check all Arel predicates <a href="https://github.com/rails/rails/blob/main/activerecord/lib/arel/predications.rb">here</a>.</p>
-<h3 id="what-a-formatter-returns">
+            <p>This page is for anyone reading or changing Ransack’s source. It describes the
+pieces, where the boundary with Active Record is, and which parts of Active
+Record Ransack reaches into.</p>
+<h2 id="the-pieces">
   
   
-    <a href="#what-a-formatter-returns" class="anchor-heading" aria-labelledby="what-a-formatter-returns"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> What a formatter returns
+    <a href="#the-pieces" class="anchor-heading" aria-labelledby="the-pieces"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> The pieces
   
   
-</h3>
+</h2>
     
 
-<p>The formatter runs once per value and its return value is quoted as a single
-literal, so it cannot build a piece of SQL. For an <code class="language-plaintext highlighter-rouge">in</code> / <code class="language-plaintext highlighter-rouge">not_in</code> predicate
-that takes one delimited string, return an <code class="language-plaintext highlighter-rouge">Array</code> and Ransack quotes each
-element:</p>
+<p>A search goes through four stages. Each has a home under <code class="language-plaintext highlighter-rouge">lib/ransack/</code>.</p>
 
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'in_list'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'in'</span><span class="p">,</span>
-    <span class="ss">formatter: </span><span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="s1">';'</span><span class="p">)</span> <span class="p">}</span>
-<span class="k">end</span>
+<div class="table-wrapper"><table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Where</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Parse</td>
+      <td><code class="language-plaintext highlighter-rouge">search.rb</code>, <code class="language-plaintext highlighter-rouge">nodes/</code></td>
+      <td>Turns the params hash into a tree of <code class="language-plaintext highlighter-rouge">Grouping</code>, <code class="language-plaintext highlighter-rouge">Condition</code>, <code class="language-plaintext highlighter-rouge">Attribute</code>, <code class="language-plaintext highlighter-rouge">Value</code> and <code class="language-plaintext highlighter-rouge">Sort</code> nodes. Nothing here knows about the database.</td>
+    </tr>
+    <tr>
+      <td>Resolve</td>
+      <td><code class="language-plaintext highlighter-rouge">context.rb</code>, <code class="language-plaintext highlighter-rouge">active_record/context.rb</code></td>
+      <td>Maps attribute names like <code class="language-plaintext highlighter-rouge">articles_title</code> onto tables, columns and the joins needed to reach them.</td>
+    </tr>
+    <tr>
+      <td>Build</td>
+      <td><code class="language-plaintext highlighter-rouge">visitor.rb</code>, <code class="language-plaintext highlighter-rouge">predicate.rb</code>, <code class="language-plaintext highlighter-rouge">constants.rb</code></td>
+      <td>Walks the node tree and produces Arel predicates and orderings.</td>
+    </tr>
+    <tr>
+      <td>Integrate</td>
+      <td><code class="language-plaintext highlighter-rouge">active_record/</code></td>
+      <td>Everything that touches Active Record: the class methods added to models, the join machinery, and the <code class="language-plaintext highlighter-rouge">Context</code> that evaluates the search into a relation.</td>
+    </tr>
+  </tbody>
+</table></div>
 
-<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_in_list: </span><span class="s1">'Aaron;Ernie'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
-<span class="c1"># ... WHERE "people"."name" IN ('Aaron', 'Ernie')</span>
-</code></pre></div></div>
+<p>Around those sit <code class="language-plaintext highlighter-rouge">configuration.rb</code> (global options and the predicate registry),
+<code class="language-plaintext highlighter-rouge">translate.rb</code> and <code class="language-plaintext highlighter-rouge">locale/</code> (i18n), <code class="language-plaintext highlighter-rouge">helpers/</code> (the form builder and view
+helpers, loaded only when Action Controller is) and <code class="language-plaintext highlighter-rouge">ransacker.rb</code> (custom
+attributes).</p>
+<h2 id="the-active-record-boundary">
+  
+  
+    <a href="#the-active-record-boundary" class="anchor-heading" aria-labelledby="the-active-record-boundary"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> The Active Record boundary
+  
+  
+</h2>
+    
 
-<p>Returning <code class="language-plaintext highlighter-rouge">"Aaron','Ernie"</code> instead gives <code class="language-plaintext highlighter-rouge">IN ('Aaron'',''Ernie')</code>: the string
-is one value, and treating it as SQL would be an injection vector.</p>
+<p><code class="language-plaintext highlighter-rouge">Ransack::Context</code> is the seam. The generic class holds what every ORM would
+need: binding attribute names to nodes, walking association paths, checking
+the <code class="language-plaintext highlighter-rouge">ransackable_*</code> allowlists and chaining scopes. Everything that needs a real
+database sits in the subclass <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Context</code>.</p>
 
-<p>If Arel does not have the predicate you are looking for, consider monkey patching it:</p>
+<p>A context is chosen through a registry rather than a hard-coded check, so an
+integration for another ORM can register its own:</p>
 
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
-
-<span class="k">module</span> <span class="nn">Arel</span>
-  <span class="k">module</span> <span class="nn">Predications</span>
-    <span class="k">def</span> <span class="nf">gteq_or_null</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-      <span class="n">left</span> <span class="o">=</span> <span class="n">gteq</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-      <span class="n">right</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="kp">nil</span><span class="p">)</span>
-      <span class="n">left</span><span class="p">.</span><span class="nf">or</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
-    <span class="k">end</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">register</span> <span class="k">do</span> <span class="o">|</span><span class="n">object</span><span class="p">,</span> <span class="n">options</span><span class="o">|</span>
+  <span class="k">case</span> <span class="n">object</span>
+  <span class="k">when</span> <span class="no">Class</span>
+    <span class="no">MyOrm</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span> <span class="k">if</span> <span class="n">object</span> <span class="o">&lt;</span> <span class="no">MyOrm</span><span class="o">::</span><span class="no">Document</span>
+  <span class="k">when</span> <span class="no">MyOrm</span><span class="o">::</span><span class="no">Criteria</span>
+    <span class="no">MyOrm</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
   <span class="k">end</span>
 <span class="k">end</span>
-
-<span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'gteq_or_null'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'gteq_or_null'</span>
-<span class="k">end</span>
 </code></pre></div></div>
+
+<p>The resolver receives whatever was passed to <code class="language-plaintext highlighter-rouge">ransack</code>, a model class or a
+query object, and returns a context or <code class="language-plaintext highlighter-rouge">nil</code>. Ransack’s own Active Record resolver is
+registered in <code class="language-plaintext highlighter-rouge">lib/ransack/active_record/context.rb</code>. A context subclass
+implements <code class="language-plaintext highlighter-rouge">relation_for</code>, <code class="language-plaintext highlighter-rouge">type_for</code>, <code class="language-plaintext highlighter-rouge">evaluate</code>, <code class="language-plaintext highlighter-rouge">attribute_method?</code>,
+<code class="language-plaintext highlighter-rouge">table_for</code>, <code class="language-plaintext highlighter-rouge">klassify</code> and the join-building methods; the Active Record
+context is the reference implementation.</p>
+<h2 id="what-ransack-takes-from-active-records-internals">
+  
+  
+    <a href="#what-ransack-takes-from-active-records-internals" class="anchor-heading" aria-labelledby="what-ransack-takes-from-active-records-internals"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> What Ransack takes from Active Record’s internals
+  
+  
+</h2>
+    
+
+<p>Active Record’s public query interface cannot express two things Ransack
+needs: an outer join that is added one association at a time on top of a
+relation that already has joins, and a join through a polymorphic <code class="language-plaintext highlighter-rouge">belongs_to</code>
+to one named class. To get them, <code class="language-plaintext highlighter-rouge">lib/ransack/active_record/</code> prepends small
+modules onto three internal classes:</p>
+
+<div class="table-wrapper"><table>
+  <thead>
+    <tr>
+      <th>Active Record class</th>
+      <th>Ransack module</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Associations::JoinDependency</code></td>
+      <td><code class="language-plaintext highlighter-rouge">JoinDependencyExtensions</code></td>
+      <td>Accept <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Join</code> nodes in the association tree, and hand back the aliased tables for an association so a later correlated subquery can reuse them.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Associations::JoinDependency::JoinAssociation</code></td>
+      <td><code class="language-plaintext highlighter-rouge">JoinAssociationExtensions</code></td>
+      <td>Carry the join type and the polymorphic target class; build join constraints against tables Ransack already aliased.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Reflection::AbstractReflection</code></td>
+      <td><code class="language-plaintext highlighter-rouge">ReflectionExtensions</code></td>
+      <td>Add the <code class="language-plaintext highlighter-rouge">type = 'ClassName'</code> constraint when a polymorphic association is joined to one class.</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<p>Before 6.0 these lived in a separate top-level <code class="language-plaintext highlighter-rouge">Polyamorous</code> namespace, a
+remnant of the gem of that name that was merged into Ransack in 2019.</p>
+
+<p>These are private APIs. They are the part of Ransack most likely to need
+attention when a new Rails version ships, which is why the nightly CI job runs
+the suite against Rails <code class="language-plaintext highlighter-rouge">main</code>. Keeping this list short, and moving items off
+it as Active Record grows public equivalents, is an explicit goal.</p>
+
+<p>Everything else goes through public API: <code class="language-plaintext highlighter-rouge">reflect_on_all_associations</code>,
+<code class="language-plaintext highlighter-rouge">columns_hash</code>, <code class="language-plaintext highlighter-rouge">type_for_attribute</code>, <code class="language-plaintext highlighter-rouge">attribute_aliases</code>, <code class="language-plaintext highlighter-rouge">defined_enums</code>,
+<code class="language-plaintext highlighter-rouge">arel_table</code>, the relation query methods, and the connection pool’s schema
+cache for column types.</p>
+<h2 id="databases">
+  
+  
+    <a href="#databases" class="anchor-heading" aria-labelledby="databases"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Databases
+  
+  
+</h2>
+    
+
+<p>Ransack does not have per-database code paths. Arel renders the query for
+whichever database is connected, and the two decisions that do depend on the
+database — whether a case-insensitive <code class="language-plaintext highlighter-rouge">LIKE</code> needs <code class="language-plaintext highlighter-rouge">LOWER()</code> and which
+function counts characters — are answered by <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Dialect</code>.
+A dialect is derived from the adapter class’s ancestry (so an adapter built on
+the PostgreSQL adapter is PostgreSQL) or set with <code class="language-plaintext highlighter-rouge">config.dialect</code>, and is the
+only place a database is named in <code class="language-plaintext highlighter-rouge">lib/</code>. See
+<a href="/ransack/getting-started/configuration/#sql-dialect">Configuration</a>.</p>
 
           
 
@@ -314,7 +398,7 @@ is one value, and treating it as SQL would be an injection vector.</p>
       
       
         <p class="text-small mb-0">
-          <a href="https://github.com/activerecord-hackery/ransack/edit/main/docs/going-further/custom-predicates.md" id="edit-this-page">Edit this page on GitHub</a>
+          <a href="https://github.com/activerecord-hackery/ransack/edit/main/docs/going-further/architecture.md" id="edit-this-page">Edit this page on GitHub</a>
         </p>
       
     </div>
