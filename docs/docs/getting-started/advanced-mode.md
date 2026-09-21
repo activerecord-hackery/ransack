@@ -31,7 +31,7 @@ Person.ransack(c: { '0' => { a: ['children_name'], p: 'eq', v: [''] } }).result.
 Both forms drop the condition, so neither contributes a join.
 
 To search *for* a blank value instead of ignoring it, see
-[`ignore_blank_values`](./configuration#blank-values).
+[`ignore_blank_values`](./configuration.md#blank-values).
 
 :::note
 
