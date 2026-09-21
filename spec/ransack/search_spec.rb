@@ -936,6 +936,17 @@ module Ransack
         expect { Person.ransack!(name_or_email_or_only_search_eq: 'x') }.not_to raise_error
         expect { Person.ransack!(name_and_email_eq: 'x') }.not_to raise_error
       end
+
+      # An attribute whose own name contains both is never split.
+      it 'leaves an attribute named with both combinators alone' do
+        allow(Person).to receive(:ransackable_attributes).and_return(Person.authorizable_ransackable_attributes + ['stop_and_or_end'])
+        Person.ransacker(:stop_and_or_end) { |parent| parent.table[:stop_end] }
+
+        expect { Person.ransack!(stop_and_or_end_eq: 'x') }.not_to raise_error
+        expect(Person.ransack!(stop_and_or_end_eq: 'x').result.to_sql).to include('= \'x\'')
+      ensure
+        Person._ransackers.delete('stop_and_or_end')
+      end
     end
 
     describe 'the long-form condition keys' do

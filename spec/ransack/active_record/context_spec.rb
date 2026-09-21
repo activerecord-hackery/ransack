@@ -56,12 +56,15 @@ module Ransack
         # walking into it used to ask the reflection for a class (#1267).
         it 'is treated as attribute names, not as the association' do
           sql = Note.ransack(notable_id_or_id_eq: 3).result.to_sql
-          expect(sql).to include(%q{"notes"."notable_id" = 3 OR "notes"."id" = 3})
+          notes = quote_table_name('notes')
+          expect(sql).to include(
+            "#{notes}.#{quote_column_name('notable_id')} = 3 OR #{notes}.#{quote_column_name('id')} = 3"
+          )
         end
 
         it 'still walks into the association when the class is named' do
           sql = Note.ransack(notable_of_Person_type_name_eq: 'x').result.to_sql
-          expect(sql).to include(%q{"people"."name" = 'x'})
+          expect(sql).to include("#{quote_table_name('people')}.#{quote_column_name('name')} = 'x'")
         end
       end
 
@@ -241,8 +244,9 @@ module Ransack
               conditions = searches.map { |s| Visitor.new.accept(s.base) }
               Article.joins(context.join_sources).where(conditions.reduce(&:or)).to_sql
             end
-            expect(sql).to include('INNER JOIN "people"')
-            expect(sql).to include(%q{"articles"."title" = 'A' OR "articles"."title" = 'B'})
+            title = "#{quote_table_name('articles')}.#{quote_column_name('title')}"
+            expect(sql).to include("INNER JOIN #{quote_table_name('people')}")
+            expect(sql).to include("#{title} = 'A' OR #{title} = 'B'")
           end
 
           it 'can be rejoined to execute a valid query' do

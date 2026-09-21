@@ -111,11 +111,14 @@ This ensures that Ransack properly handles the join dependencies between your ma
 ## Unknown sorts
 
 A sort on an attribute that is not in `ransortable_attributes`, or that does
-not exist, produces no `ORDER BY` at all: the whole sort list is dropped, and
-so is any default ordering. Under a strict search (`ransack!`, or
-`ignore_unknown_conditions = false`) it raises `Ransack::InvalidSearchError`
-instead, the same way an unknown attribute in a condition does. A sort backed
-by a `sort_by_<attribute>_<direction>` scope is always accepted.
+not exist, is dropped silently. Any other sorts in the same request still
+apply, but the model's default ordering does not: once a sort list is given,
+Ransack replaces the default order, so a request whose only sort is invalid
+comes back with no `ORDER BY` at all. Under a strict search (`ransack!`, or
+`ignore_unknown_conditions = false`) an invalid sort raises
+`Ransack::InvalidSearchError` instead, the same way an unknown attribute in a
+condition does. A sort backed by a `sort_by_<attribute>_<direction>` scope is
+always accepted.
 
 ```ruby
 Person.ransack!(s: 'secret_column asc')

@@ -47,11 +47,13 @@ module Ransack
               str = context.ransackable_alias(str)
             end
 
-            combinator = combinator_in(str, context)
-
+            # A name that is an attribute in its own right is never split,
+            # whatever it contains.
             if context.present? && context.attribute_method?(str)
               attributes = [str]
+              combinator = nil
             else
+              combinator = combinator_in(str, context)
               attributes = str.split(/_and_|_or_/)
             end
 
