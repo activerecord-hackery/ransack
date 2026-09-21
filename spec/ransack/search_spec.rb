@@ -242,6 +242,38 @@ module Ransack
         .to eq [Nodes::Condition, Nodes::Condition]
       end
 
+      # Regression test for https://github.com/activerecord-hackery/ransack/issues/1150
+      # The low-level `c:` API previously only worked when `a:` and `v:` were given
+      # in their Hash form (`{"0" => {name: ...}}`). When supplied as Arrays of
+      # attribute / value envelopes (`[{name: ...}]`, `[{value: ...}]`) the parser
+      # silently dropped the attribute or treated the entire envelope hash as the
+      # value.
+      context 'low-level c: API with Array of envelope hashes' do
+        it 'extracts :name from each attribute hash inside an Array' do
+          s = Search.new(Person,
+            c: [{ a: [{ name: 'name' }], p: 'cont', v: [{ value: 'Ernie' }] }]
+          )
+          field = "#{quote_table_name('people')}.#{quote_column_name('name')}"
+          expect(s.result.to_sql).to match(/#{field} I?LIKE '%Ernie%'/)
+        end
+
+        it 'extracts :value from each value hash inside an Array' do
+          s = Search.new(Person,
+            c: [{ a: { '0' => { name: 'name' } }, p: 'cont', v: [{ value: 'Ernie' }] }]
+          )
+          field = "#{quote_table_name('people')}.#{quote_column_name('name')}"
+          expect(s.result.to_sql).to match(/#{field} I?LIKE '%Ernie%'/)
+        end
+
+        it 'still accepts plain Array of names/values (canonical form)' do
+          s = Search.new(Person,
+            c: [{ a: ['name'], p: 'cont', v: ['Ernie'] }]
+          )
+          field = "#{quote_table_name('people')}.#{quote_column_name('name')}"
+          expect(s.result.to_sql).to match(/#{field} I?LIKE '%Ernie%'/)
+        end
+      end
+
       it 'creates conditions for custom predicates that take arrays' do
         Ransack.configure do |config|
           config.add_predicate 'ary_pred', wants_array: true

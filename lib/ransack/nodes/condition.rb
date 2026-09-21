@@ -81,8 +81,13 @@ module Ransack
       def attributes=(args)
         case args
         when Array
-          args.each do |name|
-            build_attribute(name)
+          args.each do |attr|
+            if attr.is_a?(Hash) && (attr.key?(:name) || attr.key?("name"))
+              attr = attr.with_indifferent_access
+              build_attribute(attr[:name], attr[:ransacker_args])
+            else
+              build_attribute(attr)
+            end
           end
         when Hash
           args.each do |index, attrs|
@@ -104,8 +109,10 @@ module Ransack
         case args
         when Array
           args.each do |val|
-            val = Value.new(@context, val)
-            self.values << val
+            if val.is_a?(Hash) && (val.key?(:value) || val.key?("value"))
+              val = val.with_indifferent_access[:value]
+            end
+            self.values << Value.new(@context, val)
           end
         when Hash
           args.each do |index, attrs|
