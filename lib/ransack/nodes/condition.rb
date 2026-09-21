@@ -363,7 +363,15 @@ module Ransack
         # backslash as a literal character rather than an escape.
         # See https://github.com/activerecord-hackery/ransack/issues/1581
         if like_predicate?(arel_pred)
-          arel_values = Arel::Nodes.build_quoted(arel_values)
+          # The compound forms (matches_any / matches_all and their negations)
+          # iterate over an Array of patterns, so each element is quoted on its
+          # own; wrapping the whole Array in one node would hand them a single
+          # Quoted to iterate over.
+          arel_values = if arel_values.is_a?(Array)
+            arel_values.map { |v| Arel::Nodes.build_quoted(v) }
+          else
+            Arel::Nodes.build_quoted(arel_values)
+          end
           predicate = attr_value_for_attribute(attribute)
                       .public_send(arel_pred, arel_values, Constants::LIKE_ESCAPE_CHARACTER)
         else

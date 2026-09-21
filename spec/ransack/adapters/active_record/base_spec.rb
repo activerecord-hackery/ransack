@@ -423,6 +423,44 @@ module Ransack
             expect(Person.ransack(name_cont: 'a_c').result.to_a).to eq [match]
           end
 
+          # The compound LIKE predicates take an Array of terms. Each one must be
+          # escaped and quoted individually, and the ESCAPE clause must apply
+          # to every LIKE they expand into.
+          it 'escapes every term of a cont_any search' do
+            hit_a = Person.create!(name: '50%off')
+            hit_b = Person.create!(name: 'a_c')
+            Person.create!(name: '50 off')
+            Person.create!(name: 'abc')
+
+            search = Person.ransack(name_cont_any: ['50%', 'a_c'])
+            expect(search.result.to_a).to match_array [hit_a, hit_b]
+            expect(search.result.to_sql.scan(/ESCAPE/).size).to eq 2
+          end
+
+          it 'escapes every term of a cont_all search' do
+            hit = Person.create!(name: '50%off')
+            Person.create!(name: '50 off')
+
+            expect(Person.ransack(name_cont_all: ['50', '%']).result.to_a).to eq [hit]
+          end
+
+          it 'escapes every term of a not_cont_any search' do
+            Person.create!(name: '50%off')
+            Person.create!(name: 'a_c')
+            kept = Person.create!(name: 'plain')
+
+            result = Person.ransack(name_not_cont_any: ['50%', 'a_c']).result.to_a
+            expect(result).to include kept
+            expect(result.map(&:name)).not_to include '50%off', 'a_c'
+          end
+
+          it 'escapes every term of a start_any search' do
+            hit = Person.create!(name: 'a_c')
+            Person.create!(name: 'abc')
+
+            expect(Person.ransack(name_start_any: ['a_', 'zz']).result.to_a).to eq [hit]
+          end
+
           it 'treats a percent sign in the search term literally' do
             match = Person.create!(name: 'dis%count')
             Person.create!(name: 'discount')
