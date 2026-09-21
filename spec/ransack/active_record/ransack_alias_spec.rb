@@ -72,6 +72,40 @@ module Ransack
         end
       end
 
+      # Person has a `true_or_false` column and a `terms_and_conditions` column.
+      describe 'names that contain a combinator' do
+        let(:model) do
+          Class.new(Person) do
+            def self.name
+              'PersonWithCombinatorAliases'
+            end
+            ransack_alias :true, :name
+            ransack_alias :consent, :terms_and_conditions
+          end
+        end
+        let(:article_model) do
+          person_model = model
+          Class.new(Article) do
+            def self.name
+              'ArticleWithCombinatorAliases'
+            end
+            belongs_to :person, class_name: person_model.name, anonymous_class: person_model
+          end
+        end
+
+        it 'leaves a real attribute alone even when an alias matches its first segment' do
+          sql = model.ransack(true_or_false_eq: true).result.to_sql
+          expect(sql).to include(column('people', 'true_or_false'))
+          expect(sql).not_to include(column('people', 'name'))
+        end
+
+        it 'prefixes an associated alias whose target is one attribute as a whole' do
+          sql = article_model.ransack(person_consent_eq: true).result.to_sql
+          expect(sql).to include(column('people', 'terms_and_conditions'))
+          expect { article_model.ransack!(person_consent_eq: true).result.to_a }.not_to raise_error
+        end
+      end
+
       it 'does not need the alias itself allowlisted, only its targets' do
         allow(Person).to receive(:ransackable_attributes).and_return(%w[name email])
         sql = Person.ransack!(term_cont: 'a').result.to_sql

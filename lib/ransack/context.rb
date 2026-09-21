@@ -191,8 +191,11 @@ module Ransack
     # `name_or_email_or_parent_name`. Returns the name unchanged when it
     # holds no alias.
     def resolve_aliases(str)
-      whole = ransackable_alias(str)
+      whole = resolve_alias_segment(str)
       return whole if whole != str
+      # A name that is an attribute in its own right is never split, even if
+      # it contains a combinator (a column called `true_or_false`).
+      return str if attribute_method?(str)
 
       segments = str.split(/_and_|_or_/)
       resolved = segments.map { |segment| resolve_alias_segment(segment) }
@@ -247,6 +250,9 @@ module Ransack
       associated = traverse(path)
       target = associated._ransack_aliases.fetch(remainder, associated._ransack_aliases.fetch(remainder.to_sym, remainder))
       return segment if target == remainder
+      # The target may itself be one attribute whose name contains a
+      # combinator (`terms_and_conditions`); it is prefixed whole.
+      return "#{path}_#{target}" if ransackable_attribute?(target, associated)
 
       # Prefix every attribute of the alias's target with the path.
       target.gsub(/(\A|_and_|_or_)/) { "#{$1}#{path}_" }
