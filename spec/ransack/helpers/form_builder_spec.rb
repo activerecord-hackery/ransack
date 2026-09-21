@@ -153,6 +153,32 @@ module Ransack
         end
       end
 
+      # Ransack used to monkey-patch ActionView::Helpers::Tags::Base#value to
+      # call `send` rather than `public_send`, which made Rails reach private
+      # Kernel methods on any object whose attribute name happened to collide
+      # with one. That broke unrelated forms in apps that merely had Ransack
+      # loaded — `Kernel#test` takes 2..3 arguments, so building a field named
+      # `test` raised ArgumentError.
+      # See https://github.com/activerecord-hackery/ransack/pull/1485
+      context 'with a non-Ransack form object' do
+        it 'does not break fields whose name collides with a private Kernel method' do
+          # Any object that answers an unknown reader with nil, as an OpenStruct
+          # with no such attribute would. Written out in plain Ruby because
+          # ostruct is no longer a default gem as of Ruby 4.0.
+          model = Class.new do
+            def method_missing(*) = nil
+            def respond_to_missing?(*) = false
+          end.new
+
+          builder = ActionView::Helpers::FormBuilder.new(
+            :thing, model, ActionView::Base.empty, {}
+          )
+
+          expect { builder.text_field(:test) }.not_to raise_error
+          expect(builder.text_field(:test)).to match(/name="thing\[test\]"/)
+        end
+      end
+
       private
 
         def test_label(f, query, expected)
