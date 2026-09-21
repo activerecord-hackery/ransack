@@ -20,6 +20,66 @@ module Ransack
         Search.new(Person, name_eq: 'foobar')
       end
 
+      context 'blank value handling' do
+        after { Ransack.configure { |c| c.ignore_blank_values = true } }
+
+        context 'when ignore_blank_values is true (the default)' do
+          it 'removes empty string conditions before building' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_eq: '')
+          end
+
+          it 'removes empty array conditions before building' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_in: [])
+          end
+
+          it 'removes conditions that are blank after whitespace stripping' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_eq: '   ')
+          end
+        end
+
+        context 'when ignore_blank_values is false' do
+          before { Ransack.configure { |c| c.ignore_blank_values = false } }
+
+          it 'keeps empty string conditions before building' do
+            expect_any_instance_of(Search).to receive(:build)
+            .with({ 'name_eq' => '' })
+            Search.new(Person, name_eq: '')
+          end
+
+          it 'keeps empty array conditions before building' do
+            expect_any_instance_of(Search).to receive(:build)
+            .with({ 'name_in' => [] })
+            Search.new(Person, name_in: [])
+          end
+
+          it 'still removes nil conditions before building' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_eq: nil)
+          end
+
+          it 'searches for the empty string with an eq predicate' do
+            s = Search.new(Person, name_eq: '')
+            field = "#{quote_table_name('people')}.#{quote_column_name('name')}"
+            expect(s.result.to_sql).to include "#{field} = ''"
+          end
+
+          it 'matches nothing for an empty array with an in predicate' do
+            s = Search.new(Person, name_in: [])
+            expect(s.result.to_a).to eq []
+          end
+
+          it 'keeps the condition on the search object' do
+            s = Search.new(Person, children_name_eq: '')
+            condition = s.base[:children_name_eq]
+            expect(condition).not_to be_nil
+            expect(condition.values.first.value).to eq ''
+          end
+        end
+      end
+
       context 'whitespace stripping' do
         context 'when whitespace_strip option is true' do
           before do

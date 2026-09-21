@@ -41,8 +41,54 @@ Ransack.configure do |config|
 
   # Postgres has a nulls first / nulls last option, this can be configured.
   config.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
+
+  # Strip leading and trailing whitespace from string search values.
+  # Default is true.
+  config.strip_whitespace = false
+
+  # Treat blank values as conditions to search for, rather than as absent.
+  # Default is true (blank values are ignored).
+  config.ignore_blank_values = false
 end
 ```
+
+## Blank values
+
+By default Ransack ignores a condition whose value is blank — an empty string,
+or an array of only blank values. This is what makes an HTML search form behave
+sensibly: a form submitted with its fields left empty returns every record
+rather than none.
+
+```ruby
+Person.ransack(name_eq: "").result.to_sql
+# => SELECT "people".* FROM "people"
+```
+
+For a JSON API this is often the wrong default, because there an empty value is
+usually an explicit filter rather than an untouched form field. Setting
+`ignore_blank_values` to `false` makes Ransack search for the blank value
+instead of dropping it:
+
+```ruby
+Ransack.configure { |config| config.ignore_blank_values = false }
+
+Person.ransack(name_eq: "").result.to_sql
+# => SELECT "people".* FROM "people" WHERE "people"."name" = ''
+
+Person.ransack(id_in: []).result.to_a
+# => []   (an empty allowlist matches nothing, rather than matching everything)
+```
+
+A `nil` value is ignored under either setting, so params that were never sent
+are still not turned into conditions.
+
+:::caution
+
+Do not turn this off for a search backed by an HTML form. A blank text input
+posts `""`, so with `ignore_blank_values = false` an untouched field becomes
+`WHERE column = ''` and the form returns nothing.
+
+:::
 
 ## Custom search parameter key name
 

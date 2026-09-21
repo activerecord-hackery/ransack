@@ -26,7 +26,7 @@ module Ransack
       if params.is_a? Hash
         params = params.dup
         params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
-        params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false && !i.nil? } }
+        params.delete_if { |_k, v| ignorable_value?(v) }
       else
         params = {}
       end
@@ -140,6 +140,18 @@ module Ransack
         @scope_args[key] = args.is_a?(Array) ? sanitized_args : args
       end
       @context.chain_scope(key, sanitized_args)
+    end
+
+    # Whether a top-level condition value should be dropped before building.
+    # With `ignore_blank_values` on (the default) a blank value means "this form
+    # field was left empty"; with it off, only `nil` is treated that way and a
+    # blank value is a value to search for.
+    def ignorable_value?(value)
+      if Ransack.options[:ignore_blank_values]
+        [*value].all? { |i| i.blank? && i != false && !i.nil? }
+      else
+        value.nil? || (value.is_a?(Array) && !value.empty? && value.all?(&:nil?))
+      end
     end
 
     def collapse_multiparameter_attributes!(attrs)
