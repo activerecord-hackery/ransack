@@ -292,11 +292,11 @@ module Ransack
       end
 
       def arel_predicate
-        predicate = attributes.map { |attribute|
+        attributes.map { |attribute|
           association = attribute.parent
           parent_table = association.table
 
-          if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
+          predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
             query = context.build_correlated_subquery(association)
             context.remove_association(association)
 
@@ -319,18 +319,21 @@ module Ransack
           else
             format_predicate(attribute)
           end
+
+          # Applied per attribute rather than to the reduced node: once several
+          # attributes are combined, the result is an And/Or whose `right` is
+          # another node, so only the last attribute would ever be unwrapped.
+          if replace_right_node?(predicate)
+            # Replace right node object to plain integer value in order to avoid
+            # ActiveModel::RangeError from Arel::Node::Casted.
+            # The error can be ignored here because RDBMSs accept large numbers
+            # in condition clauses.
+            plain_value = predicate.right.value
+            predicate.right = plain_value
+          end
+
+          predicate
         }.reduce(combinator_method)
-
-        if replace_right_node?(predicate)
-          # Replace right node object to plain integer value in order to avoid
-          # ActiveModel::RangeError from Arel::Node::Casted.
-          # The error can be ignored here because RDBMSs accept large numbers
-          # in condition clauses.
-          plain_value = predicate.right.value
-          predicate.right = plain_value
-        end
-
-        predicate
       end
 
       def not_nested_condition(attribute, parent_table)
