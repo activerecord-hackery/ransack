@@ -445,6 +445,24 @@ module Ransack
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         expect(@s.result.to_sql).to match /#{field} IS NULL OR #{field} = ''/
       end
+
+      # Regression test for https://github.com/activerecord-hackery/ransack/issues/1552
+      # On non-string columns the empty-string half of the comparison has no
+      # meaning and gets cast to NULL, producing the always-UNKNOWN
+      # `column != NULL` clause. The query should reduce to `IS NOT NULL` only.
+      it 'generates only IS NOT NULL on non-string columns' do
+        @s.salary_present = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} IS NOT NULL/
+        expect(@s.result.to_sql).not_to match(%r{!= NULL})
+      end
+
+      it 'generates only IS NULL on non-string columns when assigned false' do
+        @s.salary_present = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} IS NULL/
+        expect(@s.result.to_sql).not_to match(%r{= NULL})
+      end
     end
 
     describe 'blank' do
@@ -458,6 +476,21 @@ module Ransack
         @s.name_blank = false
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         expect(@s.result.to_sql).to match /#{field} IS NOT NULL AND #{field} != ''/
+      end
+
+      # Regression test for https://github.com/activerecord-hackery/ransack/issues/1552
+      it 'generates only IS NULL on non-string columns' do
+        @s.salary_blank = true
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} IS NULL/
+        expect(@s.result.to_sql).not_to match(%r{= NULL})
+      end
+
+      it 'generates only IS NOT NULL on non-string columns when assigned false' do
+        @s.salary_blank = false
+        field = "#{quote_table_name("people")}.#{quote_column_name("salary")}"
+        expect(@s.result.to_sql).to match /#{field} IS NOT NULL/
+        expect(@s.result.to_sql).not_to match(%r{!= NULL})
       end
     end
 
