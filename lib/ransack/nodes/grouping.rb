@@ -148,7 +148,7 @@ module Ransack
       def build(params)
         params.with_indifferent_access.each do |key, value|
           case key
-          when /^(g|c|m)$/
+          when /^(g|c|m|groupings|conditions|combinator)$/
             self.send("#{key}=", value)
           else
             if @context.ransackable_scope?(key, @context.object)
