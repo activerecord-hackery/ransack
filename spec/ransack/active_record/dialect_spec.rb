@@ -47,10 +47,12 @@ module Ransack::ActiveRecord
       # A model on a second database of a different kind must get that
       # database's dialect, not the primary connection's (#1407).
       it 'reads the searched model, not ActiveRecord::Base' do
-        allow(Person).to receive(:adapter_class).and_return(mysql_adapter)
+        # Whatever the suite's database is, give Person a different one.
+        other = Dialect.for(::ActiveRecord::Base).mysql? ? sqlite_adapter : mysql_adapter
+        allow(Person).to receive(:adapter_class).and_return(other)
 
-        expect(Dialect.for(Person)).to be_mysql
-        expect(Dialect.for(::ActiveRecord::Base)).not_to be_mysql
+        expect(Dialect.for(Person)).to eq Dialect.new(Dialect.detect(other))
+        expect(Dialect.for(Person)).not_to eq Dialect.for(::ActiveRecord::Base)
       end
 
       it 'is overridden by config.dialect' do
