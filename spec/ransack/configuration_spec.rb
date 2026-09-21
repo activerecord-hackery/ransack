@@ -188,7 +188,7 @@ module Ransack
       end
     end
 
-    it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+    it "PG's sort option", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL" do
       default = Ransack.options.clone
 
       Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
