@@ -34,8 +34,9 @@ module Ransack
       down_arrow: '&#9650;'.freeze,
       default_arrow: nil,
       sanitize_scope_args: true,
-      postgres_fields_sort_option: nil,
-      strip_whitespace: true
+      fields_sort_option: nil,
+      strip_whitespace: true,
+      ignore_blank_values: true
     }
 
     def configure
@@ -162,13 +163,24 @@ module Ransack
     # User may want to configure it like this:
     #
     # Ransack.configure do |c|
-    #   c.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
+    #   c.fields_sort_option = :nulls_first # or e.g. :nulls_always_last
     # end
     #
-    # See this feature: https://www.postgresql.org/docs/13/queries-order.html
+    # Emitted through Arel's `nulls_first` / `nulls_last`, so it works on any
+    # backend Arel supports it for. MySQL has no NULLS FIRST / LAST syntax and
+    # Arel does not emulate it, so this option does not apply there.
     #
+    # See https://www.postgresql.org/docs/current/queries-order.html
+    #
+    def fields_sort_option=(setting)
+      self.options[:fields_sort_option] = setting
+    end
+
+    # Renamed to `fields_sort_option` now that NULLS FIRST / NULLS LAST is
+    # emitted through Arel and is no longer PostgreSQL-specific. The old name
+    # still works so existing initializers keep running.
     def postgres_fields_sort_option=(setting)
-      self.options[:postgres_fields_sort_option] = setting
+      self.fields_sort_option = setting
     end
 
     # By default, Ransack displays sort order indicator arrows in sort links.
@@ -195,6 +207,27 @@ module Ransack
     #
     def strip_whitespace=(boolean)
       self.options[:strip_whitespace] = boolean
+    end
+
+    # By default, Ransack ignores search conditions whose value is blank — an
+    # empty string, or an array containing only blank values. This is what makes
+    # a search form submitted with empty fields return every record rather than
+    # none, and it is almost always what an HTML form wants.
+    #
+    # Set this to false to treat a blank value as a value to search *for*:
+    # `name_eq: ''` then generates `WHERE name = ''`, and `id_in: []` generates a
+    # condition matching nothing rather than being dropped. This is usually what
+    # a JSON API wants, where an empty value is an explicit filter rather than an
+    # untouched form field.
+    #
+    # A `nil` value is ignored either way.
+    #
+    # Ransack.configure do |config|
+    #   config.ignore_blank_values = false
+    # end
+    #
+    def ignore_blank_values=(boolean)
+      self.options[:ignore_blank_values] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

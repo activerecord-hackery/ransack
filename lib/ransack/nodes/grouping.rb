@@ -1,7 +1,12 @@
 module Ransack
   module Nodes
     class Grouping < Node
-      attr_accessor :combinator
+      attr_reader :combinator
+
+      # The writer is inherited from Node, which normalises the value. Defining
+      # it here as well — or aliasing before the definition is in place — would
+      # bind `m=` to the plain attribute writer and skip that normalisation,
+      # which is how `g: [{ m: 'OR' }]` silently fell back to AND.
       alias :m :combinator
       alias :m= :combinator=
 
@@ -12,7 +17,7 @@ module Ransack
 
       def initialize(context, combinator = nil)
         super(context)
-        self.combinator = combinator.to_s if combinator
+        self.combinator = combinator if combinator
       end
 
       def persisted?
@@ -181,6 +186,16 @@ module Ransack
       end
 
       def read_attribute(name)
+        # A field built from an aliased attribute writes its value under the real
+        # name but reads it back under the alias. Resolve the alias so the
+        # value survives a form round-trip (#689).
+        if self[name].nil?
+          stripped_name = name.dup
+          predicate = Predicate.detect_and_strip_from_string!(stripped_name)
+          aliased_attribute = context.ransackable_alias(stripped_name)
+          name = "#{aliased_attribute}_#{predicate}" unless aliased_attribute == stripped_name
+        end
+
         if self[name].respond_to?(:value)
           self[name].value
         else

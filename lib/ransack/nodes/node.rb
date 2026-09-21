@@ -29,6 +29,19 @@ module Ransack
         end
       end
 
+      # Every way of supplying a combinator — a top-level `combinator`/`m`,
+      # or an `m` inside any nested grouping or condition — ends up here, so
+      # this is the one place that normalises the spelling and, when the search
+      # is strict, rejects a value it does not recognise.
+      def combinator=(val)
+        normalised = val.to_s.downcase
+        @combinator = Constants::AND_OR.detect { |v| v == normalised }
+
+        if @combinator.nil? && !normalised.empty? && context&.strict_conditions?
+          raise InvalidSearchError, "Invalid combinator #{val}"
+        end
+      end
+
     end
   end
 end

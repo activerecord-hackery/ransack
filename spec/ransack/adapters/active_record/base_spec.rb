@@ -312,7 +312,7 @@ module Ransack
         describe '#ransacker' do
           # For infix tests
           def self.sane_adapter?
-            case ::ActiveRecord::Base.connection.adapter_name
+            case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
             when 'SQLite3', 'PostgreSQL'
               true
             else
@@ -362,6 +362,73 @@ module Ransack
             expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
           end
 
+          it 'should remove empty key value pairs from the complex params hash' do
+            s = Person.ransack(
+              c: {
+                '0' => {
+                        a: ['children_name'],
+                        p: 'eq', v: ['']
+                      }
+              })
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty key value pairs from a string-keyed complex hash' do
+            s = Person.ransack(
+              'c' => {
+                '0' => { 'a' => ['children_name'], 'p' => 'eq', 'v' => [''] }
+              })
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty conditions inside a nested grouping' do
+            s = Person.ransack(
+              g: [{ c: { '0' => { a: ['children_name'], p: 'eq', v: [''] } } }])
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty conditions inside a doubly nested grouping' do
+            s = Person.ransack(
+              g: [{ g: [{ c: [{ a: ['children_name'], p: 'eq', v: [''] }] }] }])
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should remove empty conditions under the long-form grouping keys' do
+            s = Person.ransack(
+              groupings: [{ conditions: [{ a: ['children_name'], p: 'eq', v: [''] }] }])
+            expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+          end
+
+          it 'should not modify nested parameters while pruning' do
+            params = { g: [{ c: [{ a: ['children_name'], p: 'eq', v: [''] }] }] }
+            original = params.deep_dup
+
+            Person.ransack(params)
+
+            expect(params).to eq original
+          end
+
+          # The `v:` values of a `c:` condition may be given bare or wrapped in
+          # a `{ value: ... }` envelope. Both carry real values that must
+          # survive the blank-pruning above — dropping them silently turns a
+          # filtered search into an unfiltered one.
+          it 'should keep a populated Hash-form value in the complex params hash' do
+            s = Person.ransack(
+              c: {
+                '0' => {
+                        a: ['name'],
+                        p: 'eq', v: { '0' => { value: 'Ernie' } }
+                      }
+              })
+            expect(s.result.to_sql).to match(/= 'Ernie'/)
+          end
+
+          it 'should keep a populated Array-form value in the complex params hash' do
+            s = Person.ransack(
+              c: { '0' => { a: ['name'], p: 'eq', v: ['Ernie'] } })
+            expect(s.result.to_sql).to match(/= 'Ernie'/)
+          end
+
           it 'should keep proper key value pairs in the params hash' do
             s = Person.ransack(children_reversed_name_eq: 'Testing')
             expect(s.result.to_sql).to match /LEFT OUTER JOIN/
@@ -409,6 +476,59 @@ module Ransack
             p = Person.create!(name: "\\WINNER\\")
             s = Person.ransack(name_cont: "\\WINNER\\")
             expect(s.result.to_a).to eq [p]
+          end
+
+          # Regression test for
+          # https://github.com/activerecord-hackery/ransack/issues/1581
+          # `_` is a single-character LIKE wildcard. Escaping it only takes
+          # effect when an ESCAPE clause is emitted, which SQLite and other
+          # backends with no default escape character require.
+          it 'treats an underscore in the search term literally' do
+            match = Person.create!(name: 'a_c')
+            Person.create!(name: 'abc')
+
+            expect(Person.ransack(name_cont: 'a_c').result.to_a).to eq [match]
+          end
+
+          # The compound LIKE predicates take an Array of terms. Each one must be
+          # escaped and quoted individually, and the ESCAPE clause must apply
+          # to every LIKE they expand into. Names are prefixed per example
+          # because rows persist across examples in this file.
+          it 'escapes every term of a cont_any search' do
+            %w[cany-50%off cany-a_c cany-50off cany-abc].each { |n| Person.create!(name: n) }
+
+            search = Person.ransack(name_cont_any: ['cany-50%', 'cany-a_c'])
+            expect(search.result.map(&:name)).to match_array %w[cany-50%off cany-a_c]
+            expect(search.result.to_sql.scan(/ESCAPE/).size).to eq 2
+          end
+
+          it 'escapes every term of a cont_all search' do
+            %w[call-50%off call-50off].each { |n| Person.create!(name: n) }
+
+            search = Person.ransack(name_cont_all: ['call-50', '%off'])
+            expect(search.result.map(&:name)).to eq %w[call-50%off]
+          end
+
+          it 'escapes every term of a not_cont_all search' do
+            %w[ncall-50%off ncall-a_c ncall-plain].each { |n| Person.create!(name: n) }
+
+            names = Person.ransack(name_not_cont_all: ['50%', 'a_c']).result.map(&:name)
+            expect(names).to include 'ncall-plain'
+            expect(names).not_to include 'ncall-50%off', 'ncall-a_c'
+          end
+
+          it 'escapes every term of a start_any search' do
+            %w[sa_c sabc].each { |n| Person.create!(name: n) }
+
+            search = Person.ransack(name_start_any: ['sa_', 'zz'])
+            expect(search.result.map(&:name)).to eq %w[sa_c]
+          end
+
+          it 'treats a percent sign in the search term literally' do
+            match = Person.create!(name: 'dis%count')
+            Person.create!(name: 'discount')
+
+            expect(Person.ransack(name_cont: 'dis%count').result.to_a).to eq [match]
           end
 
           if ::ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::Base.respond_to?(:normalizes)
@@ -471,8 +591,8 @@ module Ransack
           context 'searching by underscores' do
             # when escaping is supported right in LIKE expression without adding extra expressions
             def self.simple_escaping?
-              case ::ActiveRecord::Base.connection.adapter_name
-                when 'Mysql2', 'PostgreSQL'
+              case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
+                when 'Mysql2', 'Trilogy', 'PostgreSQL'
                   true
                 else
                   false

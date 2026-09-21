@@ -101,37 +101,30 @@ module Ransack
       end
 
       context 'with wildcard string values' do
-        it 'properly quotes values with wildcards for LIKE predicates' do
-          ransack_hash = { name_cont: 'test%' }
-          sql = Person.ransack(ransack_hash).result.to_sql
+        # 'test%' must match values ending in a literal '%', not act as a
+        # second wildcard, so the '%' is escaped and an ESCAPE clause is
+        # emitted. See https://github.com/activerecord-hackery/ransack/issues/1581
+        let(:escaped_value) { quote_value('%test\\%%') }
+        let(:escape_clause) { "ESCAPE #{quote_value('\\')}" }
 
-          # The % should be properly quoted in the SQL
-          case ActiveRecord::Base.connection.adapter_name
-          when "Mysql2"
-            expect(sql).to include("LIKE '%test\\\\%%'")
-            expect(sql).not_to include("NOT LIKE '%test\\\\%%'")
-          when "PostGIS", "PostgreSQL"
-            expect(sql).to include("ILIKE '%test\\%%'")
-            expect(sql).not_to include("NOT ILIKE '%test\\%%'")
-          else
-            expect(sql).to include("LIKE '%test%%'")
-            expect(sql).not_to include("NOT LIKE '%test%%'")
+        let(:like) do
+          case ActiveRecord::Base.adapter_class::ADAPTER_NAME
+          when "PostGIS", "PostgreSQL" then 'ILIKE'
+          else 'LIKE'
           end
         end
 
-        it 'properly quotes values with wildcards for NOT LIKE predicates' do
-          ransack_hash = { name_not_cont: 'test%' }
-          sql = Person.ransack(ransack_hash).result.to_sql
+        it 'escapes wildcards in the value for LIKE predicates' do
+          sql = Person.ransack(name_cont: 'test%').result.to_sql
 
-          # The % should be properly quoted in the SQL
-          case ActiveRecord::Base.connection.adapter_name
-          when "Mysql2"
-            expect(sql).to include("NOT LIKE '%test\\\\%%'")
-          when "PostGIS", "PostgreSQL"
-            expect(sql).to include("NOT ILIKE '%test\\%%'")
-          else
-            expect(sql).to include("NOT LIKE '%test%%'")
-          end
+          expect(sql).to include("#{like} #{escaped_value} #{escape_clause}")
+          expect(sql).not_to include("NOT #{like}")
+        end
+
+        it 'escapes wildcards in the value for NOT LIKE predicates' do
+          sql = Person.ransack(name_not_cont: 'test%').result.to_sql
+
+          expect(sql).to include("NOT #{like} #{escaped_value} #{escape_clause}")
         end
       end
 
@@ -275,13 +268,13 @@ module Ransack
           end
 
           # Create tables if they don't exist
-          ActiveRecord::Base.connection.create_table(:tasks, force: true) do |t|
+          ActiveRecord::Base.lease_connection.create_table(:tasks, force: true) do |t|
             t.string :uid
             t.string :name
             t.timestamps null: false
           end
 
-          ActiveRecord::Base.connection.create_table(:follows, force: true) do |t|
+          ActiveRecord::Base.lease_connection.create_table(:follows, force: true) do |t|
             t.string :followed_uid, null: false
             t.string :followed_type, null: false
             t.string :follower_uid, null: false
@@ -291,7 +284,7 @@ module Ransack
             t.index [:follower_uid, :follower_type]
           end
 
-          ActiveRecord::Base.connection.create_table(:users, force: true) do |t|
+          ActiveRecord::Base.lease_connection.create_table(:users, force: true) do |t|
             t.string :uid
             t.string :name
             t.timestamps null: false
@@ -304,9 +297,9 @@ module Ransack
           Object.send(:remove_const, :TestFollow)
           Object.send(:remove_const, :TestUser)
 
-          ActiveRecord::Base.connection.drop_table(:tasks, if_exists: true)
-          ActiveRecord::Base.connection.drop_table(:follows, if_exists: true)
-          ActiveRecord::Base.connection.drop_table(:users, if_exists: true)
+          ActiveRecord::Base.lease_connection.drop_table(:tasks, if_exists: true)
+          ActiveRecord::Base.lease_connection.drop_table(:follows, if_exists: true)
+          ActiveRecord::Base.lease_connection.drop_table(:users, if_exists: true)
         end
 
         it 'correctly handles not_in predicate with polymorphic associations' do

@@ -3,7 +3,7 @@ require 'ransack/visitor'
 module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
-    attr_accessor :auth_object, :search_key
+    attr_accessor :auth_object, :search_key, :ignore_unknown_conditions
 
     class << self
 
@@ -32,6 +32,12 @@ module Ransack
       end
 
     end # << self
+
+    # Unknown attributes, predicates and combinators raise rather than being
+    # ignored when either the global option or this search's own option says so.
+    def strict_conditions?
+      !Ransack.options[:ignore_unknown_conditions] || ignore_unknown_conditions == false
+    end
 
     def initialize(object, options = {})
       @object = relation_for(object)
