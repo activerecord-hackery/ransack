@@ -131,8 +131,9 @@ module Ransack
       end
 
       def combinator=(val)
-        @combinator = Constants::AND_OR.detect { |v| v == val.to_s } || nil
+        super
       end
+
       alias :m= :combinator=
       alias :m :combinator
 
@@ -178,10 +179,17 @@ module Ransack
         end
       end
 
+      # The long spellings route through the short setters: `p=` resolves a
+      # Predicate object, whereas the `predicate=` attribute writer would store
+      # the bare name.
+      LONG_KEYS = {
+        'attributes' => 'a', 'values' => 'v', 'predicate' => 'p', 'combinator' => 'm'
+      }.freeze
+
       def build(params)
         params.with_indifferent_access.each do |key, value|
-          if key.match(/^(a|v|p|m)$/)
-            self.send("#{key}=", value)
+          if key.match(/^(a|v|p|m|attributes|values|predicate|combinator)$/)
+            self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end
         end
 

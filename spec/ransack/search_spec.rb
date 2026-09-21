@@ -461,6 +461,120 @@ module Ransack
         end
       end
 
+      # `alias :m= :combinator=` used to be declared before the normalising
+      # writer existed, so it bound to the plain attribute writer and `m:`
+      # skipped normalisation entirely — `g: [{ m: 'OR' }]` silently became AND.
+      context 'with a combinator that needs normalising' do
+        ['or', 'OR', 'Or', :or, :OR].each do |combinator|
+          it "treats #{combinator.inspect} as 'or'" do
+            search = Search.new(
+              Person, g: [{ m: combinator, name_eq: 'a', email_eq: 'b' }]
+            )
+
+            expect(search.result.to_sql).to include ' OR '
+          end
+        end
+
+        ['and', 'AND', :and].each do |combinator|
+          it "treats #{combinator.inspect} as 'and'" do
+            search = Search.new(
+              Person, g: [{ m: combinator, name_eq: 'a', email_eq: 'b' }]
+            )
+
+            expect(search.result.to_sql).to include ' AND '
+          end
+        end
+      end
+
+      context 'combinator validation in strict mode' do
+        it 'accepts any spelling of a valid combinator' do
+          expect { Search.new(Person, { combinator: 'OR', name_eq: 'a' }, ignore_unknown_conditions: false) }
+            .not_to raise_error
+        end
+
+        it 'rejects an unknown combinator given as m' do
+          expect { Search.new(Person, { m: 'nand', name_eq: 'a' }, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Invalid combinator nand')
+        end
+
+        it 'rejects an unknown combinator inside a nested grouping' do
+          expect {
+            Search.new(Person, { g: [{ m: 'nand', name_eq: 'a', email_eq: 'b' }] }, ignore_unknown_conditions: false)
+          }.to raise_error(InvalidSearchError, 'Invalid combinator nand')
+        end
+
+        it 'ignores a blank combinator, as a submitted empty field' do
+          expect { Search.new(Person, { m: '', name_eq: 'a' }, ignore_unknown_conditions: false) }
+            .not_to raise_error
+        end
+      end
+
+      context 'combinator validation in permissive mode' do
+        it 'falls back to and for an unknown combinator' do
+          search = Search.new(Person, g: [{ m: 'nand', name_eq: 'a', email_eq: 'b' }])
+          expect(search.result.to_sql).to include ' AND '
+        end
+
+        it 'does not raise for a non-string combinator' do
+          search = Search.new(Person, g: [{ m: 1, name_eq: 'a', email_eq: 'b' }])
+          expect(search.result.to_sql).to include ' AND '
+        end
+      end
+
+      context 'long-form condition keys' do
+        it 'accepts attributes, predicate and values in a condition' do
+          search = Search.new(Person, c: [{ attributes: ['name'], predicate: 'eq', values: ['Ernie'] }])
+          field = "#{quote_table_name('people')}.#{quote_column_name('name')}"
+          expect(search.result.to_sql).to include "#{field} = 'Ernie'"
+        end
+      end
+
+      context 'with an invalid combinator' do
+        subject { Search.new(Person, name_eq: 'foobar', combinator: 'unknown') }
+
+        context 'when ignore_unknown_conditions configuration option is false' do
+          before do
+            Ransack.configure { |c| c.ignore_unknown_conditions = false }
+          end
+
+          specify { expect { subject }.to raise_error ArgumentError }
+        end
+
+        context 'when ignore_unknown_conditions configuration option is true' do
+          before do
+            Ransack.configure { |c| c.ignore_unknown_conditions = true }
+          end
+
+          specify { expect { subject }.not_to raise_error }
+        end
+
+        subject(:with_ignore_unknown_conditions_false) {
+          Search.new(Person,
+            { name_eq: 'foobar', combinator: 'unknown' },
+            { ignore_unknown_conditions: false }
+          )
+        }
+
+        subject(:with_ignore_unknown_conditions_true) {
+          Search.new(Person,
+            { name_eq: 'foobar', combinator: 'unknown' },
+            { ignore_unknown_conditions: true }
+          )
+        }
+
+        context 'when ignore_unknown_conditions search parameter is absent' do
+          specify { expect { subject }.not_to raise_error }
+        end
+
+        context 'when ignore_unknown_conditions search parameter is false' do
+          specify { expect { with_ignore_unknown_conditions_false }.to raise_error ArgumentError }
+        end
+
+        context 'when ignore_unknown_conditions search parameter is true' do
+          specify { expect { with_ignore_unknown_conditions_true }.not_to raise_error }
+        end
+      end
+
       it 'does not modify the parameters' do
         params = { name_eq: '' }
         expect { Search.new(Person, params) }.not_to change { params }

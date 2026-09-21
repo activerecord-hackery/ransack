@@ -36,6 +36,7 @@ module Ransack
       end
       @context = options[:context] || Context.for(object, options)
       @context.auth_object = options[:auth_object]
+      @context.ignore_unknown_conditions = options[:ignore_unknown_conditions]
       @base = Nodes::Grouping.new(
         @context, options[:grouping] || Constants::AND
         )
