@@ -39,8 +39,8 @@ Ransack.configure do |config|
   # e.g. 'eq' allows for allowing for exact matches by just the attribute name.
   config.default_predicate = 'eq'
 
-  # Postgres has a nulls first / nulls last option, this can be configured.
-  config.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
+  # Where NULLs are placed when sorting.
+  config.fields_sort_option = :nulls_first # or e.g. :nulls_always_last
 
   # Strip leading and trailing whitespace from string search values.
   # Default is true.
@@ -80,6 +80,38 @@ Before Ransack 5.0 only top-level values were stripped, so the same search
 behaved differently depending on whether it was written in the shorthand or the
 grouped form. See
 [#1414](https://github.com/activerecord-hackery/ransack/issues/1414).
+
+:::
+
+## Sorting NULLs
+
+`fields_sort_option` controls where `NULL`s are placed when sorting:
+
+| Value | Ascending | Descending |
+| --- | --- | --- |
+| `nil` (default) | backend default | backend default |
+| `:nulls_first` | `NULLS FIRST` | `NULLS LAST` |
+| `:nulls_last` | `NULLS LAST` | `NULLS FIRST` |
+| `:nulls_always_first` | `NULLS FIRST` | `NULLS FIRST` |
+| `:nulls_always_last` | `NULLS LAST` | `NULLS LAST` |
+
+```ruby
+Ransack.configure { |config| config.fields_sort_option = :nulls_first }
+
+Person.ransack(s: 'name asc').result.to_sql
+# ... ORDER BY "people"."name" ASC NULLS FIRST
+```
+
+:::note
+
+This was called `postgres_fields_sort_option` before Ransack 5.0, and was built
+by interpolating SQL fragments. It now goes through Arel's `nulls_first` /
+`nulls_last`, so it applies to any backend Arel supports rather than only
+PostgreSQL. The old name still works.
+
+**MySQL is the exception** — it has no `NULLS FIRST` / `NULLS LAST` syntax and
+Arel does not emulate it, so setting this option has no effect there. See
+[#1373](https://github.com/activerecord-hackery/ransack/issues/1373).
 
 :::
 
