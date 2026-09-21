@@ -29,6 +29,10 @@ module Ransack
         end
       end
 
+      def combinator=(val)
+        @combinator = Constants::AND_OR.detect { |v| v == val&.downcase&.to_s } || nil
+      end
+
     end
   end
 end
