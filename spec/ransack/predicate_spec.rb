@@ -165,7 +165,7 @@ module Ransack
 
     describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS", "PostgreSQL" then %{"people"."name" ILIKE}
         when "Mysql2"                then %{`people`.`name` LIKE}
         else                              %{"people"."name" LIKE}
@@ -182,7 +182,7 @@ module Ransack
 
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS", "PostgreSQL" then %{"people"."name" NOT ILIKE}
         when "Mysql2"                then %{`people`.`name` NOT LIKE}
         else                              %{"people"."name" NOT LIKE}
@@ -199,7 +199,7 @@ module Ransack
 
     describe 'i_cont' do
       it_has_behavior 'wildcard escaping', :name_i_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS"    then %{LOWER("people"."name") ILIKE}
         when "PostgreSQL" then %{"people"."name" ILIKE}
         when "Mysql2"     then %{LOWER(`people`.`name`) LIKE}
@@ -217,7 +217,7 @@ module Ransack
 
     describe 'not_i_cont' do
       it_has_behavior 'wildcard escaping', :name_not_i_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS"    then %{LOWER("people"."name") NOT ILIKE}
         when "PostgreSQL" then %{"people"."name" NOT ILIKE}
         when "Mysql2"     then %{LOWER(`people`.`name`) NOT LIKE}
@@ -548,7 +548,7 @@ module Ransack
 
       def expected_query(value, attribute = 'awesome', operator = '=')
         field = "#{quote_table_name("people")}.#{quote_column_name(attribute)}"
-        quoted_value = ActiveRecord::Base.connection.quote(value)
+        quoted_value = ActiveRecord::Base.lease_connection.quote(value)
         /#{field} #{operator} #{quoted_value}/
       end
     end
