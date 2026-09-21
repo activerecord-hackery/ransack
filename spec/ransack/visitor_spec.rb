@@ -15,7 +15,7 @@ module Ransack
     end
 
     shared_examples 'not an or combinator' do | combinator |
-      it 'routes to #visit_or' do
+      it 'routes to #visit_and' do
         expect(viz).to_not receive(:visit_or)
         expect(viz).to     receive(:visit_and)
 

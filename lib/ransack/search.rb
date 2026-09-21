@@ -32,6 +32,7 @@ module Ransack
       end
       @context = options[:context] || Context.for(object, options)
       @context.auth_object = options[:auth_object]
+      @context.ignore_unknown_conditions = options[:ignore_unknown_conditions]
       @base = Nodes::Grouping.new(
         @context, options[:grouping] || Constants::AND
         )
@@ -52,13 +53,6 @@ module Ransack
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
         elsif base.attribute_method?(key)
-          if (key == Constants::COMBINATOR &&
-              Constants::AND_OR.exclude?(value.to_s) &&
-              (!Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions))
-
-            raise ArgumentError, "Invalid combinator #{value}"
-          end
-
           base.send("#{key}=", value)
         elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
           raise InvalidSearchError, "Invalid search term #{key}"

@@ -393,6 +393,49 @@ module Ransack
         end
       end
 
+      context 'combinator validation in strict mode' do
+        it 'accepts any spelling of a valid combinator' do
+          expect { Search.new(Person, { combinator: 'OR', name_eq: 'a' }, ignore_unknown_conditions: false) }
+            .not_to raise_error
+        end
+
+        it 'rejects an unknown combinator given as m' do
+          expect { Search.new(Person, { m: 'nand', name_eq: 'a' }, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Invalid combinator nand')
+        end
+
+        it 'rejects an unknown combinator inside a nested grouping' do
+          expect {
+            Search.new(Person, { g: [{ m: 'nand', name_eq: 'a', email_eq: 'b' }] }, ignore_unknown_conditions: false)
+          }.to raise_error(InvalidSearchError, 'Invalid combinator nand')
+        end
+
+        it 'ignores a blank combinator, as a submitted empty field' do
+          expect { Search.new(Person, { m: '', name_eq: 'a' }, ignore_unknown_conditions: false) }
+            .not_to raise_error
+        end
+      end
+
+      context 'combinator validation in permissive mode' do
+        it 'falls back to and for an unknown combinator' do
+          search = Search.new(Person, g: [{ m: 'nand', name_eq: 'a', email_eq: 'b' }])
+          expect(search.result.to_sql).to include ' AND '
+        end
+
+        it 'does not raise for a non-string combinator' do
+          search = Search.new(Person, g: [{ m: 1, name_eq: 'a', email_eq: 'b' }])
+          expect(search.result.to_sql).to include ' AND '
+        end
+      end
+
+      context 'long-form condition keys' do
+        it 'accepts attributes, predicate and values in a condition' do
+          search = Search.new(Person, c: [{ attributes: ['name'], predicate: 'eq', values: ['Ernie'] }])
+          field = "#{quote_table_name('people')}.#{quote_column_name('name')}"
+          expect(search.result.to_sql).to include "#{field} = 'Ernie'"
+        end
+      end
+
       context 'with an invalid combinator' do
         subject { Search.new(Person, name_eq: 'foobar', combinator: 'unknown') }
 

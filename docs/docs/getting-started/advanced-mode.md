@@ -68,12 +68,19 @@ Person.ransack(g: [{ m: 'nand', name_eq: 'Ernie', email_eq: 'ernie@example.com' 
 This is deliberate — a search built from user input should not blow up on a bad
 parameter. If you would rather hear about it, use `ransack!`, or set
 `ignore_unknown_conditions` to `false`, and an unrecognised combinator raises
-just as an unknown predicate or attribute does:
+just as an unknown predicate or attribute does — at any level of nesting:
 
 ```ruby
 Person.ransack!(name_eq: 'Ernie', combinator: 'nand')
-# ArgumentError: Invalid combinator nand
+# Ransack::InvalidSearchError: Invalid combinator nand
+
+Person.ransack!(g: [{ m: 'nand', name_eq: 'Ernie', email_eq: 'ernie@example.com' }])
+# Ransack::InvalidSearchError: Invalid combinator nand
 ```
+
+`Ransack::InvalidSearchError` is a subclass of `ArgumentError`, so existing
+`rescue ArgumentError` handlers still catch it. A blank combinator, as a form
+submits for an untouched field, is never an error.
 
 :::note
 
