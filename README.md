@@ -1,4 +1,4 @@
-# ![Ransack](./docs/static/logo/ransack-h.png "Ransack")
+# ![Ransack](./docs/assets/logo/ransack-h.png "Ransack")
 
 [![Build Status](https://github.com/activerecord-hackery/ransack/workflows/test/badge.svg)](https://github.com/activerecord-hackery/ransack/actions)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
@@ -34,7 +34,7 @@ gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
 
 ### Documentation
 
-There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), which is a [Docusaurus](https://docusaurus.io/) project and run as a GitHub Pages site. Alternatively there is [AI Generated documentation](https://deepwiki.com/activerecord-hackery/ransack/1-overview) produced by [devin.ai](https://devin.ai/).
+There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), built with [Jekyll](https://jekyllrb.com/) and [Just the Docs](https://just-the-docs.com/) from the Markdown under `docs/` and published as a GitHub Pages site. Alternatively there is [AI Generated documentation](https://deepwiki.com/activerecord-hackery/ransack/1-overview) produced by [devin.ai](https://devin.ai/).
 
 This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quick-start cheatsheet, created by [@raghubetina](https://gist.github.com/raghubetina)
 

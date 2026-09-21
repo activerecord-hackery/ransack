@@ -1,0 +1,59 @@
+# Ransack documentation, built with Jekyll and the Just the Docs theme and
+# published to GitHub Pages by .github/workflows/deploy.yml.
+title: Ransack
+description: Object-based searching for Active Record
+url: https://activerecord-hackery.github.io
+baseurl: /ransack
+
+theme: just-the-docs
+logo: /assets/logo/ransack-h.png
+favicon_ico: /assets/img/favicon.ico
+
+permalink: pretty
+search_enabled: true
+heading_anchors: true
+
+# Every page uses the theme's layout; the theme gem does not set this itself.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+aux_links:
+  Ransack on GitHub: https://github.com/activerecord-hackery/ransack
+aux_links_new_tab: true
+
+gh_edit_link: true
+gh_edit_link_text: Edit this page on GitHub
+gh_edit_repository: https://github.com/activerecord-hackery/ransack
+gh_edit_branch: main
+gh_edit_source: docs
+gh_edit_view_mode: edit
+
+callouts_level: quiet
+callouts:
+  note:
+    title: Note
+    color: blue
+  caution:
+    title: Caution
+    color: yellow
+
+plugins:
+  - jekyll-relative-links
+  - jekyll-redirect-from
+  - jekyll-seo-tag
+
+relative_links:
+  enabled: true
+  collections: false
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+  - node_modules
+
+footer_content: 'Ransack is <a href="https://github.com/activerecord-hackery/ransack/blob/main/LICENSE">MIT licensed</a>. Questions belong in <a href="https://github.com/activerecord-hackery/ransack/discussions">Discussions</a>; reproducible bugs in <a href="https://github.com/activerecord-hackery/ransack/issues">Issues</a>.'

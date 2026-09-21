@@ -9,27 +9,24 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          node-version: 16
-          cache: yarn
-          cache-dependency-path: docs/yarn.lock
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        working-directory: docs
+          ruby-version: "3.4"
+          working-directory: docs
+          bundler-cache: true
 
       - name: Build website
-        run: yarn build
+        run: bundle exec jekyll build --strict_front_matter
         working-directory: docs
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/build
+          publish_dir: docs/_site
