@@ -85,6 +85,7 @@ jobs:
         rails:
           - 8-1-stable
           - 8-0-stable
+          - 7-2-stable
         ruby:
           - 3.4.8
           - 3.2.2

@@ -81,10 +81,10 @@ Here's a quick guide:
    DB=trilogy bundle exec rake spec
    ```
    
-   A one-liner to run all three
+   A one-liner to run all of them
    
    ```sh
-   bundle exec rubocop && bundle exec rake spec && DB=pg bundle exec rake spec && DB=mysql bundle exec rake spec
+   bundle exec rubocop && bundle exec rake spec && DB=pg bundle exec rake spec && DB=mysql bundle exec rake spec && DB=trilogy bundle exec rake spec
    ```
 
    For Postgres and MySQL, databases are expected to exist, called 'ransack'. To create use these commands (assuming OS X and Homebrew):
