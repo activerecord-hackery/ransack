@@ -108,7 +108,7 @@ module Ransack
         let(:escape_clause) { "ESCAPE #{quote_value('\\')}" }
 
         let(:like) do
-          case ActiveRecord::Base.adapter_class::ADAPTER_NAME
+          case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
           when "PostGIS", "PostgreSQL" then 'ILIKE'
           else 'LIKE'
           end
@@ -219,7 +219,7 @@ module Ransack
       context 'with polymorphic associations and not_in predicate' do
         before do
           # Define test models for polymorphic associations
-          class ::TestTask < ActiveRecord::Base
+          class ::TestTask < ::ActiveRecord::Base
             self.table_name = 'tasks'
             has_many :follows, primary_key: :uid, inverse_of: :followed, foreign_key: :followed_uid, class_name: 'TestFollow'
             has_many :users, through: :follows, source: :follower, source_type: 'TestUser'
@@ -235,7 +235,7 @@ module Ransack
             end
           end
 
-          class ::TestFollow < ActiveRecord::Base
+          class ::TestFollow < ::ActiveRecord::Base
             self.table_name = 'follows'
             belongs_to :follower, polymorphic: true, foreign_key: :follower_uid, primary_key: :uid
             belongs_to :followed, polymorphic: true, foreign_key: :followed_uid, primary_key: :uid
@@ -251,7 +251,7 @@ module Ransack
             end
           end
 
-          class ::TestUser < ActiveRecord::Base
+          class ::TestUser < ::ActiveRecord::Base
             self.table_name = 'users'
             has_many :follows, primary_key: :uid, inverse_of: :follower, foreign_key: :follower_uid, class_name: 'TestFollow'
             has_many :tasks, through: :follows, source: :followed, source_type: 'TestTask'
@@ -268,13 +268,13 @@ module Ransack
           end
 
           # Create tables if they don't exist
-          ActiveRecord::Base.lease_connection.create_table(:tasks, force: true) do |t|
+          ::ActiveRecord::Base.lease_connection.create_table(:tasks, force: true) do |t|
             t.string :uid
             t.string :name
             t.timestamps null: false
           end
 
-          ActiveRecord::Base.lease_connection.create_table(:follows, force: true) do |t|
+          ::ActiveRecord::Base.lease_connection.create_table(:follows, force: true) do |t|
             t.string :followed_uid, null: false
             t.string :followed_type, null: false
             t.string :follower_uid, null: false
@@ -284,7 +284,7 @@ module Ransack
             t.index [:follower_uid, :follower_type]
           end
 
-          ActiveRecord::Base.lease_connection.create_table(:users, force: true) do |t|
+          ::ActiveRecord::Base.lease_connection.create_table(:users, force: true) do |t|
             t.string :uid
             t.string :name
             t.timestamps null: false
@@ -297,9 +297,9 @@ module Ransack
           Object.send(:remove_const, :TestFollow)
           Object.send(:remove_const, :TestUser)
 
-          ActiveRecord::Base.lease_connection.drop_table(:tasks, if_exists: true)
-          ActiveRecord::Base.lease_connection.drop_table(:follows, if_exists: true)
-          ActiveRecord::Base.lease_connection.drop_table(:users, if_exists: true)
+          ::ActiveRecord::Base.lease_connection.drop_table(:tasks, if_exists: true)
+          ::ActiveRecord::Base.lease_connection.drop_table(:follows, if_exists: true)
+          ::ActiveRecord::Base.lease_connection.drop_table(:users, if_exists: true)
         end
 
         it 'correctly handles not_in predicate with polymorphic associations' do

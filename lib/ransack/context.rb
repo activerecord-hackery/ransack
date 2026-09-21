@@ -7,28 +7,24 @@ module Ransack
 
     class << self
 
-      def for_class(klass, options = {})
-        if klass < ActiveRecord::Base
-          Adapters::ActiveRecord::Context.new(klass, options)
-        end
+      # An ORM integration registers a block that returns a Context for the
+      # objects it understands and nil for anything else. Ransack ships the
+      # Active Record integration (see Ransack::ActiveRecord::Context); an
+      # integration for another ORM registers its own resolver here.
+      def register(&resolver)
+        Ransack::Context.resolvers << resolver
       end
 
-      def for_object(object, options = {})
-        case object
-        when ActiveRecord::Relation
-          Adapters::ActiveRecord::Context.new(object.klass, options)
-        end
+      def resolvers
+        @resolvers ||= []
       end
 
       def for(object, options = {})
-        context =
-          if Class === object
-            for_class(object, options)
-          else
-            for_object(object, options)
-          end
-        context or raise ArgumentError,
-          "Don't know what context to use for #{object}"
+        Ransack::Context.resolvers.each do |resolver|
+          context = resolver.call(object, options)
+          return context if context
+        end
+        raise ArgumentError, "Don't know what context to use for #{object}"
       end
 
     end # << self
@@ -43,7 +39,7 @@ module Ransack
       @object = relation_for(object)
       @klass = @object.klass
       @join_dependency = join_dependency(@object)
-      @join_type = options[:join_type] || Polyamorous::OuterJoin
+      @join_type = options[:join_type] || Arel::Nodes::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @associations_pot = {}
       @tables_pot = {}
@@ -61,14 +57,11 @@ module Ransack
       end
     end
 
+    # The model class behind a search object, an association node or a class.
+    # Each ORM integration decides what counts as a model, so this is defined
+    # on the integration's Context subclass.
     def klassify(obj)
-      if Class === obj && ::ActiveRecord::Base > obj
-        obj
-      elsif obj.respond_to? :klass
-        obj.klass
-      else
-        raise ArgumentError, "Don't know how to klassify #{obj.inspect}"
-      end
+      raise NotImplementedError, "#{self.class} must implement #klassify"
     end
 
     # Convert a string representing a chain of associations and an attribute

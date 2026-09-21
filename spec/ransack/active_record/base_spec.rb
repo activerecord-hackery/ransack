@@ -1,0 +1,1056 @@
+require 'spec_helper'
+
+module Ransack
+  module ActiveRecord
+    describe Base do
+      subject { ::ActiveRecord::Base }
+
+      it { should respond_to :ransack }
+
+      describe '#search' do
+        subject { Person.ransack }
+
+        it { should be_a Search }
+        it 'has a Relation as its object' do
+          expect(subject.object).to be_an ::ActiveRecord::Relation
+        end
+
+        context "multiple database connection" do
+          it "does not raise error" do
+            expect { Person.ransack(name_cont: "test") }.not_to raise_error
+            expect { SubDB::OperationHistory.ransack(people_id_eq: 1) }.not_to raise_error
+          end
+        end
+
+        context 'with scopes' do
+          before do
+            allow(Person)
+            .to receive(:ransackable_scopes)
+            .and_return([:active, :over_age, :of_age])
+          end
+
+          it 'applies true scopes' do
+            s = Person.ransack('active' => true)
+            expect(s.result.to_sql).to (include 'active = 1')
+          end
+
+          it 'applies stringy true scopes' do
+            s = Person.ransack('active' => 'true')
+            expect(s.result.to_sql).to (include 'active = 1')
+          end
+
+          it 'applies stringy boolean scopes with true value in an array' do
+            s = Person.ransack('of_age' => ['true'])
+            expect(s.result.to_sql).to (include rails7_and_mysql ? %q{(age >= '18')} : 'age >= 18')
+          end
+
+          it 'applies stringy boolean scopes with false value in an array' do
+            s = Person.ransack('of_age' => ['false'])
+            expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age < '18'} : 'age < 18')
+          end
+
+          it 'ignores unlisted scopes' do
+            s = Person.ransack('restricted' => true)
+            expect(s.result.to_sql).to_not (include 'restricted')
+          end
+
+          it 'ignores false scopes' do
+            s = Person.ransack('active' => false)
+            expect(s.result.to_sql).not_to (include 'active')
+          end
+
+          it 'ignores stringy false scopes' do
+            s = Person.ransack('active' => 'false')
+            expect(s.result.to_sql).to_not (include 'active')
+          end
+
+          it 'passes values to scopes' do
+            s = Person.ransack('over_age' => 18)
+            expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '18'} : 'age > 18')
+          end
+
+          it 'chains scopes' do
+            s = Person.ransack('over_age' => 18, 'active' => true)
+            expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '18'} : 'age > 18')
+            expect(s.result.to_sql).to (include 'active = 1')
+          end
+
+          it 'applies scopes that define string SQL joins' do
+            allow(Article)
+              .to receive(:ransackable_scopes)
+              .and_return([:latest_comment_cont])
+
+            # Including a negative condition to test removing the scope
+            s = Search.new(Article, notes_note_not_eq: 'Test', latest_comment_cont: 'Test')
+            expect(s.result.to_sql).to include 'latest_comment'
+          end
+
+          context "with sanitize_custom_scope_booleans set to false" do
+            before(:all) do
+              Ransack.configure { |c| c.sanitize_custom_scope_booleans = false }
+            end
+
+            after(:all) do
+              Ransack.configure { |c| c.sanitize_custom_scope_booleans = true }
+            end
+
+            it 'passes true values to scopes' do
+              s = Person.ransack('over_age' => 1)
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '1'} : 'age > 1')
+            end
+
+            it 'passes false values to scopes'  do
+              s = Person.ransack('over_age' => 0)
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '0'} : 'age > 0')
+            end
+          end
+
+          context "with ransackable_scopes_skip_sanitize_args enabled for scope" do
+            before do
+              allow(Person)
+              .to receive(:ransackable_scopes_skip_sanitize_args)
+              .and_return([:over_age])
+            end
+
+            it 'passes true values to scopes' do
+              s = Person.ransack('over_age' => 1)
+              expect(s.result.to_sql).to (include rails7_and_mysql ? %q{age > '1'} : 'age > 1')
+            end
+
+            it 'passes false values to scopes'  do
+              s = Person.ransack('over_age' => 0)
+              expect(s.result.to_sql).to (include  rails7_and_mysql ? %q{age > '0'} : 'age > 0')
+            end
+          end
+        end
+
+        it 'does not raise exception for string :params argument' do
+          expect { Person.ransack('') }.to_not raise_error
+        end
+
+        it 'raises ArgumentError exception if ransack! called with unknown condition' do
+          expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(ArgumentError)
+        end
+
+        it 'raises InvalidSearchError exception if ransack! called with unknown condition' do
+          expect { Person.ransack!(unknown_attr_eq: 'Ernie') }.to raise_error(InvalidSearchError)
+        end
+
+        it 'does not modify the parameters' do
+          params = { name_eq: '' }
+          expect { Person.ransack(params) }.not_to change { params }
+        end
+      end
+
+      context 'has_one through associations' do
+        let(:address)  { Address.create!(city: 'Boston') }
+        let(:org) { Organization.create!(name: 'Testorg', address: address) }
+        let!(:employee) { Employee.create!(name: 'Ernie', organization: org) }
+
+        it 'works when has_one through association is first' do
+          s = Employee.ransack(address_city_eq: 'Boston', organization_name_eq: 'Testorg')
+          expect(s.result.to_a).to include(employee)
+        end
+
+        it 'works when has_one through association is last' do
+          s = Employee.ransack(organization_name_eq: 'Testorg', address_city_eq: 'Boston')
+          expect(s.result.to_a).to include(employee)
+        end
+      end
+
+      context 'negative conditions on HABTM associations' do
+        let(:medieval) { Tag.create!(name: 'Medieval') }
+        let(:fantasy)  { Tag.create!(name: 'Fantasy') }
+        let(:arthur)   { Article.create!(title: 'King Arthur') }
+        let(:marco)    { Article.create!(title: 'Marco Polo') }
+
+        before do
+          marco.tags << medieval
+          arthur.tags << medieval
+          arthur.tags << fantasy
+        end
+
+        it 'removes redundant joins from top query' do
+          s = Article.ransack(tags_name_not_eq: "Fantasy")
+          sql = s.result.to_sql
+          expect(sql).to_not include('LEFT OUTER JOIN')
+        end
+
+        it 'handles != for single values' do
+          s = Article.ransack(tags_name_not_eq: "Fantasy")
+          articles = s.result.to_a
+          expect(articles).to include marco
+          expect(articles).to_not include arthur
+        end
+
+        it 'handles NOT IN for multiple attributes' do
+          s = Article.ransack(tags_name_not_in: ["Fantasy", "Scifi"])
+          articles = s.result.to_a
+
+          expect(articles).to include marco
+          expect(articles).to_not include arthur
+        end
+      end
+
+      context 'negative conditions on related object with HABTM associations' do
+        let(:medieval) { Tag.create!(name: 'Medieval') }
+        let(:fantasy)  { Tag.create!(name: 'Fantasy') }
+        let(:arthur)   { Article.create!(title: 'King Arthur') }
+        let(:marco)    { Article.create!(title: 'Marco Polo') }
+        let(:comment_arthur)  { marco.comments.create!(body: 'King Arthur comment') }
+        let(:comment_marco)   { arthur.comments.create!(body: 'Marco Polo comment') }
+
+        before do
+          comment_arthur.tags << medieval
+          comment_marco.tags << fantasy
+        end
+
+        it 'removes redundant joins from top query' do
+          s = Article.ransack(comments_tags_name_not_eq: "Fantasy")
+          sql = s.result.to_sql
+          expect(sql).to include('LEFT OUTER JOIN')
+        end
+
+        it 'handles != for single values' do
+          s = Article.ransack(comments_tags_name_not_eq: "Fantasy")
+          articles = s.result.to_a
+          expect(articles).to include marco
+          expect(articles).to_not include arthur
+        end
+
+        it 'handles NOT IN for multiple attributes' do
+          s = Article.ransack(comments_tags_name_not_in: ["Fantasy", "Scifi"])
+          articles = s.result.to_a
+
+          expect(articles).to include marco
+          expect(articles).to_not include arthur
+        end
+      end
+
+      context 'negative conditions on self-referenced associations' do
+        let(:pop) { Person.create!(name: 'Grandpa') }
+        let(:dad) { Person.create!(name: 'Father') }
+        let(:mom) { Person.create!(name: 'Mother') }
+        let(:son) { Person.create!(name: 'Grandchild') }
+
+        before do
+          son.parent = dad
+          dad.parent = pop
+          dad.children << son
+          mom.children << son
+          pop.children << dad
+          son.save! && dad.save! && mom.save! && pop.save!
+        end
+
+        it 'handles multiple associations and aliases' do
+          s = Person.ransack(
+            c: {
+              '0' => { a: ['name'], p: 'not_eq', v: ['Father'] },
+              '1' => {
+                      a: ['children_name', 'parent_name'],
+                      p: 'not_eq', v: ['Father'], m: 'or'
+                    },
+              '2' => { a: ['children_salary'], p: 'eq', v: [nil] }
+            })
+          people = s.result
+
+          expect(people.to_a).to include son
+          expect(people.to_a).to include mom
+          expect(people.to_a).to_not include dad  # rule '0': 'name'
+          expect(people.to_a).to_not include pop  # rule '1': 'children_name'
+        end
+      end
+
+      describe '#ransack_alias' do
+        it 'translates an alias to the correct attributes' do
+          p = Person.create!(name: 'Meatloaf', email: 'babies@example.com')
+
+          s = Person.ransack(term_cont: 'atlo')
+          expect(s.result.to_a).to eq [p]
+
+          s = Person.ransack(term_cont: 'babi')
+          expect(s.result.to_a).to eq [p]
+
+          s = Person.ransack(term_cont: 'nomatch')
+          expect(s.result.to_a).to eq []
+        end
+
+        it 'also works with associations' do
+          dad = Person.create!(name: 'Birdman')
+          son = Person.create!(name: 'Weezy', parent: dad)
+
+          s = Person.ransack(daddy_eq: 'Birdman')
+          expect(s.result.to_a).to eq [son]
+
+          s = Person.ransack(daddy_eq: 'Drake')
+          expect(s.result.to_a).to eq []
+        end
+
+        it 'makes aliases available to subclasses' do
+          yngwie = Musician.create!(name: 'Yngwie Malmsteen')
+
+          musicians = Musician.ransack(term_cont: 'ngw').result
+          expect(musicians).to eq([yngwie])
+        end
+
+        it 'handles naming collisions gracefully' do
+          frank = Person.create!(name: 'Frank Stallone')
+
+          people = Person.ransack(term_cont: 'allon').result
+          expect(people).to eq([frank])
+
+          Class.new(Article) do
+            ransack_alias :term, :title
+          end
+
+          people = Person.ransack(term_cont: 'allon').result
+          expect(people).to eq([frank])
+        end
+      end
+
+      describe '#ransacker' do
+        # For infix tests
+        def self.sane_adapter?
+          case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
+          when 'SQLite3', 'PostgreSQL'
+            true
+          else
+            false
+          end
+        end
+        # in schema.rb, class Person:
+        # ransacker :reversed_name, formatter: proc { |v| v.reverse } do |parent|
+        #   parent.table[:name]
+        # end
+        #
+        # ransacker :doubled_name do |parent|
+        #   Arel::Nodes::InfixOperation.new(
+        #     '||', parent.table[:name], parent.table[:name]
+        #   )
+        # end
+
+        it 'creates ransack attributes' do
+          person = Person.create!(name: 'Aric Smith')
+
+          s = Person.ransack(reversed_name_eq: 'htimS cirA')
+          expect(s.result.size).to eq(1)
+
+          expect(s.result.first).to eq person
+        end
+
+        it 'can be accessed through associations' do
+          s = Person.ransack(children_reversed_name_eq: 'htimS cirA')
+          expect(s.result.to_sql).to match(
+            /#{quote_table_name("children_people")}.#{
+               quote_column_name("name")} = 'Aric Smith'/
+          )
+        end
+
+        it 'allows an attribute to be an InfixOperation' do
+          s = Person.ransack(doubled_name_eq: 'Aric SmithAric Smith')
+          expect(s.result.first).to eq Person.where(name: 'Aric Smith').first
+        end if defined?(Arel::Nodes::InfixOperation) && sane_adapter?
+
+        it 'does not break #count if using InfixOperations' do
+          s = Person.ransack(doubled_name_eq: 'Aric SmithAric Smith')
+          expect(s.result.count).to eq 1
+        end if defined?(Arel::Nodes::InfixOperation) && sane_adapter?
+
+        it 'should remove empty key value pairs from the params hash' do
+          s = Person.ransack(children_reversed_name_eq: '')
+          expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+        end
+
+        it 'should remove empty key value pairs from the complex params hash' do
+          s = Person.ransack(
+            c: {
+              '0' => {
+                      a: ['children_name'],
+                      p: 'eq', v: ['']
+                    }
+            })
+          expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+        end
+
+        it 'should remove empty key value pairs from a string-keyed complex hash' do
+          s = Person.ransack(
+            'c' => {
+              '0' => { 'a' => ['children_name'], 'p' => 'eq', 'v' => [''] }
+            })
+          expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+        end
+
+        it 'should remove empty conditions inside a nested grouping' do
+          s = Person.ransack(
+            g: [{ c: { '0' => { a: ['children_name'], p: 'eq', v: [''] } } }])
+          expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+        end
+
+        it 'should remove empty conditions inside a doubly nested grouping' do
+          s = Person.ransack(
+            g: [{ g: [{ c: [{ a: ['children_name'], p: 'eq', v: [''] }] }] }])
+          expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+        end
+
+        it 'should remove empty conditions under the long-form grouping keys' do
+          s = Person.ransack(
+            groupings: [{ conditions: [{ a: ['children_name'], p: 'eq', v: [''] }] }])
+          expect(s.result.to_sql).not_to match /LEFT OUTER JOIN/
+        end
+
+        it 'should not modify nested parameters while pruning' do
+          params = { g: [{ c: [{ a: ['children_name'], p: 'eq', v: [''] }] }] }
+          original = params.deep_dup
+
+          Person.ransack(params)
+
+          expect(params).to eq original
+        end
+
+        # The `v:` values of a `c:` condition may be given bare or wrapped in
+        # a `{ value: ... }` envelope. Both carry real values that must
+        # survive the blank-pruning above — dropping them silently turns a
+        # filtered search into an unfiltered one.
+        it 'should keep a populated Hash-form value in the complex params hash' do
+          s = Person.ransack(
+            c: {
+              '0' => {
+                      a: ['name'],
+                      p: 'eq', v: { '0' => { value: 'Ernie' } }
+                    }
+            })
+          expect(s.result.to_sql).to match(/= 'Ernie'/)
+        end
+
+        it 'should keep a populated Array-form value in the complex params hash' do
+          s = Person.ransack(
+            c: { '0' => { a: ['name'], p: 'eq', v: ['Ernie'] } })
+          expect(s.result.to_sql).to match(/= 'Ernie'/)
+        end
+
+        it 'should keep proper key value pairs in the params hash' do
+          s = Person.ransack(children_reversed_name_eq: 'Testing')
+          expect(s.result.to_sql).to match /LEFT OUTER JOIN/
+        end
+
+        it 'should function correctly when nil is passed in' do
+          s = Person.ransack(nil)
+        end
+
+        it 'should function correctly when a blank string is passed in' do
+          s = Person.ransack('')
+        end
+
+        it 'should function correctly with a multi-parameter attribute' do
+          if ::ActiveRecord::VERSION::MAJOR >= 7
+            ::ActiveRecord.default_timezone = :utc
+          else
+            ::ActiveRecord::Base.default_timezone = :utc
+          end
+          Time.zone = 'UTC'
+
+          date = Date.current
+          s = Person.ransack(
+            { 'created_at_gteq(1i)' => date.year,
+              'created_at_gteq(2i)' => date.month,
+              'created_at_gteq(3i)' => date.day
+            }
+          )
+          expect(s.result.to_sql).to match />=/
+          expect(s.result.to_sql).to match date.to_s
+        end
+
+        it 'should function correctly when using fields with dots in them' do
+          s = Person.ransack(email_cont: 'example.com')
+          expect(s.result.exists?).to be true
+        end
+
+        it 'should function correctly when using fields with % in them' do
+          p = Person.create!(name: '110%-er')
+          s = Person.ransack(name_cont: '10%')
+          expect(s.result.to_a).to eq [p]
+        end
+
+        it 'should function correctly when using fields with backslashes in them' do
+          p = Person.create!(name: "\\WINNER\\")
+          s = Person.ransack(name_cont: "\\WINNER\\")
+          expect(s.result.to_a).to eq [p]
+        end
+
+        # Regression test for
+        # https://github.com/activerecord-hackery/ransack/issues/1581
+        # `_` is a single-character LIKE wildcard. Escaping it only takes
+        # effect when an ESCAPE clause is emitted, which SQLite and other
+        # backends with no default escape character require.
+        it 'treats an underscore in the search term literally' do
+          match = Person.create!(name: 'a_c')
+          Person.create!(name: 'abc')
+
+          expect(Person.ransack(name_cont: 'a_c').result.to_a).to eq [match]
+        end
+
+        # The compound LIKE predicates take an Array of terms. Each one must be
+        # escaped and quoted individually, and the ESCAPE clause must apply
+        # to every LIKE they expand into. Names are prefixed per example
+        # because rows persist across examples in this file.
+        it 'escapes every term of a cont_any search' do
+          %w[cany-50%off cany-a_c cany-50off cany-abc].each { |n| Person.create!(name: n) }
+
+          search = Person.ransack(name_cont_any: ['cany-50%', 'cany-a_c'])
+          expect(search.result.map(&:name)).to match_array %w[cany-50%off cany-a_c]
+          expect(search.result.to_sql.scan(/ESCAPE/).size).to eq 2
+        end
+
+        it 'escapes every term of a cont_all search' do
+          %w[call-50%off call-50off].each { |n| Person.create!(name: n) }
+
+          search = Person.ransack(name_cont_all: ['call-50', '%off'])
+          expect(search.result.map(&:name)).to eq %w[call-50%off]
+        end
+
+        it 'escapes every term of a not_cont_all search' do
+          %w[ncall-50%off ncall-a_c ncall-plain].each { |n| Person.create!(name: n) }
+
+          names = Person.ransack(name_not_cont_all: ['50%', 'a_c']).result.map(&:name)
+          expect(names).to include 'ncall-plain'
+          expect(names).not_to include 'ncall-50%off', 'ncall-a_c'
+        end
+
+        it 'escapes every term of a start_any search' do
+          %w[sa_c sabc].each { |n| Person.create!(name: n) }
+
+          search = Person.ransack(name_start_any: ['sa_', 'zz'])
+          expect(search.result.map(&:name)).to eq %w[sa_c]
+        end
+
+        it 'treats a percent sign in the search term literally' do
+          match = Person.create!(name: 'dis%count')
+          Person.create!(name: 'discount')
+
+          expect(Person.ransack(name_cont: 'dis%count').result.to_a).to eq [match]
+        end
+
+        # This context was silently skipped until Ransack 6.0: its guard read
+        # `ActiveRecord::Base.respond_to?(:normalizes)` from inside the
+        # `Ransack::Adapters::ActiveRecord` module, which resolved to Ransack's
+        # own `Base` and was always false.
+        context 'with ActiveRecord::normalizes' do
+          # A temporary model whose normalization would mangle LIKE wildcards
+          # if it were applied to search values.
+          let(:normalizing_class) do
+            Class.new(::ActiveRecord::Base) do
+              self.table_name = 'people'
+              normalizes :name, with: ->(name) { name.gsub(/[^a-z0-9]/, '_') }
+
+              def self.ransackable_attributes(auth_object = nil)
+                Person.ransackable_attributes(auth_object)
+              end
+
+              def self.name
+                'TestPersonWithNormalization'
+              end
+            end
+          end
+
+          before { stub_const('TestPersonWithNormalization', normalizing_class) }
+          after { Person.where(name: 'foo_bar').delete_all }
+
+          it 'does not apply normalization to LIKE wildcards for cont predicate' do
+            p = TestPersonWithNormalization.create!(name: 'foo%bar')
+            expect(p.reload.name).to eq('foo_bar') # normalization applied on write
+
+            s = TestPersonWithNormalization.ransack(name_cont: 'foo')
+            expect(s.result.to_a).to eq [p]
+
+            sql = s.result.to_sql
+            expect(sql).to include("LIKE '%foo%'")
+            expect(sql).not_to include("LIKE '_foo_'")
+          end
+
+          it 'does not apply normalization to LIKE wildcards for other LIKE predicates' do
+            p = TestPersonWithNormalization.create!(name: 'foo%bar')
+
+            s = TestPersonWithNormalization.ransack(name_start: 'foo')
+            expect(s.result.to_a).to eq [p]
+            expect(s.result.to_sql).to include("LIKE 'foo%'")
+
+            s = TestPersonWithNormalization.ransack(name_end: 'bar')
+            expect(s.result.to_a).to eq [p]
+            expect(s.result.to_sql).to include("LIKE '%bar'")
+
+            s = TestPersonWithNormalization.ransack(name_i_cont: 'FOO')
+            expect(s.result.to_a).to eq [p]
+            expect(s.result.to_sql).to include("LIKE '%foo%'")
+          end
+        end
+
+        context 'searching by underscores' do
+          # when escaping is supported right in LIKE expression without adding extra expressions
+          def self.simple_escaping?
+            case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
+              when 'Mysql2', 'Trilogy', 'PostgreSQL'
+                true
+              else
+                false
+            end
+          end
+
+          it 'should search correctly if matches exist' do
+            p = Person.create!(name: 'name_with_underscore')
+            s = Person.ransack(name_cont: 'name_')
+            expect(s.result.to_a).to eq [p]
+          end if simple_escaping?
+
+          it 'should return empty result if no matches' do
+            Person.create!(name: 'name_with_underscore')
+            s = Person.ransack(name_cont: 'n_')
+            expect(s.result.to_a).to eq []
+          end if simple_escaping?
+        end
+
+        context 'searching on an `in` predicate with a ransacker' do
+          it 'should function correctly when passing an array of ids' do
+            s = Person.ransack(array_people_ids_in: true)
+            expect(s.result.count).to be > 0
+
+            s = Person.ransack(array_where_people_ids_in: [1, '2', 3])
+            expect(s.result.count).to be 3
+            expect(s.result.map(&:id)).to eq [3, 2, 1]
+          end
+
+          it 'should function correctly with HABTM associations' do
+            article = Article.first
+            tag = article.tags.first
+            s = Person.ransack(article_tags_in: [tag.id])
+
+            expect(s.result.count).to be 1
+            expect(s.result.map(&:id)).to eq [article.person.id]
+          end
+
+          it 'should function correctly when passing an array of strings' do
+            a, b = Person.select(:id).order(:id).limit(2).map { |a| a.id.to_s }
+
+            Person.create!(name: a)
+            s = Person.ransack(array_people_names_in: true)
+            expect(s.result.count).to be > 0
+            s = Person.ransack(array_where_people_names_in: a)
+            expect(s.result.count).to be 1
+
+            Person.create!(name: b)
+            s = Person.ransack(array_where_people_names_in: [a, b])
+            expect(s.result.count).to be 2
+          end
+
+          it 'should function correctly with an Arel SqlLiteral' do
+            s = Person.ransack(sql_literal_id_in: 1)
+            expect(s.result.count).to be 1
+            s = Person.ransack(sql_literal_id_in: ['2', 4, '5', 8])
+            expect(s.result.count).to be 4
+          end
+        end
+
+        context 'search on an `in` predicate with an array' do
+          it 'should function correctly when passing an array of ids' do
+            array = Person.all.map(&:id)
+            s = Person.ransack(id_in: array)
+            expect(s.result.count).to eq array.size
+          end
+        end
+
+        it 'should work correctly when an attribute name ends with _start' do
+          p = Person.create!(new_start: 'Bar and foo', name: 'Xiang')
+
+          s = Person.ransack(new_start_end: ' and foo')
+          expect(s.result.to_a).to eq [p]
+
+          s = Person.ransack(name_or_new_start_start: 'Xia')
+          expect(s.result.to_a).to eq [p]
+
+          s = Person.ransack(new_start_or_name_end: 'iang')
+          expect(s.result.to_a).to eq [p]
+        end
+
+        it 'should work correctly when an attribute name ends with _end' do
+          p = Person.create!(stop_end: 'Foo and bar', name: 'Marianne')
+
+          s = Person.ransack(stop_end_start: 'Foo and')
+          expect(s.result.to_a).to eq [p]
+
+          s = Person.ransack(stop_end_or_name_end: 'anne')
+          expect(s.result.to_a).to eq [p]
+
+          s = Person.ransack(name_or_stop_end_end: ' bar')
+          expect(s.result.to_a).to eq [p]
+        end
+
+        it 'should work correctly when an attribute name has `and` in it' do
+          p = Person.create!(terms_and_conditions: true)
+          s = Person.ransack(terms_and_conditions_eq: true)
+          expect(s.result.to_a).to eq [p]
+        end
+
+        context 'attribute aliased column names' do
+          it 'should be translated to original column name' do
+            s = Person.ransack(full_name_eq: 'Nicolas Cage')
+            expect(s.result.to_sql).to match(
+              /WHERE #{quote_table_name("people")}.#{quote_column_name("name")}/
+            )
+          end
+
+          it 'should translate on associations' do
+            s = Person.ransack(articles_content_cont: 'Nicolas Cage')
+            expect(s.result.to_sql).to match(
+              /#{quote_table_name("articles")}.#{
+                 quote_column_name("body")} I?LIKE '%Nicolas Cage%'/
+            )
+          end
+        end
+
+        it 'sorts with different join variants' do
+          comments = [
+            Comment.create(article: Article.create(title: 'Avenger'), person: Person.create(salary: 100_000)),
+            Comment.create(article: Article.create(title: 'Avenge'), person: Person.create(salary: 50_000)),
+          ]
+          expect(Comment.ransack(article_title_cont: 'aven', s: 'person_salary desc').result).to eq(comments)
+          expect(Comment.joins(:person).ransack(s: 'persons_salarydesc', article_title_cont: 'aven').result).to eq(comments)
+          expect(Comment.joins(:person).ransack(article_title_cont: 'aven', s: 'persons_salary desc').result).to eq(comments)
+        end
+
+        it 'allows sort by `only_sort` field' do
+          s = Person.ransack(
+            's' => { '0' => { 'dir' => 'asc', 'name' => 'only_sort' } }
+          )
+          expect(s.result.to_sql).to match(
+            /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_sort")} ASC/
+          )
+        end
+
+        it 'does not sort by `only_search` field' do
+          s = Person.ransack(
+            's' => { '0' => { 'dir' => 'asc', 'name' => 'only_search' } }
+          )
+          expect(s.result.to_sql).not_to match(
+            /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_search")} ASC/
+          )
+        end
+
+        it 'allows search by `only_search` field' do
+          s = Person.ransack(only_search_eq: 'htimS cirA')
+          expect(s.result.to_sql).to match(
+            /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_search")} = 'htimS cirA'/
+          )
+        end
+
+        it 'cannot be searched by `only_sort`' do
+          s = Person.ransack(only_sort_eq: 'htimS cirA')
+          expect(s.result.to_sql).not_to match(
+            /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_sort")} = 'htimS cirA'/
+          )
+        end
+
+        it 'allows sort by `only_admin` field, if auth_object: :admin' do
+          s = Person.ransack(
+            { 's' => { '0' => { 'dir' => 'asc', 'name' => 'only_admin' } } },
+            { auth_object: :admin }
+          )
+          expect(s.result.to_sql).to match(
+            /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} ASC/
+          )
+        end
+
+        it 'does not sort by `only_admin` field, if auth_object: nil' do
+          s = Person.ransack(
+            's' => { '0' => { 'dir' => 'asc', 'name' => 'only_admin' } }
+          )
+          expect(s.result.to_sql).not_to match(
+            /ORDER BY #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} ASC/
+          )
+        end
+
+        it 'allows search by `only_admin` field, if auth_object: :admin' do
+          s = Person.ransack(
+            { only_admin_eq: 'htimS cirA' },
+            { auth_object: :admin }
+          )
+          expect(s.result.to_sql).to match(
+            /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} = 'htimS cirA'/
+          )
+        end
+
+        it 'cannot be searched by `only_admin`, if auth_object: nil' do
+          s = Person.ransack(only_admin_eq: 'htimS cirA')
+          expect(s.result.to_sql).not_to match(
+            /WHERE #{quote_table_name("people")}.#{
+              quote_column_name("only_admin")} = 'htimS cirA'/
+          )
+        end
+
+        it 'should allow passing ransacker arguments to a ransacker' do
+          s = Person.ransack(
+            c: [{
+              a: {
+                '0' => {
+                  name: 'with_arguments', ransacker_args: [10, 100]
+                }
+              },
+              p: 'cont',
+              v: ['Passing arguments to ransackers!']
+            }]
+          )
+          expect(s.result.to_sql).to match(
+            /LENGTH\(articles.body\) BETWEEN 10 AND 100/
+          )
+          expect(s.result.to_sql).to match(
+            /LIKE \'\%Passing arguments to ransackers!\%\'/
+            )
+          expect { s.result.first }.to_not raise_error
+        end
+
+        it 'should allow sort passing arguments to a ransacker' do
+          s = Person.ransack(
+            s: {
+              '0' => {
+                name: 'with_arguments', dir: 'desc', ransacker_args: [2, 6]
+              }
+            }
+          )
+          expect(s.result.to_sql).to match(
+            /ORDER BY \(SELECT MAX\(articles.title\) FROM articles/
+            )
+          expect(s.result.to_sql).to match(
+            /WHERE articles.person_id = people.id AND LENGTH\(articles.body\)/
+            )
+          expect(s.result.to_sql).to match(
+            /BETWEEN 2 AND 6 GROUP BY articles.person_id \) DESC/
+          )
+        end
+
+        context 'case insensitive sorting' do
+          it 'allows sort by desc' do
+            search = Person.ransack(sorts: ['name_case_insensitive desc'])
+            expect(search.result.to_sql).to match /ORDER BY LOWER(.*) DESC/
+          end
+
+          it 'allows sort by asc' do
+            search = Person.ransack(sorts: ['name_case_insensitive asc'])
+            expect(search.result.to_sql).to match /ORDER BY LOWER(.*) ASC/
+          end
+        end
+
+        context 'ransacker with different types' do
+          it 'handles string type ransacker correctly' do
+            s = Person.ransack(name_case_insensitive_eq: 'test')
+            expect(s.result.to_sql).to match(/LOWER\(.*\) = 'test'/)
+          end
+
+          it 'handles integer type ransacker correctly' do
+            s = Person.ransack(sql_literal_id_eq: 1)
+            expect(s.result.to_sql).to match(/people\.id = 1/)
+          end
+        end
+
+        context 'ransacker with formatter returning nil' do
+          it 'handles formatter returning nil gracefully' do
+            # This tests the edge case where a formatter might return nil
+            s = Person.ransack(article_tags_eq: 999999) # Non-existent tag ID
+            expect { s.result.to_sql }.not_to raise_error
+          end
+        end
+
+        context 'ransacker with array formatters' do
+          it 'handles array_people_ids formatter correctly' do
+            person1 = Person.create!(name: 'Test1')
+            person2 = Person.create!(name: 'Test2')
+            
+            s = Person.ransack(array_people_ids_eq: 'test')
+            expect { s.result }.not_to raise_error
+          end
+
+          it 'handles array_where_people_ids formatter correctly' do
+            person1 = Person.create!(name: 'Test1')
+            person2 = Person.create!(name: 'Test2')
+            
+            s = Person.ransack(array_where_people_ids_eq: [person1.id, person2.id])
+            expect { s.result }.not_to raise_error
+          end
+        end
+
+        context 'regular sorting' do
+          it 'allows sort by desc' do
+            search = Person.ransack(sorts: ['name desc'])
+            expect(search.result.to_sql).to match /ORDER BY .* DESC/
+          end
+
+          it 'allows sort by asc' do
+            search = Person.ransack(sorts: ['name asc'])
+            expect(search.result.to_sql).to match /ORDER BY .* ASC/
+          end
+        end
+
+        context 'sorting by a scope' do
+          it 'applies the correct scope' do
+            search = Person.ransack(sorts: ['reverse_name asc'])
+            expect(search.result.to_sql).to include("ORDER BY REVERSE(name) ASC")
+          end
+        end
+      end
+
+      describe '#ransackable_attributes' do
+        context 'when auth_object is nil' do
+          subject { Person.ransackable_attributes }
+
+          it { should include 'name' }
+          it { should include 'reversed_name' }
+          it { should include 'doubled_name' }
+          it { should include 'term' }
+          it { should include 'only_search' }
+          it { should_not include 'only_sort' }
+          it { should_not include 'only_admin' }
+
+          it { should include 'full_name' }
+        end
+
+        context 'with auth_object :admin' do
+          subject { Person.ransackable_attributes(:admin) }
+
+          it { should include 'name' }
+          it { should include 'reversed_name' }
+          it { should include 'doubled_name' }
+          it { should include 'only_search' }
+          it { should_not include 'only_sort' }
+          it { should include 'only_admin' }
+        end
+
+        context 'when not defined in model, nor in ApplicationRecord' do
+          subject { Article.ransackable_attributes }
+
+          it "raises a helpful error" do
+            without_application_record_method(:ransackable_attributes) do
+              expect { subject }.to raise_error(RuntimeError, /Ransack needs Article attributes explicitly allowlisted/)
+            end
+          end
+        end
+
+        context 'when defined only in model by delegating to super' do
+          subject { Article.ransackable_attributes }
+
+          around do |example|
+            Article.singleton_class.define_method(:ransackable_attributes) do
+              super(nil) - super(nil)
+            end
+
+            example.run
+          ensure
+            Article.singleton_class.remove_method(:ransackable_attributes)
+          end
+
+          it "returns the allowlist in the model, and warns" do
+            without_application_record_method(:ransackable_attributes) do
+              expect { subject }.to output(/Ransack's builtin `ransackable_attributes` method is deprecated/).to_stderr
+              expect(subject).to be_empty
+            end
+          end
+        end
+      end
+
+      describe '#ransortable_attributes' do
+        context 'when auth_object is nil' do
+          subject { Person.ransortable_attributes }
+
+          it { should include 'name' }
+          it { should include 'reversed_name' }
+          it { should include 'doubled_name' }
+          it { should include 'only_sort' }
+          it { should_not include 'only_search' }
+          it { should_not include 'only_admin' }
+        end
+
+        context 'with auth_object :admin' do
+          subject { Person.ransortable_attributes(:admin) }
+
+          it { should include 'name' }
+          it { should include 'reversed_name' }
+          it { should include 'doubled_name' }
+          it { should include 'only_sort' }
+          it { should_not include 'only_search' }
+          it { should include 'only_admin' }
+        end
+      end
+
+      describe '#ransackable_associations' do
+        subject { Person.ransackable_associations }
+
+        it { should include 'parent' }
+        it { should include 'children' }
+        it { should include 'articles' }
+
+        context 'when not defined in model, nor in ApplicationRecord' do
+          subject { Article.ransackable_associations }
+
+          it "raises a helpful error" do
+            without_application_record_method(:ransackable_associations) do
+              expect { subject }.to raise_error(RuntimeError, /Ransack needs Article associations explicitly allowlisted/)
+            end
+          end
+        end
+
+        context 'when defined only in model by delegating to super' do
+          subject { Article.ransackable_associations }
+
+          around do |example|
+            Article.singleton_class.define_method(:ransackable_associations) do
+              super(nil) - super(nil)
+            end
+
+            example.run
+          ensure
+            Article.singleton_class.remove_method(:ransackable_associations)
+          end
+
+          it "returns the allowlist in the model, and warns" do
+            without_application_record_method(:ransackable_associations) do
+              expect { subject }.to output(/Ransack's builtin `ransackable_associations` method is deprecated/).to_stderr
+              expect(subject).to be_empty
+            end
+          end
+        end
+      end
+
+      describe '#ransackable_scopes' do
+        subject { Person.ransackable_scopes }
+
+        it { should eq [] }
+      end
+
+      describe '#ransackable_scopes_skip_sanitize_args' do
+        subject { Person.ransackable_scopes_skip_sanitize_args }
+
+        it { should eq [] }
+      end
+
+      private
+
+      def without_application_record_method(method)
+        ApplicationRecord.singleton_class.alias_method :"original_#{method}", :"#{method}"
+        ApplicationRecord.singleton_class.remove_method :"#{method}"
+
+        yield
+      ensure
+        ApplicationRecord.singleton_class.alias_method :"#{method}", :"original_#{method}"
+        ApplicationRecord.singleton_class.remove_method :"original_#{method}"
+      end
+
+      def rails7_and_mysql
+        ::ActiveRecord::VERSION::MAJOR >= 7 &&
+          %w[mysql mysql2 trilogy].include?(ENV['DB'])
+      end
+    end
+  end
+end

@@ -4,11 +4,14 @@ require 'active_support/deprecator'
 
 require 'active_support/core_ext'
 require 'ransack/configuration'
-require 'polyamorous/polyamorous'
 
 module Ransack
   extend Configuration
   class UntraversableAssociationError < StandardError; end
+
+  def self.deprecator
+    @deprecator ||= ActiveSupport::Deprecation.new('7.0', 'Ransack')
+  end
 end
 
 Ransack.configure do |config|

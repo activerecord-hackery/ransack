@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Polyamorous
+module Ransack::ActiveRecord
   describe JoinDependency do
     context 'with symbol joins' do
       subject { new_join_dependency Person, articles: :comments }
@@ -8,7 +8,7 @@ module Polyamorous
       specify { expect(subject.send(:join_root).drop(1).size)
         .to eq(2) }
       specify { expect(subject.send(:join_root).drop(1).map(&:join_type).uniq)
-        .to eq [Polyamorous::InnerJoin] }
+        .to eq [Arel::Nodes::InnerJoin] }
     end
 
     context 'with has_many :through association' do
@@ -26,7 +26,7 @@ module Polyamorous
       specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 1 }
       specify { expect(subject.send(:join_root).drop(1).first.join_type)
-        .to eq Polyamorous::OuterJoin }
+        .to eq Arel::Nodes::OuterJoin }
     end
 
     context 'with nested outer joins' do
@@ -36,9 +36,9 @@ module Polyamorous
       specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 2 }
       specify { expect(subject.send(:join_root).drop(1).map(&:join_type))
-        .to eq [Polyamorous::OuterJoin, Polyamorous::OuterJoin] }
+        .to eq [Arel::Nodes::OuterJoin, Arel::Nodes::OuterJoin] }
       specify { expect(subject.send(:join_root).drop(1).map(&:join_type).uniq)
-        .to eq [Polyamorous::OuterJoin] }
+        .to eq [Arel::Nodes::OuterJoin] }
     end
 
     context 'with polymorphic belongs_to join' do
@@ -47,7 +47,7 @@ module Polyamorous
       specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 1 }
       specify { expect(subject.send(:join_root).drop(1).first.join_type)
-        .to eq Polyamorous::InnerJoin }
+        .to eq Arel::Nodes::InnerJoin }
       specify { expect(subject.send(:join_root).drop(1).first.table_name)
         .to eq 'people' }
     end
@@ -59,7 +59,7 @@ module Polyamorous
       specify { expect(subject.send(:join_root).drop(1).size)
         .to eq 2 }
       specify { expect(subject.send(:join_root).drop(1).map(&:join_type).uniq)
-        .to eq [Polyamorous::InnerJoin] }
+        .to eq [Arel::Nodes::InnerJoin] }
       specify { expect(subject.send(:join_root).drop(1).first.table_name)
         .to eq 'people' }
       specify { expect(subject.send(:join_root).drop(1)[1].table_name)
@@ -70,7 +70,7 @@ module Polyamorous
       subject { new_join_dependency Note,
         new_join(:notable, :outer, Person) => :comments }
       specify { expect(subject.send(:join_root).drop(1).size).to eq 2 }
-      specify { expect(subject.send(:join_root).drop(1).map(&:join_type)).to eq [Polyamorous::OuterJoin, Polyamorous::InnerJoin] }
+      specify { expect(subject.send(:join_root).drop(1).map(&:join_type)).to eq [Arel::Nodes::OuterJoin, Arel::Nodes::InnerJoin] }
       specify { expect(subject.send(:join_root).drop(1).first.table_name)
         .to eq 'people' }
       specify { expect(subject.send(:join_root).drop(1)[1].table_name)

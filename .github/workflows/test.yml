@@ -15,7 +15,7 @@ jobs:
         rails:
           - 8-1-stable
           - 8-0-stable
-          - v7.2.2
+          - v7.2.2.1
         ruby:
           - 4.0.1
           - 3.4.8

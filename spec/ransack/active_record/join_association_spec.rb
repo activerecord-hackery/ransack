@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Polyamorous
+module Ransack::ActiveRecord
   describe JoinAssociation do
     let(:join_dependency) { new_join_dependency Note, {} }
     let(:reflection) { Note.reflect_on_association(:notable) }
