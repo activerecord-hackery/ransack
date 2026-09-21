@@ -6,12 +6,15 @@ gem 'rake'
 rails = ENV['RAILS'] || '7-2-stable'
 
 gem 'faker'
-# >= 2.9.5 for CVE-2026-54619 (use-after-free when redefining a SQLite function
-# with a different arity). The 1.x line ended at 1.7.3 and never received the
-# fix, so the old Rails-version split can no longer be kept on a patched
-# version. Rails 7.2 works with sqlite3 2.x, and the gemspec requires
-# Active Record >= 7.2, so one constraint now covers every supported version.
-gem 'sqlite3', '>= 2.9.5'
+# CVE-2026-54619 (use-after-free when redefining a SQLite function with a
+# different arity) is fixed in sqlite3 2.9.5. The 1.x line ended at 1.7.3 and
+# never received the fix, so the old Rails-version split could not be kept on a
+# patched version; Rails 7.2 runs fine against sqlite3 2.x, so it is gone.
+#
+# sqlite3 dropped Ruby 3.1 in 2.9.0, so no patched release exists for Ruby 3.1.
+# It stays on the last line that supports it. Ruby 3.1 is itself past EOL and is
+# scheduled to be dropped in 5.0.0 (#1686), which retires this branch.
+gem 'sqlite3', RUBY_VERSION >= '3.2' ? '>= 2.9.5' : '~> 2.8.1'
 gem 'pg'
 gem 'activerecord-postgis-adapter'
 gem 'pry'
