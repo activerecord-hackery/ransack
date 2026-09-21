@@ -271,7 +271,7 @@ module Ransack
       end
 
       def attr_value_for_attribute(attr)
-        return attr.attr if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+        return attr.attr if ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL"
 
         predicate.case_insensitive ? attr.attr.lower : attr.attr
       rescue
@@ -300,11 +300,11 @@ module Ransack
       end
 
       def arel_predicate
-        predicate = attributes.map { |attribute|
+        attributes.map { |attribute|
           association = attribute.parent
           parent_table = association.table
 
-          if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
+          predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
             query = context.build_correlated_subquery(association)
             context.remove_association(association)
 
@@ -327,18 +327,22 @@ module Ransack
           else
             format_predicate(attribute)
           end
+
+          # Applied per attribute rather than to the reduced node: once several
+          # attributes are combined, the result is an And/Or whose `right` is
+          # another predicate node rather than a Casted value, so
+          # replace_right_node? returns false and nothing is unwrapped at all.
+          if replace_right_node?(predicate)
+            # Replace right node object to plain integer value in order to avoid
+            # ActiveModel::RangeError from Arel::Node::Casted.
+            # The error can be ignored here because RDBMSs accept large numbers
+            # in condition clauses.
+            plain_value = predicate.right.value
+            predicate.right = plain_value
+          end
+
+          predicate
         }.reduce(combinator_method)
-
-        if replace_right_node?(predicate)
-          # Replace right node object to plain integer value in order to avoid
-          # ActiveModel::RangeError from Arel::Node::Casted.
-          # The error can be ignored here because RDBMSs accept large numbers
-          # in condition clauses.
-          plain_value = predicate.right.value
-          predicate.right = plain_value
-        end
-
-        predicate
       end
 
       def not_nested_condition(attribute, parent_table)
@@ -365,12 +369,28 @@ module Ransack
         end
 
         # For LIKE predicates, wrap the value in Arel::Nodes.build_quoted to prevent
-        # ActiveRecord normalization from affecting wildcard patterns
-        if like_predicate?(arel_pred)
-          arel_values = Arel::Nodes.build_quoted(arel_values)
-        end
+        # ActiveRecord normalization from affecting wildcard patterns, and pass
+        # the escape character so the escaping done by `escape_wildcards` is
+        # actually honoured. Without an explicit ESCAPE clause, SQLite treats a
+        # backslash as a literal character rather than an escape.
+        # See https://github.com/activerecord-hackery/ransack/issues/1581
+        # A length predicate compares LENGTH(column) rather than the column.
+        attr_value = length_predicate? ? length_function_for_attribute(attribute) : attr_value_for_attribute(attribute)
 
-        predicate = attr_value_for_attribute(attribute).public_send(arel_pred, arel_values)
+        if like_predicate?(arel_pred)
+          # The compound forms (matches_any / matches_all and their negations)
+          # iterate over an Array of patterns, so each element is quoted on its
+          # own; wrapping the whole Array in one node would hand them a single
+          # Quoted to iterate over.
+          arel_values = if arel_values.is_a?(Array)
+            arel_values.map { |v| Arel::Nodes.build_quoted(v) }
+          else
+            Arel::Nodes.build_quoted(arel_values)
+          end
+          predicate = attr_value.public_send(arel_pred, arel_values, Constants::LIKE_ESCAPE_CHARACTER)
+        else
+          predicate = attr_value.public_send(arel_pred, arel_values)
+        end
 
         if in_predicate?(predicate)
           predicate.right = predicate.right.map do |pr|
@@ -386,8 +406,13 @@ module Ransack
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
       end
 
+      LIKE_PREDICATES = %w[
+        matches matches_any matches_all
+        does_not_match does_not_match_any does_not_match_all
+      ].freeze
+
       def like_predicate?(arel_predicate)
-        arel_predicate == 'matches' || arel_predicate == 'does_not_match'
+        LIKE_PREDICATES.include?(arel_predicate)
       end
 
       STRING_LIKE_TYPES = %i[string text citext].freeze
@@ -418,6 +443,28 @@ module Ransack
         relation, name = arel_node.attribute.values
         attribute_type = relation.type_for_attribute(name).type
         attribute_type == :integer && arel_node.value.is_a?(Integer)
+      end
+
+      def length_predicate?
+        predicate_name.to_s.start_with?('length_')
+      end
+
+      # CHAR_LENGTH counts characters and is the SQL standard spelling; SQLite
+      # has no CHAR_LENGTH and its LENGTH already counts characters for text.
+      CHAR_LENGTH_ADAPTERS = %w[PostgreSQL PostGIS Mysql2 Trilogy].freeze
+
+      def length_function_for_attribute(attribute)
+        function_name =
+          if CHAR_LENGTH_ADAPTERS.include?(ActiveRecord::Base.adapter_class::ADAPTER_NAME)
+            'CHAR_LENGTH'.freeze
+          else
+            'LENGTH'.freeze
+          end
+
+        Arel::Nodes::NamedFunction.new(
+          function_name,
+          [attr_value_for_attribute(attribute)]
+        )
       end
 
       def valid_combinator?

@@ -15,7 +15,7 @@ module Ransack
           relation     = attr.arel_attribute.relation
           name         = attr.arel_attribute.name.to_s
           table        = relation.respond_to?(:table_name) ? relation.table_name : relation.name
-          schema_cache = self.klass.connection.schema_cache
+          schema_cache = self.klass.connection_pool.schema_cache
           unless schema_cache.send(:data_source_exists?, table)
             raise "No table named #{table} exists."
           end
@@ -44,15 +44,15 @@ module Ransack
               if scope_or_sort.is_a?(Symbol)
                 relation = relation.send(scope_or_sort)
               else
-                case Ransack.options[:postgres_fields_sort_option]
+                case Ransack.options[:fields_sort_option]
                 when :nulls_first
-                  scope_or_sort = scope_or_sort.direction == :asc ? Arel.sql("#{scope_or_sort.to_sql} NULLS FIRST") : Arel.sql("#{scope_or_sort.to_sql} NULLS LAST")
+                  scope_or_sort = scope_or_sort.direction == :asc ? scope_or_sort.nulls_first : scope_or_sort.nulls_last
                 when :nulls_last
-                  scope_or_sort = scope_or_sort.direction == :asc ? Arel.sql("#{scope_or_sort.to_sql} NULLS LAST") : Arel.sql("#{scope_or_sort.to_sql} NULLS FIRST")
+                  scope_or_sort = scope_or_sort.direction == :asc ? scope_or_sort.nulls_last : scope_or_sort.nulls_first
                 when :nulls_always_first
-                  scope_or_sort = Arel.sql("#{scope_or_sort.to_sql} NULLS FIRST")
+                  scope_or_sort = scope_or_sort.nulls_first
                 when :nulls_always_last
-                  scope_or_sort = Arel.sql("#{scope_or_sort.to_sql} NULLS LAST")
+                  scope_or_sort = scope_or_sort.nulls_last
                 end
 
                 relation = relation.order(scope_or_sort)

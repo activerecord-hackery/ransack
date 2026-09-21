@@ -22,8 +22,8 @@ List of all possible predicates
 | `*_lteq` | less than or equal | |
 | `*_gt` | greater than | |
 | `*_gteq` | greater than or equal | |
-| `*_present` | not null and not empty | Only compatible with string columns. Example: `q[name_present]=1` (SQL: `col is not null AND col != ''`) |
-| `*_blank` | is null or empty. | (SQL: `col is null OR col = ''`) |
+| `*_present` | not null and not empty | Example: `q[name_present]=1`. On string columns, SQL: `col IS NOT NULL AND col != ''`. On other column types the empty-string half is dropped, giving `col IS NOT NULL` |
+| `*_blank` | is null or empty | On string columns, SQL: `col IS NULL OR col = ''`. On other column types, `col IS NULL` |
 | `*_null` | is null | |
 | `*_not_null` | is not null | |
 | `*_in` | match any values in array | e.g. `q[name_in][]=Alice&q[name_in][]=Bob` |
@@ -61,8 +61,80 @@ List of all possible predicates
 | `*_not_i_cont` | Does not contain with case insensitive |
 | `*_not_i_cont_any` | Does not contain any of values with case insensitive | |
 | `*_not_i_cont_all` | Does not contain all of values with case insensitive | |
+| `*_length_eq` | string length equals | SQL: `LENGTH(col) = value` |
+| `*_length_lt` | string length less than | |
+| `*_length_lteq` | string length less than or equal | |
+| `*_length_gt` | string length greater than | |
+| `*_length_gteq` | string length greater than or equal | |
 | `*_true` | is true | |
 | `*_false` | is false | |
 
 
 See full list: https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/locale/en.yml#L16
+
+### Searching by string length
+
+The `length_*` predicates compare the length of a column rather than its
+contents, which saves reaching for a ransacker for something this common:
+
+```ruby
+Person.ransack(name_length_lteq: 3).result.to_sql
+# ... WHERE LENGTH("people"."name") <= 3
+
+Person.ransack(name_length_gt: 10).result
+```
+
+The function used depends on the backend: `CHAR_LENGTH` on PostgreSQL, PostGIS
+and MySQL, `LENGTH` elsewhere. Both count characters rather than bytes for text
+columns.
+### Wildcards in `LIKE` predicates
+
+The `LIKE`-based predicates — `cont`, `start`, `end`, their `i_`, `not_` and
+`_any` / `_all` variants — treat the search term as a literal string, not as a
+pattern. `%` and `_` in a user's input are escaped, and Ransack emits an
+explicit `ESCAPE` clause so that escaping is honoured on every backend:
+
+```ruby
+Person.ransack(name_cont: "50%").result.to_sql
+# => SELECT "people".* FROM "people" WHERE "people"."name" LIKE '%50\%%' ESCAPE '\'
+```
+
+This finds names containing the literal text `50%`, rather than names
+containing `50` followed by anything.
+
+To match with a pattern of your own, use `matches`, which passes the value
+through unescaped:
+
+```ruby
+Person.ransack(email_matches: "%@example.com").result
+```
+
+:::note
+
+Before Ransack 5.0 the escaping was applied only on MySQL and PostgreSQL, and
+no `ESCAPE` clause was emitted. On SQLite and other backends a `%` or `_` in the
+search term acted as a wildcard. See
+[#1581](https://github.com/activerecord-hackery/ransack/issues/1581).
+
+:::
+
+### Searching `enum` attributes
+
+An Active Record `enum` can be searched by its label rather than its underlying
+value. Ransack casts the label before building the query:
+
+```ruby
+class Person < ApplicationRecord
+  enum :temperament, { sanguine: 1, choleric: 2, melancholic: 3, phlegmatic: 4 }
+end
+
+Person.ransack(temperament_eq: 'choleric').result.to_sql
+# ... WHERE "people"."temperament" = 2
+
+Person.ransack(temperament_in: ['sanguine', 'choleric']).result.to_sql
+# ... WHERE "people"."temperament" IN (1, 2)
+```
+
+This means a select built from `Person.temperaments.keys` can be posted
+straight back to Ransack without translating the labels yourself.
+

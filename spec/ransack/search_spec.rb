@@ -20,6 +20,91 @@ module Ransack
         Search.new(Person, name_eq: 'foobar')
       end
 
+      context 'blank value handling' do
+        after { Ransack.configure { |c| c.ignore_blank_values = true } }
+
+        context 'when ignore_blank_values is true (the default)' do
+          it 'removes empty string conditions before building' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_eq: '')
+          end
+
+          it 'removes empty array conditions before building' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_in: [])
+          end
+
+          it 'removes conditions that are blank after whitespace stripping' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_eq: '   ')
+          end
+        end
+
+        context 'when ignore_blank_values is false' do
+          before { Ransack.configure { |c| c.ignore_blank_values = false } }
+
+          it 'keeps empty string conditions before building' do
+            expect_any_instance_of(Search).to receive(:build)
+            .with({ 'name_eq' => '' })
+            Search.new(Person, name_eq: '')
+          end
+
+          it 'keeps empty array conditions before building' do
+            expect_any_instance_of(Search).to receive(:build)
+            .with({ 'name_in' => [] })
+            Search.new(Person, name_in: [])
+          end
+
+          it 'still removes nil conditions before building' do
+            expect_any_instance_of(Search).to receive(:build).with({})
+            Search.new(Person, name_eq: nil)
+          end
+
+          it 'searches for the empty string with an eq predicate' do
+            s = Search.new(Person, name_eq: '')
+            field = "#{quote_table_name('people')}.#{quote_column_name('name')}"
+            expect(s.result.to_sql).to include "#{field} = ''"
+          end
+
+          it 'matches nothing for an empty array with an in predicate' do
+            s = Search.new(Person, name_in: [])
+            expect(s.result.to_a).to eq []
+          end
+
+          # A blank on a non-string column would be cast to nil before
+          # validation and the condition silently dropped — returning every
+          # row, which is the one outcome this option exists to prevent.
+          it 'treats a blank on an integer column as NULL' do
+            s = Search.new(Person, parent_id_eq: '')
+            field = "#{quote_table_name('people')}.#{quote_column_name('parent_id')}"
+            expect(s.result.to_sql).to include "#{field} IS NULL"
+          end
+
+          it 'treats a blank on a boolean column as NULL' do
+            s = Search.new(Person, awesome_eq: '')
+            field = "#{quote_table_name('people')}.#{quote_column_name('awesome')}"
+            expect(s.result.to_sql).to include "#{field} IS NULL"
+          end
+
+          it 'matches nothing for a blank inside an in predicate on an integer column' do
+            Person.create!(salary: 100)
+            expect(Search.new(Person, salary_in: ['']).result.to_a).to eq []
+          end
+
+          it 'matches nothing for a blank with a comparison predicate on an integer column' do
+            Person.create!(salary: 100)
+            expect(Search.new(Person, salary_gt: '').result.to_a).to eq []
+          end
+
+          it 'keeps the condition on the search object' do
+            s = Search.new(Person, children_name_eq: '')
+            condition = s.base[:children_name_eq]
+            expect(condition).not_to be_nil
+            expect(condition.values.first.value).to eq ''
+          end
+        end
+      end
+
       context 'whitespace stripping' do
         context 'when whitespace_strip option is true' do
           before do
@@ -30,6 +115,14 @@ module Ransack
             expect_any_instance_of(Search).to receive(:build)
             .with({ 'name_eq' => 'foobar' })
             Search.new(Person, name_eq: '   foobar     ')
+          end
+
+          describe 'nested search params with group conditions' do
+            it 'strips leading & trailing whitespace in all nested values before building' do
+              expect_any_instance_of(Search).to receive(:build)
+              .with({ 'g' => [{ 'm' => 'or', 'name_eq' => 'foobar' }] })
+              Search.new(Person, { g: [{ m: 'or', name_eq: '   foobar     ' }] })
+            end
           end
         end
 
@@ -1000,19 +1093,19 @@ module Ransack
         end.to raise_error(Ransack::InvalidSearchError,  "Invalid argument (Integer) supplied to sorts=")
       end
 
-      it "PG's sort option", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      it "fields sort option", if: !%w[Mysql2 Trilogy].include?(::ActiveRecord::Base.adapter_class::ADAPTER_NAME) do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_first }
         s = Search.new(Person, s: 'name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC NULLS FIRST"
         s = Search.new(Person, s: 'name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" DESC NULLS LAST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_last }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_last }
         s = Search.new(Person, s: 'name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC NULLS LAST"
         s = Search.new(Person, s: 'name desc')
@@ -1021,31 +1114,31 @@ module Ransack
         Ransack.options = default
       end
 
-      it "PG's sort option with double name", if: ::ActiveRecord::Base.connection.adapter_name == "PostgreSQL" do
+      it "fields sort option with double name", if: !%w[Mysql2 Trilogy].include?(::ActiveRecord::Base.adapter_class::ADAPTER_NAME) do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_first }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS FIRST"
         s = Search.new(Person, s: 'doubled_name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS LAST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_last }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_last }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS LAST"
         s = Search.new(Person, s: 'doubled_name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS FIRST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_always_first }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_always_first }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS FIRST"
         s = Search.new(Person, s: 'doubled_name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS FIRST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_always_last }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_always_last }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS LAST"
         s = Search.new(Person, s: 'doubled_name desc')
