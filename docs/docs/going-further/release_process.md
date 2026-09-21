@@ -21,38 +21,68 @@ In other words: `Major.Minor.Patch`.
 
 *For the maintainers of Ransack.*
 
-Releases are published to RubyGems automatically by the
+Publishing to RubyGems is automatic. Publishing a GitHub Release triggers the
 [`Release to RubyGems`](https://github.com/activerecord-hackery/ransack/blob/main/.github/workflows/release.yml)
-workflow, using [RubyGems Trusted Publishing](https://guides.rubygems.org/trusted-publishing/).
-There is no API key to hold or rotate: the workflow exchanges a short-lived GitHub OIDC
-token for a RubyGems credential at publish time.
+workflow, which builds the gem and pushes it using
+[RubyGems Trusted Publishing](https://guides.rubygems.org/trusted-publishing/).
+There is no API key to hold or rotate, and nothing to run locally.
 
-### Releasing a new version
+### The flow
 
-Example for release 4.4.1:
+Example for release 5.1.0.
 
-1. Update [`version.rb`](https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/version.rb)
-   to `4.4.1`, commit and push to `main`.
-2. Click [Draft a new Release](https://github.com/activerecord-hackery/ransack/releases/new) and use these settings:
-   - Tag: `v4.4.1`
-   - Release Title: `4.4.1`
-   - Check `Set as the Latest Release`
-   - Click `Generate release notes`
-   - Click `Publish Release`
-3. Publishing the release triggers the workflow, which verifies that the tag matches
-   `Ransack::VERSION` and then builds and pushes the gem. Watch it under
-   [Actions](https://github.com/activerecord-hackery/ransack/actions/workflows/release.yml).
+1. **Merge the pull requests** that make up the release. Everything on `main` at the
+   time of the version bump is what ships, so check the queue is in the state you want.
 
-If the tag and `Ransack::VERSION` disagree, the workflow fails before pushing anything.
-Fix `version.rb`, delete the tag and the release, and redo step 2.
+2. **Merge a version pull request.** Open a PR that changes only
+   [`version.rb`](https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/version.rb):
 
-To re-run a publish for a tag that already exists, use the workflow's
-`Run workflow` button and pass the tag.
+   ```ruby
+   module Ransack
+     VERSION = '5.1.0'
+   end
+   ```
 
-### One-time setup
+   Merge it last, so the bump is the final commit before the tag.
 
-Trusted Publishing has to be configured once by a gem owner on RubyGems.org, at
-[the gem's trusted publishers page](https://rubygems.org/gems/ransack/trusted_publishers):
+3. **Create the release.** Click
+   [Draft a new release](https://github.com/activerecord-hackery/ransack/releases/new) and set:
+
+   | Field | Value |
+   | --- | --- |
+   | Tag | `v5.1.0` — *Create new tag on publish*, target `main` |
+   | Release title | `5.1.0` |
+   | Notes | Click **Generate release notes**. GitHub lists every merged PR since the previous release; group them under headings (breaking changes, features, bug fixes) and remove anything internal |
+   | Set as the latest release | checked |
+
+4. **Publish the release.** That is the trigger. Within a minute the workflow starts;
+   watch it under [Actions → Release to RubyGems](https://github.com/activerecord-hackery/ransack/actions/workflows/release.yml).
+   It checks out the tag, verifies the tag matches `Ransack::VERSION`, builds the gem,
+   exchanges a short-lived OIDC token for RubyGems credentials, and pushes. When it
+   finishes, the version is live at https://rubygems.org/gems/ransack.
+
+Since 4.4.0 the release notes are the changelog; `CHANGELOG.md` is not updated.
+
+### If something goes wrong
+
+**The tag and `Ransack::VERSION` disagree.** The workflow refuses to publish and fails on
+the *Check the tag matches* step before building anything. This happens when the
+release is published before the version PR is merged, or with a typo in the tag. Delete
+the release and the tag, fix `main`, and redo step 3.
+
+**The workflow failed after the tag exists** (for example a RubyGems outage). Don't
+create a new tag. Re-run it from the Actions tab with **Run workflow**, passing the
+existing tag (`v5.1.0`). The same check runs, then the publish.
+
+**`No trusted publisher configured for this workflow`.** The trusted publisher on
+RubyGems.org is missing or its details changed. A gem owner re-creates it — see below —
+then re-runs the workflow as above.
+
+### Trusted publisher configuration
+
+Configured once by a gem owner at
+[the gem's trusted publishers page](https://rubygems.org/gems/ransack/trusted_publishers).
+Already in place; recorded here in case it ever needs to be re-created:
 
 | Field | Value |
 | --- | --- |
@@ -61,17 +91,17 @@ Trusted Publishing has to be configured once by a gem owner on RubyGems.org, at
 | Workflow filename | `release.yml` |
 | Environment | `rubygems` |
 
-The `rubygems` environment should also exist in the repository's
+The `rubygems` environment exists in the repository's
 [environment settings](https://github.com/activerecord-hackery/ransack/settings/environments).
-Adding required reviewers to it means a release needs a second maintainer to approve
-the push — recommended, but optional.
+Adding required reviewers to it makes every publish wait for a second maintainer's
+approval — optional, but a reasonable safeguard for a gem with this many downloads.
 
 ### Manual fallback
 
-If the workflow is unavailable:
+Only if the workflow cannot be used at all:
 
 ```bash
 gem signin
 rake build
-gem push pkg/ransack-4.4.1.gem
+gem push pkg/ransack-5.1.0.gem
 ```
