@@ -11,6 +11,16 @@ when 'mysql', 'mysql2'
     password: ENV.fetch("MYSQL_PASSWORD") { "" },
     encoding: 'utf8'
   )
+when 'trilogy'
+  # To test with Trilogy: `DB=trilogy bundle exec rake spec`
+  ActiveRecord::Base.establish_connection(
+    adapter:  'trilogy',
+    database: 'ransack',
+    username: ENV.fetch("MYSQL_USERNAME") { "root" },
+    password: ENV.fetch("MYSQL_PASSWORD") { "" },
+    host:     ENV.fetch("MYSQL_HOST") { "127.0.0.1" },
+    encoding: 'utf8'
+  )
 when 'pg', 'postgres', 'postgresql'
   # To test with PostgreSQL: `DB=postgresql bundle exec rake spec`
   ActiveRecord::Base.establish_connection(
@@ -39,6 +49,8 @@ else
     database: ':memory:'
   )
 end
+
+ActiveRecord.permanent_connection_checkout = :disallowed
 
 # This is just a test app with no sensitive data, so we explicitly allowlist all
 # attributes and associations for search. In general, end users should
@@ -411,7 +423,7 @@ module SubDB
   module Schema
     def self.create
       s = ::ActiveRecord::Schema.new
-      s.instance_variable_set(:@connection, SubDB::Base.connection)
+      s.instance_variable_set(:@connection, SubDB::Base.lease_connection)
       s.verbose = false
       s.define({}) do
         create_table :operation_histories, force: true do |t|

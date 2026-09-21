@@ -106,6 +106,29 @@ module Ransack
           end
         end
       end
+
+      # Regression test for
+      # https://github.com/activerecord-hackery/ransack/issues/689
+      # A form field built from an aliased attribute has to read its value
+      # back under the alias, or the value is lost between requests.
+      describe "#read_attribute" do
+        let(:conditions) do
+          {
+            '0' => {
+              'a' => { '0' => { 'name' => 'parent_name', 'ransacker_args' => '' } },
+              'p' => 'cont',
+              'v' => { '0' => { 'value' => 'John' } }
+            },
+          }
+        end
+
+        before { subject.conditions = conditions }
+
+        it "reads the value back under both the real name and the alias" do
+          expect(subject.parent_name_cont).to eq("John")
+          expect(subject.daddy_cont).to eq("John")
+        end
+      end
     end
   end
 end
