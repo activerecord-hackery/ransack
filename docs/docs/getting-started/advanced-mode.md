@@ -28,7 +28,8 @@ Person.ransack(c: { '0' => { a: ['children_name'], p: 'eq', v: [''] } }).result.
 # => SELECT "people".* FROM "people"
 ```
 
-Both forms drop the condition, so neither contributes a join.
+Both forms drop the condition, so neither contributes a join. This applies at
+any depth of nested groupings, under the short or long key spellings.
 
 To search *for* a blank value instead of ignoring it, see
 [`ignore_blank_values`](./configuration.md#blank-values).

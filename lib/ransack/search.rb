@@ -24,7 +24,9 @@ module Ransack
       strip_whitespace = options.fetch(:strip_whitespace, Ransack.options[:strip_whitespace])
       params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
       if params.is_a? Hash
-        params = params.dup
+        # deep_dup: the pruning below edits nested hashes in place, and the
+        # caller's params must come back untouched.
+        params = params.deep_dup
         params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
         params.delete_if { |_k, v| blank_condition_value?(v) }
         prune_blank_advanced_conditions!(params)
@@ -185,13 +187,26 @@ module Ransack
     # form, so the filter above never sees them. Left in place, a condition with
     # an empty value still builds its attribute and contributes a join, giving a
     # LEFT OUTER JOIN with no WHERE clause to go with it.
-    def prune_blank_advanced_conditions!(params)
-      conditions = params[:c] || params['c']
+    def prune_blank_advanced_conditions!(node)
+      return unless node.is_a?(Hash)
 
+      conditions = fetch_either(node, :c, :conditions)
       case conditions
       when Array then conditions.delete_if { |c| blank_advanced_condition?(c) }
       when Hash  then conditions.delete_if { |_k, c| blank_advanced_condition?(c) }
       end
+
+      # Groupings nest to any depth and carry their own conditions, so descend
+      # into each of them too.
+      groupings = fetch_either(node, :g, :groupings)
+      groupings = groupings.values if groupings.is_a?(Hash)
+      Array(groupings).each { |grouping| prune_blank_advanced_conditions!(grouping) }
+    end
+
+    # Params are not yet indifferent-access here, so look under both spellings
+    # of a key and both its short and long forms.
+    def fetch_either(hash, short, long)
+      hash[short] || hash[short.to_s] || hash[long] || hash[long.to_s]
     end
 
     def blank_advanced_condition?(condition)
