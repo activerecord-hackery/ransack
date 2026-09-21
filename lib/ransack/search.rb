@@ -26,7 +26,8 @@ module Ransack
       if params.is_a? Hash
         params = params.dup
         params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
-        params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false && !i.nil? } }
+        params.delete_if { |_k, v| blank_condition_value?(v) }
+        prune_blank_advanced_conditions!(params)
       else
         params = {}
       end
@@ -173,5 +174,41 @@ module Ransack
       attrs
     end
 
+    # True when every element of a condition's value is blank, i.e. the field
+    # was submitted empty. `false` is a real value, and an explicit nil is kept
+    # so `name_in: [nil]` still reaches the query.
+    def blank_condition_value?(value)
+      [*value].all? { |i| i.blank? && i != false && !i.nil? }
+    end
+
+    # The low-level `c:` API nests its values a level deeper than the shorthand
+    # form, so the filter above never sees them. Left in place, a condition with
+    # an empty value still builds its attribute and contributes a join, giving a
+    # LEFT OUTER JOIN with no WHERE clause to go with it.
+    def prune_blank_advanced_conditions!(params)
+      conditions = params[:c] || params['c']
+
+      case conditions
+      when Array then conditions.delete_if { |c| blank_advanced_condition?(c) }
+      when Hash  then conditions.delete_if { |_k, c| blank_advanced_condition?(c) }
+      end
+    end
+
+    def blank_advanced_condition?(condition)
+      return false unless condition.is_a?(Hash)
+
+      values = condition[:v] || condition['v']
+
+      case values
+      when Array then values.all? { |v| blank_condition_value?(unwrap_value(v)) }
+      when Hash  then values.all? { |_k, v| blank_condition_value?(unwrap_value(v)) }
+      end
+    end
+
+    # Values in the `c:` API may be given bare or wrapped in a `{ value: ... }`
+    # envelope, the same two forms `Condition#values=` accepts.
+    def unwrap_value(value)
+      value.is_a?(Hash) ? (value[:value] || value['value']) : value
+    end
   end
 end
