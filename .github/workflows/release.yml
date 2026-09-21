@@ -24,12 +24,18 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          # Qualify the dispatch input as a tag ref. actions/checkout resolves
+          # a bare name as a branch first, so a branch sharing the tag's name
+          # would be published instead of the release commit.
+          ref: >-
+            ${{ github.event.inputs.tag
+                && format('refs/tags/{0}', github.event.inputs.tag)
+                || github.ref }}
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
         with:
           ruby-version: "3.4"
 
