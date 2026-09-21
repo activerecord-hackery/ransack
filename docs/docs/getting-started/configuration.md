@@ -59,7 +59,21 @@ if there are two searches on one page. Another name may be set using the `search
 
 ### In the view
 
+The form helpers read the key from the search object, so nothing extra is
+needed:
+
 ```erb
-<%= f.search_form_for @search, as: :log_search %>
+<%= search_form_for @search %>
 <%= sort_link(@search) %>
 ```
+
+This emits `log_search[...]` field names rather than the default `q[...]`.
+
+:::note
+
+Before Ransack 5.0 the form helpers ignored a per-search `search_key` and always
+used the global default, so the key had to be repeated as `as: :log_search`
+(`scope:` for `search_form_with`). Passing it explicitly still works and still
+wins. See [#1118](https://github.com/activerecord-hackery/ransack/issues/1118).
+
+:::
