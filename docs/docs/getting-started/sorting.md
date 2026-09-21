@@ -107,3 +107,20 @@ For programmatic sorting, let Ransack handle the joins first:
 ```
 
 This ensures that Ransack properly handles the join dependencies between your main model's translations and the associated model's translations.
+
+## Unknown sorts
+
+A sort on an attribute that is not in `ransortable_attributes`, or that does
+not exist, produces no `ORDER BY` at all: the whole sort list is dropped, and
+so is any default ordering. Under a strict search (`ransack!`, or
+`ignore_unknown_conditions = false`) it raises `Ransack::InvalidSearchError`
+instead, the same way an unknown attribute in a condition does. A sort backed
+by a `sort_by_<attribute>_<direction>` scope is always accepted.
+
+```ruby
+Person.ransack!(s: 'secret_column asc')
+# Ransack::InvalidSearchError: Invalid sort term secret_column
+```
+
+Before Ransack 6.0 a strict search checked only conditions, and an invalid sort
+was dropped silently.

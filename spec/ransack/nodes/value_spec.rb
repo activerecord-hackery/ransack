@@ -35,6 +35,30 @@ module Ransack
         end
       end
 
+      context "with a Date value for a time type" do
+        let(:raw_value) { Date.new(2023, 8, 29) }
+
+        # Date#to_time uses the process's system zone, so when that differs
+        # from Time.zone the day boundary moved (#1436).
+        it 'means midnight in Time.zone regardless of the system zone' do
+          with_system_zone('Europe/Berlin') do
+            Time.use_zone('UTC') do
+              result = subject.cast(:datetime)
+              expect(result).to eq Time.utc(2023, 8, 29)
+              expect(result.zone).to eq 'UTC'
+            end
+          end
+        end
+
+        def with_system_zone(zone)
+          previous = ENV['TZ']
+          ENV['TZ'] = zone
+          yield
+        ensure
+          ENV['TZ'] = previous
+        end
+      end
+
       Constants::TRUE_VALUES.each do |value|
         context "with a true boolean value (#{value})" do
           let(:raw_value) { value.to_s }

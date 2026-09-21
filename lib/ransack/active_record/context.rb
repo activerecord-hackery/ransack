@@ -16,6 +16,10 @@ module Ransack
         @dialect ||= Dialect.for(@klass)
       end
 
+      # The type a value for this attribute is cast to. Read through the
+      # Attributes API rather than the schema column, so that
+      # `attribute :starts_at, :datetime` on a date column is honoured (#1028);
+      # a column with no attribute override reports its column type.
       def type_for(attr)
         return nil unless attr && attr.valid?
         relation     = attr.arel_attribute.relation
@@ -25,8 +29,9 @@ module Ransack
         unless schema_cache.send(:data_source_exists?, table)
           raise "No table named #{table} exists."
         end
-        column = attr.klass.columns.find { |column| column.name == name }
-        column&.type
+        return nil unless attr.klass.attribute_types.key?(name)
+
+        attr.klass.type_for_attribute(name).type
       end
 
       def evaluate(search, opts = {})
@@ -82,7 +87,7 @@ module Ransack
             assoc, poly_class = unpolymorphize_association(
               segments.join(Constants::UNDERSCORE)
               )
-            if found_assoc = get_association(assoc, klass)
+            if found_assoc = traversable_association(assoc, poly_class, klass)
               exists = attribute_method?(
                 remainder.join(Constants::UNDERSCORE),
                 poly_class || found_assoc.klass
@@ -119,7 +124,11 @@ module Ransack
       def join_sources
         base, joins = begin
           alias_tracker = @object.alias_tracker
-          constraints   = @join_dependency.join_constraints(@object.joins_values, alias_tracker, @object.references_values)
+          # Only stashed join dependencies are handed on; the relation's
+          # symbol, hash and string joins were folded into @join_dependency
+          # when it was built, and join_constraints cannot take them (#1659).
+          stashed_joins = @object.joins_values.grep(JoinDependency)
+          constraints   = @join_dependency.join_constraints(stashed_joins, alias_tracker, @object.references_values)
 
           [
             Arel::SelectManager.new(@object.table),
@@ -257,7 +266,7 @@ module Ransack
             assoc, klass = unpolymorphize_association(
               segments.join(Constants::UNDERSCORE)
               )
-            if found_assoc = get_association(assoc, parent)
+            if found_assoc = traversable_association(assoc, klass, parent)
               join = build_or_find_association(
                 found_assoc.name, parent, klass
                 )
@@ -275,6 +284,18 @@ module Ransack
         klass = klassify parent
         ransackable_association?(str, klass) &&
         klass.reflect_on_all_associations.detect { |a| a.name.to_s == str }
+      end
+
+      # An association that can actually be walked into. A polymorphic
+      # association has no class of its own, so it only counts when the name
+      # named one with `_of_Model_type`; otherwise `from_id_or_to_id` would
+      # match the `from` association and ask it for a class (#1267).
+      def traversable_association(name, polymorphic_class, parent)
+        assoc = get_association(name, parent)
+        return nil unless assoc
+        return nil if assoc.polymorphic? && polymorphic_class.nil?
+
+        assoc
       end
 
       def join_dependency(relation)
@@ -302,7 +323,6 @@ module Ransack
         end
         buckets.default = []
         association_joins         = buckets[:association_join]
-        stashed_association_joins = buckets[:stashed_join]
         join_nodes                = buckets[:join_node].uniq
         string_joins              = buckets[:string_join].map(&:strip)
         string_joins.uniq!
@@ -361,7 +381,6 @@ module Ransack
 
       def extract_joins(association)
         parent = @join_dependency.instance_variable_get(:@join_root)
-        reflection = association.reflection
         join_constraints = association.join_constraints_with_tables(
                              parent.table,
                              parent.base_klass,

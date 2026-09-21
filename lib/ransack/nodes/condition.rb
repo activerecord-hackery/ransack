@@ -47,12 +47,7 @@ module Ransack
               str = context.ransackable_alias(str)
             end
 
-            combinator =
-            if str.match(/_(or|and)_/)
-              $1
-            else
-              nil
-            end
+            combinator = combinator_in(str, context)
 
             if context.present? && context.attribute_method?(str)
               attributes = [str]
@@ -61,6 +56,21 @@ module Ransack
             end
 
             [attributes, predicate, combinator]
+          end
+
+          # A condition name carries one combinator: `a_or_b_or_c` or
+          # `a_and_b`. There is no grammar for precedence between the two,
+          # so a name using both is rejected under a strict search rather
+          # than silently applying whichever came first to every attribute
+          # (#1019). Mixed logic is what groupings are for.
+          def combinator_in(str, context)
+            combinators = str.scan(/_(or|and)_/).flatten.uniq
+            if combinators.size > 1 && context&.strict_conditions?
+              raise InvalidSearchError,
+                "Mixed combinators in #{str}: a condition name may use " \
+                "_and_ or _or_ but not both; use groupings for mixed logic"
+            end
+            combinators.first
           end
       end
 
@@ -181,14 +191,16 @@ module Ransack
 
       # The long spellings route through the short setters: `p=` resolves a
       # Predicate object, whereas the `predicate=` attribute writer would store
-      # the bare name.
+      # the bare name. `predicate_name` is the spelling the ransacker docs
+      # used for years, so it is accepted too (#1009).
       LONG_KEYS = {
-        'attributes' => 'a', 'values' => 'v', 'predicate' => 'p', 'combinator' => 'm'
+        'attributes' => 'a', 'values' => 'v', 'predicate' => 'p',
+        'predicate_name' => 'p', 'combinator' => 'm'
       }.freeze
 
       def build(params)
         params.with_indifferent_access.each do |key, value|
-          if key.match(/^(a|v|p|m|attributes|values|predicate|combinator)$/)
+          if key.match(/^(a|v|p|m|attributes|values|predicate|predicate_name|combinator)$/)
             self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end
         end

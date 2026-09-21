@@ -25,6 +25,46 @@ module Ransack
         end
       end
 
+      describe '#type_for with the Attributes API' do
+        # A column redeclared with `attribute` is cast by its declared type,
+        # not the schema column's (#1028).
+        let(:model) do
+          Class.new(Person) do
+            def self.name
+              'PersonWithDatetimeStart'
+            end
+            attribute :life_start, :datetime
+          end
+        end
+
+        it 'reports the declared type' do
+          search = Search.new(model, life_start_gteq: Time.utc(2020, 5, 31, 21, 57, 43))
+          attribute = search.base.conditions.first.attributes.first
+          expect(search.context.type_for(attribute)).to eq :datetime
+          expect(search.result.to_sql).to include('21:57:43')
+        end
+
+        it 'still reports the column type without a declaration' do
+          search = Search.new(Person, life_start_gteq: '2020-05-31')
+          attribute = search.base.conditions.first.attributes.first
+          expect(search.context.type_for(attribute)).to eq :date
+        end
+      end
+
+      describe 'a polymorphic association name with no _of_Model_type suffix' do
+        # `notable_id_or_id` starts with the polymorphic association's name;
+        # walking into it used to ask the reflection for a class (#1267).
+        it 'is treated as attribute names, not as the association' do
+          sql = Note.ransack(notable_id_or_id_eq: 3).result.to_sql
+          expect(sql).to include(%q{"notes"."notable_id" = 3 OR "notes"."id" = 3})
+        end
+
+        it 'still walks into the association when the class is named' do
+          sql = Note.ransack(notable_of_Person_type_name_eq: 'x').result.to_sql
+          expect(sql).to include(%q{"people"."name" = 'x'})
+        end
+      end
+
       it 'has an Active Record alias tracker method' do
         expect(subject.alias_tracker)
         .to be_an ::ActiveRecord::Associations::AliasTracker
@@ -187,6 +227,22 @@ module Ransack
             parents, children = shared_context.join_sources
             expect(children.left.name).to eq "children_people"
             expect(parents.left.name).to eq "parents_people"
+          end
+
+          # The relation's own symbol joins were handed to join_constraints,
+          # which only takes stashed join dependencies (#1659).
+          it 'works when the current scope already has joins' do
+            sql = Article.joins(:person).scoping do
+              context = Context.for(Article)
+              searches = [
+                Search.new(Article, { title_eq: 'A' }, context: context),
+                Search.new(Article, { title_eq: 'B' }, context: context)
+              ]
+              conditions = searches.map { |s| Visitor.new.accept(s.base) }
+              Article.joins(context.join_sources).where(conditions.reduce(&:or)).to_sql
+            end
+            expect(sql).to include('INNER JOIN "people"')
+            expect(sql).to include(%q{"articles"."title" = 'A' OR "articles"."title" = 'B'})
           end
 
           it 'can be rejoined to execute a valid query' do

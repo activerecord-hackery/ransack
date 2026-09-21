@@ -95,6 +95,13 @@ The argument of `f.search_field` has to be in this form:
 
 where `[_or_another_attribute_name]...` means any repetition of `_or_` plus the name of the attribute.
 
+`_and_` works the same way, but a single name uses one or the other, not both:
+there is no precedence rule for `a_or_b_and_c`. A strict search (`ransack!`,
+or `ignore_unknown_conditions = false`) raises `Ransack::InvalidSearchError`
+for a name that mixes them; a permissive search applies the first combinator
+it finds to every attribute. For mixed logic use
+[groupings](./advanced-mode.md).
+
 `cont` (contains) and `start` (starts with) are just two of the available
 search predicates.
 

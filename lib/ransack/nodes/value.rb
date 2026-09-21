@@ -61,7 +61,14 @@ module Ransack
           Time.zone.local(*val) rescue nil
         else
           unless val.acts_like?(:time)
-            val = val.is_a?(String) ? Time.zone.parse(val) : val.to_time rescue val
+            val = case val
+                  when String then Time.zone.parse(val)
+                  # A Date means midnight in Time.zone. Date#to_time would
+                  # give midnight in the process's system zone, which then
+                  # shifts by the offset between the two (#1436).
+                  when Date then val.in_time_zone
+                  else val.to_time
+                  end rescue val
           end
           val.in_time_zone rescue nil
         end

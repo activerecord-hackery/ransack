@@ -389,6 +389,36 @@ def self.ransackable_scopes_skip_sanitize_args
 end
 ```
 
+#### Scopes and `false`
+
+A bare `false` (or `'0'` / `'false'`, which are sanitized to `false`) is taken
+to mean "this checkbox was not ticked", and the scope is not applied at all.
+That is right for a scope with no argument, but wrong for a scope such as
+`activated(boolean)` driven by a yes / no / any select, which needs to receive
+`false`. List that scope in `ransackable_scopes_skip_sanitize_args`: it then
+receives every value as given, including `false`, and can cast for itself:
+
+```ruby
+class Employee < ActiveRecord::Base
+  # `true` is passed as a bare call, so the argument needs a default.
+  scope :activated, ->(value = true) { where(active: ActiveModel::Type::Boolean.new.cast(value)) }
+
+  def self.ransackable_scopes(auth_object = nil)
+    %i(activated)
+  end
+
+  def self.ransackable_scopes_skip_sanitize_args
+    %i(activated)
+  end
+end
+
+Employee.ransack(activated: false).result   # WHERE "employees"."active" = FALSE
+Employee.ransack(activated: '0').result     # the same, from a form
+```
+
+Wrapping the value in an array (`activated: [false]`) has always passed it
+through and still does.
+
 Scopes are a recent addition to Ransack and currently have a few caveats:
 First, a scope involving child associations needs to be defined in the parent
 table model, not in the child model. Second, scopes with an array as an

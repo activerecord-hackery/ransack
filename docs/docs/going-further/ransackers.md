@@ -227,7 +227,7 @@ Person.ransack(
         ransacker_args: [10, 100]
       }
     },
-    predicate_name: 'cont',
+    predicate: 'cont',
     values: ['Ransackers can take arguments']
   }]
 )

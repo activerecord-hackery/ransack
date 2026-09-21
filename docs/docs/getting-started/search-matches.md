@@ -163,3 +163,23 @@ Person.ransack(temperament_in: ['sanguine', 'choleric']).result.to_sql
 This means a select built from `Person.temperaments.keys` can be posted
 straight back to Ransack without translating the labels yourself.
 
+### Attribute types
+
+A search value is cast by the model's attribute type before it reaches the
+query, so `'2020-05-31'` becomes a `Date` for a date column and `'1'` becomes
+`true` for a boolean one. The type comes from the Attributes API, not the
+schema, so a column redeclared with `attribute` is cast the way the model
+declares it:
+
+```ruby
+class Event < ApplicationRecord
+  attribute :starts_on, :datetime   # a date column, treated as a datetime
+end
+
+Event.ransack(starts_on_gteq: Time.utc(2020, 5, 31, 21, 57)).result.to_sql
+# ... WHERE "events"."starts_on" >= '2020-05-31 21:57:00'
+```
+
+A `Date` given for a datetime column means midnight in `Time.zone`, whatever
+the server's system time zone is. Before Ransack 6.0 both of these followed
+the schema column and the system zone instead.

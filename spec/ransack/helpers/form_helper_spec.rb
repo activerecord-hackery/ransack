@@ -880,6 +880,14 @@ module Ransack
         it { should match /action="\/people"/ }
       end
 
+      # form_with only reads a value back when the object responds to the
+      # reader, which Search answered through method_missing alone.
+      describe '#search_form_with reading a value back' do
+        subject { @controller.view_context
+          .search_form_with(model: Person.ransack(name_cont: 'ernie')) { |f| f.text_field :name_cont } }
+        it { should match /value="ernie"/ }
+      end
+
       describe '#search_form_with with pdf format' do
         subject {
           @controller.view_context
