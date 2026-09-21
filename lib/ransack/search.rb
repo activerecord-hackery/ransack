@@ -25,7 +25,9 @@ module Ransack
       params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
       if params.is_a? Hash
         params = params.dup
-        params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
+        # deep_ so that values nested inside `g:` groupings and `c:` conditions
+        # are stripped too, not just the top level.
+        params = params.deep_transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
         params.delete_if { |k, v| [*v].all?{ |i| i.blank? && i != false && !i.nil? } }
       else
         params = {}
