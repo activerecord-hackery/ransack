@@ -167,7 +167,7 @@ module Ransack
       it_has_behavior 'wildcard escaping', :name_cont,
         (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS", "PostgreSQL" then %{"people"."name" ILIKE}
-        when "Mysql2"                then %{`people`.`name` LIKE}
+        when "Mysql2", "Trilogy"     then %{`people`.`name` LIKE}
         else                              %{"people"."name" LIKE}
         end) do
         subject { @s }
@@ -184,7 +184,7 @@ module Ransack
       it_has_behavior 'wildcard escaping', :name_not_cont,
         (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS", "PostgreSQL" then %{"people"."name" NOT ILIKE}
-        when "Mysql2"                then %{`people`.`name` NOT LIKE}
+        when "Mysql2", "Trilogy"     then %{`people`.`name` NOT LIKE}
         else                              %{"people"."name" NOT LIKE}
         end) do
         subject { @s }
@@ -202,7 +202,7 @@ module Ransack
         (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS"    then %{LOWER("people"."name") ILIKE}
         when "PostgreSQL" then %{"people"."name" ILIKE}
-        when "Mysql2"     then %{LOWER(`people`.`name`) LIKE}
+        when "Mysql2", "Trilogy" then %{LOWER(`people`.`name`) LIKE}
         else                   %{LOWER("people"."name") LIKE}
         end) do
         subject { @s }
@@ -220,7 +220,7 @@ module Ransack
         (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS"    then %{LOWER("people"."name") NOT ILIKE}
         when "PostgreSQL" then %{"people"."name" NOT ILIKE}
-        when "Mysql2"     then %{LOWER(`people`.`name`) NOT LIKE}
+        when "Mysql2", "Trilogy" then %{LOWER(`people`.`name`) NOT LIKE}
         else                   %{LOWER("people"."name") NOT LIKE}
         end) do
         subject { @s }
