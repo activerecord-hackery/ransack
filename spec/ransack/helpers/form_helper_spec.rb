@@ -859,6 +859,21 @@ module Ransack
         it { should match /example_name_eq/ }
       end
 
+      # Regression test for https://github.com/activerecord-hackery/ransack/issues/1118
+      # When a per-search `search_key:` option is passed to `Person.ransack`,
+      # `search_form_for` should honour it instead of falling back to the
+      # global `Ransack.options[:search_key]`. `sort_link` and `sort_url`
+      # already read this from the search's context.
+      describe '#search_form_for with per-search search_key' do
+        subject {
+          @controller.view_context
+          .search_form_for(Person.ransack({}, search_key: :people_search)) { |f|
+            f.text_field :name_eq
+          }
+        }
+        it { should match /people_search_name_eq/ }
+      end
+
       describe '#search_form_with with default format' do
         subject { @controller.view_context
           .search_form_with(model: Person.ransack) {} }
@@ -901,6 +916,17 @@ module Ransack
           .search_form_with(model: Person.ransack) { |f| f.text_field :name_eq }
         }
         it { should match /example\[name_eq\]/ }
+      end
+
+      # Regression test for https://github.com/activerecord-hackery/ransack/issues/1118
+      describe '#search_form_with with per-search search_key' do
+        subject {
+          @controller.view_context
+          .search_form_with(model: Person.ransack({}, search_key: :people_search)) { |f|
+            f.text_field :name_eq
+          }
+        }
+        it { should match /people_search\[name_eq\]/ }
       end
 
       describe '#search_form_with without Ransack::Search object' do
