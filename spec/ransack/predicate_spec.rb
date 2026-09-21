@@ -212,6 +212,17 @@ module Ransack
         expect(@s.result.to_sql).to match /[LOWER\(]?#{field}\)? I?LIKE '%ric%'/
       end
 
+      # The dialect comes from the searched model's connection, so a model on
+      # a second database does not get the primary database's SQL (#1407).
+      it 'takes the dialect from the searched model' do
+        postgresql_shaped = Class.new(::ActiveRecord::ConnectionAdapters::AbstractAdapter)
+        stub_const('ActiveRecord::ConnectionAdapters::PostgreSQLAdapter', postgresql_shaped)
+        allow(Person).to receive(:adapter_class).and_return(postgresql_shaped)
+
+        @s.name_i_cont = 'Ric'
+        expect(@s.result.to_sql).not_to include 'LOWER('
+      end
+
       # A ransacker can return any Arel node, not only a column. Before 6.0
       # the lowering went through Attribute#lower, which such nodes lack, and
       # the failure was rescued into an un-lowered comparison (#1357).

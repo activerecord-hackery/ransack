@@ -57,8 +57,11 @@ module Ransack
         postgresql?
       end
 
-      # CHAR_LENGTH counts characters and is the SQL standard spelling; SQLite
-      # has no CHAR_LENGTH and its LENGTH already counts characters for text.
+      # CHAR_LENGTH is the SQL standard spelling and what PostgreSQL and MySQL
+      # use; their LENGTH counts bytes on MySQL. SQLite has no CHAR_LENGTH,
+      # and neither does Oracle, while both count characters with LENGTH, so
+      # the generic dialect keeps LENGTH: it is the spelling the adapters
+      # Ransack does not know are most likely to have.
       def length_function
         postgresql? || mysql? ? 'CHAR_LENGTH'.freeze : 'LENGTH'.freeze
       end

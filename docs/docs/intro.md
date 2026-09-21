@@ -28,7 +28,7 @@ treatment for the handful of places where the SQL differs:
 An adapter that subclasses one of Rails' own is recognised as that database
 without any configuration. Other adapters (`sqlserver`, `oracle_enhanced`)
 are treated as standard SQL; they are known to work but are not tested here,
-and the [`dialect` option](./configuration.md#sql-dialect) lets you name a
+and the [`dialect` option](./getting-started/configuration.md#sql-dialect) lets you name a
 dialect explicitly if one of the known ones is a better fit.
 
 ## Installation
