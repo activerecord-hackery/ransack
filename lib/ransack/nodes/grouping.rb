@@ -126,7 +126,7 @@ module Ransack
       end
 
       def attribute_method?(name)
-        stripped_name = strip_predicate_and_index(name)
+        stripped_name = @context.resolve_aliases(strip_predicate_and_index(name))
         return true if @context.attribute_method?(stripped_name) ||
                        @context.attribute_method?(name)
         case stripped_name
@@ -192,7 +192,7 @@ module Ransack
         if self[name].nil?
           stripped_name = name.dup
           predicate = Predicate.detect_and_strip_from_string!(stripped_name)
-          aliased_attribute = context.ransackable_alias(stripped_name)
+          aliased_attribute = context.resolve_aliases(stripped_name)
           name = "#{aliased_attribute}_#{predicate}" unless aliased_attribute == stripped_name
         end
 

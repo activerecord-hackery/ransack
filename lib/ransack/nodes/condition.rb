@@ -44,7 +44,7 @@ module Ransack
             end
 
             if context.present?
-              str = context.ransackable_alias(str)
+              str = context.resolve_aliases(str)
             end
 
             # A name that is an attribute in its own right is never split,

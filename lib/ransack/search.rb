@@ -65,7 +65,10 @@ module Ransack
       self
     end
 
+    # Replaces the sorts, so `search.sorts = []` clears them. Before 6.0 each
+    # assignment appended (#994); use `build_sort` to add one.
     def sorts=(args)
+      @sorts = [] unless args.is_a?(String)
       case args
       when Array
         args.each do |sort|
@@ -104,17 +107,19 @@ module Ransack
       Nodes::Sort.new(@context).build(opts)
     end
 
+    # A scope wins over an attribute of the same name, as it does when the
+    # params hash is built (#1472).
     def method_missing(method_id, *args)
       method_name = method_id.to_s
       getter_name = method_name.sub(/=$/, ''.freeze)
-      if base.attribute_method?(getter_name)
-        base.send(method_id, *args)
-      elsif @context.ransackable_scope?(getter_name, @context.object)
+      if @context.ransackable_scope?(getter_name, @context.object)
         if method_name =~ /=$/
-          add_scope getter_name, args
+          add_scope getter_name, args.size == 1 ? args.first : args
         else
           @scope_args[method_name]
         end
+      elsif base.attribute_method?(getter_name)
+        base.send(method_id, *args)
       else
         super
       end

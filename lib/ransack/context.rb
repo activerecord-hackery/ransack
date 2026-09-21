@@ -182,6 +182,26 @@ module Ransack
       klass._ransack_aliases.fetch(str, klass._ransack_aliases.fetch(str.to_sym, str))
     end
 
+    # Expands every `ransack_alias` in a condition name: the whole name, each
+    # `_or_` / `_and_` segment of a compound, and an alias defined on an
+    # associated model and reached through an association path
+    # (`person_term` when Person aliases `term`). An alias that expands to a
+    # compound is joined with that compound's own combinator, so
+    # `term_or_daddy` with `term => name_or_email` becomes
+    # `name_or_email_or_parent_name`. Returns the name unchanged when it
+    # holds no alias.
+    def resolve_aliases(str)
+      whole = ransackable_alias(str)
+      return whole if whole != str
+
+      segments = str.split(/_and_|_or_/)
+      resolved = segments.map { |segment| resolve_alias_segment(segment) }
+      return str if resolved == segments
+
+      combinator = str[/_(or|and)_/, 1] || Constants::OR
+      resolved.join("_#{combinator}_")
+    end
+
     def ransackable_attribute?(str, klass)
       klass.ransackable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
     end
@@ -215,6 +235,22 @@ module Ransack
     end
 
     private
+
+    def resolve_alias_segment(segment)
+      target = ransackable_alias(segment)
+      return target if target != segment
+
+      path = association_path(segment)
+      return segment if path.blank?
+
+      remainder = segment.delete_prefix("#{path}_")
+      associated = traverse(path)
+      target = associated._ransack_aliases.fetch(remainder, associated._ransack_aliases.fetch(remainder.to_sym, remainder))
+      return segment if target == remainder
+
+      # Prefix every attribute of the alias's target with the path.
+      target.gsub(/(\A|_and_|_or_)/) { "#{$1}#{path}_" }
+    end
 
     def cast_scope_args(args)
       if args.is_a?(Array)
