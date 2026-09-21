@@ -4,7 +4,6 @@ module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
     attr_accessor :auth_object, :search_key
-    attr_reader :arel_visitor
 
     class << self
 

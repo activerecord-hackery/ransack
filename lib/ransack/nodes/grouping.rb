@@ -1,7 +1,6 @@
 module Ransack
   module Nodes
     class Grouping < Node
-      attr_reader :conditions
       attr_accessor :combinator
       alias :m :combinator
       alias :m= :combinator=
