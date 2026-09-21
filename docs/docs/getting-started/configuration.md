@@ -14,8 +14,8 @@ Ransack.configure do |config|
   # Default key name is :q
   config.search_key = :query
 
-  # Raise errors if a query contains an unknown predicate or attribute.
-  # Default is true (do not raise error on unknown conditions).
+  # Raise errors if a query contains an unknown predicate, attribute, combinator
+  # or sort. Default is true (do not raise error on unknown conditions).
   config.ignore_unknown_conditions = false
 
   # Globally display sort links without the order indicator arrow.

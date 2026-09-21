@@ -916,9 +916,89 @@ module Ransack
         end
     end
 
+    describe 'a condition name with both _and_ and _or_' do
+      # There is no precedence grammar for a name using both combinators; the
+      # first one found used to be applied to every attribute (#1019).
+      it 'raises under a strict search' do
+        expect { Person.ransack!(name_or_email_and_only_search_eq: 'x') }
+          .to raise_error(InvalidSearchError, /Mixed combinators in name_or_email_and_only_search/)
+        expect { Person.ransack({ name_and_email_or_only_search_eq: 'x' }, ignore_unknown_conditions: false) }
+          .to raise_error(InvalidSearchError, /Mixed combinators/)
+      end
+
+      it 'keeps the first combinator under a permissive search' do
+        sql = Person.ransack(name_or_email_and_only_search_eq: 'x').result.to_sql
+        expect(sql).to include(%q{= 'x' OR })
+        expect(sql).not_to include(' AND ')
+      end
+
+      it 'accepts a single combinator repeated' do
+        expect { Person.ransack!(name_or_email_or_only_search_eq: 'x') }.not_to raise_error
+        expect { Person.ransack!(name_and_email_eq: 'x') }.not_to raise_error
+      end
+
+      # An attribute whose own name contains both is never split.
+      it 'leaves an attribute named with both combinators alone' do
+        allow(Person).to receive(:ransackable_attributes).and_return(Person.authorizable_ransackable_attributes + ['stop_and_or_end'])
+        Person.ransacker(:stop_and_or_end) { |parent| parent.table[:stop_end] }
+
+        expect { Person.ransack!(stop_and_or_end_eq: 'x') }.not_to raise_error
+        expect(Person.ransack!(stop_and_or_end_eq: 'x').result.to_sql).to include('= \'x\'')
+      ensure
+        Person._ransackers.delete('stop_and_or_end')
+      end
+    end
+
+    describe 'the long-form condition keys' do
+      let(:attributes) { { '0' => { name: 'with_arguments', ransacker_args: [10, 100] } } }
+
+      it 'accept predicate: as the long spelling of p:' do
+        sql = Person.ransack(conditions: [{ attributes: attributes, predicate: 'cont', values: ['x'] }]).result.to_sql
+        expect(sql).to include('BETWEEN 10 AND 100')
+      end
+
+      # The spelling the ransackers page documented for years (#1009).
+      it 'accept predicate_name: too' do
+        sql = Person.ransack(conditions: [{ attributes: attributes, predicate_name: 'cont', values: ['x'] }]).result.to_sql
+        expect(sql).to include('BETWEEN 10 AND 100')
+      end
+    end
+
     describe '#sorts=' do
       before do
         @s = Search.new(Person)
+      end
+
+      # A sort that is neither ransortable nor backed by a sort_by scope was
+      # dropped silently even under ransack! (#1427).
+      context 'under a strict search' do
+        it 'raises for an attribute that is not ransortable' do
+          expect { Person.ransack!(s: 'only_search asc') }
+            .to raise_error(InvalidSearchError, 'Invalid sort term only_search')
+          expect { Person.ransack({ s: 'only_search asc' }, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Invalid sort term only_search')
+        end
+
+        it 'raises for an attribute that does not exist' do
+          expect { Person.ransack!(s: 'nonexistent_column asc') }
+            .to raise_error(InvalidSearchError, 'Invalid sort term nonexistent_column')
+        end
+
+        it 'accepts a sort backed by a sort_by_<name>_<dir> scope' do
+          s = Person.ransack!(s: 'reverse_name asc')
+          expect(s.result.to_sql).to include('REVERSE(name) ASC')
+        end
+
+        it 'accepts a sort given as a hash' do
+          expect { Person.ransack!(s: { '0' => { name: 'name', dir: 'asc' } }) }.not_to raise_error
+          expect { Person.ransack!(s: { '0' => { name: 'only_search', dir: 'asc' } }) }
+            .to raise_error(InvalidSearchError, 'Invalid sort term only_search')
+        end
+      end
+
+      it 'drops an unknown sort under a permissive search' do
+        s = Person.ransack(s: 'only_search asc')
+        expect(s.result.to_sql).not_to include('only_search')
       end
 
       it 'doesn\'t creates sorts' do
@@ -1064,20 +1144,15 @@ module Ransack
       end
 
       it 'creates valid sort when ransortable_attributes returns symbols (issue #1538)' do
-        Person.singleton_class.class_eval do
-          define_method(:ransortable_attributes) { |_auth = nil| [:id, :name] }
-        end
-        begin
-          @s.sorts = 'name asc'
-          expect(@s.sorts.size).to eq(1)
-          sort = @s.sorts.first
-          expect(sort).to be_a Nodes::Sort
-          expect(sort).to be_valid
-          expect(@s.result.to_sql).to include('ORDER BY')
-          expect(@s.result.to_sql).to include('name')
-        ensure
-          Person.singleton_class.remove_method(:ransortable_attributes)
-        end
+        allow(Person).to receive(:ransortable_attributes).and_return([:id, :name])
+
+        @s.sorts = 'name asc'
+        expect(@s.sorts.size).to eq(1)
+        sort = @s.sorts.first
+        expect(sort).to be_a Nodes::Sort
+        expect(sort).to be_valid
+        expect(@s.result.to_sql).to include('ORDER BY')
+        expect(@s.result.to_sql).to include('name')
       end
 
       it 'raises ArgumentError when an invalid argument is sent' do

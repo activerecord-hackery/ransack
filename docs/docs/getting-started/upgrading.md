@@ -41,6 +41,33 @@ adapter class's ancestry, so PostGIS is PostgreSQL without being named, and
 development dependency and its CI job are gone. See
 [Configuration](./configuration.md#sql-dialect).
 
+### Strict searches check more
+
+Under `ransack!` or `ignore_unknown_conditions = false`, two things that were
+silently accepted now raise `Ransack::InvalidSearchError`:
+
+- a sort on an attribute that is not ransortable or does not exist, which used
+  to drop the whole `ORDER BY` (see [Sorting](./sorting.md#unknown-sorts));
+- a condition name that mixes `_and_` and `_or_`, which used to apply the
+  first combinator to every attribute (see [Simple Mode](./simple-mode.md)).
+
+Permissive searches are unchanged.
+
+### Values are cast by the declared attribute type
+
+A column redeclared with `attribute :name, :datetime` is now cast as a
+datetime; before, the schema column's type won. A `Date` given for a datetime
+column now means midnight in `Time.zone`; before, it was midnight in the
+server's system time zone, which moved the day boundary when the two differed.
+See [Search Matchers](./search-matches.md#attribute-types).
+
+### Scopes that skip sanitizing receive `false`
+
+A scope listed in `ransackable_scopes_skip_sanitize_args` now receives a bare
+`false` instead of being skipped, so it can be driven by a yes / no / any
+select. Other scopes still treat `false` as an unticked checkbox. See
+[Other notes](../going-further/other-notes.md#scopes-and-false).
+
 ### `Polyamorous` is gone; `Ransack::Adapters::ActiveRecord` is deprecated
 
 The Active Record integration now lives under `Ransack::ActiveRecord`. See

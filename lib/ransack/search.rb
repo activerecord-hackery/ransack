@@ -74,12 +74,11 @@ module Ransack
           else
             sort = Nodes::Sort.extract(@context, sort)
           end
-          self.sorts << sort if sort
+          add_sort(sort) if sort
         end
       when Hash
         args.each do |index, attrs|
-          sort = Nodes::Sort.new(@context).build(attrs)
-          self.sorts << sort
+          add_sort(Nodes::Sort.new(@context).build(attrs))
         end
       when String
         self.sorts = [args]
@@ -121,6 +120,17 @@ module Ransack
       end
     end
 
+    # Rails' form helpers only read a field's value back when the object
+    # says it responds to the reader; `form_with` in particular checks
+    # before calling. Mirror method_missing so a search_form_with field is
+    # pre-filled the same way a search_form_for one is.
+    def respond_to_missing?(method_id, include_private = false)
+      getter_name = method_id.to_s.sub(/=$/, ''.freeze)
+      base.attribute_method?(getter_name) ||
+        @context.ransackable_scope?(getter_name, @context.object) ||
+        super
+    end
+
     def inspect
       details = [
         [:class, klass.name],
@@ -135,6 +145,22 @@ module Ransack
     end
 
     private
+
+    # A sort that names neither a sortable attribute nor a `sort_by_<name>_<dir>`
+    # scope produces no ORDER BY. Under a strict search that is an error, the
+    # same as an unknown attribute in a condition (#1427); otherwise it is
+    # dropped as before.
+    def add_sort(sort)
+      if @context.strict_conditions? && !sort.valid? && !sort_scope?(sort)
+        raise InvalidSearchError, "Invalid sort term #{sort.name}"
+      end
+
+      self.sorts << sort
+    end
+
+    def sort_scope?(sort)
+      @context.object.respond_to?(:"sort_by_#{sort.name}_#{sort.dir}")
+    end
 
     def add_scope(key, args)
       sanitized_args = @context.sanitize_scope_args(key, args)

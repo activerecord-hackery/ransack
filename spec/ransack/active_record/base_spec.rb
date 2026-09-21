@@ -54,6 +54,22 @@ module Ransack
             expect(s.result.to_sql).to_not (include 'restricted')
           end
 
+          # A bare false means an unticked checkbox and skips the scope, unless
+          # the scope has opted out of sanitizing, in which case it receives
+          # false like any other value and can drive a yes / no / any select
+          # (#1375).
+          it 'skips a scope given false' do
+            s = Person.ransack('of_age' => false)
+            expect(s.result.to_sql).to_not include 'age'
+          end
+
+          it 'passes false to a scope that skips sanitizing' do
+            allow(Person).to receive(:ransackable_scopes_skip_sanitize_args).and_return([:of_age])
+
+            s = Person.ransack('of_age' => false)
+            expect(s.result.to_sql).to include(rails7_and_mysql ? %q{age < '18'} : 'age < 18')
+          end
+
           it 'ignores false scopes' do
             s = Person.ransack('active' => false)
             expect(s.result.to_sql).not_to (include 'active')

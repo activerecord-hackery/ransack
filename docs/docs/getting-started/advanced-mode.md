@@ -25,7 +25,7 @@ long spelling, and the two are interchangeable:
 | `c` | `conditions` | The conditions in a grouping |
 | `m` | `combinator` | How this grouping's members are joined |
 | `a` | `attributes` | The attributes a condition applies to |
-| `p` | `predicate` | The predicate to apply |
+| `p` | `predicate` | The predicate to apply (`predicate_name` is accepted too) |
 | `v` | `values` | The values to match against |
 
 ```ruby

@@ -78,8 +78,15 @@ module Ransack
       table_for(parent)[attr_name]
     end
 
+    # A bare `false` normally means "this checkbox was not ticked" and the
+    # scope is not applied at all. A scope listed in
+    # `ransackable_scopes_skip_sanitize_args` has asked to see its values as
+    # given, so `false` reaches it like any other value and it can be driven
+    # by a yes / no / any select (#1375).
     def chain_scope(scope, args)
-      return unless @klass.method(scope) && args != false
+      return unless @klass.method(scope)
+      return if args == false && !ransackable_scope_skip_sanitize_args?(scope, @klass)
+
       @object = if scope_arity(scope) < 1 && args == true
                   @object.public_send(scope)
                 elsif scope_arity(scope) == 1 && args.is_a?(Array)
@@ -150,6 +157,10 @@ module Ransack
             association_parts.join(Constants::UNDERSCORE)
           )
           next unless found_assoc = get_association(assoc, base)
+          # A polymorphic association is only complete once its
+          # `_of_Model_type` suffix has been consumed; matching on the bare
+          # name would ask the reflection for a class it cannot know (#1557).
+          next if found_assoc.polymorphic? && klass.nil?
           path += association_parts
           association_parts = []
           base = klassify(klass || found_assoc)
