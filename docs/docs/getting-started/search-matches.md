@@ -61,12 +61,32 @@ List of all possible predicates
 | `*_not_i_cont` | Does not contain with case insensitive |
 | `*_not_i_cont_any` | Does not contain any of values with case insensitive | |
 | `*_not_i_cont_all` | Does not contain all of values with case insensitive | |
+| `*_length_eq` | string length equals | SQL: `LENGTH(col) = value` |
+| `*_length_lt` | string length less than | |
+| `*_length_lteq` | string length less than or equal | |
+| `*_length_gt` | string length greater than | |
+| `*_length_gteq` | string length greater than or equal | |
 | `*_true` | is true | |
 | `*_false` | is false | |
 
 
 See full list: https://github.com/activerecord-hackery/ransack/blob/main/lib/ransack/locale/en.yml#L16
 
+### Searching by string length
+
+The `length_*` predicates compare the length of a column rather than its
+contents, which saves reaching for a ransacker for something this common:
+
+```ruby
+Person.ransack(name_length_lteq: 3).result.to_sql
+# ... WHERE LENGTH("people"."name") <= 3
+
+Person.ransack(name_length_gt: 10).result
+```
+
+The function used depends on the backend: `CHAR_LENGTH` on PostgreSQL, PostGIS
+and MySQL, `LENGTH` elsewhere. Both count characters rather than bytes for text
+columns.
 ### Wildcards in `LIKE` predicates
 
 The `LIKE`-based predicates — `cont`, `start`, `end`, their `i_`, `not_` and
