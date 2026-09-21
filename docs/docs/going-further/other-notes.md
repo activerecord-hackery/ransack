@@ -429,8 +429,8 @@ artists = Artist.ransack(name_cont: 'foo', style_cont: 'bar', m: 'or')
 
 artists.result.to_sql
 => "SELECT \"artists\".* FROM \"artists\"
-    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
-    OR \"artists\".\"style\" ILIKE '%bar%'))"
+    WHERE ((\"artists\".\"name\" LIKE '%foo%'
+    OR \"artists\".\"style\" LIKE '%bar%'))"
 ```
 
 The combinator becomes `or` instead of the default `and`, and the SQL query
@@ -452,8 +452,8 @@ artists.result.to_sql
       ON \"memberships\".\"artist_id\" = \"artists\".\"id\"
     LEFT OUTER JOIN \"musicians\"
       ON \"musicians\".\"id\" = \"memberships\".\"musician_id\"
-    WHERE ((\"artists\".\"name\" ILIKE '%foo%'
-    OR \"musicians\".\"email\" ILIKE '%bar%'))"
+    WHERE ((\"artists\".\"name\" LIKE '%foo%'
+    OR \"musicians\".\"email\" LIKE '%bar%'))"
 ```
 
 ### Using SimpleForm

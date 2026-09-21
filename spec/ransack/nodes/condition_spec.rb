@@ -107,12 +107,7 @@ module Ransack
         let(:escaped_value) { quote_value('%test\\%%') }
         let(:escape_clause) { "ESCAPE #{quote_value('\\')}" }
 
-        let(:like) do
-          case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
-          when "PostGIS", "PostgreSQL" then 'ILIKE'
-          else 'LIKE'
-          end
-        end
+        let(:like) { 'LIKE' }
 
         it 'escapes wildcards in the value for LIKE predicates' do
           sql = Person.ransack(name_cont: 'test%').result.to_sql

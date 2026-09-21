@@ -1,4 +1,5 @@
 require 'ransack/active_record/base'
+require 'ransack/active_record/dialect'
 require 'ransack/active_record/context'
 
 ActiveSupport.on_load(:active_record) do

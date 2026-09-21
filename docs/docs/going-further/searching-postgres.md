@@ -52,6 +52,8 @@ Contact.all.ransack("within_json_cont" => "my")
 
 Will generate
 
-`SELECT "contacts".* FROM "contacts" WHERE contacts.json_data ILIKE '%my%'`
+`SELECT "contacts".* FROM "contacts" WHERE contacts.json_data LIKE '%my%' ESCAPE '\'`
+
+(`within_json_i_cont` gives `ILIKE` for a match that ignores case.)
 
 Note that this search treats the entire JSON as string, including parens, etc. i.e. you can search for e.g.: `Contact.all.ransack("within_json_cont" => '{"key": "value"}')`

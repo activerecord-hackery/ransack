@@ -77,3 +77,14 @@ Everything else goes through public API: `reflect_on_all_associations`,
 `columns_hash`, `type_for_attribute`, `attribute_aliases`, `defined_enums`,
 `arel_table`, the relation query methods, and the connection pool's schema
 cache for column types.
+
+## Databases
+
+Ransack does not have per-database code paths. Arel renders the query for
+whichever database is connected, and the two decisions that do depend on the
+database — whether a case-insensitive `LIKE` needs `LOWER()` and which
+function counts characters — are answered by `Ransack::ActiveRecord::Dialect`.
+A dialect is derived from the adapter class's ancestry (so an adapter built on
+the PostgreSQL adapter is PostgreSQL) or set with `config.dialect`, and is the
+only place a database is named in `lib/`. See
+[Configuration](../getting-started/configuration.md#sql-dialect).

@@ -1,4 +1,14 @@
 module RansackHelper
+  # The dialect of the database the suite is running against, for examples
+  # whose expected SQL differs by backend.
+  def self.dialect
+    Ransack::ActiveRecord::Dialect.for(::ActiveRecord::Base)
+  end
+
+  def dialect
+    RansackHelper.dialect
+  end
+
   def quote_table_name(table)
     ::ActiveRecord::Base.lease_connection.quote_table_name(table)
   end
