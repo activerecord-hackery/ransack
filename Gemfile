@@ -13,7 +13,7 @@ gem 'faker'
 #
 # sqlite3 dropped Ruby 3.1 in 2.9.0, so no patched release exists for Ruby 3.1.
 # It stays on the last line that supports it. Ruby 3.1 is itself past EOL and is
-# scheduled to be dropped in 5.0.0 (#1686), which retires this branch.
+# scheduled to be dropped in 6.0.0 (#1686), which retires this branch.
 gem 'sqlite3', RUBY_VERSION >= '3.2' ? '>= 2.9.5' : '~> 2.8.1'
 gem 'pg'
 gem 'activerecord-postgis-adapter'
