@@ -35,12 +35,17 @@ integration for another ORM can register its own:
 
 ```ruby
 Ransack::Context.register do |object, options|
-  MyOrm::Context.new(object, options) if object.is_a?(MyOrm::Document)
+  case object
+  when Class
+    MyOrm::Context.new(object, options) if object < MyOrm::Document
+  when MyOrm::Criteria
+    MyOrm::Context.new(object, options)
+  end
 end
 ```
 
-The resolver receives whatever was passed to `ransack` (a class or a relation)
-and returns a context or `nil`. Ransack's own Active Record resolver is
+The resolver receives whatever was passed to `ransack`, a model class or a
+query object, and returns a context or `nil`. Ransack's own Active Record resolver is
 registered in `lib/ransack/active_record/context.rb`. A context subclass
 implements `relation_for`, `type_for`, `evaluate`, `attribute_method?`,
 `table_for`, `klassify` and the join-building methods; the Active Record

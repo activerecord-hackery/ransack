@@ -375,6 +375,10 @@ end
 # than hard-coded in Ransack::Context so another ORM integration can register
 # its own without patching Ransack.
 Ransack::Context.register do |object, options|
+  # Active Record may not be loaded at all when another ORM's resolver is
+  # the one that should answer.
+  next unless defined?(::ActiveRecord::Base)
+
   case object
   when Class
     Ransack::ActiveRecord::Context.new(object, options) if object < ::ActiveRecord::Base

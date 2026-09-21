@@ -11,16 +11,12 @@ changes in every release is in the
 
 ## Upgrading to 6.0
 
-### Ruby 3.2 and Rails 7.2.2.1 or later are required
+### Ruby 3.2 or later is required
 
 Ruby 3.1 reached end of life in March 2025 and no longer receives security
 fixes. Ransack 6.0 requires Ruby 3.2 or later, which is also the floor for
 Rails 8.0. If you are on Ruby 3.1 you are already limited to Rails 7.2; stay on
 Ransack 5.x until you can upgrade Ruby.
-
-The minimum Active Record version moves from 7.2.0 to 7.2.2.1, the December
-2024 security release. Ransack carried a second copy of its join-building code
-for the four earlier 7.2 patch releases; it is gone.
 
 ### `Polyamorous` is gone; `Ransack::Adapters::ActiveRecord` is deprecated
 
