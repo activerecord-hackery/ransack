@@ -886,19 +886,19 @@ module Ransack
         end.to raise_error(Ransack::InvalidSearchError,  "Invalid argument (Integer) supplied to sorts=")
       end
 
-      it "PG's sort option", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL" do
+      it "fields sort option", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME != "Mysql2" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_first }
         s = Search.new(Person, s: 'name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC NULLS FIRST"
         s = Search.new(Person, s: 'name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" DESC NULLS LAST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_last }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_last }
         s = Search.new(Person, s: 'name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" ASC NULLS LAST"
         s = Search.new(Person, s: 'name desc')
@@ -907,31 +907,31 @@ module Ransack
         Ransack.options = default
       end
 
-      it "PG's sort option with double name", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL" do
+      it "fields sort option with double name", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME != "Mysql2" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_first }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_first }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS FIRST"
         s = Search.new(Person, s: 'doubled_name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS LAST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_last }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_last }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS LAST"
         s = Search.new(Person, s: 'doubled_name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS FIRST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_always_first }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_always_first }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS FIRST"
         s = Search.new(Person, s: 'doubled_name desc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" DESC NULLS FIRST"
 
-        Ransack.configure { |c| c.postgres_fields_sort_option = :nulls_always_last }
+        Ransack.configure { |c| c.fields_sort_option = :nulls_always_last }
         s = Search.new(Person, s: 'doubled_name asc')
         expect(s.result.to_sql).to eq "SELECT \"people\".* FROM \"people\" ORDER BY \"people\".\"name\" || \"people\".\"name\" ASC NULLS LAST"
         s = Search.new(Person, s: 'doubled_name desc')
