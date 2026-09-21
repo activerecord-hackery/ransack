@@ -3,6 +3,7 @@ name: cronjob
 on:
   schedule:
     - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
   sqlite3:
@@ -11,12 +12,12 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.2.2
+          - 3.4.8
     env:
       DB: sqlite3
       RAILS: main
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -32,14 +33,14 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.2.2
+          - 3.4.8
     env:
       DB: mysql
       RAILS: main
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: root
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -62,7 +63,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.2.2
+          - 3.4.8
     env:
       DB: postgis
       RAILS: main
@@ -85,7 +86,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -104,7 +105,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.2.2
+          - 3.4.8
     env:
       DB: postgres
       RAILS: main
@@ -127,7 +128,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
