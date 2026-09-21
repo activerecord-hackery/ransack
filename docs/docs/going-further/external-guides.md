@@ -21,6 +21,7 @@ Do you want to have a blog post or other content on Ransack highlighted? Please 
 - [Ransack Memory](https://github.com/richardrails/ransack_memory) Automatically save and load Ransack's filtered params into the Rail's session
 - [Mobility Ransack](https://github.com/shioyama/mobility-ransack) Search attributes translated by Mobility with Ransack.
 - [Ransack UI](https://github.com/ndbroadbent/ransack_ui) Framework for building a search UI with Ransack **_seems abandoned_**
+- [search_syntax](https://github.com/stereobooster/search_syntax) Parses a GitHub-style query string (`title:foo author:>bar`) into a Ransack params hash
 
 # Blogs
 

@@ -46,6 +46,32 @@ We need to `send` the tag fieldname to our model, also using the singular naming
 
 Now we can collect our data via the form, with tags separated by commas.
 
+## Allowlisting
+
+Ransack only searches attributes and associations a model allowlists, and a
+condition on anything else is dropped silently (or raises under `ransack!`).
+The tagging associations and the tag model both need entries:
+
+```ruby
+class Task < ApplicationRecord
+  acts_as_taggable_on :projects
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[projects taggings]
+  end
+end
+
+# config/initializers/acts_as_taggable_on.rb
+ActsAsTaggableOn::Tag.class_eval do
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name]
+  end
+end
+```
+
+Without these, `projects_name_in` produces a query with no `WHERE` clause and
+every task comes back.
+
 ## Ransack Search
 
 Imagine you have the following two instances of `Task`:

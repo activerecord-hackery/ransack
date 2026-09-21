@@ -183,3 +183,24 @@ Event.ransack(starts_on_gteq: Time.utc(2020, 5, 31, 21, 57)).result.to_sql
 A `Date` given for a datetime column means midnight in `Time.zone`, whatever
 the server's system time zone is. Before Ransack 6.0 both of these followed
 the schema column and the system zone instead.
+
+### Negative predicates on collections
+
+On a `has_many`, `has_and_belongs_to_many` or `has_many :through`
+association, a negative predicate (`not_eq`, `not_cont`, `not_in`, `not_null`
+and the rest) means *no associated record matches the positive form*. It is
+built as a correlated subquery rather than a join:
+
+```ruby
+Person.ransack(articles_title_not_eq: 'Draft').result.to_sql
+# ... WHERE "people"."id" NOT IN (
+#       SELECT "articles"."person_id" FROM "articles"
+#       WHERE "articles"."person_id" = "people"."id"
+#         AND NOT ("articles"."title" != 'Draft'))
+```
+
+That selects people none of whose articles is titled `Draft`, including people
+with no articles. A join would instead select people who have *at least one*
+article with a different title, which is a different question; ask it with a
+scope or a ransacker if you need it. On a `belongs_to` or `has_one` the two
+readings coincide and the predicate is a plain join condition.
