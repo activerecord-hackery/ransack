@@ -6,4 +6,11 @@ module RansackHelper
   def quote_column_name(column)
     ActiveRecord::Base.lease_connection.quote_column_name(column)
   end
+
+  # Quotes a string the way the current adapter would render it as a SQL
+  # literal, so specs can assert on generated SQL without hardcoding each
+  # backend's escaping of backslashes.
+  def quote_value(value)
+    ActiveRecord::Base.lease_connection.quote(value)
+  end
 end

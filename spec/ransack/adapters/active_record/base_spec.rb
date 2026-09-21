@@ -478,6 +478,59 @@ module Ransack
             expect(s.result.to_a).to eq [p]
           end
 
+          # Regression test for
+          # https://github.com/activerecord-hackery/ransack/issues/1581
+          # `_` is a single-character LIKE wildcard. Escaping it only takes
+          # effect when an ESCAPE clause is emitted, which SQLite and other
+          # backends with no default escape character require.
+          it 'treats an underscore in the search term literally' do
+            match = Person.create!(name: 'a_c')
+            Person.create!(name: 'abc')
+
+            expect(Person.ransack(name_cont: 'a_c').result.to_a).to eq [match]
+          end
+
+          # The compound LIKE predicates take an Array of terms. Each one must be
+          # escaped and quoted individually, and the ESCAPE clause must apply
+          # to every LIKE they expand into. Names are prefixed per example
+          # because rows persist across examples in this file.
+          it 'escapes every term of a cont_any search' do
+            %w[cany-50%off cany-a_c cany-50off cany-abc].each { |n| Person.create!(name: n) }
+
+            search = Person.ransack(name_cont_any: ['cany-50%', 'cany-a_c'])
+            expect(search.result.map(&:name)).to match_array %w[cany-50%off cany-a_c]
+            expect(search.result.to_sql.scan(/ESCAPE/).size).to eq 2
+          end
+
+          it 'escapes every term of a cont_all search' do
+            %w[call-50%off call-50off].each { |n| Person.create!(name: n) }
+
+            search = Person.ransack(name_cont_all: ['call-50', '%off'])
+            expect(search.result.map(&:name)).to eq %w[call-50%off]
+          end
+
+          it 'escapes every term of a not_cont_all search' do
+            %w[ncall-50%off ncall-a_c ncall-plain].each { |n| Person.create!(name: n) }
+
+            names = Person.ransack(name_not_cont_all: ['50%', 'a_c']).result.map(&:name)
+            expect(names).to include 'ncall-plain'
+            expect(names).not_to include 'ncall-50%off', 'ncall-a_c'
+          end
+
+          it 'escapes every term of a start_any search' do
+            %w[sa_c sabc].each { |n| Person.create!(name: n) }
+
+            search = Person.ransack(name_start_any: ['sa_', 'zz'])
+            expect(search.result.map(&:name)).to eq %w[sa_c]
+          end
+
+          it 'treats a percent sign in the search term literally' do
+            match = Person.create!(name: 'dis%count')
+            Person.create!(name: 'discount')
+
+            expect(Person.ransack(name_cont: 'dis%count').result.to_a).to eq [match]
+          end
+
           if ::ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::Base.respond_to?(:normalizes)
             context 'with ActiveRecord::normalizes' do
               around(:each) do |example|

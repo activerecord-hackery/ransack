@@ -158,19 +158,19 @@ module Ransack
       ]
     ].freeze
 
+    # The character used to escape LIKE wildcards. Emitted as an explicit
+    # `ESCAPE` clause alongside every LIKE / NOT LIKE predicate, so the
+    # behaviour does not depend on a backend's default escape character —
+    # MySQL and PostgreSQL default to backslash, SQLite has no default at all.
+    LIKE_ESCAPE_CHARACTER = '\\'.freeze
+
   module_function
-    # replace % \ to \% \\
+    # Escapes the LIKE wildcards `%` and `_`, and the escape character itself,
+    # so they are matched literally. Paired with the `ESCAPE` clause added in
+    # `Condition#format_predicate`; escaping without it silently does nothing
+    # on SQLite. See https://github.com/activerecord-hackery/ransack/issues/1581
     def escape_wildcards(unescaped)
-      case ActiveRecord::Base.adapter_class::ADAPTER_NAME
-      when "Mysql2".freeze
-        # Necessary for MySQL
-        unescaped.to_s.gsub(/([\\%_])/, '\\\\\\1')
-      when "PostGIS".freeze, "PostgreSQL".freeze
-        # Necessary for PostgreSQL
-        unescaped.to_s.gsub(/([\\%_.])/, '\\\\\\1')
-      else
-        unescaped
-      end
+      unescaped.to_s.gsub(/([\\%_])/) { "#{LIKE_ESCAPE_CHARACTER}#{$1}" }
     end
   end
 end
