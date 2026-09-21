@@ -32,16 +32,26 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
-          bundler-cache: false
 
+      # Guards against publishing a gem whose version contradicts its tag.
+      # RubyGems releases cannot be recalled, so this has to fail before the push.
       - name: Check the tag matches lib/ransack/version.rb
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
-          tag="${{ github.event.inputs.tag || github.ref_name }}"
-          version=$(ruby -r ./lib/ransack/version.rb -e 'print Ransack::VERSION')
-          if [ "$tag" != "v$version" ]; then
-            echo "::error::Tag $tag does not match Ransack::VERSION ($version). Refusing to publish."
+          version=$(ruby -r./lib/ransack/version -e 'print Ransack::VERSION')
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Tag $TAG does not match Ransack::VERSION ($version). Refusing to publish."
             exit 1
           fi
-          echo "Publishing ransack $version from tag $tag"
+          echo "version=$version" >> "$GITHUB_ENV"
+          echo "Publishing ransack $version from tag $TAG"
 
-      - uses: rubygems/release-gem@v1
+      - name: Build the gem
+        run: gem build ransack.gemspec
+
+      - name: Configure RubyGems trusted publishing credentials
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+
+      - name: Push to RubyGems.org
+        run: gem push "ransack-${version}.gem"
