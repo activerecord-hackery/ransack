@@ -24,10 +24,11 @@ module Ransack
       strip_whitespace = options.fetch(:strip_whitespace, Ransack.options[:strip_whitespace])
       params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
       if params.is_a? Hash
-        # deep_dup: the pruning below edits nested hashes in place, and the
-        # caller's params must come back untouched.
-        params = params.deep_dup
-        params = params.transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
+        # deep_transform_values rebuilds every nested hash and array, which
+        # also gives the pruning below a private copy to edit — the caller's
+        # params come back untouched. Values nested inside `g:` groupings and
+        # `c:` conditions are stripped too, not just the top level.
+        params = params.deep_transform_values { |v| v.is_a?(String) && strip_whitespace ? v.strip : v }
         params.delete_if { |_k, v| blank_condition_value?(v) }
         prune_blank_advanced_conditions!(params)
       else
