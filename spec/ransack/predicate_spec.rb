@@ -160,7 +160,7 @@ module Ransack
         (case ActiveRecord::Base.connection.adapter_name
         when "PostGIS", "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        when "Mysql2"
+        when "Mysql2", "Trilogy"
           /`people`.`name` LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" LIKE '%%._\\%'/
@@ -180,7 +180,7 @@ module Ransack
         (case ActiveRecord::Base.connection.adapter_name
         when "PostGIS", "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        when  "Mysql2"
+        when  "Mysql2", "Trilogy"
           /`people`.`name` NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /"people"."name" NOT LIKE '%%._\\%'/
@@ -202,7 +202,7 @@ module Ransack
           /LOWER\("people"."name"\) ILIKE '%\\%\\.\\_\\\\%'/
         when "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
-        when "Mysql2"
+        when "Mysql2", "Trilogy"
           /LOWER\(`people`.`name`\) LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /LOWER\("people"."name"\) LIKE '%%._\\%'/
@@ -224,7 +224,7 @@ module Ransack
           /LOWER\("people"."name"\) NOT ILIKE '%\\%\\.\\_\\\\%'/
         when "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
-        when "Mysql2"
+        when "Mysql2", "Trilogy"
           /LOWER\(`people`.`name`\) NOT LIKE '%\\\\%.\\\\_\\\\\\\\%'/
         else
          /LOWER\("people"."name"\) NOT LIKE '%%._\\%'/

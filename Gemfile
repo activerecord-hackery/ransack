@@ -48,6 +48,7 @@ else
   end
 end
 gem 'mysql2'
+gem 'trilogy'
 
 group :test do
   gem 'factory_bot'

@@ -77,6 +77,39 @@ jobs:
       - name: Run tests
         run: bundle exec rspec
 
+  trilogy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rails:
+          - 8-1-stable
+          - 8-0-stable
+        ruby:
+          - 3.4.8
+          - 3.2.2
+    env:
+      DB: trilogy
+      RAILS: ${{ matrix.rails }}
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      MYSQL_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Startup MySQL
+        run: |
+          sudo systemctl start mysql.service
+      - name: Setup databases
+        run: |
+          mysql --user=root --password=root --host=127.0.0.1 -e 'create database ransack collate utf8_general_ci;';
+      - name: Run tests
+        run: bundle exec rspec
+
   postgis:
     runs-on: ubuntu-22.04
     strategy:

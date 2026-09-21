@@ -78,6 +78,7 @@ Here's a quick guide:
    ```sh
    DB=pg bundle exec rake spec
    DB=mysql bundle exec rake spec
+   DB=trilogy bundle exec rake spec
    ```
    
    A one-liner to run all three

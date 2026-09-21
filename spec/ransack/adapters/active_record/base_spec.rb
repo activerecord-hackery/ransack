@@ -472,7 +472,7 @@ module Ransack
             # when escaping is supported right in LIKE expression without adding extra expressions
             def self.simple_escaping?
               case ::ActiveRecord::Base.connection.adapter_name
-                when 'Mysql2', 'PostgreSQL'
+                when 'Mysql2', 'Trilogy', 'PostgreSQL'
                   true
                 else
                   false
@@ -935,7 +935,8 @@ module Ransack
         end
 
         def rails7_and_mysql
-          ::ActiveRecord::VERSION::MAJOR >= 7 && ENV['DB'] == 'mysql'
+          ::ActiveRecord::VERSION::MAJOR >= 7 &&
+            %w[mysql mysql2 trilogy].include?(ENV['DB'])
         end
       end
     end
