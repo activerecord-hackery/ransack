@@ -49,8 +49,38 @@ Ransack.configure do |config|
   # Treat blank values as conditions to search for, rather than as absent.
   # Default is true (blank values are ignored).
   config.ignore_blank_values = false
+
+  # Name the SQL dialect explicitly instead of detecting it from the adapter.
+  # Default is nil (detect). One of :postgresql, :mysql, :sqlite, :generic.
+  config.dialect = :postgresql
 end
 ```
+
+## SQL dialect
+
+Nearly everything Ransack generates goes through Arel, which renders it for
+whichever database the connection uses. Two things depend on the database
+directly: whether a case-insensitive predicate such as `i_cont` needs the
+column wrapped in `LOWER()` (PostgreSQL has `ILIKE`, so it does not), and
+which function the `length_*` predicates call (`CHAR_LENGTH` on PostgreSQL
+and MySQL, `LENGTH` elsewhere).
+
+Ransack decides these from the class of the model's connection adapter, and
+an adapter that subclasses one of Rails' own inherits its dialect: the
+`postgis` adapter is a subclass of the PostgreSQL adapter and is treated as
+PostgreSQL, `trilogy` and `mysql2` share a parent and are both MySQL. Any
+other adapter gets the `:generic` dialect, which uses only standard SQL.
+
+If an adapter speaks a known dialect without inheriting from the Rails adapter
+for it, name the dialect:
+
+```ruby
+Ransack.configure { |config| config.dialect = :postgresql }
+```
+
+The setting is global, so it is not suitable for an application that connects
+to different kinds of database from different models; there, rely on
+detection.
 
 ## Whitespace stripping
 

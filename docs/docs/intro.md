@@ -13,6 +13,24 @@ Ready to move beyond the basics? Use **advanced features** like i18n and extensi
 
 Ransack is supported for Rails 8.1, 8.0, 7.2 on Ruby 3.2 and later.
 
+### Databases
+
+Ransack generates SQL through Arel, so it works with any database Active
+Record can talk to. Three are tested on every change and get first-class
+treatment for the handful of places where the SQL differs:
+
+| Database | Adapters | Tested in CI |
+| --- | --- | --- |
+| PostgreSQL | `postgresql`, and any adapter built on it such as `postgis` | yes |
+| MySQL / MariaDB | `mysql2`, `trilogy` | yes |
+| SQLite | `sqlite3` | yes |
+
+An adapter that subclasses one of Rails' own is recognised as that database
+without any configuration. Other adapters (`sqlserver`, `oracle_enhanced`)
+are treated as standard SQL; they are known to work but are not tested here,
+and the [`dialect` option](./configuration.md#sql-dialect) lets you name a
+dialect explicitly if one of the known ones is a better fit.
+
 ## Installation
 
 To install `ransack` and add it to your Gemfile, run

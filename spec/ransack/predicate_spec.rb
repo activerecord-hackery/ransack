@@ -165,45 +165,43 @@ module Ransack
 
     describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
-        (case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
-        when "PostGIS", "PostgreSQL" then %{"people"."name" ILIKE}
-        when "Mysql2", "Trilogy"     then %{`people`.`name` LIKE}
-        else                              %{"people"."name" LIKE}
-        end) do
+        (RansackHelper.dialect.mysql? ? %{`people`.`name` LIKE} : %{"people"."name" LIKE}) do
         subject { @s }
       end
 
       it 'generates a LIKE query with value surrounded by %' do
         @s.name_cont = 'ric'
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        expect(@s.result.to_sql).to match /#{field} I?LIKE '%ric%'/
+        expect(@s.result.to_sql).to match /#{field} LIKE '%ric%'/
+      end
+
+      # Before 6.0 every LIKE on PostgreSQL was rendered as ILIKE, so `cont`
+      # and `i_cont` were indistinguishable there (#1421).
+      it 'is case-sensitive: never ILIKE, even on PostgreSQL' do
+        @s.name_cont = 'Ric'
+        expect(@s.result.to_sql).not_to include 'ILIKE'
       end
     end
 
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont,
-        (case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
-        when "PostGIS", "PostgreSQL" then %{"people"."name" NOT ILIKE}
-        when "Mysql2", "Trilogy"     then %{`people`.`name` NOT LIKE}
-        else                              %{"people"."name" NOT LIKE}
-        end) do
+        (RansackHelper.dialect.mysql? ? %{`people`.`name` NOT LIKE} : %{"people"."name" NOT LIKE}) do
         subject { @s }
       end
 
       it 'generates a NOT LIKE query with value surrounded by %' do
         @s.name_not_cont = 'ric'
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%ric%'/
+        expect(@s.result.to_sql).to match /#{field} NOT LIKE '%ric%'/
       end
     end
 
     describe 'i_cont' do
       it_has_behavior 'wildcard escaping', :name_i_cont,
-        (case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
-        when "PostGIS"    then %{LOWER("people"."name") ILIKE}
-        when "PostgreSQL" then %{"people"."name" ILIKE}
-        when "Mysql2", "Trilogy" then %{LOWER(`people`.`name`) LIKE}
-        else                   %{LOWER("people"."name") LIKE}
+        (case RansackHelper.dialect.name
+        when :postgresql then %{"people"."name" ILIKE}
+        when :mysql      then %{LOWER(`people`.`name`) LIKE}
+        else                  %{LOWER("people"."name") LIKE}
         end) do
         subject { @s }
       end
@@ -213,15 +211,27 @@ module Ransack
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
         expect(@s.result.to_sql).to match /[LOWER\(]?#{field}\)? I?LIKE '%ric%'/
       end
+
+      # A ransacker can return any Arel node, not only a column. Before 6.0
+      # the lowering went through Attribute#lower, which such nodes lack, and
+      # the failure was rescued into an un-lowered comparison (#1357).
+      it 'lowers a ransacker expression too' do
+        @s.doubled_name_i_cont = 'Ric'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} \|\| #{field} ILIKE '%ric%'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field} \|\| #{field}\) LIKE '%ric%'/
+        end
+      end
     end
 
     describe 'not_i_cont' do
       it_has_behavior 'wildcard escaping', :name_not_i_cont,
-        (case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
-        when "PostGIS"    then %{LOWER("people"."name") NOT ILIKE}
-        when "PostgreSQL" then %{"people"."name" NOT ILIKE}
-        when "Mysql2", "Trilogy" then %{LOWER(`people`.`name`) NOT LIKE}
-        else                   %{LOWER("people"."name") NOT LIKE}
+        (case RansackHelper.dialect.name
+        when :postgresql then %{"people"."name" NOT ILIKE}
+        when :mysql      then %{LOWER(`people`.`name`) NOT LIKE}
+        else                  %{LOWER("people"."name") NOT LIKE}
         end) do
         subject { @s }
       end

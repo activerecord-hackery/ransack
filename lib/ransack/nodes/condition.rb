@@ -270,12 +270,18 @@ module Ransack
         end
       end
 
+      # The column (or ransacker expression) a predicate compares against.
+      # A case-insensitive predicate lowers it, unless the dialect has a
+      # case-insensitive LIKE of its own (ILIKE), in which case the lowering
+      # is left to the database. LOWER() is applied as a function rather than
+      # through Arel's Attribute#lower so that a ransacker returning any Arel
+      # node — a SQL literal, an infix operation — is lowered too (#1357).
       def attr_value_for_attribute(attr)
-        return attr.attr if ::ActiveRecord::Base.adapter_class::ADAPTER_NAME == "PostgreSQL"
-
-        predicate.case_insensitive ? attr.attr.lower : attr.attr
-      rescue
-        attr.attr
+        if predicate.case_insensitive && !context.dialect.case_insensitive_like?
+          Arel::Nodes::NamedFunction.new('LOWER'.freeze, [attr.attr])
+        else
+          attr.attr
+        end
       end
 
       def default_type
@@ -318,7 +324,7 @@ module Ransack
                 Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
               end
             when 'not_cont'
-              query.where(attribute.attr.matches(formatted_values_for_attribute(attribute)))
+              query.where(like_predicate(attribute, 'matches'.freeze))
               Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
             else
               query.where(format_predicate(attribute).not)
@@ -368,26 +374,11 @@ module Ransack
           arel_values = arel_values.reject { |v| v == ''.freeze }
         end
 
-        # For LIKE predicates, wrap the value in Arel::Nodes.build_quoted to prevent
-        # ActiveRecord normalization from affecting wildcard patterns, and pass
-        # the escape character so the escaping done by `escape_wildcards` is
-        # actually honoured. Without an explicit ESCAPE clause, SQLite treats a
-        # backslash as a literal character rather than an escape.
-        # See https://github.com/activerecord-hackery/ransack/issues/1581
         # A length predicate compares LENGTH(column) rather than the column.
         attr_value = length_predicate? ? length_function_for_attribute(attribute) : attr_value_for_attribute(attribute)
 
         if like_predicate?(arel_pred)
-          # The compound forms (matches_any / matches_all and their negations)
-          # iterate over an Array of patterns, so each element is quoted on its
-          # own; wrapping the whole Array in one node would hand them a single
-          # Quoted to iterate over.
-          arel_values = if arel_values.is_a?(Array)
-            arel_values.map { |v| Arel::Nodes.build_quoted(v) }
-          else
-            Arel::Nodes.build_quoted(arel_values)
-          end
-          predicate = attr_value.public_send(arel_pred, arel_values, Constants::LIKE_ESCAPE_CHARACTER)
+          predicate = like_predicate(attribute, arel_pred, arel_values)
         else
           predicate = attr_value.public_send(arel_pred, arel_values)
         end
@@ -413,6 +404,44 @@ module Ransack
 
       def like_predicate?(arel_predicate)
         LIKE_PREDICATES.include?(arel_predicate)
+      end
+
+      # Builds a LIKE / NOT LIKE node (or the _any / _all forms).
+      #
+      # The value is wrapped in Arel::Nodes.build_quoted so that Active
+      # Record's `normalizes` cannot rewrite the wildcards, and the escape
+      # character is passed so the escaping done by `escape_wildcards` is
+      # honoured: without an explicit ESCAPE clause SQLite treats a backslash
+      # as a literal character (#1581). The compound forms iterate over an
+      # Array of patterns, so each element is quoted on its own.
+      #
+      # Only the `i_` predicates ask for a case-insensitive match. Arel's
+      # PostgreSQL visitor renders a case-sensitive `matches` as LIKE and the
+      # other kind as ILIKE; before 6.0 the flag was never passed and every
+      # LIKE on PostgreSQL became ILIKE (#1421).
+      def like_predicate(attribute, arel_predicate, values = formatted_values_for_attribute(attribute))
+        attr_value = attr_value_for_attribute(attribute)
+        escape = Constants::LIKE_ESCAPE_CHARACTER
+        case_sensitive = !predicate.case_insensitive
+
+        case arel_predicate
+        # Arel's does_not_match_any / _all take no case_sensitive argument,
+        # unlike the other four, so they are assembled here the same way Arel
+        # assembles them.
+        when 'does_not_match_any'.freeze
+          nodes = values.map { |v| attr_value.does_not_match(Arel::Nodes.build_quoted(v), escape, case_sensitive) }
+          Arel::Nodes::Grouping.new(nodes.inject(&:or))
+        when 'does_not_match_all'.freeze
+          nodes = values.map { |v| attr_value.does_not_match(Arel::Nodes.build_quoted(v), escape, case_sensitive) }
+          Arel::Nodes::Grouping.new(Arel::Nodes::And.new(nodes))
+        else
+          quoted = if values.is_a?(Array)
+            values.map { |v| Arel::Nodes.build_quoted(v) }
+          else
+            Arel::Nodes.build_quoted(values)
+          end
+          attr_value.public_send(arel_predicate, quoted, escape, case_sensitive)
+        end
       end
 
       STRING_LIKE_TYPES = %i[string text citext].freeze
@@ -449,20 +478,9 @@ module Ransack
         predicate_name.to_s.start_with?('length_')
       end
 
-      # CHAR_LENGTH counts characters and is the SQL standard spelling; SQLite
-      # has no CHAR_LENGTH and its LENGTH already counts characters for text.
-      CHAR_LENGTH_ADAPTERS = %w[PostgreSQL PostGIS Mysql2 Trilogy].freeze
-
       def length_function_for_attribute(attribute)
-        function_name =
-          if CHAR_LENGTH_ADAPTERS.include?(::ActiveRecord::Base.adapter_class::ADAPTER_NAME)
-            'CHAR_LENGTH'.freeze
-          else
-            'LENGTH'.freeze
-          end
-
         Arel::Nodes::NamedFunction.new(
-          function_name,
+          context.dialect.length_function,
           [attr_value_for_attribute(attribute)]
         )
       end

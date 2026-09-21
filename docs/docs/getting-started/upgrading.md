@@ -18,6 +18,29 @@ fixes. Ransack 6.0 requires Ruby 3.2 or later, which is also the floor for
 Rails 8.0. If you are on Ruby 3.1 you are already limited to Rails 7.2; stay on
 Ransack 5.x until you can upgrade Ruby.
 
+### `cont` is case-sensitive on PostgreSQL
+
+Ransack never told Arel whether a `LIKE` should be case-sensitive, and Arel's
+PostgreSQL visitor renders the default as `ILIKE`. So on PostgreSQL `cont`,
+`start`, `end` and `matches` all ignored case, while the docs said `cont` used
+`LIKE`. They now do: `cont` is `LIKE` and `i_cont` is `ILIKE`. A PostgreSQL
+application that relied on `cont` ignoring case should switch those searches
+to `i_cont`. MySQL and SQLite are unaffected; their `LIKE` follows the
+column's collation as before. See
+[Search Matchers](./search-matches.md#case-sensitivity).
+
+### Database dialects are detected from the adapter class
+
+A few places generate different SQL per database. They used to compare the
+adapter's name against a list (`"PostgreSQL"`, `"PostGIS"`, `"Mysql2"`,
+`"Trilogy"`), so an adapter that was not on the list — even one built on a
+known adapter — got the wrong SQL, and PostGIS was carried as a development
+dependency just to keep it on the list. The dialect is now read from the
+adapter class's ancestry, so PostGIS is PostgreSQL without being named, and
+`config.dialect` overrides the detection. The `activerecord-postgis-adapter`
+development dependency and its CI job are gone. See
+[Configuration](./configuration.md#sql-dialect).
+
 ### `Polyamorous` is gone; `Ransack::Adapters::ActiveRecord` is deprecated
 
 The Active Record integration now lives under `Ransack::ActiveRecord`. See

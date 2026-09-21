@@ -36,7 +36,8 @@ module Ransack
       sanitize_scope_args: true,
       fields_sort_option: nil,
       strip_whitespace: true,
-      ignore_blank_values: true
+      ignore_blank_values: true,
+      dialect: nil
     }
 
     def configure
@@ -228,6 +229,21 @@ module Ransack
     #
     def ignore_blank_values=(boolean)
       self.options[:ignore_blank_values] = boolean
+    end
+
+    # Ransack works out which SQL dialect a model's database speaks from the
+    # connection adapter's class: PostgreSQL, MySQL (mysql2 and trilogy) and
+    # SQLite are recognised, as is any adapter that subclasses one of them,
+    # and anything else uses standard SQL only. For an adapter that speaks a
+    # known dialect without inheriting from Rails' adapter for it, name the
+    # dialect explicitly:
+    #
+    # Ransack.configure do |config|
+    #   config.dialect = :postgresql # or :mysql, :sqlite, :generic
+    # end
+    #
+    def dialect=(name)
+      self.options[:dialect] = name&.to_sym
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

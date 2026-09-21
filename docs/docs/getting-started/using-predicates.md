@@ -61,7 +61,8 @@ The `matches` predicate returns all records where a field is like a given value:
 => SELECT "users".* FROM "users" WHERE ("users"."first_name" LIKE 'Ryan')
 ```
 
-On Postgres, the case-insensitive ILIKE will be used.
+`matches` is case-sensitive on PostgreSQL; MySQL and SQLite apply their
+collation's rules. Use `i_cont` for a match that ignores case everywhere.
 
 **Opposite: `does_not_match`**
 

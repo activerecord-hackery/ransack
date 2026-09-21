@@ -12,6 +12,10 @@ module Ransack
         object.all
       end
 
+      def dialect
+        @dialect ||= Dialect.for(@klass)
+      end
+
       def type_for(attr)
         return nil unless attr && attr.valid?
         relation     = attr.arel_attribute.relation

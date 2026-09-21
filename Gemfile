@@ -12,7 +12,6 @@ gem 'faker'
 # patched version; Rails 7.2 runs fine against sqlite3 2.x, so it is gone.
 gem 'sqlite3', '>= 2.9.5'
 gem 'pg'
-gem 'activerecord-postgis-adapter'
 gem 'pry'
 gem 'byebug'
 

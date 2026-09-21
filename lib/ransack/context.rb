@@ -57,6 +57,13 @@ module Ransack
       end
     end
 
+    # The SQL dialect the search will be rendered in, for the few places
+    # where generated SQL differs by database. See
+    # Ransack::ActiveRecord::Dialect for the questions it answers.
+    def dialect
+      raise NotImplementedError, "#{self.class} must implement #dialect"
+    end
+
     # The model class behind a search object, an association node or a class.
     # Each ORM integration decides what counts as a model, so this is defined
     # on the integration's Context subclass.

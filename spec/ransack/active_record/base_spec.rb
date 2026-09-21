@@ -311,12 +311,7 @@ module Ransack
       describe '#ransacker' do
         # For infix tests
         def self.sane_adapter?
-          case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
-          when 'SQLite3', 'PostgreSQL'
-            true
-          else
-            false
-          end
+          RansackHelper.dialect.sqlite? || RansackHelper.dialect.postgresql?
         end
         # in schema.rb, class Person:
         # ransacker :reversed_name, formatter: proc { |v| v.reverse } do |parent|
@@ -587,12 +582,7 @@ module Ransack
         context 'searching by underscores' do
           # when escaping is supported right in LIKE expression without adding extra expressions
           def self.simple_escaping?
-            case ::ActiveRecord::Base.adapter_class::ADAPTER_NAME
-              when 'Mysql2', 'Trilogy', 'PostgreSQL'
-                true
-              else
-                false
-            end
+            RansackHelper.dialect.mysql? || RansackHelper.dialect.postgresql?
           end
 
           it 'should search correctly if matches exist' do
@@ -711,9 +701,9 @@ module Ransack
             Comment.create(article: Article.create(title: 'Avenger'), person: Person.create(salary: 100_000)),
             Comment.create(article: Article.create(title: 'Avenge'), person: Person.create(salary: 50_000)),
           ]
-          expect(Comment.ransack(article_title_cont: 'aven', s: 'person_salary desc').result).to eq(comments)
-          expect(Comment.joins(:person).ransack(s: 'persons_salarydesc', article_title_cont: 'aven').result).to eq(comments)
-          expect(Comment.joins(:person).ransack(article_title_cont: 'aven', s: 'persons_salary desc').result).to eq(comments)
+          expect(Comment.ransack(article_title_cont: 'Aven', s: 'person_salary desc').result).to eq(comments)
+          expect(Comment.joins(:person).ransack(s: 'persons_salarydesc', article_title_cont: 'Aven').result).to eq(comments)
+          expect(Comment.joins(:person).ransack(article_title_cont: 'Aven', s: 'persons_salary desc').result).to eq(comments)
         end
 
         it 'allows sort by `only_sort` field' do
