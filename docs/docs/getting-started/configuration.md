@@ -42,11 +42,50 @@ Ransack.configure do |config|
   # Where NULLs are placed when sorting.
   config.fields_sort_option = :nulls_first # or e.g. :nulls_always_last
 
+  # Strip leading and trailing whitespace from string search values.
+  # Default is true.
+  config.strip_whitespace = false
+
   # Treat blank values as conditions to search for, rather than as absent.
   # Default is true (blank values are ignored).
   config.ignore_blank_values = false
 end
 ```
+
+## Whitespace stripping
+
+By default Ransack strips leading and trailing whitespace from string search
+values, so a stray space pasted into a search box does not change the result:
+
+```ruby
+Person.ransack(name_cont: "  Ernie  ").result.to_sql
+# ... WHERE "people"."name" LIKE '%Ernie%'
+```
+
+Stripping applies at every level of the parameters, including values nested
+inside `g:` groupings and `c:` conditions:
+
+```ruby
+Person.ransack(g: [{ name_cont: "  Ernie  ", m: 'or' }]).result.to_sql
+# ... WHERE "people"."name" LIKE '%Ernie%'
+```
+
+It can be turned off globally, or per search:
+
+```ruby
+Ransack.configure { |config| config.strip_whitespace = false }
+
+Person.ransack({ name_cont: "  Ernie  " }, strip_whitespace: false)
+```
+
+:::note
+
+Before Ransack 5.0 only top-level values were stripped, so the same search
+behaved differently depending on whether it was written in the shorthand or the
+grouped form. See
+[#1414](https://github.com/activerecord-hackery/ransack/issues/1414).
+
+:::
 
 ## Blank values
 
@@ -138,7 +177,21 @@ if there are two searches on one page. Another name may be set using the `search
 
 ### In the view
 
+The form helpers read the key from the search object, so nothing extra is
+needed:
+
 ```erb
-<%= f.search_form_for @search, as: :log_search %>
+<%= search_form_for @search %>
 <%= sort_link(@search) %>
 ```
+
+This emits `log_search[...]` field names rather than the default `q[...]`.
+
+:::note
+
+Before Ransack 5.0 the form helpers ignored a per-search `search_key` and always
+used the global default, so the key had to be repeated as `as: :log_search`
+(`scope:` for `search_form_with`). Passing it explicitly still works and still
+wins. See [#1118](https://github.com/activerecord-hackery/ransack/issues/1118).
+
+:::

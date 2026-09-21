@@ -232,6 +232,18 @@ class Article < ActiveRecord::Base
 end
 ```
 
+The allowlists may be given as strings or as symbols — `%w[title body]` and
+`%i[title body]` behave identically.
+
+:::note
+
+Before Ransack 5.0 a symbol allowlist was compared against strings without
+normalising, so `%i[title body]` matched nothing and every search on those
+attributes was silently ignored. See
+[#1538](https://github.com/activerecord-hackery/ransack/issues/1538).
+
+:::
+
 Here is example code for the `articles_controller`:
 
 ```ruby
