@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'ostruct'
 
 module Ransack
   module Helpers
@@ -163,8 +162,16 @@ module Ransack
       # See https://github.com/activerecord-hackery/ransack/pull/1485
       context 'with a non-Ransack form object' do
         it 'does not break fields whose name collides with a private Kernel method' do
+          # Any object that answers an unknown reader with nil, as an OpenStruct
+          # with no such attribute would. Written out in plain Ruby because
+          # ostruct is no longer a default gem as of Ruby 4.0.
+          model = Class.new do
+            def method_missing(*) = nil
+            def respond_to_missing?(*) = false
+          end.new
+
           builder = ActionView::Helpers::FormBuilder.new(
-            :thing, OpenStruct.new, ActionView::Base.empty, {}
+            :thing, model, ActionView::Base.empty, {}
           )
 
           expect { builder.text_field(:test) }.not_to raise_error
