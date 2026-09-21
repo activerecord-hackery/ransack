@@ -979,7 +979,7 @@ module Ransack
         end.to raise_error(Ransack::InvalidSearchError,  "Invalid argument (Integer) supplied to sorts=")
       end
 
-      it "fields sort option", if: ::ActiveRecord::Base.connection.adapter_name != "Mysql2" do
+      it "fields sort option", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME != "Mysql2" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'name asc')
@@ -1000,7 +1000,7 @@ module Ransack
         Ransack.options = default
       end
 
-      it "fields sort option with double name", if: ::ActiveRecord::Base.connection.adapter_name != "Mysql2" do
+      it "fields sort option with double name", if: ::ActiveRecord::Base.adapter_class::ADAPTER_NAME != "Mysql2" do
         default = Ransack.options.clone
 
         s = Search.new(Person, s: 'doubled_name asc')

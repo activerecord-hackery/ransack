@@ -106,7 +106,7 @@ module Ransack
           sql = Person.ransack(ransack_hash).result.to_sql
 
           # The % should be properly quoted in the SQL
-          case ActiveRecord::Base.connection.adapter_name
+          case ActiveRecord::Base.adapter_class::ADAPTER_NAME
           when "Mysql2"
             expect(sql).to include("LIKE '%test\\\\%%'")
             expect(sql).not_to include("NOT LIKE '%test\\\\%%'")
@@ -124,7 +124,7 @@ module Ransack
           sql = Person.ransack(ransack_hash).result.to_sql
 
           # The % should be properly quoted in the SQL
-          case ActiveRecord::Base.connection.adapter_name
+          case ActiveRecord::Base.adapter_class::ADAPTER_NAME
           when "Mysql2"
             expect(sql).to include("NOT LIKE '%test\\\\%%'")
           when "PostGIS", "PostgreSQL"
@@ -275,13 +275,13 @@ module Ransack
           end
 
           # Create tables if they don't exist
-          ActiveRecord::Base.connection.create_table(:tasks, force: true) do |t|
+          ActiveRecord::Base.lease_connection.create_table(:tasks, force: true) do |t|
             t.string :uid
             t.string :name
             t.timestamps null: false
           end
 
-          ActiveRecord::Base.connection.create_table(:follows, force: true) do |t|
+          ActiveRecord::Base.lease_connection.create_table(:follows, force: true) do |t|
             t.string :followed_uid, null: false
             t.string :followed_type, null: false
             t.string :follower_uid, null: false
@@ -291,7 +291,7 @@ module Ransack
             t.index [:follower_uid, :follower_type]
           end
 
-          ActiveRecord::Base.connection.create_table(:users, force: true) do |t|
+          ActiveRecord::Base.lease_connection.create_table(:users, force: true) do |t|
             t.string :uid
             t.string :name
             t.timestamps null: false
@@ -304,9 +304,9 @@ module Ransack
           Object.send(:remove_const, :TestFollow)
           Object.send(:remove_const, :TestUser)
 
-          ActiveRecord::Base.connection.drop_table(:tasks, if_exists: true)
-          ActiveRecord::Base.connection.drop_table(:follows, if_exists: true)
-          ActiveRecord::Base.connection.drop_table(:users, if_exists: true)
+          ActiveRecord::Base.lease_connection.drop_table(:tasks, if_exists: true)
+          ActiveRecord::Base.lease_connection.drop_table(:follows, if_exists: true)
+          ActiveRecord::Base.lease_connection.drop_table(:users, if_exists: true)
         end
 
         it 'correctly handles not_in predicate with polymorphic associations' do

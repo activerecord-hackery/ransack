@@ -166,7 +166,7 @@ module Ransack
 
     describe 'cont' do
       it_has_behavior 'wildcard escaping', :name_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS", "PostgreSQL"
           /"people"."name" ILIKE '%\\%\\.\\_\\\\%'/
         when "Mysql2"
@@ -186,7 +186,7 @@ module Ransack
 
     describe 'not_cont' do
       it_has_behavior 'wildcard escaping', :name_not_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS", "PostgreSQL"
           /"people"."name" NOT ILIKE '%\\%\\.\\_\\\\%'/
         when  "Mysql2"
@@ -206,7 +206,7 @@ module Ransack
 
     describe 'i_cont' do
       it_has_behavior 'wildcard escaping', :name_i_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS"
           /LOWER\("people"."name"\) ILIKE '%\\%\\.\\_\\\\%'/
         when "PostgreSQL"
@@ -228,7 +228,7 @@ module Ransack
 
     describe 'not_i_cont' do
       it_has_behavior 'wildcard escaping', :name_not_i_cont,
-        (case ActiveRecord::Base.connection.adapter_name
+        (case ActiveRecord::Base.adapter_class::ADAPTER_NAME
         when "PostGIS"
           /LOWER\("people"."name"\) NOT ILIKE '%\\%\\.\\_\\\\%'/
         when "PostgreSQL"
@@ -333,14 +333,14 @@ module Ransack
         @s.awesome_true = true
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_true}/
+          ActiveRecord::Base.lease_connection.quoted_true}/
       end
 
       it 'generates an inequality condition for boolean true' do
         @s.awesome_true = false
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} != #{
-          ActiveRecord::Base.connection.quoted_true}/
+          ActiveRecord::Base.lease_connection.quoted_true}/
       end
     end
 
@@ -349,14 +349,14 @@ module Ransack
         @s.awesome_not_true = true
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} != #{
-          ActiveRecord::Base.connection.quoted_true}/
+          ActiveRecord::Base.lease_connection.quoted_true}/
       end
 
       it 'generates an equality condition for boolean true' do
         @s.awesome_not_true = false
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_true}/
+          ActiveRecord::Base.lease_connection.quoted_true}/
       end
     end
 
@@ -365,14 +365,14 @@ module Ransack
         @s.awesome_false = true
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_false}/
+          ActiveRecord::Base.lease_connection.quoted_false}/
       end
 
       it 'generates an inequality condition for boolean false' do
         @s.awesome_false = false
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} != #{
-          ActiveRecord::Base.connection.quoted_false}/
+          ActiveRecord::Base.lease_connection.quoted_false}/
       end
     end
 
@@ -381,14 +381,14 @@ module Ransack
         @s.awesome_not_false = true
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} != #{
-          ActiveRecord::Base.connection.quoted_false}/
+          ActiveRecord::Base.lease_connection.quoted_false}/
       end
 
       it 'generates an equality condition for boolean false' do
         @s.awesome_not_false = false
         field = "#{quote_table_name("people")}.#{quote_column_name("awesome")}"
         expect(@s.result.to_sql).to match /#{field} = #{
-          ActiveRecord::Base.connection.quoted_false}/
+          ActiveRecord::Base.lease_connection.quoted_false}/
       end
     end
 
@@ -563,7 +563,7 @@ module Ransack
 
       def expected_query(value, attribute = 'awesome', operator = '=')
         field = "#{quote_table_name("people")}.#{quote_column_name(attribute)}"
-        quoted_value = ActiveRecord::Base.connection.quote(value)
+        quoted_value = ActiveRecord::Base.lease_connection.quote(value)
         /#{field} #{operator} #{quoted_value}/
       end
     end
