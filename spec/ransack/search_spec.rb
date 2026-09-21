@@ -75,6 +75,12 @@ module Ransack
         Search.new(Person, name_eq_any: ['foobar'])
       end
 
+      it 'keeps conditions with a nil value in an array before building' do
+        expect_any_instance_of(Search).to receive(:build)
+        .with({ 'name_in' => [nil] })
+        Search.new(Person, name_in: [nil])
+      end
+
       it 'does not raise exception for string :params argument' do
         expect { Search.new(Person, '') }.not_to raise_error
       end
