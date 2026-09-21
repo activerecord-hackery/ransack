@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'ostruct'
 
 module Ransack
   module Helpers
@@ -150,6 +151,24 @@ module Ransack
         it 'accepts poly_type field' do
           html = @f.text_field(:notable_type_eq)
           expect(html).to match /id=\"q_notable_type_eq\"/
+        end
+      end
+
+      # Ransack used to monkey-patch ActionView::Helpers::Tags::Base#value to
+      # call `send` rather than `public_send`, which made Rails reach private
+      # Kernel methods on any object whose attribute name happened to collide
+      # with one. That broke unrelated forms in apps that merely had Ransack
+      # loaded — `Kernel#test` takes 2..3 arguments, so building a field named
+      # `test` raised ArgumentError.
+      # See https://github.com/activerecord-hackery/ransack/pull/1485
+      context 'with a non-Ransack form object' do
+        it 'does not break fields whose name collides with a private Kernel method' do
+          builder = ActionView::Helpers::FormBuilder.new(
+            :thing, OpenStruct.new, ActionView::Base.empty, {}
+          )
+
+          expect { builder.text_field(:test) }.not_to raise_error
+          expect(builder.text_field(:test)).to match(/name="thing\[test\]"/)
         end
       end
 
