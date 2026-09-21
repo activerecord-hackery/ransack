@@ -322,7 +322,8 @@ module Ransack
 
           # Applied per attribute rather than to the reduced node: once several
           # attributes are combined, the result is an And/Or whose `right` is
-          # another node, so only the last attribute would ever be unwrapped.
+          # another predicate node rather than a Casted value, so
+          # replace_right_node? returns false and nothing is unwrapped at all.
           if replace_right_node?(predicate)
             # Replace right node object to plain integer value in order to avoid
             # ActiveModel::RangeError from Arel::Node::Casted.
