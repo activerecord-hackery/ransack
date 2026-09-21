@@ -34,7 +34,7 @@ module Ransack
       down_arrow: '&#9650;'.freeze,
       default_arrow: nil,
       sanitize_scope_args: true,
-      postgres_fields_sort_option: nil,
+      fields_sort_option: nil,
       strip_whitespace: true,
       ignore_blank_values: true
     }
@@ -163,13 +163,24 @@ module Ransack
     # User may want to configure it like this:
     #
     # Ransack.configure do |c|
-    #   c.postgres_fields_sort_option = :nulls_first # or e.g. :nulls_always_last
+    #   c.fields_sort_option = :nulls_first # or e.g. :nulls_always_last
     # end
     #
-    # See this feature: https://www.postgresql.org/docs/13/queries-order.html
+    # Emitted through Arel's `nulls_first` / `nulls_last`, so it works on any
+    # backend Arel supports it for. MySQL has no NULLS FIRST / LAST syntax and
+    # Arel does not emulate it, so this option does not apply there.
     #
+    # See https://www.postgresql.org/docs/current/queries-order.html
+    #
+    def fields_sort_option=(setting)
+      self.options[:fields_sort_option] = setting
+    end
+
+    # Renamed to `fields_sort_option` now that NULLS FIRST / NULLS LAST is
+    # emitted through Arel and is no longer PostgreSQL-specific. The old name
+    # still works so existing initializers keep running.
     def postgres_fields_sort_option=(setting)
-      self.options[:postgres_fields_sort_option] = setting
+      self.fields_sort_option = setting
     end
 
     # By default, Ransack displays sort order indicator arrows in sort links.

@@ -79,7 +79,13 @@ module Ransack
       return true if vals.empty? && wants_array &&
                      !Ransack.options[:ignore_blank_values]
 
-      vals.any? { |v| validator.call(type ? v.cast(type) : v.value) }
+      # When blank values are meaningful, validate the value as given. Casting
+      # first would turn '' into nil for an integer or boolean column and the
+      # explicit blank would be dropped — leaving no condition at all.
+      vals.any? do |v|
+        value = type && Ransack.options[:ignore_blank_values] ? v.cast(type) : v.value
+        validator.call(value)
+      end
     end
 
     def negative?
