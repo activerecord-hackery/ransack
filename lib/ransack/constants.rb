@@ -83,6 +83,18 @@ module Ransack
         formatter: proc { |v| "#{escape_wildcards(v)}%" }
         }
       ],
+      ['i_start'.freeze, {
+        arel_predicate: 'matches'.freeze,
+        formatter: proc { |v| "#{escape_wildcards(v.downcase)}%" },
+        case_insensitive: true
+        }
+      ],
+      ['not_i_start'.freeze, {
+        arel_predicate: 'does_not_match'.freeze,
+        formatter: proc { |v| "#{escape_wildcards(v.downcase)}%" },
+        case_insensitive: true
+        }
+      ],
       ['end'.freeze, {
         arel_predicate: 'matches'.freeze,
         formatter: proc { |v| "%#{escape_wildcards(v)}" }
@@ -91,6 +103,18 @@ module Ransack
       ['not_end'.freeze, {
         arel_predicate: 'does_not_match'.freeze,
         formatter: proc { |v| "%#{escape_wildcards(v)}" }
+        }
+      ],
+      ['i_end'.freeze, {
+        arel_predicate: 'matches'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v.downcase)}" },
+        case_insensitive: true
+        }
+      ],
+      ['not_i_end'.freeze, {
+        arel_predicate: 'does_not_match'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v.downcase)}" },
+        case_insensitive: true
         }
       ],
       ['true'.freeze, {

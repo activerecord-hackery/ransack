@@ -49,8 +49,8 @@ List of all possible predicates
 | `*_not_end` | Does not end with | |
 | `*_end_any` | Ends with any of | |
 | `*_end_all` | Ends with all of | |
-| `*_not_end_any` | | |
-| `*_not_end_all` | | |
+| `*_not_end_any` | Does not end with any of | |
+| `*_not_end_all` | Does not end with all of | |
 | `*_cont` | Contains value | SQL: `col LIKE '%value%'` |
 | `*_cont_any` | Contains any of | |
 | `*_cont_all` | Contains all of | |
@@ -63,6 +63,18 @@ List of all possible predicates
 | `*_not_i_cont` | Does not contain with case insensitive |
 | `*_not_i_cont_any` | Does not contain any of values with case insensitive | |
 | `*_not_i_cont_all` | Does not contain all of values with case insensitive | |
+| `*_i_start` | Starts with value, ignoring case | SQL: `LOWER(col) LIKE 'value%'`, or `col ILIKE 'value%'` on PostgreSQL |
+| `*_i_start_any` | Starts with any of values, ignoring case | |
+| `*_i_start_all` | Starts with all of values, ignoring case | |
+| `*_not_i_start` | Does not start with, ignoring case | |
+| `*_not_i_start_any` | Does not start with any of values, ignoring case | |
+| `*_not_i_start_all` | Does not start with all of values, ignoring case | |
+| `*_i_end` | Ends with value, ignoring case | SQL: `LOWER(col) LIKE '%value'`, or `col ILIKE '%value'` on PostgreSQL |
+| `*_i_end_any` | Ends with any of values, ignoring case | |
+| `*_i_end_all` | Ends with all of values, ignoring case | |
+| `*_not_i_end` | Does not end with, ignoring case | |
+| `*_not_i_end_any` | Does not end with any of values, ignoring case | |
+| `*_not_i_end_all` | Does not end with all of values, ignoring case | |
 | `*_length_eq` | string length equals | SQL: `LENGTH(col) = value` |
 | `*_length_lt` | string length less than | |
 | `*_length_lteq` | string length less than or equal | |
@@ -95,9 +107,10 @@ columns.
 `cont`, `start`, `end` and `matches` compare with `LIKE` and mean what the
 database's `LIKE` means. On PostgreSQL that is a case-sensitive match; on MySQL
 and SQLite `LIKE` is case-insensitive for the default collations, and Ransack
-does not change that. The `i_` forms (`i_cont`, `not_i_cont` and their `_any` /
-`_all` variants) are case-insensitive everywhere: they use `ILIKE` on
-PostgreSQL and `LOWER(col) LIKE lowercased value` elsewhere.
+does not change that. The `i_` forms (`i_cont`, `i_start`, `i_end`, their
+`not_` opposites and their `_any` / `_all` variants) are case-insensitive
+everywhere: they use `ILIKE` on PostgreSQL and `LOWER(col) LIKE lowercased
+value` elsewhere.
 
 ```ruby
 Person.ransack(name_cont: 'Ric').result.to_sql
@@ -108,8 +121,9 @@ Person.ransack(name_i_cont: 'Ric').result.to_sql
 ```
 
 Before Ransack 6.0, every `LIKE` on PostgreSQL was rendered as `ILIKE`, so
-`cont` and `i_cont` behaved the same there. If your application relied on that,
-switch those searches to `i_cont`.
+`cont` and `i_cont` behaved the same there, and `start` and `end` ignored case
+too. If your application relied on that, switch those searches to `i_cont`,
+`i_start` and `i_end`.
 
 A custom predicate declared with `case_insensitive: true` gets the same
 treatment, and so does a ransacker: the whole expression is wrapped in
