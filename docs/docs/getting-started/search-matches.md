@@ -187,7 +187,7 @@ the schema column and the system zone instead.
 ### Negative predicates on collections
 
 On a `has_many`, `has_and_belongs_to_many` or `has_many :through`
-association, a negative predicate (`not_eq`, `not_cont`, `not_in`, `not_null`
+association, a negative predicate (`not_eq`, `not_cont`, `not_in`, `not_start`
 and the rest) means *no associated record matches the positive form*. It is
 built as a correlated subquery rather than a join:
 
@@ -202,5 +202,14 @@ Person.ransack(articles_title_not_eq: 'Draft').result.to_sql
 That selects people none of whose articles is titled `Draft`, including people
 with no articles. A join would instead select people who have *at least one*
 article with a different title, which is a different question; ask it with a
-scope or a ransacker if you need it. On a `belongs_to` or `has_one` the two
-readings coincide and the predicate is a plain join condition.
+scope or a ransacker if you need it.
+
+`not_null` is the exception: `articles_title_not_null: true` means *at least
+one* associated record has a value (`"people"."id" IN (SELECT ... WHERE
+"articles"."title" IS NOT NULL)`), so it excludes people with no articles.
+
+On a `belongs_to` or `has_one` the predicate is a plain condition on the
+joined table, `"people"."name" != 'x'` after a `LEFT OUTER JOIN`. A record
+with no associated record has `NULL` there, and `NULL != 'x'` is not true, so
+it is excluded; add `_or_parent_id_null` style logic or a scope if you want
+those included.

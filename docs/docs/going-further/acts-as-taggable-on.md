@@ -50,14 +50,17 @@ Now we can collect our data via the form, with tags separated by commas.
 
 Ransack only searches attributes and associations a model allowlists, and a
 condition on anything else is dropped silently (or raises under `ransack!`).
-The tagging associations and the tag model both need entries:
+The tagging association and the tag model both need entries. Only the
+association named in the search key is checked; Active Record follows the
+`through` reflection to the taggings table by itself, so `taggings` need not
+be allowlisted:
 
 ```ruby
 class Task < ApplicationRecord
   acts_as_taggable_on :projects
 
   def self.ransackable_associations(auth_object = nil)
-    %w[projects taggings]
+    %w[projects]
   end
 end
 
