@@ -31,6 +31,26 @@ end
 ```
 You can check all Arel predicates [here](https://github.com/rails/rails/blob/main/activerecord/lib/arel/predications.rb).
 
+### What a formatter returns
+
+The formatter runs once per value and its return value is quoted as a single
+literal, so it cannot build a piece of SQL. For an `in` / `not_in` predicate
+that takes one delimited string, return an `Array` and Ransack quotes each
+element:
+
+```ruby
+Ransack.configure do |config|
+  config.add_predicate 'in_list', arel_predicate: 'in',
+    formatter: proc { |v| v.split(';') }
+end
+
+Person.ransack(name_in_list: 'Aaron;Ernie').result.to_sql
+# ... WHERE "people"."name" IN ('Aaron', 'Ernie')
+```
+
+Returning `"Aaron','Ernie"` instead gives `IN ('Aaron'',''Ernie')`: the string
+is one value, and treating it as SQL would be an injection vector.
+
 If Arel does not have the predicate you are looking for, consider monkey patching it:
 
 ```ruby

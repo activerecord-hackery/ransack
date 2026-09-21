@@ -54,6 +54,27 @@ Compound predicates (`_any` & `_all`) may be removed by passing the option `comp
 <%= f.predicate_select compounds: false %>
 ```
 
+To let the user pick the predicate for one fixed attribute, use the
+condition builders from [advanced mode](../getting-started/advanced-mode.md)
+with the attribute name in a hidden field:
+
+```erb
+<%= search_form_for @q do |f| %>
+  <%= f.condition_fields do |c| %>
+    <%= c.attribute_fields do |a| %>
+      <%= a.hidden_field :name, value: 'title' %>
+    <% end %>
+    <%= c.predicate_select only: %i(cont start eq) %>
+    <%= c.value_fields do |v| %>
+      <%= v.text_field :value %>
+    <% end %>
+  <% end %>
+<% end %>
+```
+
+This posts `q[c][0][a][0][name]=title`, `q[c][0][p]=cont` and
+`q[c][0][v][0][value]=...`, which Ransack reads as a single condition.
+
 Searchable attributes versus non-searchable ones may be specified as follows:
 
 ```ruby

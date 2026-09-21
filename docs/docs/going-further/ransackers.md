@@ -282,6 +282,26 @@ In the view
   %td= f.select :price_exists_true, [["Any", 2], ["No", 0], ["Yes", 1]]
 ```
 
+The `_true` predicate compares, so this renders as `(select exists ...) = TRUE`.
+For a bare `EXISTS` / `NOT EXISTS`, which PostgreSQL plans better, use a scope
+instead of a ransacker and pass the choice as a value:
+
+```ruby
+# in the model:
+scope :price_exists, ->(choice = 'yes') {
+  subquery = 'select 1 from prices where prices.book_id = books.id'
+  choice == 'no' ? where("not exists (#{subquery})") : where("exists (#{subquery})")
+}
+
+def self.ransackable_scopes(auth_object = nil)
+  %i[price_exists]
+end
+```
+
+```haml
+  %td= f.select :price_exists, [["Any", ""], ["Yes", "yes"], ["No", "no"]]
+```
+
 ### Associations
 
 _Performing a query on an association with a differing class name:_

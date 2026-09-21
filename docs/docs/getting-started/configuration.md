@@ -24,7 +24,9 @@ Ransack.configure do |config|
   config.hide_sort_order_indicators = true
 
   # By default, Ransack displays sort order indicator arrows with HTML codes, but
-  # these can be overridden.
+  # these can be overridden. `up_arrow` is shown when the column is sorted
+  # descending and `down_arrow` when it is sorted ascending: the arrow names the
+  # direction the link will sort in next, not the current one.
   config.custom_arrows = {
     up_arrow:   '<i class="fa fa-long-arrow-up"></i>', # default: '&#9660;'
     down_arrow: 'U+02193',                             # default: '&#9650;'
@@ -183,12 +185,9 @@ Person.ransack(s: 'name asc').result.to_sql
 
 This was called `postgres_fields_sort_option` before Ransack 5.0, and was built
 by interpolating SQL fragments. It now goes through Arel's `nulls_first` /
-`nulls_last`, so it applies to any backend Arel supports rather than only
-PostgreSQL. The old name still works.
-
-**MySQL is the exception** — it has no `NULLS FIRST` / `NULLS LAST` syntax and
-Arel does not emulate it, so setting this option has no effect there. See
-[#1373](https://github.com/activerecord-hackery/ransack/issues/1373).
+`nulls_last` nodes, so it works on every database Arel renders them for,
+including MySQL, where Arel emulates them as `ORDER BY col IS NULL, col`
+(Rails 7.2 and later). The old name still works.
 
 :::
 

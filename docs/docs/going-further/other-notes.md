@@ -240,6 +240,36 @@ Here is how these four methods could be implemented in your application:
 Any values not returned from these methods will be ignored by Ransack, i.e.
 they are not authorized.
 
+#### Searching everything
+
+Ransack also defines `authorizable_ransackable_attributes` and
+`authorizable_ransackable_associations`, which return every column, ransacker
+and alias, and every association. To restore the pre-4.0 behaviour where
+everything is searchable, delegate to them once in the base class:
+
+```ruby
+class ApplicationRecord < ActiveRecord::Base
+  primary_abstract_class
+
+  def self.ransackable_attributes(auth_object = nil)
+    authorizable_ransackable_attributes
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    authorizable_ransackable_associations
+  end
+end
+```
+
+Think before doing this in an application that exposes search params to
+users: it makes `encrypted_password`, `reset_token` and every other column
+searchable. They are also a convenient base for an exclusion list:
+`authorizable_ransackable_attributes - %w[encrypted_password]`.
+
+For models that inherit from `ActiveRecord::Base` directly (some gems define
+their own), put the two methods in a module and extend every model with it
+from an initializer: `ActiveSupport.on_load(:active_record) { extend TheModule }`.
+
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
 for an `auth_object` key in the options hash which can be used by your own
@@ -318,6 +348,43 @@ Trying it out in `rails console`:
 ```
 
 That's it! Now you know how to allow/block various elements in Ransack.
+
+### Searching Action Text
+
+A rich text attribute is an ordinary `has_one` association to
+`ActionText::RichText`, so it is searched like any association once both sides
+are allowlisted:
+
+```ruby
+# config/initializers/ransack.rb
+ActiveSupport.on_load(:action_text_rich_text) do
+  def self.ransackable_attributes(auth_object = nil)
+    %w[body]
+  end
+end
+
+class Post < ApplicationRecord
+  has_rich_text :content
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[rich_text_content]
+  end
+end
+
+Post.ransack(rich_text_content_body_cont: 'hello')
+```
+
+The body is stored as HTML, so tag names and attributes match too. Keep a
+plain-text column alongside if that matters.
+
+### Encrypted attributes
+
+A column declared with `encrypts :email, deterministic: true` can be searched
+with the equality predicates (`eq`, `not_eq`, `in`, `not_in`): Ransack casts
+the value through the attribute type, so Active Record encrypts it before the
+comparison. The `LIKE` predicates (`cont`, `start`, `end` and the `i_` forms)
+cannot match part of a ciphertext, and a non-deterministic column cannot be
+searched at all. Neither is something Ransack can change.
 
 ### Handling unknown predicates or attributes
 
@@ -462,6 +529,21 @@ wrapped in an array to function (see
 which is not compatible with Ransack form helpers. For this use case, it may be
 better for now to use [ransackers](https://activerecord-hackery.github.io/ransack/going-further/ransackers) instead,
 where feasible. Pull requests with solutions and tests are welcome!
+
+#### Scopes are always `AND`ed
+
+A scope is applied by chaining it onto the relation, outside the condition
+tree that `m: 'or'` and groupings govern, so it is always `AND`ed with the
+rest of the search:
+
+```ruby
+Person.ransack(active: true, name_cont: 'foo', m: 'or').result.to_sql
+# ... WHERE (active = 1) AND "people"."name" LIKE '%foo%' ESCAPE '\'
+```
+
+For something that must take part in an `OR`, use a
+[ransacker](./ransackers.md) or a [custom predicate](./custom-predicates.md)
+instead of a scope.
 
 ### Grouping queries by OR instead of AND
 
