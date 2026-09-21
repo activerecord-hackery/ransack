@@ -89,6 +89,14 @@ module Ransack
       @klass.method(scope).arity
     end
 
+    def sanitize_scope_args(key, args)
+      if Ransack.options[:sanitize_scope_args] && !ransackable_scope_skip_sanitize_args?(key, object)
+        cast_scope_args(args)
+      else
+        args
+      end
+    end
+
     def bind(object, str)
       return nil unless str
       object.parent, object.attr_name = bind_pair_for(str)
@@ -185,6 +193,22 @@ module Ransack
 
     def searchable_associations(str = ''.freeze)
       traverse(str).ransackable_associations(auth_object)
+    end
+
+    private
+
+    def cast_scope_args(args)
+      if args.is_a?(Array)
+        args = args.map(&method(:cast_scope_args))
+      end
+
+      if Constants::TRUE_VALUES.include? args
+        true
+      elsif Constants::FALSE_VALUES.include? args
+        false
+      else
+        args
+      end
     end
   end
 end

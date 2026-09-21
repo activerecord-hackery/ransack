@@ -473,6 +473,31 @@ module Ransack
           expect(@s.result.to_sql).to match /#{field} NOT IN \('a', 'b'\)/
         end
       end
+
+      # Pending spec for https://github.com/activerecord-hackery/ransack/issues/1553
+      # When a custom predicate uses arel_predicate: 'in' together with a formatter
+      # that builds the inner SQL fragment manually (e.g. joining with "','"),
+      # ActiveRecord double-escapes the single quotes, producing IN ('a'',''b')
+      # instead of IN ('a', 'b').
+      #
+      # Marked pending because the fix direction needs a design call. See the
+      # discussion on the linked issue.
+      describe "with 'in' arel predicate and a string-returning formatter" do
+        before do
+          Ransack.configure do |c|
+            c.add_predicate "in_list",
+              arel_predicate: "in",
+              formatter: proc { |v| v&.split(";")&.join("','") }
+          end
+        end
+
+        it 'does not double-escape single quotes in the formatted value' do
+          pending "https://github.com/activerecord-hackery/ransack/issues/1553"
+          @s.name_in_list = "Aaron;Ernie"
+          field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+          expect(@s.result.to_sql).to match /#{field} IN \('Aaron', 'Ernie'\)/
+        end
+      end
     end
 
     private

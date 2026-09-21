@@ -132,11 +132,7 @@ module Ransack
     private
 
     def add_scope(key, args)
-      sanitized_args = if Ransack.options[:sanitize_scope_args] && !@context.ransackable_scope_skip_sanitize_args?(key, @context.object)
-        sanitized_scope_args(args)
-      else
-        args
-      end
+      sanitized_args = @context.sanitize_scope_args(key, args)
 
       if @context.scope_arity(key) == 1
         @scope_args[key] = args.is_a?(Array) ? args[0] : args
@@ -144,20 +140,6 @@ module Ransack
         @scope_args[key] = args.is_a?(Array) ? sanitized_args : args
       end
       @context.chain_scope(key, sanitized_args)
-    end
-
-    def sanitized_scope_args(args)
-      if args.is_a?(Array)
-        args = args.map(&method(:sanitized_scope_args))
-      end
-
-      if Constants::TRUE_VALUES.include? args
-        true
-      elsif Constants::FALSE_VALUES.include? args
-        false
-      else
-        args
-      end
     end
 
     def collapse_multiparameter_attributes!(attrs)
