@@ -437,12 +437,12 @@
     </tr>
     <tr>
       <td><code class="language-plaintext highlighter-rouge">*_not_end_any</code></td>
-      <td> </td>
+      <td>Does not end with any of</td>
       <td> </td>
     </tr>
     <tr>
       <td><code class="language-plaintext highlighter-rouge">*_not_end_all</code></td>
-      <td> </td>
+      <td>Does not end with all of</td>
       <td> </td>
     </tr>
     <tr>
@@ -503,6 +503,66 @@
     <tr>
       <td><code class="language-plaintext highlighter-rouge">*_not_i_cont_all</code></td>
       <td>Does not contain all of values with case insensitive</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_i_start</code></td>
+      <td>Starts with value, ignoring case</td>
+      <td>SQL: <code class="language-plaintext highlighter-rouge">LOWER(col) LIKE 'value%'</code>, or <code class="language-plaintext highlighter-rouge">col ILIKE 'value%'</code> on PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_i_start_any</code></td>
+      <td>Starts with any of values, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_i_start_all</code></td>
+      <td>Starts with all of values, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_not_i_start</code></td>
+      <td>Does not start with, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_not_i_start_any</code></td>
+      <td>Does not start with any of values, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_not_i_start_all</code></td>
+      <td>Does not start with all of values, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_i_end</code></td>
+      <td>Ends with value, ignoring case</td>
+      <td>SQL: <code class="language-plaintext highlighter-rouge">LOWER(col) LIKE '%value'</code>, or <code class="language-plaintext highlighter-rouge">col ILIKE '%value'</code> on PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_i_end_any</code></td>
+      <td>Ends with any of values, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_i_end_all</code></td>
+      <td>Ends with all of values, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_not_i_end</code></td>
+      <td>Does not end with, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_not_i_end_any</code></td>
+      <td>Does not end with any of values, ignoring case</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*_not_i_end_all</code></td>
+      <td>Does not end with all of values, ignoring case</td>
       <td> </td>
     </tr>
     <tr>
@@ -577,9 +637,10 @@ columns.</p>
 <p><code class="language-plaintext highlighter-rouge">cont</code>, <code class="language-plaintext highlighter-rouge">start</code>, <code class="language-plaintext highlighter-rouge">end</code> and <code class="language-plaintext highlighter-rouge">matches</code> compare with <code class="language-plaintext highlighter-rouge">LIKE</code> and mean what the
 database’s <code class="language-plaintext highlighter-rouge">LIKE</code> means. On PostgreSQL that is a case-sensitive match; on MySQL
 and SQLite <code class="language-plaintext highlighter-rouge">LIKE</code> is case-insensitive for the default collations, and Ransack
-does not change that. The <code class="language-plaintext highlighter-rouge">i_</code> forms (<code class="language-plaintext highlighter-rouge">i_cont</code>, <code class="language-plaintext highlighter-rouge">not_i_cont</code> and their <code class="language-plaintext highlighter-rouge">_any</code> /
-<code class="language-plaintext highlighter-rouge">_all</code> variants) are case-insensitive everywhere: they use <code class="language-plaintext highlighter-rouge">ILIKE</code> on
-PostgreSQL and <code class="language-plaintext highlighter-rouge">LOWER(col) LIKE lowercased value</code> elsewhere.</p>
+does not change that. The <code class="language-plaintext highlighter-rouge">i_</code> forms (<code class="language-plaintext highlighter-rouge">i_cont</code>, <code class="language-plaintext highlighter-rouge">i_start</code>, <code class="language-plaintext highlighter-rouge">i_end</code>, their
+<code class="language-plaintext highlighter-rouge">not_</code> opposites and their <code class="language-plaintext highlighter-rouge">_any</code> / <code class="language-plaintext highlighter-rouge">_all</code> variants) are case-insensitive
+everywhere: they use <code class="language-plaintext highlighter-rouge">ILIKE</code> on PostgreSQL and <code class="language-plaintext highlighter-rouge">LOWER(col) LIKE lowercased
+value</code> elsewhere.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_cont: </span><span class="s1">'Ric'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
 <span class="c1"># PostgreSQL: ... WHERE "people"."name" LIKE '%Ric%' ESCAPE '\'</span>
@@ -589,8 +650,9 @@ PostgreSQL and <code class="language-plaintext highlighter-rouge">LOWER(col) LIK
 </code></pre></div></div>
 
 <p>Before Ransack 6.0, every <code class="language-plaintext highlighter-rouge">LIKE</code> on PostgreSQL was rendered as <code class="language-plaintext highlighter-rouge">ILIKE</code>, so
-<code class="language-plaintext highlighter-rouge">cont</code> and <code class="language-plaintext highlighter-rouge">i_cont</code> behaved the same there. If your application relied on that,
-switch those searches to <code class="language-plaintext highlighter-rouge">i_cont</code>.</p>
+<code class="language-plaintext highlighter-rouge">cont</code> and <code class="language-plaintext highlighter-rouge">i_cont</code> behaved the same there, and <code class="language-plaintext highlighter-rouge">start</code> and <code class="language-plaintext highlighter-rouge">end</code> ignored case
+too. If your application relied on that, switch those searches to <code class="language-plaintext highlighter-rouge">i_cont</code>,
+<code class="language-plaintext highlighter-rouge">i_start</code> and <code class="language-plaintext highlighter-rouge">i_end</code>.</p>
 
 <p>A custom predicate declared with <code class="language-plaintext highlighter-rouge">case_insensitive: true</code> gets the same
 treatment, and so does a ransacker: the whole expression is wrapped in

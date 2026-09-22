@@ -463,6 +463,24 @@ predicates instead.</em></p>
 </code></pre></div></div>
 
 <p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_start</code></strong></p>
+<h2 id="i_start">
+  
+  
+    <a href="#i_start" class="anchor-heading" aria-labelledby="i_start"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> i_start
+  
+  
+</h2>
+    
+
+<p>The <code class="language-plaintext highlighter-rouge">i_start</code> case-insensitive predicate returns all records where a field begins with a given value and ignores case:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_i_start: </span><span class="s1">'Rya'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="no">LOWER</span><span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span><span class="p">)</span> <span class="no">LIKE</span> <span class="s1">'rya%'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>On PostgreSQL this renders as <code class="language-plaintext highlighter-rouge">"users"."first_name" ILIKE 'rya%'</code> instead. The <code class="language-plaintext highlighter-rouge">i_start_any</code> and <code class="language-plaintext highlighter-rouge">i_start_all</code> compounds take a list of values, like <code class="language-plaintext highlighter-rouge">i_cont_any</code> and <code class="language-plaintext highlighter-rouge">i_cont_all</code>.</p>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_i_start</code></strong></p>
 <h2 id="end-ends-with">
   
   
@@ -479,6 +497,24 @@ predicates instead.</em></p>
 </code></pre></div></div>
 
 <p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_end</code></strong></p>
+<h2 id="i_end">
+  
+  
+    <a href="#i_end" class="anchor-heading" aria-labelledby="i_end"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> i_end
+  
+  
+</h2>
+    
+
+<p>The <code class="language-plaintext highlighter-rouge">i_end</code> case-insensitive predicate returns all records where a field ends with a given value and ignores case:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="no">User</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">first_name_i_end: </span><span class="s1">'yan'</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="o">=&gt;</span> <span class="no">SELECT</span> <span class="s2">"users"</span><span class="p">.</span><span class="nf">*</span> <span class="no">FROM</span> <span class="s2">"users"</span>  <span class="no">WHERE</span> <span class="p">(</span><span class="no">LOWER</span><span class="p">(</span><span class="s2">"users"</span><span class="o">.</span><span class="s2">"first_name"</span><span class="p">)</span> <span class="no">LIKE</span> <span class="s1">'%yan'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>On PostgreSQL this renders as <code class="language-plaintext highlighter-rouge">"users"."first_name" ILIKE '%yan'</code> instead. The <code class="language-plaintext highlighter-rouge">i_end_any</code> and <code class="language-plaintext highlighter-rouge">i_end_all</code> compounds take a list of values.</p>
+
+<p><strong>Opposite: <code class="language-plaintext highlighter-rouge">not_i_end</code></strong></p>
 <h2 id="true">
   
   

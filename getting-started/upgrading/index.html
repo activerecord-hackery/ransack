@@ -251,10 +251,10 @@ changes in every release is in the
 fixes. Ransack 6.0 requires Ruby 3.2 or later, which is also the floor for
 Rails 8.0. If you are on Ruby 3.1 you are already limited to Rails 7.2; stay on
 Ransack 5.x until you can upgrade Ruby.</p>
-<h3 id="cont-is-case-sensitive-on-postgresql">
+<h3 id="cont-start-and-end-are-case-sensitive-on-postgresql">
   
   
-    <a href="#cont-is-case-sensitive-on-postgresql" class="anchor-heading" aria-labelledby="cont-is-case-sensitive-on-postgresql"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">cont</code> is case-sensitive on PostgreSQL
+    <a href="#cont-start-and-end-are-case-sensitive-on-postgresql" class="anchor-heading" aria-labelledby="cont-start-and-end-are-case-sensitive-on-postgresql"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">cont</code>, <code class="language-plaintext highlighter-rouge">start</code> and <code class="language-plaintext highlighter-rouge">end</code> are case-sensitive on PostgreSQL
   
   
 </h3>
@@ -263,10 +263,13 @@ Ransack 5.x until you can upgrade Ruby.</p>
 <p>Ransack never told Arel whether a <code class="language-plaintext highlighter-rouge">LIKE</code> should be case-sensitive, and Arel’s
 PostgreSQL visitor renders the default as <code class="language-plaintext highlighter-rouge">ILIKE</code>. So on PostgreSQL <code class="language-plaintext highlighter-rouge">cont</code>,
 <code class="language-plaintext highlighter-rouge">start</code>, <code class="language-plaintext highlighter-rouge">end</code> and <code class="language-plaintext highlighter-rouge">matches</code> all ignored case, while the docs said <code class="language-plaintext highlighter-rouge">cont</code> used
-<code class="language-plaintext highlighter-rouge">LIKE</code>. They now do: <code class="language-plaintext highlighter-rouge">cont</code> is <code class="language-plaintext highlighter-rouge">LIKE</code> and <code class="language-plaintext highlighter-rouge">i_cont</code> is <code class="language-plaintext highlighter-rouge">ILIKE</code>. A PostgreSQL
-application that relied on <code class="language-plaintext highlighter-rouge">cont</code> ignoring case should switch those searches
-to <code class="language-plaintext highlighter-rouge">i_cont</code>. MySQL and SQLite are unaffected; their <code class="language-plaintext highlighter-rouge">LIKE</code> follows the
-column’s collation as before. See
+<code class="language-plaintext highlighter-rouge">LIKE</code>. They now do: <code class="language-plaintext highlighter-rouge">cont</code>, <code class="language-plaintext highlighter-rouge">start</code> and <code class="language-plaintext highlighter-rouge">end</code> are <code class="language-plaintext highlighter-rouge">LIKE</code>; <code class="language-plaintext highlighter-rouge">i_cont</code> and the
+new <code class="language-plaintext highlighter-rouge">i_start</code> and <code class="language-plaintext highlighter-rouge">i_end</code> are <code class="language-plaintext highlighter-rouge">ILIKE</code>. A PostgreSQL application that relied
+on those predicates ignoring case should switch to the <code class="language-plaintext highlighter-rouge">i_</code> form. Nothing
+raises when it does not; the search just stops matching rows whose case
+differs, so check filters that are wired up by another library. ActiveAdmin’s
+string filter, for example, offers <code class="language-plaintext highlighter-rouge">cont</code>, <code class="language-plaintext highlighter-rouge">start</code> and <code class="language-plaintext highlighter-rouge">end</code>. MySQL and SQLite
+are unaffected; their <code class="language-plaintext highlighter-rouge">LIKE</code> follows the column’s collation as before. See
 <a href="/ransack/getting-started/search-matches/#case-sensitivity">Search Matchers</a>.</p>
 <h3 id="database-dialects-are-detected-from-the-adapter-class">
   
