@@ -196,6 +196,15 @@ A `Date` given for a datetime column means midnight in `Time.zone`, whatever
 the server's system time zone is. Before Ransack 6.0 both of these followed
 the schema column and the system zone instead.
 
+Rails' date and time selects submit a value in pieces, `created_at(1i)` for
+the year through `created_at(6i)` for the second, and Ransack folds them back
+into one value the way Active Record does. The pieces come from the query
+string, so a malformed one is dropped rather than raised on: a key with no
+position, a position outside 1 to 16, or a piece for an attribute that was
+also given whole. Before Ransack 4.4.2 an out-of-range position was used as
+an array index, so a crafted request could make the server allocate an array
+of any size (GHSA-vxc9-rm8f-p56j).
+
 ### Negative predicates on collections
 
 On a `has_many`, `has_and_belongs_to_many` or `has_many :through`

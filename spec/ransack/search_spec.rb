@@ -734,6 +734,79 @@ module Ransack
       end
     end
 
+    describe '#collapse_multiparameter_attributes!' do
+      def collapse(attrs)
+        Search.allocate.send(:collapse_multiparameter_attributes!, attrs)
+      end
+
+      it 'collapses legitimate multiparameter attributes' do
+        result = collapse(
+          'created_at(1i)' => '2021',
+          'created_at(2i)' => '1',
+          'created_at(3i)' => '5'
+        )
+        expect(result['created_at']).to eq [2021, 1, 5]
+      end
+
+      it 'drops a position larger than the allowed number of components' do
+        result = collapse('created_at(100000000000i)' => '1')
+        expect(result).not_to have_key('created_at')
+      end
+
+      it 'drops a zero or negative position' do
+        result = collapse('created_at(0i)' => '1', 'created_at(-1i)' => '1')
+        expect(result).not_to have_key('created_at')
+      end
+
+      it 'drops a key with no position' do
+        result = collapse('created_at(' => '1', 'created_at()' => '2')
+        expect(result).to eq({})
+        expect {
+          Person.ransack('created_at(' => '1').result.to_sql
+        }.not_to raise_error
+      end
+
+      it 'keeps a plain value and drops the fragments given alongside it' do
+        result = collapse('created_at' => '2020', 'created_at(1i)' => '2021')
+        expect(result).to eq('created_at' => '2020')
+        expect {
+          Person.ransack('created_at' => '2020', 'created_at(1i)' => '2021').result.to_sql
+        }.not_to raise_error
+      end
+
+      it 'keeps the position at the upper boundary and drops just past it' do
+        at_limit = collapse('created_at(16i)' => '1')
+        expect(at_limit['created_at'].length).to eq 16
+
+        past_limit = collapse('created_at(17i)' => '1')
+        expect(past_limit).not_to have_key('created_at')
+      end
+
+      it 'does not raise or exhaust memory for a crafted huge position (DoS)' do
+        expect {
+          Person.ransack('created_at(100000000000i)' => '1').result.to_sql
+        }.not_to raise_error
+      end
+
+      context 'when the position has no cast suffix (e.g. (10000) not (10000i))' do
+        it 'stores a small uncast position as its raw value' do
+          result = collapse('created_at(1)' => 'x')
+          expect(result['created_at']).to eq ['x']
+        end
+
+        it 'drops a large uncast position' do
+          result = collapse('created_at(10000)' => '1')
+          expect(result).not_to have_key('created_at')
+        end
+
+        it 'does not raise or exhaust memory for a crafted huge uncast position (DoS)' do
+          expect {
+            Person.ransack('created_at(100000000000)' => '1').result.to_sql
+          }.not_to raise_error
+        end
+      end
+    end
+
     describe '#result' do
       let(:people_name_field) {
         "#{quote_table_name("people")}.#{quote_column_name("name")}"
