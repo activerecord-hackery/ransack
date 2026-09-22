@@ -152,6 +152,31 @@ module Ransack
             expect(html).not_to match /<option value="#{key}">/
           end
         end
+        it 'selects the predicate of the condition being rendered' do
+          search = Person.ransack(
+            c: { '0' => { a: { '0' => { name: 'name' } }, p: 'start', v: { '0' => { value: 'x' } } } }
+          )
+          html = nil
+          @controller.view_context.search_form_for(search) do |f|
+            f.condition_fields { |c| html = c.predicate_select }
+          end
+          expect(html).to match /<option selected="selected" value="start">/
+          expect(html.scan(/selected="selected"/).size).to eq(1)
+        end
+        it 'selects the :default predicate for a new condition' do
+          html = nil
+          @controller.view_context.search_form_for(@s) do |f|
+            f.condition_fields(@s.build_condition) { |c| html = c.predicate_select default: 'eq' }
+          end
+          expect(html).to match /<option selected="selected" value="eq">/
+        end
+        it 'honours an explicit :selected option' do
+          html = @f.predicate_select selected: 'lt'
+          expect(html).to match /<option selected="selected" value="lt">/
+        end
+        it 'selects nothing on a builder whose object has no predicate' do
+          expect(@f.predicate_select).not_to match /selected="selected"/
+        end
       end
 
       context 'fields used in polymorphic relations as search attributes in form' do
