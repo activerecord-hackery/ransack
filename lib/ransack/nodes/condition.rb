@@ -234,7 +234,7 @@ module Ransack
 
       def predicate_name=(name)
         self.predicate = Predicate.named(name)
-        unless negative?
+        if predicate && !negative?
           attributes.each { |a| context.lock_association(a.parent) }
         end
         @predicate

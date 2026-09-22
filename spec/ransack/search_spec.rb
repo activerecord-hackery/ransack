@@ -506,6 +506,18 @@ module Ransack
           expect(search.result.to_sql).not_to include('name')
         end
 
+        it 'drops a condition with an unknown predicate instead of an arity error' do
+          search = Search.new(Person, { c: [{ a: ['name'], p: 'nope', v: [{ value: 'a' }, { value: 'b' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.base.conditions).to be_empty
+        end
+
+        it 'drops a condition with an unknown attribute instead of an arity error' do
+          search = Search.new(Person, { c: [{ a: ['nope'], p: 'eq', v: [{ value: 'a' }, { value: 'b' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.base.conditions).to be_empty
+        end
+
         it 'accepts several values for a predicate that wants an array' do
           search = Search.new(Person, { c: [{ a: ['name'], p: 'in', v: [{ value: 'Aric' }, { value: 'Fern' }] }] },
             ignore_unknown_conditions: false)
