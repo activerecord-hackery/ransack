@@ -17,6 +17,44 @@ module Ransack
         end
       end
 
+      context 'integer out of range inside a composite node' do
+        # An out-of-range integer only raises once Arel casts it while
+        # building SQL, so a plain `_eq` predicate hits that directly. The
+        # same value used to raise once it sat inside an In node's `right`
+        # Array, or inside the Grouping/And/Or that Arel's own `_any` /
+        # `_all` predicates build.
+        let(:big) { '99999999999999999999' }
+
+        it 'does not raise for a plain predicate' do
+          sql = Person.ransack(salary_eq: big).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for a plain _in predicate' do
+          sql = Person.ransack(salary_in: [big]).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for a predicate ORed with another condition' do
+          sql = Person.ransack(
+            m: 'or',
+            salary_in: [big],
+            name_eq: 'Bob'
+          ).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for an _any predicate with three or more values' do
+          sql = Person.ransack(salary_eq_any: ['1', '2', big]).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for an _all predicate with three or more values' do
+          sql = Person.ransack(salary_eq_all: ['1', '2', big]).result.to_sql
+          expect(sql).to include(big)
+        end
+      end
+
       context 'with an alias' do
         subject {
           Condition.extract(
