@@ -5,6 +5,12 @@ module Ransack
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
     attr_accessor :auth_object, :search_key, :ignore_unknown_conditions
 
+    # True when the search was built from permitted strong parameters and
+    # the controller is trusted as the authorization boundary (see
+    # `Ransack.options[:strong_parameters]`). The model allowlists are then
+    # replaced by the lists of what exists; scopes are gated regardless.
+    attr_accessor :strong_parameters
+
     class << self
 
       # An ORM integration registers a block that returns a Context for the
@@ -206,15 +212,15 @@ module Ransack
     end
 
     def ransackable_attribute?(str, klass)
-      klass.ransackable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
+      attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransortable_attribute?(str, klass)
-      klass.ransortable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
+      sortable_attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransackable_association?(str, klass)
-      klass.ransackable_associations(auth_object).any? { |s| s.to_sym == str.to_sym }
+      associations_for(klass).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransackable_scope?(str, klass)
@@ -226,18 +232,44 @@ module Ransack
     end
 
     def searchable_attributes(str = ''.freeze)
-      traverse(str).ransackable_attributes(auth_object)
+      attributes_for(traverse(str))
     end
 
     def sortable_attributes(str = ''.freeze)
-      traverse(str).ransortable_attributes(auth_object)
+      sortable_attributes_for(traverse(str))
     end
 
     def searchable_associations(str = ''.freeze)
-      traverse(str).ransackable_associations(auth_object)
+      associations_for(traverse(str))
     end
 
     private
+
+    # The allowlist for a class: what the model authorizes, or, under trusted
+    # strong parameters, everything that exists on it.
+    def attributes_for(klass)
+      if strong_parameters
+        klass.authorizable_ransackable_attributes
+      else
+        klass.ransackable_attributes(auth_object)
+      end
+    end
+
+    def sortable_attributes_for(klass)
+      if strong_parameters
+        klass.authorizable_ransackable_attributes
+      else
+        klass.ransortable_attributes(auth_object)
+      end
+    end
+
+    def associations_for(klass)
+      if strong_parameters
+        klass.authorizable_ransackable_associations
+      else
+        klass.ransackable_associations(auth_object)
+      end
+    end
 
     def resolve_alias_segment(segment)
       target = ransackable_alias(segment)

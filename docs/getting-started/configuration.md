@@ -153,6 +153,28 @@ such as `_gt`, a blank matches nothing at all rather than everything.
 > Do not turn this off for a search backed by an HTML form. A blank text input
 > posts `""`, so with `ignore_blank_values = false` an untouched field becomes
 > `WHERE column = ''` and the form returns nothing.
+## Strong parameters
+
+By default the model's `ransackable_attributes`, `ransackable_associations`
+and `ransortable_attributes` decide what a search may touch. Turn on
+`strong_parameters` to let a controller decide instead: a search built from
+an `ActionController::Parameters` that the controller has permitted skips
+those three lists, and every permitted key that names a real column,
+ransacker, alias or association is searchable.
+
+```ruby
+Ransack.configure { |config| config.strong_parameters = true }
+
+@q = Article.ransack(params.fetch(:q, {}).permit(:title_cont, :s))
+```
+
+A plain Hash, or unpermitted parameters, still go through the model lists,
+and `ransackable_scopes` is consulted whatever the parameters are. The
+setting is off by default and can be overridden for one search with
+`ransack(params, strong_parameters: true)` or `false`. See
+[Authorization](../going-further/other-notes.md#strong-parameters-instead-of-model-allowlists)
+for what to permit and the one thing to watch out for.
+
 ## Sorting NULLs
 
 `fields_sort_option` controls where `NULL`s are placed when sorting:
