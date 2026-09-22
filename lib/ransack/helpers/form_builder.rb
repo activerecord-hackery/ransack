@@ -147,14 +147,14 @@ module Ransack
       def template_grouped_collection_select(collection, options, html_options)
         @template.grouped_collection_select(
           @object_name, :name, collection, :last, :first, :first, :last,
-          objectify_options(options), @default_options.merge(html_options)
+          objectify_options(options), @default_html_options.merge(html_options)
           )
       end
 
       def template_collection_select(name, collection, options, html_options)
         @template.collection_select(
           @object_name, name, collection, :first, :last,
-          objectify_options(options), @default_options.merge(html_options)
+          objectify_options(options), @default_html_options.merge(html_options)
           )
       end
 
