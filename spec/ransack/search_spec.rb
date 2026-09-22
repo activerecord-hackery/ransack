@@ -466,8 +466,24 @@ module Ransack
       end
 
       it 'drops a zero or negative position' do
-        result = collapse('created_at(0i)' => '1')
+        result = collapse('created_at(0i)' => '1', 'created_at(-1i)' => '1')
         expect(result).not_to have_key('created_at')
+      end
+
+      it 'drops a key with no position' do
+        result = collapse('created_at(' => '1', 'created_at()' => '2')
+        expect(result).to eq({})
+        expect {
+          Person.ransack('created_at(' => '1').result.to_sql
+        }.not_to raise_error
+      end
+
+      it 'keeps a plain value and drops the fragments given alongside it' do
+        result = collapse('created_at' => '2020', 'created_at(1i)' => '2021')
+        expect(result).to eq('created_at' => '2020')
+        expect {
+          Person.ransack('created_at' => '2020', 'created_at(1i)' => '2021').result.to_sql
+        }.not_to raise_error
       end
 
       it 'keeps the position at the upper boundary and drops just past it' do
