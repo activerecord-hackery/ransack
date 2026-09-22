@@ -348,18 +348,14 @@ module Ransack
             format_predicate(attribute)
           end
 
-          # Applied per attribute rather than to the reduced node: once several
-          # attributes are combined, the result is an And/Or whose `right` is
-          # another predicate node rather than a Casted value, so
-          # replace_right_node? returns false and nothing is unwrapped at all.
-          if replace_right_node?(predicate)
-            # Replace right node object to plain integer value in order to avoid
-            # ActiveModel::RangeError from Arel::Node::Casted.
-            # The error can be ignored here because RDBMSs accept large numbers
-            # in condition clauses.
-            plain_value = predicate.right.value
-            predicate.right = plain_value
-          end
+          # Replace an oversized Casted integer value with the plain integer,
+          # in order to avoid ActiveModel::RangeError from Arel::Node::Casted.
+          # The error can be ignored here because RDBMSs accept large numbers
+          # in condition clauses. Applied recursively rather than only to the
+          # top-level node, because the Casted value can sit inside an In /
+          # NotIn node's `right` Array, or inside the Grouping / And / Or
+          # that Arel's own `_any` / `_all` predicates build.
+          unwrap_oversized_integers(predicate)
 
           predicate
         }.reduce(combinator_method)
@@ -477,15 +473,45 @@ module Ransack
         end
       end
 
-      def replace_right_node?(predicate)
-        return false unless predicate.is_a?(Arel::Nodes::Binary)
+      # Walks a predicate node for the shapes `#arel_predicate` can produce
+      # (a single Binary, an In/NotIn holding an Array, or several of these
+      # combined with Grouping/And/Or) and replaces each integer Casted
+      # value it finds with the plain integer, in place.
+      def unwrap_oversized_integers(node)
+        case node
+        when Arel::Nodes::Grouping
+          unwrap_oversized_integers(node.expr)
+        when Arel::Nodes::And, Arel::Nodes::Or
+          # Both are Nary: `grouping_any` (behind every `_any` predicate)
+          # builds a single Or with one child per value, not a pairwise
+          # chain, so `left`/`right` alone would miss the third value on.
+          node.children.each { |child| unwrap_oversized_integers(child) }
+        when Arel::Nodes::In, Arel::Nodes::NotIn
+          if node.right.is_a?(Array)
+            node.right = node.right.map { |v| plain_integer(v) || v }
+          else
+            # In / NotIn are Binary subclasses and match before that arm, so a
+            # bare Casted right (not an Array) needs the same handling as one.
+            unwrap_binary_right(node)
+          end
+        when Arel::Nodes::Binary
+          unwrap_binary_right(node)
+        end
+      end
 
-        arel_node = predicate.right
-        return false unless arel_node.is_a?(Arel::Nodes::Casted)
+      def unwrap_binary_right(node)
+        plain_value = plain_integer(node.right)
+        node.right = plain_value if plain_value
+      end
+
+      def plain_integer(arel_node)
+        return nil unless arel_node.is_a?(Arel::Nodes::Casted)
 
         relation, name = arel_node.attribute.values
         attribute_type = relation.type_for_attribute(name).type
-        attribute_type == :integer && arel_node.value.is_a?(Integer)
+        return nil unless attribute_type == :integer && arel_node.value.is_a?(Integer)
+
+        arel_node.value
       end
 
       def length_predicate?
