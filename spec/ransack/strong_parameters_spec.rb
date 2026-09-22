@@ -77,9 +77,26 @@ module Ransack
         }.to raise_error(InvalidSearchError, /active/)
       end
 
+      # `permit(:s)` permits the key, not the column named in its value, so a
+      # trusted `s` can sort by anything that exists. Documented as such.
       it 'lets permitted params sort by a column the model does not allow' do
         sql = Person.ransack(permitted(s: 'only_search asc')).result.to_sql
         expect(sql).to match(/ORDER BY .*only_search.* ASC/)
+      end
+
+      it 'keeps ransortable_attributes for one search with strong_parameters: false' do
+        sql = Person.ransack(permitted(s: 'only_search asc'), strong_parameters: false).result.to_sql
+        expect(sql).not_to include 'only_search'
+      end
+
+      # The `sort_by_<name>_<dir>` convention is not gated by
+      # `ransackable_scopes` in any mode: it is reached by name, takes nothing
+      # from the request, and this setting neither opens nor closes it.
+      it 'leaves the sort_by_ scope convention exactly as it is without strong parameters' do
+        trusted = Person.ransack(permitted(s: 'reverse_name asc')).result.to_sql
+        plain   = Person.ransack(s: 'reverse_name asc').result.to_sql
+        expect(trusted).to eq plain
+        expect(trusted).to include 'REVERSE(name) ASC'
       end
 
       it 'lets permitted params traverse an association the model does not allow' do
