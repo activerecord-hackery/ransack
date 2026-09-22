@@ -138,3 +138,43 @@ Person.ransack(temperament_in: ['sanguine', 'choleric']).result.to_sql
 This means a select built from `Person.temperaments.keys` can be posted
 straight back to Ransack without translating the labels yourself.
 
+### Date and time selects
+
+Rails' date and time selects submit a value in pieces, `created_at(1i)` for
+the year through `created_at(6i)` for the second, and Ransack folds them back
+into one value the way Active Record does. The pieces come from the query
+string, so a malformed one is dropped rather than raised on: a key with no
+position, a position outside 1 to 16, or a piece for an attribute that was
+also given whole. Before Ransack 4.4.2 an out-of-range position was used as
+an array index, so a crafted request could make the server allocate an array
+of any size (GHSA-vxc9-rm8f-p56j).
+
+### Negative predicates on collections
+
+On a `has_many`, `has_and_belongs_to_many` or `has_many :through`
+association, a negative predicate (`not_eq`, `not_cont`, `not_in`, `not_start`
+and the rest) means *no associated record matches the positive form*. It is
+built as a correlated subquery rather than a join:
+
+```ruby
+Person.ransack(articles_title_not_eq: 'Draft').result.to_sql
+# ... WHERE "people"."id" NOT IN (
+#       SELECT "articles"."person_id" FROM "articles"
+#       WHERE "articles"."person_id" = "people"."id"
+#         AND NOT ("articles"."title" != 'Draft'))
+```
+
+That selects people none of whose articles is titled `Draft`, including people
+with no articles. A join would instead select people who have *at least one*
+article with a different title, which is a different question; ask it with a
+scope or a ransacker if you need it.
+
+`not_null` is the exception: `articles_title_not_null: true` means *at least
+one* associated record has a value (`"people"."id" IN (SELECT ... WHERE
+"articles"."title" IS NOT NULL)`), so it excludes people with no articles.
+
+On a `belongs_to` or `has_one` the predicate is a plain condition on the
+joined table, `"people"."name" != 'x'` after a `LEFT OUTER JOIN`. A record
+with no associated record has `NULL` there, and `NULL != 'x'` is not true, so
+it is excluded; add `_or_parent_id_null` style logic or a scope if you want
+those included.
