@@ -327,11 +327,31 @@ module Ransack
         person&.destroy
       end
 
-      it 'works with the _any and _all compounds' do
+      it 'registers the _any and _all compounds' do
+        expect(Predicate.names).to include('i_start_any', 'i_start_all', 'not_i_start_any', 'not_i_start_all')
+      end
+
+      it 'keeps both halves of an _any compound case-insensitive' do
         @s.name_i_start_any = %w(Er Ri)
         field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
-        expect(@s.result.to_sql).to match /I?LIKE 'er%'.* OR .*I?LIKE 'ri%'/
-        expect(Predicate.names).to include('i_start_any', 'i_start_all', 'not_i_start_any', 'not_i_start_all')
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} ILIKE 'er%'.* OR .*#{field} ILIKE 'ri%'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) LIKE 'er%'.* OR .*LOWER\(#{field}\) LIKE 'ri%'/
+        end
+      end
+
+      # Arel's does_not_match_any / _all take no case_sensitive argument, unlike
+      # matches_any / _all, so Condition maps them over does_not_match by hand.
+      # These are the compounds that would silently fall back to LIKE.
+      it 'keeps both halves of a not_ _any compound case-insensitive' do
+        @s.name_not_i_start_any = %w(Er Ri)
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} NOT ILIKE 'er%'.* OR .*#{field} NOT ILIKE 'ri%'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) NOT LIKE 'er%'.* OR .*LOWER\(#{field}\) NOT LIKE 'ri%'/
+        end
       end
     end
 
@@ -424,10 +444,28 @@ module Ransack
         person&.destroy
       end
 
-      it 'works with the _any and _all compounds' do
-        @s.name_i_end_all = %w(er Er)
-        expect(@s.result.to_sql).to match /I?LIKE '%er'.* AND .*I?LIKE '%er'/
+      it 'registers the _any and _all compounds' do
         expect(Predicate.names).to include('i_end_any', 'i_end_all', 'not_i_end_any', 'not_i_end_all')
+      end
+
+      it 'keeps both halves of an _all compound case-insensitive' do
+        @s.name_i_end_all = %w(Er Ri)
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} ILIKE '%er'.* AND .*#{field} ILIKE '%ri'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) LIKE '%er'.* AND .*LOWER\(#{field}\) LIKE '%ri'/
+        end
+      end
+
+      it 'keeps both halves of a not_ _all compound case-insensitive' do
+        @s.name_not_i_end_all = %w(Er Ri)
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} NOT ILIKE '%er'.* AND .*#{field} NOT ILIKE '%ri'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) NOT LIKE '%er'.* AND .*LOWER\(#{field}\) NOT LIKE '%ri'/
+        end
       end
     end
 
