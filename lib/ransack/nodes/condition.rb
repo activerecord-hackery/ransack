@@ -24,7 +24,7 @@ module Ransack
             )
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything. Tempted to go with "garbage in, garbage out" here.
-            if predicate.validate(condition.values, condition.default_type)
+            if predicate.validate(condition.values, condition.default_type, context.null_sentinel)
               condition
             else
               nil
@@ -78,7 +78,7 @@ module Ransack
 
       def valid?
         attributes.detect(&:valid?) && predicate && valid_arity? &&
-          predicate.validate(values, default_type) && valid_combinator?
+          predicate.validate(values, default_type, context.null_sentinel) && valid_combinator?
       end
 
       def valid_arity?
@@ -185,9 +185,22 @@ module Ransack
 
       def value
         if predicate.wants_array
-          values.map { |v| v.cast(default_type) }
+          values.map { |v| cast_unless_null_sentinel(v) }
         else
-          values.first.cast(default_type)
+          cast_unless_null_sentinel(values.first)
+        end
+      end
+
+      # Casting the sentinel here would turn it into a real value on a
+      # typed column (e.g. an integer column casts it to 0), so a form
+      # re-rendering this condition's current value would resubmit that
+      # literal instead of the sentinel.
+      def cast_unless_null_sentinel(v)
+        if Constants.null_sentinel_predicate?(predicate.name, context.null_sentinel) &&
+           Constants.null_sentinel_value?(v.value, context.null_sentinel)
+          v.value
+        else
+          v.cast(default_type)
         end
       end
 
@@ -247,7 +260,17 @@ module Ransack
       alias :p :predicate_name
 
       def validated_values
-        values.select { |v| predicate.validator.call(v.value) }
+        selected = values.select { |v| predicate.validator.call(v.value) }
+        return selected unless null_sentinel_requested?
+
+        # The sentinel is a marker to detect, never a value to search for
+        # or to cast to the column's type, so it is excluded from the
+        # values #format_predicate builds the ordinary IN/EQ node from.
+        selected.reject { |v| Constants.null_sentinel_value?(v.value, context.null_sentinel) }
+      end
+
+      def null_sentinel_requested?
+        Constants.null_sentinel_requested?(predicate.name, values, context.null_sentinel)
       end
 
       def casted_values_for_attribute(attr)
@@ -403,7 +426,22 @@ module Ransack
           end
         end
 
-        predicate
+        null_sentinel_requested? ? apply_null_sentinel(predicate, attr_value) : predicate
+      end
+
+      # `validated_values` has already excluded the sentinel above, so
+      # `predicate` here is built from the real values alone (or, when
+      # the sentinel was the only value submitted, from an empty
+      # array). An empty IN or eq_any/in_any is not `IS NULL` on its
+      # own terms (an empty `IN` is a literal false, and an empty
+      # `eq_any` builds a broken Grouping), so that case is replaced
+      # outright rather than OR'd.
+      def apply_null_sentinel(predicate, attr_value)
+        if validated_values.empty?
+          attr_value.eq(nil)
+        else
+          predicate.or(attr_value.eq(nil))
+        end
       end
 
       def in_predicate?(predicate)

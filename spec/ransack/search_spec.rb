@@ -151,6 +151,24 @@ module Ransack
         end
       end
 
+      context 'a per-search null_sentinel override' do
+        let(:sentinel) { '__ransack_null__' }
+        let(:null_col) { "#{quote_table_name('people')}.#{quote_column_name('name')} IS NULL" }
+
+        after { Ransack.configure { |c| c.null_sentinel = nil } }
+
+        it 'applies when no global null_sentinel is configured' do
+          search = Search.new(Person, { name_in: ['Aaron', sentinel] }, { null_sentinel: sentinel })
+          expect(search.result.to_sql).to include(null_col)
+        end
+
+        it 'turns the feature off for one search, with false, while the global setting stays on' do
+          Ransack.configure { |c| c.null_sentinel = sentinel }
+          search = Search.new(Person, { name_in: ['Aaron', sentinel] }, { null_sentinel: false })
+          expect(search.result.to_sql).not_to include('IS NULL')
+        end
+      end
+
       it 'removes empty suffixed conditions before building' do
         expect_any_instance_of(Search).to receive(:build).with({})
         Search.new(Person, name_eq_any: [''])
@@ -522,6 +540,26 @@ module Ransack
           search = Search.new(Person, { c: [{ a: ['name'], p: 'in', v: [{ value: 'Aric' }, { value: 'Fern' }] }] },
             ignore_unknown_conditions: false)
           expect(search.result.to_sql).to include('IN')
+        end
+
+        context 'when one of the extra values is the configured null_sentinel' do
+          let(:sentinel) { '__ransack_null__' }
+          let(:params) do
+            { c: [{ a: ['name'], p: 'eq', v: [{ value: 'Aric' }, { value: sentinel }] }] }
+          end
+
+          before { Ransack.configure { |c| c.null_sentinel = sentinel } }
+          after { Ransack.configure { |c| c.null_sentinel = nil } }
+
+          it 'still raises in strict mode, rather than being absorbed by the sentinel bypass' do
+            expect { Search.new(Person, params, ignore_unknown_conditions: false) }
+              .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+          end
+
+          it 'still drops the condition in the default lenient mode' do
+            search = Search.new(Person, params)
+            expect(search.base.conditions).to be_empty
+          end
         end
       end
 
