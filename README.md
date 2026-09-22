@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/activerecord-hackery/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
-[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/ransack/sponsors/badge.svg)](#sponsors)
+[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers)
 
 # Introduction
 
@@ -84,19 +84,3 @@ This project exists thanks to all the people who contribute. <img src="https://o
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/ransack#backer)]
 
 <a href="https://opencollective.com/ransack#backers" target="_blank"><img src="https://opencollective.com/ransack/backers.svg?width=890" /></a>
-
-
-## Sponsors
-
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/ransack#sponsor)]
-
-<a href="https://opencollective.com/ransack/sponsor/0/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/0/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/1/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/1/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/2/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/2/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/3/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/3/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/4/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/4/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/5/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/5/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/6/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/6/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/7/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/7/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/8/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/8/avatar.svg" /></a>
-<a href="https://opencollective.com/ransack/sponsor/9/website" target="_blank"><img src="https://opencollective.com/ransack/sponsor/9/avatar.svg" /></a>
