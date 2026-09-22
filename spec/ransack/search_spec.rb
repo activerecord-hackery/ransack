@@ -485,6 +485,46 @@ module Ransack
         end
       end
 
+      context 'a single-value predicate given several values' do
+        let(:params) do
+          { c: [{ a: ['name'], p: 'eq', v: [{ value: 'Aric' }, { value: 'Fern' }] }] }
+        end
+
+        it 'raises in strict mode, naming the predicate and attribute' do
+          expect { Search.new(Person, params, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+        end
+
+        it 'raises for a nested grouping in strict mode' do
+          expect { Search.new(Person, { g: [params] }, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError)
+        end
+
+        it 'drops the condition in the default lenient mode' do
+          search = Search.new(Person, params)
+          expect(search.base.conditions).to be_empty
+          expect(search.result.to_sql).not_to include('name')
+        end
+
+        it 'drops a condition with an unknown predicate instead of an arity error' do
+          search = Search.new(Person, { c: [{ a: ['name'], p: 'nope', v: [{ value: 'a' }, { value: 'b' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.base.conditions).to be_empty
+        end
+
+        it 'drops a condition with an unknown attribute instead of an arity error' do
+          search = Search.new(Person, { c: [{ a: ['nope'], p: 'eq', v: [{ value: 'a' }, { value: 'b' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.base.conditions).to be_empty
+        end
+
+        it 'accepts several values for a predicate that wants an array' do
+          search = Search.new(Person, { c: [{ a: ['name'], p: 'in', v: [{ value: 'Aric' }, { value: 'Fern' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.result.to_sql).to include('IN')
+        end
+      end
+
       context 'combinator validation in strict mode' do
         it 'accepts any spelling of a valid combinator' do
           expect { Search.new(Person, { combinator: 'OR', name_eq: 'a' }, ignore_unknown_conditions: false) }

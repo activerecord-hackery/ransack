@@ -38,15 +38,9 @@ module Ransack
       def conditions=(conditions)
         case conditions
         when Array
-          conditions.each do |attrs|
-            condition = Condition.new(@context).build(attrs)
-            self.conditions << condition if condition.valid?
-          end
+          conditions.each { |attrs| add_condition(attrs) }
         when Hash
-          conditions.each do |index, attrs|
-            condition = Condition.new(@context).build(attrs)
-            self.conditions << condition if condition.valid?
-          end
+          conditions.each_value { |attrs| add_condition(attrs) }
         end
         remove_duplicate_conditions!
       end
@@ -209,6 +203,28 @@ module Ransack
         string = str[/(.+?)\(/, 1] || str.dup
         Predicate.detect_and_strip_from_string!(string)
         string
+      end
+
+      # A condition is dropped when it fails validation, as an unknown
+      # attribute or predicate would be. One failure is worth naming: a
+      # single-value predicate given several values. A strict search raises
+      # for it, so the caller learns why the filter vanished (#1724). The
+      # check only applies once the predicate and an attribute have resolved;
+      # a condition that is invalid for another reason keeps its behaviour.
+      def add_condition(attrs)
+        condition = Condition.new(@context).build(attrs)
+        if condition.valid?
+          self.conditions << condition
+        elsif @context.strict_conditions? && arity_failure?(condition)
+          raise InvalidSearchError,
+            "Predicate #{condition.predicate_name} takes a single value, " \
+            "#{condition.values.size} given for #{condition.attributes.map(&:name).join(', ')}"
+        end
+      end
+
+      def arity_failure?(condition)
+        condition.predicate && condition.attributes.any?(&:valid?) &&
+          !condition.valid_arity?
       end
 
       def remove_duplicate_conditions!
