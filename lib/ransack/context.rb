@@ -47,6 +47,15 @@ module Ransack
       @base = @join_dependency.instance_variable_get(:@join_root)
     end
 
+    # False when a key has more `_`-separated segments than Ransack will
+    # parse. The attribute / association / predicate parsing that follows is
+    # superlinear in the segment count and the key is attacker-controlled, so
+    # an over-long key is treated as unknown rather than parsed
+    # (GHSA-j3f8-w227-4hh8).
+    def key_within_depth_limit?(key)
+      key.to_s.count(Constants::UNDERSCORE) <= Constants::MAX_KEY_DEPTH
+    end
+
     def bind_pair_for(key)
       @bind_pairs ||= {}
 
@@ -124,6 +133,8 @@ module Ransack
     end
 
     def association_path(str, base = @base)
+      return ''.freeze unless key_within_depth_limit?(str)
+
       base = klassify(base)
       str ||= ''.freeze
       path = []

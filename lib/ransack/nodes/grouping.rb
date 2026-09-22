@@ -122,6 +122,8 @@ module Ransack
       end
 
       def attribute_method?(name)
+        return false unless @context.key_within_depth_limit?(name)
+
         stripped_name = strip_predicate_and_index(name)
         return true if @context.attribute_method?(stripped_name) ||
                        @context.attribute_method?(name)
