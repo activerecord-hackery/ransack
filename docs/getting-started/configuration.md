@@ -182,6 +182,15 @@ this way, with no change to the field's name and no controller-side
 rewriting. This does not bypass `ransackable_attributes`: `NULL` on an exposed
 attribute is already reachable through the built-in `null` predicate.
 
+It can be set globally, or per search, the same as `strip_whitespace`:
+
+```ruby
+Person.ransack({ name_in: ['Ernie', '__ransack_null__'] }, null_sentinel: '__ransack_null__')
+
+# With a global null_sentinel configured, turn it off for one search:
+Person.ransack({ name_in: ['Ernie', '__ransack_null__'] }, null_sentinel: false)
+```
+
 {: .note }
 > `null_sentinel` must be a unique `String`. A blank string, `false`, or a
 > non-`String` value is not supported and produces undefined behavior.

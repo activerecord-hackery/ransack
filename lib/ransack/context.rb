@@ -4,6 +4,7 @@ module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
     attr_accessor :auth_object, :search_key, :ignore_unknown_conditions
+    attr_writer :null_sentinel
 
     class << self
 
@@ -33,6 +34,12 @@ module Ransack
     # ignored when either the global option or this search's own option says so.
     def strict_conditions?
       !Ransack.options[:ignore_unknown_conditions] || ignore_unknown_conditions == false
+    end
+
+    # Falls back to the global option unless this search's own option was
+    # set, including to `false` to turn the feature off for one search.
+    def null_sentinel
+      @null_sentinel.nil? ? Ransack.options[:null_sentinel] : @null_sentinel
     end
 
     def initialize(object, options = {})

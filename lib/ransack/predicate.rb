@@ -73,7 +73,7 @@ module Ransack
       end
     end
 
-    def validate(vals, type = @type)
+    def validate(vals, type = @type, sentinel = Ransack.options[:null_sentinel])
       # An explicitly empty array is a meaningful filter (matching nothing)
       # rather than an absent one, but only when blank values are not ignored.
       return true if vals.empty? && wants_array &&
@@ -84,7 +84,7 @@ module Ransack
       # cast at all: a cast to :date or :integer turns most strings into
       # nil, which the validator then rejects, dropping the whole condition
       # when the sentinel is the only value submitted (#940).
-      return true if Constants.null_sentinel_requested?(name, vals)
+      return true if Constants.null_sentinel_requested?(name, vals, sentinel)
 
       # When blank values are meaningful, validate the value as given. Casting
       # first would turn '' into nil for an integer or boolean column and the

@@ -246,19 +246,17 @@ module Ransack
       unescaped.to_s.gsub(/([\\%_])/) { "#{LIKE_ESCAPE_CHARACTER}#{$1}" }
     end
 
-    def null_sentinel_predicate?(predicate_name)
-      sentinel = Ransack.options[:null_sentinel]
+    def null_sentinel_predicate?(predicate_name, sentinel)
       sentinel && NULL_SENTINEL_PREDICATES.include?(predicate_name)
     end
 
-    def null_sentinel_value?(value)
-      sentinel = Ransack.options[:null_sentinel]
+    def null_sentinel_value?(value, sentinel)
       sentinel && value == sentinel
     end
 
-    def null_sentinel_requested?(predicate_name, values)
-      null_sentinel_predicate?(predicate_name) &&
-        values.any? { |v| null_sentinel_value?(v.value) }
+    def null_sentinel_requested?(predicate_name, values, sentinel)
+      null_sentinel_predicate?(predicate_name, sentinel) &&
+        values.any? { |v| null_sentinel_value?(v.value, sentinel) }
     end
   end
 end

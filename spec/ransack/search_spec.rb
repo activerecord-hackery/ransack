@@ -151,6 +151,24 @@ module Ransack
         end
       end
 
+      context 'a per-search null_sentinel override' do
+        let(:sentinel) { '__ransack_null__' }
+        let(:null_col) { "#{quote_table_name('people')}.#{quote_column_name('name')} IS NULL" }
+
+        after { Ransack.configure { |c| c.null_sentinel = nil } }
+
+        it 'applies when no global null_sentinel is configured' do
+          search = Search.new(Person, { name_in: ['Aaron', sentinel] }, { null_sentinel: sentinel })
+          expect(search.result.to_sql).to include(null_col)
+        end
+
+        it 'turns the feature off for one search, with false, while the global setting stays on' do
+          Ransack.configure { |c| c.null_sentinel = sentinel }
+          search = Search.new(Person, { name_in: ['Aaron', sentinel] }, { null_sentinel: false })
+          expect(search.result.to_sql).not_to include('IS NULL')
+        end
+      end
+
       it 'removes empty suffixed conditions before building' do
         expect_any_instance_of(Search).to receive(:build).with({})
         Search.new(Person, name_eq_any: [''])
