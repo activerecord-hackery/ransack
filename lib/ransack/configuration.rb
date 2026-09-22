@@ -37,7 +37,8 @@ module Ransack
       fields_sort_option: nil,
       strip_whitespace: true,
       ignore_blank_values: true,
-      dialect: nil
+      dialect: nil,
+      strong_parameters: false
     }
 
     def configure
@@ -244,6 +245,26 @@ module Ransack
     #
     def dialect=(name)
       self.options[:dialect] = name&.to_sym
+    end
+
+    # Trust strong parameters as the authorization boundary. When a search is
+    # built from an `ActionController::Parameters` that the controller has
+    # `permit`ted, the model's `ransackable_attributes`,
+    # `ransackable_associations` and `ransortable_attributes` allowlists are
+    # not consulted: every permitted key that names a real column, ransacker,
+    # alias or association is searchable. A plain Hash, or unpermitted
+    # parameters, still go through the model allowlists, and
+    # `ransackable_scopes` is always consulted, whatever the parameters.
+    #
+    # Off by default. `ransack(params, strong_parameters: true)` turns it on
+    # for one search, and `strong_parameters: false` turns it off for one.
+    #
+    # Ransack.configure do |config|
+    #   config.strong_parameters = true
+    # end
+    #
+    def strong_parameters=(boolean)
+      self.options[:strong_parameters] = boolean
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)

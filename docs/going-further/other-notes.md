@@ -271,6 +271,79 @@ For models that inherit from `ActiveRecord::Base` directly (some gems define
 their own), put the two methods in a module and extend every model with it
 from an initializer: `ActiveSupport.on_load(:active_record) { extend TheModule }`.
 
+#### Strong parameters instead of model allowlists
+
+The model allowlists decide what any caller may search. A controller often
+knows better, per action and per user, and Rails already gives it the tool:
+strong parameters. Turn on `strong_parameters` and Ransack trusts a permitted
+`ActionController::Parameters` as the authorization, skipping
+`ransackable_attributes`, `ransackable_associations` and
+`ransortable_attributes` for that search:
+
+```ruby
+# config/initializers/ransack.rb
+Ransack.configure { |config| config.strong_parameters = true }
+
+# app/controllers/articles_controller.rb
+def index
+  @q = Article.ransack(search_params)
+  @articles = @q.result
+end
+
+private
+
+def search_params
+  params.fetch(:q, {}).permit(:title_cont, :author_name_cont, :created_at_gteq, :s, s: [])
+end
+```
+
+What is permitted is the condition key, so `title_cont` allows exactly that
+and not `title_eq`. `s` is a string for a single sort and an array for
+several, hence both forms. Use `fetch` rather than `require`, because a request
+with no search is a normal request.
+
+A permitted key must still name something that exists, a column, ransacker,
+alias or association, so a typo is dropped, or raises under `ransack!`, as
+before. Three things never change with this setting:
+
+- `ransackable_scopes` is always consulted. A permitted condition key can
+  never call a class method the model has not listed. (The
+  `sort_by_<attribute>_<direction>` convention for sort scopes is separate:
+  it is reachable by name in every mode, takes nothing from the request, and
+  is neither opened nor closed by this setting.)
+- A plain Hash has no permitted flag, so a search built in the console, a job
+  or a test keeps the model allowlists.
+- Unpermitted parameters keep the model allowlists too.
+
+Sorting is the one place where `permit` cannot express a list. Permitting `s`
+permits the key, not the column names inside its value, so with this setting
+on a permitted `s` can sort by any column, ransacker or alias, and through any
+association. If sorting has to stay restricted on an action, validate the
+value yourself before passing it on, or pass `strong_parameters: false` for
+that search so `ransortable_attributes` applies:
+
+```ruby
+SORTS = %w[title created_at].freeze
+
+def search_params
+  permitted = params.fetch(:q, {}).permit(:title_cont, :s)
+  permitted.delete(:s) unless SORTS.include?(permitted[:s].to_s.split.first)
+  permitted
+end
+```
+
+The setting can be overridden per search in either direction:
+`Article.ransack(search_params, strong_parameters: true)` trusts one search
+with the global off, and `strong_parameters: false` sends one search through
+the model allowlists with the global on.
+
+{: .warning }
+> `permit(q: {})`, which advanced mode's `g` and `c` groupings need, permits
+> everything under `q`, and Ransack cannot tell that apart from an explicit
+> list. With `strong_parameters` on, that action can search and sort every
+> column and association. Permit the exact nested shape instead, or pass
+> `strong_parameters: false` for that search.
+
 All four methods can receive a single optional parameter, `auth_object`. When
 you call the search or ransack method on your model, you can provide a value
 for an `auth_object` key in the options hash which can be used by your own
