@@ -112,6 +112,21 @@ module Ransack
         end
       end
 
+      describe 'select html attributes' do
+        # @default_options carries the builder's :skip_default_ids and
+        # :allow_method_names_outside_object settings, which Rails strips from
+        # its own selects via @default_html_options; merging the former into the
+        # html options printed them as attributes on every ransack select.
+        it 'does not leak form builder options as attributes' do
+          [@f.attribute_select, @f.predicate_select, @f.combinator_select].each do |html|
+            expect(html).not_to match /skip_default_ids|allow_method_names_outside_object/
+          end
+        end
+        it 'still applies html options' do
+          expect(@f.predicate_select({}, class: 'predicate')).to match /<select class="predicate"/
+        end
+      end
+
       describe '#predicate_select' do
         it 'returns predicates with predicate_select' do
           html = @f.predicate_select
