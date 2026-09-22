@@ -19,15 +19,18 @@ fixes. Ransack 6.0 requires Ruby 3.2 or later, which is also the floor for
 Rails 8.0. If you are on Ruby 3.1 you are already limited to Rails 7.2; stay on
 Ransack 5.x until you can upgrade Ruby.
 
-### `cont` is case-sensitive on PostgreSQL
+### `cont`, `start` and `end` are case-sensitive on PostgreSQL
 
 Ransack never told Arel whether a `LIKE` should be case-sensitive, and Arel's
 PostgreSQL visitor renders the default as `ILIKE`. So on PostgreSQL `cont`,
 `start`, `end` and `matches` all ignored case, while the docs said `cont` used
-`LIKE`. They now do: `cont` is `LIKE` and `i_cont` is `ILIKE`. A PostgreSQL
-application that relied on `cont` ignoring case should switch those searches
-to `i_cont`. MySQL and SQLite are unaffected; their `LIKE` follows the
-column's collation as before. See
+`LIKE`. They now do: `cont`, `start` and `end` are `LIKE`; `i_cont` and the
+new `i_start` and `i_end` are `ILIKE`. A PostgreSQL application that relied
+on those predicates ignoring case should switch to the `i_` form. Nothing
+raises when it does not; the search just stops matching rows whose case
+differs, so check filters that are wired up by another library. ActiveAdmin's
+string filter, for example, offers `cont`, `start` and `end`. MySQL and SQLite
+are unaffected; their `LIKE` follows the column's collation as before. See
 [Search Matchers](./search-matches.md#case-sensitivity).
 
 ### Database dialects are detected from the adapter class

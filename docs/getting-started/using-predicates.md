@@ -191,6 +191,19 @@ The `start` predicate returns all records where a field begins with a given valu
 
 **Opposite: `not_start`**
 
+## i_start
+
+The `i_start` case-insensitive predicate returns all records where a field begins with a given value and ignores case:
+
+```ruby
+>> User.ransack(first_name_i_start: 'Rya').result.to_sql
+=> SELECT "users".* FROM "users"  WHERE (LOWER("users"."first_name") LIKE 'rya%')
+```
+
+On PostgreSQL this renders as `"users"."first_name" ILIKE 'rya%'` instead. The `i_start_any` and `i_start_all` compounds take a list of values, like `i_cont_any` and `i_cont_all`.
+
+**Opposite: `not_i_start`**
+
 ## end (ends with)
 
 The `end` predicate returns all records where a field ends with a given value:
@@ -201,6 +214,19 @@ The `end` predicate returns all records where a field ends with a given value:
 ```
 
 **Opposite: `not_end`**
+
+## i_end
+
+The `i_end` case-insensitive predicate returns all records where a field ends with a given value and ignores case:
+
+```ruby
+>> User.ransack(first_name_i_end: 'yan').result.to_sql
+=> SELECT "users".* FROM "users"  WHERE (LOWER("users"."first_name") LIKE '%yan')
+```
+
+On PostgreSQL this renders as `"users"."first_name" ILIKE '%yan'` instead. The `i_end_any` and `i_end_all` compounds take a list of values.
+
+**Opposite: `not_i_end`**
 
 ## true
 
