@@ -64,6 +64,8 @@ module Ransack
         end
 
         def attribute_method?(str, klass = @klass)
+          return false unless key_within_depth_limit?(str)
+
           exists = false
           if ransackable_attribute?(str, klass) ||
              ransortable_attribute?(str, klass)
@@ -238,6 +240,8 @@ module Ransack
         end
 
         def get_parent_and_attribute_name(str, parent = @base)
+          return [parent, nil] unless key_within_depth_limit?(str)
+
           attr_name = nil
 
           if ransackable_attribute?(str, klassify(parent)) ||

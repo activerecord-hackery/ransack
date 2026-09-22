@@ -50,6 +50,15 @@ module Ransack
 
     DISTINCT = 'DISTINCT '.freeze
 
+    # The most `_`-separated segments a single condition or sort key may have
+    # before Ransack rejects it as invalid instead of parsing it. Working out
+    # whether a key is an attribute, an `_and_`/`_or_` compound or a path
+    # through associations is superlinear in this count, and the key comes
+    # straight from the query string, so an unbounded one is a CPU-exhaustion
+    # denial of service (GHSA-j3f8-w227-4hh8). No real search key is this
+    # long: OR-ing every column of a very wide table stays well under it.
+    MAX_KEY_DEPTH = 200
+
     DERIVED_PREDICATES = [
       [CONT, {
         arel_predicate: 'matches'.freeze,
