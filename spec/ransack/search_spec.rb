@@ -523,6 +523,26 @@ module Ransack
             ignore_unknown_conditions: false)
           expect(search.result.to_sql).to include('IN')
         end
+
+        context 'when one of the extra values is the configured null_sentinel' do
+          let(:sentinel) { '__ransack_null__' }
+          let(:params) do
+            { c: [{ a: ['name'], p: 'eq', v: [{ value: 'Aric' }, { value: sentinel }] }] }
+          end
+
+          before { Ransack.configure { |c| c.null_sentinel = sentinel } }
+          after { Ransack.configure { |c| c.null_sentinel = nil } }
+
+          it 'still raises in strict mode, rather than being absorbed by the sentinel bypass' do
+            expect { Search.new(Person, params, ignore_unknown_conditions: false) }
+              .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+          end
+
+          it 'still drops the condition in the default lenient mode' do
+            search = Search.new(Person, params)
+            expect(search.base.conditions).to be_empty
+          end
+        end
       end
 
       context 'combinator validation in strict mode' do

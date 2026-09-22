@@ -79,6 +79,13 @@ module Ransack
       return true if vals.empty? && wants_array &&
                      !Ransack.options[:ignore_blank_values]
 
+      # The null sentinel is a marker compared by identity, never cast to
+      # the column's type. Casting it here would be the only place it is
+      # cast at all: a cast to :date or :integer turns most strings into
+      # nil, which the validator then rejects, dropping the whole condition
+      # when the sentinel is the only value submitted (#940).
+      return true if Constants.null_sentinel_requested?(name, vals)
+
       # When blank values are meaningful, validate the value as given. Casting
       # first would turn '' into nil for an integer or boolean column and the
       # explicit blank would be dropped — leaving no condition at all.

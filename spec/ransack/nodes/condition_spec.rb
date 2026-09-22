@@ -17,6 +17,160 @@ module Ransack
         end
       end
 
+      context 'with a null_sentinel' do
+        let(:sentinel) { '__ransack_null__' }
+
+        before { Ransack.configure { |c| c.null_sentinel = sentinel } }
+        after { Ransack.configure { |c| c.null_sentinel = nil } }
+
+        def where_clause(hash)
+          sql = Person.ransack(hash).result.to_sql
+          sql.split(/\bWHERE\b/, 2).last.to_s
+             .split(/\bORDER BY\b/).first.to_s.strip
+        end
+
+        # `col` is quoted the way the current adapter would quote
+        # `people.<col>`, so these assertions hold on SQLite, PostgreSQL
+        # and MySQL/Trilogy alike, rather than assuming double quotes.
+        def qcol(col)
+          "#{quote_table_name('people')}.#{quote_column_name(col)}"
+        end
+
+        context 'on a string column, through _in' do
+          it 'behaves as a plain _in with no sentinel present' do
+            expect(where_clause(name_in: ['Aaron']))
+              .to eq "#{qcol('name')} IN (#{quote_value('Aaron')})"
+          end
+
+          it 'ORs in IS NULL when the sentinel accompanies real values' do
+            expect(where_clause(name_in: ['Aaron', sentinel]))
+              .to eq "(#{qcol('name')} IN (#{quote_value('Aaron')}) " \
+                     "OR #{qcol('name')} IS NULL)"
+          end
+
+          it 'is IS NULL alone when the sentinel is the only value' do
+            expect(where_clause(name_in: [sentinel]))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+        end
+
+        context 'on a string column, through _eq' do
+          it 'is IS NULL when the sentinel is submitted' do
+            expect(where_clause(name_eq: sentinel))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+        end
+
+        context 'on an integer column, through _in' do
+          it 'casts the real values and ORs in IS NULL' do
+            expect(where_clause(salary_in: ['1', sentinel]))
+              .to eq "(#{qcol('salary')} IN (1) OR #{qcol('salary')} IS NULL)"
+          end
+        end
+
+        context 'on a date column, through _in' do
+          # A date cast of the sentinel string yields nil, which the
+          # default validator rejects. Without a sentinel-aware
+          # `Predicate#validate`, this condition is dropped entirely
+          # rather than reaching `Condition#format_predicate` at all.
+          it 'is IS NULL alone when the sentinel is the only value' do
+            expect(where_clause(life_start_in: [sentinel]))
+              .to eq "#{qcol('life_start')} IS NULL"
+          end
+
+          it 'casts the real value and ORs in IS NULL' do
+            date = quote_value('2020-01-01')
+            expect(where_clause(life_start_in: ['2020-01-01', sentinel]))
+              .to eq "(#{qcol('life_start')} IN (#{date}) " \
+                     "OR #{qcol('life_start')} IS NULL)"
+          end
+        end
+
+        context 'on an eq_any compound predicate' do
+          it 'ORs in IS NULL alongside the compound' do
+            expect(where_clause(name_eq_any: ['Aaron', sentinel]))
+              .to eq "((#{qcol('name')} = #{quote_value('Aaron')}) " \
+                     "OR #{qcol('name')} IS NULL)"
+          end
+
+          it 'is IS NULL alone when the sentinel is the only value' do
+            expect(where_clause(name_eq_any: [sentinel]))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+        end
+
+        context 'on an in_any compound predicate' do
+          it 'ORs in IS NULL alongside the compound' do
+            expect(where_clause(name_in_any: ['Aaron', sentinel]))
+              .to eq "((#{qcol('name')} IN (#{quote_value('Aaron')})) " \
+                     "OR #{qcol('name')} IS NULL)"
+          end
+
+          it 'is IS NULL alone when the sentinel is the only value' do
+            expect(where_clause(name_in_any: [sentinel]))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+        end
+
+        context 'the eq_all and in_all compound predicates, which are ambiguous and out of scope' do
+          # Both are conjunctive: ORing IS NULL onto them would widen rather
+          # than narrow, since a column can never equal two different real
+          # values at once. They are excluded for the same reason the
+          # negative predicates below are.
+          it 'treats the sentinel as a literal value for eq_all' do
+            expect(where_clause(name_eq_all: ['Aaron', sentinel]))
+              .to eq "(#{qcol('name')} = #{quote_value('Aaron')} " \
+                     "AND #{qcol('name')} = #{quote_value(sentinel)})"
+          end
+
+          it 'treats the sentinel as a literal value for in_all' do
+            expect(where_clause(name_in_all: ['Aaron', sentinel]))
+              .to eq "(#{qcol('name')} IN (#{quote_value('Aaron')}) " \
+                     "AND #{qcol('name')} IN (#{quote_value(sentinel)}))"
+          end
+        end
+
+        context 'the negative predicates, which are out of scope' do
+          it 'treats the sentinel as a literal value for _not_in' do
+            expect(where_clause(name_not_in: ['Aaron', sentinel]))
+              .to eq "#{qcol('name')} NOT IN (#{quote_value('Aaron')}, " \
+                     "#{quote_value(sentinel)})"
+          end
+
+          it 'treats the sentinel as a literal value for _not_eq' do
+            expect(where_clause(name_not_eq: sentinel))
+              .to eq "#{qcol('name')} != #{quote_value(sentinel)}"
+          end
+        end
+
+        context 'the form round-trip' do
+          it 'returns the sentinel alongside the real value, on a string column' do
+            search = Person.ransack(name_in: ['Aaron', sentinel])
+            expect(search.name_in).to match_array(['Aaron', sentinel])
+          end
+
+          it 'returns the sentinel uncast, on an integer column' do
+            search = Person.ransack(salary_in: ['1', sentinel])
+            expect(search.salary_in).to match_array([1, sentinel])
+          end
+
+          it 'returns the sentinel uncast, on a date column' do
+            search = Person.ransack(life_start_in: ['2020-01-01', sentinel])
+            expect(search.life_start_in).to match_array([Date.new(2020, 1, 1), sentinel])
+          end
+        end
+
+        context 'with no null_sentinel configured' do
+          before { Ransack.configure { |c| c.null_sentinel = nil } }
+
+          it 'treats a sentinel-shaped value as a literal, when unset' do
+            expect(where_clause(name_in: ['Aaron', sentinel]))
+              .to eq "#{qcol('name')} IN (#{quote_value('Aaron')}, " \
+                     "#{quote_value(sentinel)})"
+          end
+        end
+      end
+
       context 'with an alias' do
         subject {
           Condition.extract(

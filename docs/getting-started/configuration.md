@@ -54,6 +54,10 @@ Ransack.configure do |config|
   # Name the SQL dialect explicitly instead of detecting it from the adapter.
   # Default is nil (detect). One of :postgresql, :mysql, :sqlite, :generic.
   config.dialect = :postgresql
+
+  # A unique String value that, when submitted to an eq/in predicate (or their
+  # _any compounds), also matches NULL. Default is nil (disabled).
+  config.null_sentinel = '__ransack_null__'
 end
 ```
 
@@ -153,6 +157,40 @@ such as `_gt`, a blank matches nothing at all rather than everything.
 > Do not turn this off for a search backed by an HTML form. A blank text input
 > posts `""`, so with `ignore_blank_values = false` an untouched field becomes
 > `WHERE column = ''` and the form returns nothing.
+## Null sentinel
+
+By default an `eq` or `in` predicate treats every submitted value as a literal
+to search for, with no way to also match `NULL` from the same field. Setting
+`null_sentinel` to a unique `String` value that cannot occur in your data adds
+that ability, to `eq`, `in`, and their `_any` compounds:
+
+```ruby
+Ransack.configure { |config| config.null_sentinel = '__ransack_null__' }
+
+Person.ransack(name_in: ['Ernie']).result.to_sql
+# ... WHERE "people"."name" IN ('Ernie')
+
+Person.ransack(name_in: ['Ernie', '__ransack_null__']).result.to_sql
+# ... WHERE ("people"."name" IN ('Ernie') OR "people"."name" IS NULL)
+
+Person.ransack(name_in: ['__ransack_null__']).result.to_sql
+# ... WHERE "people"."name" IS NULL
+```
+
+A single multi-select or checkbox-group field can express all three states
+this way, with no change to the field's name and no controller-side
+rewriting. This does not bypass `ransackable_attributes`: `NULL` on an exposed
+attribute is already reachable through the built-in `null` predicate.
+
+{: .note }
+> `null_sentinel` must be a unique `String`. A blank string, `false`, or a
+> non-`String` value is not supported and produces undefined behavior.
+
+The `_all` compounds (`eq_all`, `in_all`) and the negative predicates
+(`not_eq`, `not_in`, and their compounds) are excluded: both are places where
+"or is null" would be ambiguous or actively wrong, so the sentinel is treated
+as a literal value there instead. See
+[#940](https://github.com/activerecord-hackery/ransack/issues/940).
 ## Sorting NULLs
 
 `fields_sort_option` controls where `NULL`s are placed when sorting:
