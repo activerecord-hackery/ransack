@@ -50,9 +50,20 @@ module Ransack
     def add_predicate(name, opts = {})
       name = name.to_s
       opts[:name] = name
+
+      if opts[:arel_predicate] && opts[:arel_node]
+        raise ArgumentError,
+          "add_predicate '#{name}' takes :arel_predicate or :arel_node, " \
+          "not both"
+      end
+
       compounds = opts.delete(:compounds)
       compounds = true if compounds.nil?
       compounds = false if opts[:wants_array]
+      # _any/_all are built by appending a suffix to an Arel method name
+      # (see #arel_predicate_with_suffix below), which an arel_node builder
+      # has none of.
+      compounds = false if opts[:arel_node]
 
       self.predicates[name] = Predicate.new(opts)
 
@@ -281,7 +292,11 @@ module Ransack
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)
-      if arel_predicate === Proc
+      # `arel_predicate === Proc` reads as a class check, but `Proc#===` is
+      # an alias for `#call`: it invokes the proc, passing the `Proc`
+      # class itself as the argument, and branches on whatever comes
+      # back. `#respond_to?(:call)` is a real check.
+      if arel_predicate.respond_to?(:call)
         proc { |v| "#{arel_predicate.call(v)}#{suffix}" }
       else
         "#{arel_predicate}#{suffix}"

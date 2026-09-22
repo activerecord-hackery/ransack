@@ -224,6 +224,83 @@ module Ransack
         end
       end
 
+      context 'with an arel_node' do
+        def where_clause(hash)
+          sql = Person.ransack(hash).result.to_sql
+          sql.split(/\bWHERE\b/, 2).last.to_s
+             .split(/\bORDER BY\b/).first.to_s.strip
+        end
+
+        def qcol(col)
+          "#{quote_table_name('people')}.#{quote_column_name(col)}"
+        end
+
+        it 'builds a finished Arel node, the documented gteq_or_null example' do
+          Ransack.configure do |config|
+            config.add_predicate :test_gteq_or_null,
+              arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
+          end
+
+          expect(where_clause(life_start_test_gteq_or_null: '2020-01-01'))
+            .to eq "(#{qcol('life_start')} >= #{quote_value('2020-01-01')} " \
+                   "OR #{qcol('life_start')} IS NULL)"
+        end
+
+        it 'does not affect an unrelated predicate once registered' do
+          Ransack.configure do |config|
+            config.add_predicate :test_gteq_or_null_regression_check,
+              arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
+          end
+
+          expect(where_clause(name_in: ['Aaron']))
+            .to eq "#{qcol('name')} IN (#{quote_value('Aaron')})"
+          expect(where_clause(name_eq: 'Aaron'))
+            .to eq "#{qcol('name')} = #{quote_value('Aaron')}"
+          expect(where_clause(salary_gteq: 5))
+            .to eq "#{qcol('salary')} >= 5"
+        end
+
+        context 'the arel_predicate callable-detection fix' do
+          it 'detects a callable that is not a literal Proc or lambda' do
+            # `Proc === anything` is the only class in Ruby whose `#===` is
+            # aliased to `#call`. A `Method` object, or any other object
+            # responding to `#call`, is never a Proc, so the old
+            # `arel_predicate === Proc` check never detected it: it fell
+            # through to `attr_value.public_send(dispatcher, values)`,
+            # which raises because `public_send` needs a Symbol or String.
+            dispatcher = Object.new
+            def dispatcher.call(values)
+              values.present? ? 'eq' : 'not_eq'
+            end
+
+            Ransack.configure do |config|
+              config.add_predicate :test_callable_object_predicate,
+                arel_predicate: dispatcher
+            end
+
+            expect(where_clause(name_test_callable_object_predicate: 'Aaron'))
+              .to eq "#{qcol('name')} = #{quote_value('Aaron')}"
+          end
+
+          it 'calls the proc with the real values, not a Proc-class probe' do
+            # `arel_predicate === Proc` calls the proc once with the `Proc`
+            # class itself as the argument, to decide whether to treat it
+            # as callable at all, before calling it again with the real
+            # values. A proc whose return value depends on its input can
+            # be misrouted by that first, bogus call.
+            picker = proc { |v| v == Proc ? false : 'eq' }
+
+            Ransack.configure do |config|
+              config.add_predicate :test_proc_class_probe_predicate,
+                arel_predicate: picker
+            end
+
+            expect(where_clause(name_test_proc_class_probe_predicate: 'Aaron'))
+              .to eq "#{qcol('name')} = #{quote_value('Aaron')}"
+          end
+        end
+      end
+
       context 'with an alias' do
         subject {
           Condition.extract(

@@ -16,6 +16,40 @@ module Ransack
       expect(Ransack.predicates).to have_key 'test_predicate_all'
     end
 
+    context 'with an arel_node' do
+      it 'takes an arel_node builder in place of arel_predicate' do
+        Ransack.configure do |config|
+          config.add_predicate :test_node_predicate,
+            arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
+        end
+
+        expect(Ransack.predicates['test_node_predicate'].arel_node)
+          .to be_a Proc
+      end
+
+      it 'does not create compound predicates for an arel_node builder' do
+        Ransack.configure do |config|
+          config.add_predicate :test_node_predicate_no_compounds,
+            arel_node: ->(attr, val) { attr.eq(val) }
+        end
+
+        expect(Ransack.predicates)
+          .not_to have_key 'test_node_predicate_no_compounds_any'
+        expect(Ransack.predicates)
+          .not_to have_key 'test_node_predicate_no_compounds_all'
+      end
+
+      it 'raises when given both arel_predicate and arel_node' do
+        expect {
+          Ransack.configure do |config|
+            config.add_predicate :test_conflicting_predicate,
+              arel_predicate: 'eq',
+              arel_node: ->(attr, val) { attr.eq(val) }
+          end
+        }.to raise_error ArgumentError
+      end
+    end
+
     it 'avoids creating compound predicates if compounds: false' do
       Ransack.configure do |config|
         config.add_predicate(

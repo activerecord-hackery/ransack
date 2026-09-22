@@ -52,22 +52,28 @@ Person.ransack(name_in_list: 'Aaron;Ernie').result.to_sql
 Returning `"Aaron','Ernie"` instead gives `IN ('Aaron'',''Ernie')`: the string
 is one value, and treating it as SQL would be an injection vector.
 
-If Arel does not have the predicate you are looking for, consider monkey patching it:
+### Combining two conditions: `arel_node`
+
+`arel_predicate` names one Arel method with one argument, so it cannot
+combine two conditions on its own. For a predicate like `gteq_or_null`,
+pass `arel_node` instead: a two-argument callable that receives the
+attribute and the formatted values, and returns a finished Arel node
+directly.
 
 ```ruby
 # config/initializers/ransack.rb
 
-module Arel
-  module Predications
-    def gteq_or_null(other)
-      left = gteq(other)
-      right = eq(nil)
-      left.or(right)
-    end
-  end
-end
-
 Ransack.configure do |config|
-  config.add_predicate 'gteq_or_null', arel_predicate: 'gteq_or_null'
+  config.add_predicate 'gteq_or_null',
+    arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
 end
 ```
+
+`arel_node` and `arel_predicate` are mutually exclusive on one predicate,
+and `arel_node` has no compound (`_any`/`_all`) form, since those are
+built by appending a suffix to an Arel method name.
+
+Avoid monkey patching `Arel::Predications` to add a method like
+`gteq_or_null` instead: the module is undocumented in every version of
+ActiveRecord Ransack supports, and its internals differ between
+versions.

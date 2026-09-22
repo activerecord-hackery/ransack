@@ -383,7 +383,13 @@ module Ransack
       end
 
       def arel_predicate_for_attribute(attr)
-        if predicate.arel_predicate === Proc
+        # `.arel_predicate === Proc` reads as a class check, but `Proc#===`
+        # is an alias for `#call`. It actually invokes the proc, passing
+        # the `Proc` class itself as the argument, and branches on whatever
+        # comes back. `#respond_to?(:call)` is a real check, and it also
+        # catches a callable object that is not literally a Proc/lambda,
+        # which the old check could never detect.
+        if predicate.arel_predicate.respond_to?(:call)
           values = casted_values_for_attribute(attr)
           unless predicate.wants_array
             values = values.first
@@ -480,6 +486,8 @@ module Ransack
       end
 
       def format_predicate(attribute)
+        return format_predicate_from_node(attribute) if predicate.arel_node
+
         arel_pred = arel_predicate_for_attribute(attribute)
         arel_values = formatted_values_for_attribute(attribute)
 
@@ -543,6 +551,24 @@ module Ransack
       def in_predicate?(predicate)
         return unless defined?(Arel::Nodes::Casted)
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
+      end
+
+      # `arel_node` receives the attribute node and the already cast and
+      # formatted values, and returns a finished Arel node directly,
+      # instead of naming a method `#format_predicate` sends to
+      # `attr_value` with one argument.
+      def format_predicate_from_node(attribute)
+        attr_value = attr_value_for_attribute(attribute)
+        values = formatted_values_for_attribute(attribute)
+        predicate = self.predicate.arel_node.call(attr_value, values)
+
+        if in_predicate?(predicate)
+          predicate.right = predicate.right.map do |pr|
+            casted_array?(pr) ? format_values_for(pr) : pr
+          end
+        end
+
+        predicate
       end
 
       LIKE_PREDICATES = %w[
