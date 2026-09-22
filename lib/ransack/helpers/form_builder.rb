@@ -112,7 +112,6 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        options[:selected] ||= nil
         default = options.delete(:default) || Constants::CONT
 
         keys =
@@ -134,6 +133,7 @@ module Ransack
         collection = keys.map { |k| [k, Translate.predicate(k)] }
         object.predicate ||= Predicate.named(default) if
           can_use_default?(default, :predicate, keys)
+        options[:selected] = selected_predicate unless options.key?(:selected)
         template_collection_select(:p, collection, options, html_options)
       end
 
@@ -143,6 +143,14 @@ module Ransack
       end
 
       private
+
+      # Rails reads a select's current value back through the field name, which
+      # for the predicate select is +p+. Only a Condition has a public +p+, and
+      # +Kernel#p+ is private, so a builder for a Search or Grouping would
+      # raise instead of finding nothing. Resolve the value here instead.
+      def selected_predicate
+        object.predicate_name if object.respond_to?(:predicate_name)
+      end
 
       def template_grouped_collection_select(collection, options, html_options)
         @template.grouped_collection_select(
