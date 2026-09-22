@@ -110,6 +110,24 @@ module Ransack
             expect(html).to match /<optgroup label="#{model}">/
           end
         end
+        it 'reaches nested associations given as a Hash' do
+          html = @f.attribute_select(associations: { articles: :comments })
+          [Person, Article, Comment].each do |model|
+            expect(html).to match /<optgroup label="#{model}">/
+          end
+          expect(html).to match /<option value="articles_comments_body">/
+        end
+        it 'expands every shape of :associations into association paths' do
+          expand = ->(shape) { @f.send(:association_array, shape) }
+          expect(expand.call('articles')).to eq ['articles']
+          expect(expand.call([:articles, :comments])).to eq %w[articles comments]
+          expect(expand.call({ articles: :comments })).to eq %w[articles articles_comments]
+          expect(expand.call({ articles: [:comments, :tags] })).to eq %w[articles articles_comments articles_tags]
+          expect(expand.call([:comments, { articles: :tags }])).to eq %w[comments articles articles_tags]
+          expect(expand.call({ articles: { comments: :tags } })).to eq %w[articles articles_comments articles_comments_tags]
+          expect(expand.call({ articles: [] })).to eq ['articles']
+          expect(expand.call({ articles: nil })).to eq ['articles']
+        end
       end
 
       describe 'select html attributes' do

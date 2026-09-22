@@ -196,31 +196,28 @@ module Ransack
         end
       end
 
+      # Expands the +associations:+ option of +attribute_select+ into the flat
+      # list of association paths ransack understands. A String or Symbol
+      # names one association; an Array lists several; a Hash reaches through
+      # an association to its own associations, so +{ articles: :comments }+
+      # yields +articles+ and +articles_comments+. Shapes nest freely.
       def association_array(obj, prefix = nil)
-        ([prefix] + association_object(obj))
-        .compact
-        .flat_map { |v| [prefix, v].compact.join(Constants::UNDERSCORE) }
-      end
-
-      def association_object(obj)
-        case obj
-        when Array
-          obj
-        when Hash
-          association_hash(obj)
-        else
-          [obj]
-        end
-      end
-
-      def association_hash(obj)
-        obj.map do |key, value|
-          case value
-          when Array, Hash
-            association_array(value, key.to_s)
+        Array.wrap(obj).flat_map do |item|
+          case item
+          when Hash
+            association_hash(item, prefix)
+          when nil
+            []
           else
-            [key.to_s, [key, value].join(Constants::UNDERSCORE)]
+            [[prefix, item].compact.join(Constants::UNDERSCORE)]
           end
+        end.uniq
+      end
+
+      def association_hash(obj, prefix = nil)
+        obj.flat_map do |key, value|
+          path = [prefix, key].compact.join(Constants::UNDERSCORE)
+          [path] + association_array(value, path)
         end
       end
 
