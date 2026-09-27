@@ -17,6 +17,53 @@ module Ransack
         end
       end
 
+      context 'integer out of range inside a composite node' do
+        # An out-of-range integer only raises once Arel casts it while
+        # building SQL, so a plain `_eq` predicate hits that directly. The
+        # same value used to raise once it sat inside an In node's `right`
+        # Array, or inside the Grouping/And/Or that Arel's own `_any` /
+        # `_all` predicates build.
+        let(:big) { '99999999999999999999' }
+
+        it 'does not raise for a plain predicate' do
+          sql = Person.ransack(salary_eq: big).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for a plain _in predicate' do
+          sql = Person.ransack(salary_in: [big]).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for a plain _not_in predicate' do
+          sql = Person.ransack(salary_not_in: [big]).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        # A negated predicate on a collection association's column is rendered
+        # to SQL for a correlated subquery inside #arel_predicate itself, so
+        # the value has to be unwrapped before that happens.
+        it 'does not raise for a negated predicate on a collection association' do
+          sql = Person.ransack(articles_id_not_eq: big).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for a negated _in predicate on a collection association' do
+          sql = Person.ransack(articles_id_not_in: [big]).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for an _any predicate with three or more values' do
+          sql = Person.ransack(salary_eq_any: ['1', '2', big]).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for an _all predicate with three or more values' do
+          sql = Person.ransack(salary_eq_all: ['1', '2', big]).result.to_sql
+          expect(sql).to include(big)
+        end
+      end
+
       context 'with a null_sentinel' do
         let(:sentinel) { '__ransack_null__' }
 
@@ -65,6 +112,12 @@ module Ransack
           it 'casts the real values and ORs in IS NULL' do
             expect(where_clause(salary_in: ['1', sentinel]))
               .to eq "(#{qcol('salary')} IN (1) OR #{qcol('salary')} IS NULL)"
+          end
+
+          it 'unwraps an out-of-range integer sitting beside the sentinel' do
+            big = '99999999999999999999'
+            expect(where_clause(salary_in: [big, sentinel]))
+              .to eq "(#{qcol('salary')} IN (#{big}) OR #{qcol('salary')} IS NULL)"
           end
         end
 
