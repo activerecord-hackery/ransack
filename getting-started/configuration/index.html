@@ -274,6 +274,10 @@
   <span class="c1"># Name the SQL dialect explicitly instead of detecting it from the adapter.</span>
   <span class="c1"># Default is nil (detect). One of :postgresql, :mysql, :sqlite, :generic.</span>
   <span class="n">config</span><span class="p">.</span><span class="nf">dialect</span> <span class="o">=</span> <span class="ss">:postgresql</span>
+
+  <span class="c1"># A unique String value that, when submitted to an eq/in predicate (or their</span>
+  <span class="c1"># _any compounds), also matches NULL. Default is nil (disabled).</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">null_sentinel</span> <span class="o">=</span> <span class="s1">'__ransack_null__'</span>
 <span class="k">end</span>
 </code></pre></div></div>
 <h2 id="sql-dialect">
@@ -387,6 +391,59 @@ such as <code class="language-plaintext highlighter-rouge">_gt</code>, a blank m
   <p>Do not turn this off for a search backed by an HTML form. A blank text input
 posts <code class="language-plaintext highlighter-rouge">""</code>, so with <code class="language-plaintext highlighter-rouge">ignore_blank_values = false</code> an untouched field becomes
 <code class="language-plaintext highlighter-rouge">WHERE column = ''</code> and the form returns nothing.</p>
+<h2 id="null-sentinel">
+  
+  
+    <a href="#null-sentinel" class="anchor-heading" aria-labelledby="null-sentinel"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Null sentinel
+  
+  
+</h2>
+    
+</blockquote>
+
+<p>By default an <code class="language-plaintext highlighter-rouge">eq</code> or <code class="language-plaintext highlighter-rouge">in</code> predicate treats every submitted value as a literal
+to search for, with no way to also match <code class="language-plaintext highlighter-rouge">NULL</code> from the same field. Setting
+<code class="language-plaintext highlighter-rouge">null_sentinel</code> to a unique <code class="language-plaintext highlighter-rouge">String</code> value that cannot occur in your data adds
+that ability, to <code class="language-plaintext highlighter-rouge">eq</code>, <code class="language-plaintext highlighter-rouge">in</code>, and their <code class="language-plaintext highlighter-rouge">_any</code> compounds:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="p">{</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span> <span class="n">config</span><span class="p">.</span><span class="nf">null_sentinel</span> <span class="o">=</span> <span class="s1">'__ransack_null__'</span> <span class="p">}</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_in: </span><span class="p">[</span><span class="s1">'Ernie'</span><span class="p">]).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... WHERE "people"."name" IN ('Ernie')</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_in: </span><span class="p">[</span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="s1">'__ransack_null__'</span><span class="p">]).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... WHERE ("people"."name" IN ('Ernie') OR "people"."name" IS NULL)</span>
+
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">name_in: </span><span class="p">[</span><span class="s1">'__ransack_null__'</span><span class="p">]).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># ... WHERE "people"."name" IS NULL</span>
+</code></pre></div></div>
+
+<p>A single multi-select or checkbox-group field can express all three states
+this way, with no change to the field’s name and no controller-side
+rewriting. <code class="language-plaintext highlighter-rouge">eq</code> takes one value, so through it (a select with an “unset”
+option, say) the sentinel means <code class="language-plaintext highlighter-rouge">IS NULL</code> alone; “a value or <code class="language-plaintext highlighter-rouge">NULL</code>” from one
+field needs <code class="language-plaintext highlighter-rouge">in</code> or an <code class="language-plaintext highlighter-rouge">_any</code> compound. This does not bypass
+<code class="language-plaintext highlighter-rouge">ransackable_attributes</code>: <code class="language-plaintext highlighter-rouge">NULL</code> on an exposed attribute is already reachable
+through the built-in <code class="language-plaintext highlighter-rouge">null</code> predicate.</p>
+
+<p>It can be set globally, or per search, the same as <code class="language-plaintext highlighter-rouge">strip_whitespace</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">name_in: </span><span class="p">[</span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="s1">'__ransack_null__'</span><span class="p">]</span> <span class="p">},</span> <span class="ss">null_sentinel: </span><span class="s1">'__ransack_null__'</span><span class="p">)</span>
+
+<span class="c1"># With a global null_sentinel configured, turn it off for one search:</span>
+<span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">({</span> <span class="ss">name_in: </span><span class="p">[</span><span class="s1">'Ernie'</span><span class="p">,</span> <span class="s1">'__ransack_null__'</span><span class="p">]</span> <span class="p">},</span> <span class="ss">null_sentinel: </span><span class="kp">false</span><span class="p">)</span>
+</code></pre></div></div>
+
+<blockquote class="note">
+  <p><code class="language-plaintext highlighter-rouge">null_sentinel</code> must be a unique <code class="language-plaintext highlighter-rouge">String</code>. A blank string, <code class="language-plaintext highlighter-rouge">false</code>, or a
+non-<code class="language-plaintext highlighter-rouge">String</code> value is not supported and produces undefined behavior.</p>
+</blockquote>
+
+<p>The <code class="language-plaintext highlighter-rouge">_all</code> compounds (<code class="language-plaintext highlighter-rouge">eq_all</code>, <code class="language-plaintext highlighter-rouge">in_all</code>) and the negative predicates
+(<code class="language-plaintext highlighter-rouge">not_eq</code>, <code class="language-plaintext highlighter-rouge">not_in</code>, and their compounds) are excluded: both are places where
+“or is null” would be ambiguous or actively wrong, so the sentinel is treated
+as a literal value there instead. See
+<a href="https://github.com/activerecord-hackery/ransack/issues/940">#940</a>.</p>
 <h2 id="sorting-nulls">
   
   
@@ -395,7 +452,6 @@ posts <code class="language-plaintext highlighter-rouge">""</code>, so with <cod
   
 </h2>
     
-</blockquote>
 
 <p><code class="language-plaintext highlighter-rouge">fields_sort_option</code> controls where <code class="language-plaintext highlighter-rouge">NULL</code>s are placed when sorting:</p>
 
