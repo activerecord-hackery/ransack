@@ -167,6 +167,17 @@ module Ransack
           search = Search.new(Person, { name_in: ['Aaron', sentinel] }, { null_sentinel: false })
           expect(search.result.to_sql).not_to include('IS NULL')
         end
+
+        # A Context can be reused by several searches (see the shared-context
+        # specs in active_record/context_spec). Each condition captures the
+        # override when it is built, so the later search's setting (here,
+        # none) does not rewrite the earlier search's SQL.
+        it 'is kept by an earlier search when a later one reuses its context' do
+          context = Context.for(Person)
+          first = Search.new(Person, { name_in: ['Aaron', sentinel] }, { context: context, null_sentinel: sentinel })
+          Search.new(Person, { name_in: ['Aaron'] }, { context: context })
+          expect(first.result.to_sql).to include(null_col)
+        end
       end
 
       it 'removes empty suffixed conditions before building' do

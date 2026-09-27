@@ -263,8 +263,11 @@ module Ransack
     #                                   # (name IN ('Ernie') OR name IS NULL)
     #   name_in: ['__ransack_null__']   # name IS NULL
     #
-    # A single form field can express all three states this way, with no
-    # change to the field's name and no controller-side rewriting.
+    # A single multi-value form field can express all three states this
+    # way, with no change to the field's name and no controller-side
+    # rewriting. `eq` takes one value, so through it the sentinel means
+    # `IS NULL` alone; "a value or NULL" from one field needs `in` or an
+    # `_any` compound.
     #
     # This does not bypass `ransackable_attributes`: `NULL` on an exposed
     # attribute is already reachable through the built-in `null` predicate.

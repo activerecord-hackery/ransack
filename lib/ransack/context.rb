@@ -37,7 +37,9 @@ module Ransack
     end
 
     # Falls back to the global option unless this search's own option was
-    # set, including to `false` to turn the feature off for one search.
+    # set, including to `false` to turn the feature off for one search. A
+    # Condition captures this when it is built, so a later search reusing
+    # this context does not change the conditions of an earlier one.
     def null_sentinel
       @null_sentinel.nil? ? Ransack.options[:null_sentinel] : @null_sentinel
     end

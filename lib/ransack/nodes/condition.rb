@@ -9,6 +9,18 @@ module Ransack
 
       attr_accessor :predicate
 
+      # The effective null sentinel, captured when the condition is built. A
+      # Context can be shared by several searches, each with its own
+      # per-search override; reading the context lazily at SQL generation or
+      # form rendering time would let a later search's setting rewrite an
+      # earlier search's conditions.
+      attr_reader :null_sentinel
+
+      def initialize(context)
+        super
+        @null_sentinel = context&.null_sentinel
+      end
+
       class << self
         def extract(context, key, values)
           attributes, predicate, combinator =
@@ -24,7 +36,7 @@ module Ransack
             )
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything. Tempted to go with "garbage in, garbage out" here.
-            if predicate.validate(condition.values, condition.default_type, context.null_sentinel)
+            if predicate.validate(condition.values, condition.default_type, condition.null_sentinel)
               condition
             else
               nil
@@ -78,7 +90,7 @@ module Ransack
 
       def valid?
         attributes.detect(&:valid?) && predicate && valid_arity? &&
-          predicate.validate(values, default_type, context.null_sentinel) && valid_combinator?
+          predicate.validate(values, default_type, null_sentinel) && valid_combinator?
       end
 
       def valid_arity?
@@ -196,8 +208,8 @@ module Ransack
       # re-rendering this condition's current value would resubmit that
       # literal instead of the sentinel.
       def cast_unless_null_sentinel(v)
-        if Constants.null_sentinel_predicate?(predicate.name, context.null_sentinel) &&
-           Constants.null_sentinel_value?(v.value, context.null_sentinel)
+        if Constants.null_sentinel_predicate?(predicate.name, null_sentinel) &&
+           Constants.null_sentinel_value?(v.value, null_sentinel)
           v.value
         else
           v.cast(default_type)
@@ -266,11 +278,11 @@ module Ransack
         # The sentinel is a marker to detect, never a value to search for
         # or to cast to the column's type, so it is excluded from the
         # values #format_predicate builds the ordinary IN/EQ node from.
-        selected.reject { |v| Constants.null_sentinel_value?(v.value, context.null_sentinel) }
+        selected.reject { |v| Constants.null_sentinel_value?(v.value, null_sentinel) }
       end
 
       def null_sentinel_requested?
-        Constants.null_sentinel_requested?(predicate.name, values, context.null_sentinel)
+        Constants.null_sentinel_requested?(predicate.name, values, null_sentinel)
       end
 
       def casted_values_for_attribute(attr)

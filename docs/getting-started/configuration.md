@@ -179,8 +179,11 @@ Person.ransack(name_in: ['__ransack_null__']).result.to_sql
 
 A single multi-select or checkbox-group field can express all three states
 this way, with no change to the field's name and no controller-side
-rewriting. This does not bypass `ransackable_attributes`: `NULL` on an exposed
-attribute is already reachable through the built-in `null` predicate.
+rewriting. `eq` takes one value, so through it (a select with an "unset"
+option, say) the sentinel means `IS NULL` alone; "a value or `NULL`" from one
+field needs `in` or an `_any` compound. This does not bypass
+`ransackable_attributes`: `NULL` on an exposed attribute is already reachable
+through the built-in `null` predicate.
 
 It can be set globally, or per search, the same as `strip_whitespace`:
 
