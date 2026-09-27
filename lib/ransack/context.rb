@@ -5,11 +5,10 @@ module Ransack
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
     attr_accessor :auth_object, :search_key, :ignore_unknown_conditions
 
-    # True when the search was built from permitted strong parameters and
-    # the controller is trusted as the authorization boundary (see
-    # `Ransack.options[:strong_parameters]`). The model allowlists are then
-    # replaced by the lists of what exists; scopes are gated regardless.
-    attr_accessor :strong_parameters
+    # True when the search was built from `ActionController::Parameters` the
+    # controller permitted. A model with no allowlist of its own then lets
+    # that permit list be the boundary (see `allowlist` below).
+    attr_accessor :permitted
 
     class << self
 
@@ -245,29 +244,33 @@ module Ransack
 
     private
 
-    # The allowlist for a class: what the model authorizes, or, under trusted
-    # strong parameters, everything that exists on it.
     def attributes_for(klass)
-      if strong_parameters
-        klass.authorizable_ransackable_attributes
-      else
-        klass.ransackable_attributes(auth_object)
-      end
+      allowlist(klass, :ransackable_attributes) { klass.authorizable_ransackable_attributes }
     end
 
+    # `ransortable_attributes` defaults to `ransackable_attributes`, so a
+    # model that defines either one has a sort list of its own.
     def sortable_attributes_for(klass)
-      if strong_parameters
+      allowlist(klass, :ransortable_attributes, :ransackable_attributes) do
         klass.authorizable_ransackable_attributes
-      else
-        klass.ransortable_attributes(auth_object)
       end
     end
 
     def associations_for(klass)
-      if strong_parameters
-        klass.authorizable_ransackable_associations
+      allowlist(klass, :ransackable_associations) { klass.authorizable_ransackable_associations }
+    end
+
+    # The allowlist a search consults on `klass`. A model that defines its
+    # own `method` is always asked, so its list applies on top of whatever
+    # the controller permitted. A model that defines none has left the
+    # decision to the controller: when the parameters were permitted, the
+    # block's list of everything that exists is used, and otherwise the
+    # model's default runs, which raises asking for a list (#1403).
+    def allowlist(klass, method, *fallbacks)
+      if permitted && [method, *fallbacks].none? { |m| klass.ransackable_list_defined?(m) }
+        yield
       else
-        klass.ransackable_associations(auth_object)
+        klass.public_send(method, auth_object)
       end
     end
 
