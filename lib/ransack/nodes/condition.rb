@@ -150,15 +150,21 @@ module Ransack
       end
       alias :v= :values=
 
-      # An explicit combinator wins; the one an expanded alias carried is the
+      # A supplied combinator wins; the one an expanded alias carried is the
       # fallback, so `a: { '0' => { name: 'term' } }` with `term` aliasing
       # `name_or_email` ORs its two attributes without an `m` in the params.
+      # The fallback covers a missing or blank `m` only: an unknown one that
+      # `Node#combinator=` normalised to nil still fails `valid_combinator?`,
+      # as it does for any other multi-attribute condition.
       def combinator
-        @attributes.size > 1 ? (@combinator || @alias_combinator) : nil
+        return nil unless @attributes.size > 1
+
+        @combinator || (@alias_combinator unless @combinator_supplied)
       end
 
       def combinator=(val)
         super
+        @combinator_supplied = !val.to_s.strip.empty?
       end
 
       alias :m= :combinator=

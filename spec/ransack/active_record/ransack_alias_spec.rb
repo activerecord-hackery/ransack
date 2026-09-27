@@ -147,6 +147,13 @@ module Ransack
           expect(sql).to match(/#{like('people', 'name')}.* OR #{like('people', 'email')}/)
         end
 
+        it 'drops the condition for an unknown combinator, like any multi-attribute condition' do
+          sql = Person.ransack(advanced('term', extra: { m: 'nand' })).result.to_sql
+          expect(sql).not_to include('LIKE')
+          expect { Person.ransack!(advanced('term', extra: { m: 'nand' })) }
+            .to raise_error(InvalidSearchError, 'Invalid combinator nand')
+        end
+
         it 'lets an explicit combinator win over the compound one' do
           sql = Person.ransack(advanced('term', extra: { m: 'and' })).result.to_sql
           expect(sql).to match(/#{like('people', 'name')}.* AND #{like('people', 'email')}/)
