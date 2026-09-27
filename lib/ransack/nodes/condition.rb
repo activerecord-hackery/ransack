@@ -348,15 +348,6 @@ module Ransack
             format_predicate(attribute)
           end
 
-          # Replace an oversized Casted integer value with the plain integer,
-          # in order to avoid ActiveModel::RangeError from Arel::Node::Casted.
-          # The error can be ignored here because RDBMSs accept large numbers
-          # in condition clauses. Applied recursively rather than only to the
-          # top-level node, because the Casted value can sit inside an In /
-          # NotIn node's `right` Array, or inside the Grouping / And / Or
-          # that Arel's own `_any` / `_all` predicates build.
-          unwrap_oversized_integers(predicate)
-
           predicate
         }.reduce(combinator_method)
       end
@@ -398,6 +389,18 @@ module Ransack
             casted_array?(pr) ? format_values_for(pr) : pr
           end
         end
+
+        # Replace an oversized Casted integer value with the plain integer,
+        # in order to avoid ActiveModel::RangeError from Arel::Node::Casted.
+        # The error can be ignored here because RDBMSs accept large numbers
+        # in condition clauses. Applied recursively rather than only to the
+        # top-level node, because the Casted value can sit inside an In /
+        # NotIn node's `right` Array, or inside the Grouping / And / Or
+        # that Arel's own `_any` / `_all` predicates build. Done here rather
+        # than in #arel_predicate because the negated collection branch there
+        # renders this node to SQL for its correlated subquery straight away,
+        # which is where the Casted value would raise.
+        unwrap_oversized_integers(predicate)
 
         predicate
       end

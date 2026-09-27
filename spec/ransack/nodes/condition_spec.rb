@@ -35,12 +35,21 @@ module Ransack
           expect(sql).to include(big)
         end
 
-        it 'does not raise for a predicate ORed with another condition' do
-          sql = Person.ransack(
-            m: 'or',
-            salary_in: [big],
-            name_eq: 'Bob'
-          ).result.to_sql
+        it 'does not raise for a plain _not_in predicate' do
+          sql = Person.ransack(salary_not_in: [big]).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        # A negated predicate on a collection association's column is rendered
+        # to SQL for a correlated subquery inside #arel_predicate itself, so
+        # the value has to be unwrapped before that happens.
+        it 'does not raise for a negated predicate on a collection association' do
+          sql = Person.ransack(articles_id_not_eq: big).result.to_sql
+          expect(sql).to include(big)
+        end
+
+        it 'does not raise for a negated _in predicate on a collection association' do
+          sql = Person.ransack(articles_id_not_in: [big]).result.to_sql
           expect(sql).to include(big)
         end
 
