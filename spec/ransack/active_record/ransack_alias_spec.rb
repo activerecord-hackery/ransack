@@ -106,6 +106,76 @@ module Ransack
         end
       end
 
+      # Advanced-search params name the attribute directly, so an alias skipped
+      # `Condition.extract`, passed the allowlist under its own name and was
+      # bound as a column that does not exist, while `attribute_select`
+      # offered it as an option (#1728).
+      describe 'named in advanced-search params' do
+        # Adapters may append `ESCAPE '\\'` after a LIKE, hence the `.*`
+        # between fragments in the compound assertions below.
+        def like(table, name, value = 'a')
+          /#{Regexp.escape(column(table, name))} LIKE '%#{value}%'/
+        end
+
+        def advanced(names, predicate: 'cont', value: 'a', extra: {})
+          attributes = Array(names).each_with_index.to_h { |name, i| [i.to_s, { name: name }] }
+          condition = { a: attributes, p: predicate, v: { '0' => { value: value } } }.merge(extra)
+          { g: { '0' => { c: { '0' => condition } } } }
+        end
+
+        it 'expands an alias to its compound' do
+          sql = Person.ransack(advanced('term')).result.to_sql
+          expect(sql).to match(/#{like('people', 'name')}.* OR #{like('people', 'email')}/)
+          expect(sql).not_to include('term')
+          expect { Person.ransack(advanced('term')).result.to_a }.not_to raise_error
+        end
+
+        it 'expands an alias to a single association attribute' do
+          sql = Person.ransack(advanced('daddy')).result.to_sql
+          expect(sql).to match(like('parents_people', 'name'))
+          expect(sql).not_to include('daddy')
+        end
+
+        it 'expands an alias defined on an associated model' do
+          sql = Article.ransack(advanced('person_term')).result.to_sql
+          expect(sql).to match(/#{like('people', 'name')}.* OR #{like('people', 'email')}/)
+          expect { Article.ransack(advanced('person_term')).result.to_a }.not_to raise_error
+        end
+
+        it 'keeps the compound combinator when the params send a blank one after the attributes' do
+          sql = Person.ransack(advanced('term', extra: { m: '' })).result.to_sql
+          expect(sql).to match(/#{like('people', 'name')}.* OR #{like('people', 'email')}/)
+        end
+
+        it 'drops the condition for an unknown combinator, like any multi-attribute condition' do
+          sql = Person.ransack(advanced('term', extra: { m: 'nand' })).result.to_sql
+          expect(sql).not_to include('LIKE')
+          expect { Person.ransack!(advanced('term', extra: { m: 'nand' })) }
+            .to raise_error(InvalidSearchError, 'Invalid combinator nand')
+        end
+
+        it 'lets an explicit combinator win over the compound one' do
+          sql = Person.ransack(advanced('term', extra: { m: 'and' })).result.to_sql
+          expect(sql).to match(/#{like('people', 'name')}.* AND #{like('people', 'email')}/)
+        end
+
+        it 'joins an alias with a plain attribute' do
+          sql = Person.ransack(advanced(%w[daddy name], extra: { m: 'or' })).result.to_sql
+          expect(sql).to match(/#{like('parents_people', 'name')}.* OR #{like('people', 'name')}/)
+        end
+
+        it 'reads the value back under the alias from its grouping' do
+          grouping = Person.ransack(advanced('term')).base.groupings.first
+          expect(grouping.term_cont).to eq 'a'
+          expect(grouping.name_or_email_cont).to eq 'a'
+        end
+
+        it 'still offers the alias in attribute_select and accepts what it offers' do
+          search = Person.ransack(advanced('term'))
+          expect(search.context.searchable_attributes).to include('term')
+        end
+      end
+
       it 'does not need the alias itself allowlisted, only its targets' do
         allow(Person).to receive(:ransackable_attributes).and_return(%w[name email])
         sql = Person.ransack!(term_cont: 'a').result.to_sql

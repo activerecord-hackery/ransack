@@ -108,14 +108,14 @@ module Ransack
           args.each do |attr|
             if attr.is_a?(Hash) && (attr.key?(:name) || attr.key?("name"))
               attr = attr.with_indifferent_access
-              build_attribute(attr[:name], attr[:ransacker_args])
+              build_attributes(attr[:name], attr[:ransacker_args])
             else
-              build_attribute(attr)
+              build_attributes(attr)
             end
           end
         when Hash
           args.each do |index, attrs|
-            build_attribute(attrs[:name], attrs[:ransacker_args])
+            build_attributes(attrs[:name], attrs[:ransacker_args])
           end
         else
           raise ArgumentError,
@@ -150,12 +150,21 @@ module Ransack
       end
       alias :v= :values=
 
+      # A supplied combinator wins; the one an expanded alias carried is the
+      # fallback, so `a: { '0' => { name: 'term' } }` with `term` aliasing
+      # `name_or_email` ORs its two attributes without an `m` in the params.
+      # The fallback covers a missing or blank `m` only: an unknown one that
+      # `Node#combinator=` normalised to nil still fails `valid_combinator?`,
+      # as it does for any other multi-attribute condition.
       def combinator
-        @attributes.size > 1 ? @combinator : nil
+        return nil unless @attributes.size > 1
+
+        @combinator || (@alias_combinator unless @combinator_supplied)
       end
 
       def combinator=(val)
         super
+        @combinator_supplied = !val.to_s.strip.empty?
       end
 
       alias :m= :combinator=
@@ -179,6 +188,25 @@ module Ransack
       #  TODO: Add test coverage for this behavior and ensure that `name.nil?`
       #  isn't fixing issue #701 by introducing untested regressions.
       #
+      # An attribute named in advanced-search params (`a: { '0' => { name:
+      # 'term' } }`) arrives raw, unlike a simple key, which `Condition.extract`
+      # resolves before it gets here. So a `ransack_alias` is expanded here the
+      # same way: an alias to one attribute is built under that name, and an
+      # alias to a compound becomes one attribute per segment, joined by the
+      # compound's combinator (#1728). Left alone, the alias passed `valid?`
+      # by being allowlisted and bound a column that does not exist.
+      def build_attributes(name, ransacker_args = [])
+        return build_attribute(name, ransacker_args) if name.blank? || @context.nil?
+
+        resolved = @context.resolve_aliases(name.to_s)
+        if resolved == name.to_s || @context.attribute_method?(resolved)
+          build_attribute(resolved, ransacker_args)
+        else
+          @alias_combinator = resolved[/_(or|and)_/, 1]
+          resolved.split(/_and_|_or_/).each { |segment| build_attribute(segment, ransacker_args) }
+        end
+      end
+
       def build_attribute(name = nil, ransacker_args = [])
         Attribute.new(@context, name, ransacker_args).tap do |attribute|
           @context.bind(attribute, attribute.name)
