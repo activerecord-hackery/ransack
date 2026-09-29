@@ -4,7 +4,6 @@
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/activerecord-hackery/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
-[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers)
 
 # Introduction
 
@@ -78,9 +77,3 @@ Alumni Maintainers
 
 This project exists thanks to all the people who contribute. <img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" />
 
-
-## Backers
-
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/ransack#backer)]
-
-<a href="https://opencollective.com/ransack#backers" target="_blank"><img src="https://opencollective.com/ransack/backers.svg?width=890" /></a>
