@@ -4,7 +4,6 @@
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/activerecord-hackery/ransack)
 [![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
-[![Backers on Open Collective](https://opencollective.com/ransack/backers/badge.svg)](#backers)
 
 # Introduction
 
@@ -76,7 +75,7 @@ Alumni Maintainers
 - [Jon Atack](http://twitter.com/jonatack)
 - [Ryan Bigg](http://twitter.com/ryanbigg)
 
-This project exists thanks to all the people who contribute. <img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" />
+This project exists thanks to all the people who contribute. 
 
 
 ## Backers
