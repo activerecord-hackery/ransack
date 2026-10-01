@@ -423,6 +423,26 @@ version supports attribute aliases.</li>
 registry, <code class="language-plaintext highlighter-rouge">Ransack::Context.register</code>, so another ORM can plug in without
 patching Ransack.</li>
 </ul>
+<h3 id="a-model-without-allowlists-can-be-searched-through-strong-parameters">
+  
+  
+    <a href="#a-model-without-allowlists-can-be-searched-through-strong-parameters" class="anchor-heading" aria-labelledby="a-model-without-allowlists-can-be-searched-through-strong-parameters"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> A model without allowlists can be searched through strong parameters
+  
+  
+</h3>
+    
+
+<p><code class="language-plaintext highlighter-rouge">ransackable_attributes</code>, <code class="language-plaintext highlighter-rouge">ransackable_associations</code> and
+<code class="language-plaintext highlighter-rouge">ransortable_attributes</code> are now optional for a model that is only searched
+through a controller that permits the search keys. When the model defines
+none of them, a search built from permitted <code class="language-plaintext highlighter-rouge">ActionController::Parameters</code>
+treats the controller’s <code class="language-plaintext highlighter-rouge">permit</code> list as the authorization, and every
+permitted key that names a real column, ransacker, alias or association is
+searchable. A model that defines a list is always asked, so nothing changes
+for an existing model until you remove its lists. A plain Hash, or
+unpermitted parameters, still need the lists and raise without them, and
+<code class="language-plaintext highlighter-rouge">ransackable_scopes</code> still applies to every search. See
+<a href="/ransack/going-further/other-notes/#strong-parameters-instead-of-model-allowlists">Authorization</a>.</p>
 <h2 id="upgrading-to-50">
   
   

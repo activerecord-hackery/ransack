@@ -520,6 +520,92 @@ searchable. They are also a convenient base for an exclusion list:
 <p>For models that inherit from <code class="language-plaintext highlighter-rouge">ActiveRecord::Base</code> directly (some gems define
 their own), put the two methods in a module and extend every model with it
 from an initializer: <code class="language-plaintext highlighter-rouge">ActiveSupport.on_load(:active_record) { extend TheModule }</code>.</p>
+<h4 id="strong-parameters-instead-of-model-allowlists">
+  
+  
+    <a href="#strong-parameters-instead-of-model-allowlists" class="anchor-heading" aria-labelledby="strong-parameters-instead-of-model-allowlists"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Strong parameters instead of model allowlists
+  
+  
+</h4>
+    
+
+<p>The model allowlists decide what any caller may search. A controller often
+knows better, per action and per user, and Rails already gives it the tool:
+strong parameters. A model that defines none of <code class="language-plaintext highlighter-rouge">ransackable_attributes</code>,
+<code class="language-plaintext highlighter-rouge">ransackable_associations</code> and <code class="language-plaintext highlighter-rouge">ransortable_attributes</code> hands the decision to
+the controller. A search built from an <code class="language-plaintext highlighter-rouge">ActionController::Parameters</code> the
+controller has permitted may then use every permitted key that names a real
+column, ransacker, alias or association:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/article.rb</span>
+<span class="k">class</span> <span class="nc">Article</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">belongs_to</span> <span class="ss">:author</span>
+  <span class="c1"># no ransackable_attributes, ransackable_associations or ransortable_attributes</span>
+<span class="k">end</span>
+
+<span class="c1"># app/controllers/articles_controller.rb</span>
+<span class="k">def</span> <span class="nf">index</span>
+  <span class="vi">@q</span> <span class="o">=</span> <span class="no">Article</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="n">search_params</span><span class="p">)</span>
+  <span class="vi">@articles</span> <span class="o">=</span> <span class="vi">@q</span><span class="p">.</span><span class="nf">result</span>
+<span class="k">end</span>
+
+<span class="kp">private</span>
+
+<span class="k">def</span> <span class="nf">search_params</span>
+  <span class="n">params</span><span class="p">.</span><span class="nf">fetch</span><span class="p">(</span><span class="ss">:q</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:title_cont</span><span class="p">,</span> <span class="ss">:author_name_cont</span><span class="p">,</span> <span class="ss">:created_at_gteq</span><span class="p">,</span> <span class="ss">:s</span><span class="p">,</span> <span class="ss">s: </span><span class="p">[])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>What is permitted is the condition key, so <code class="language-plaintext highlighter-rouge">title_cont</code> allows exactly that
+and not <code class="language-plaintext highlighter-rouge">title_eq</code>. <code class="language-plaintext highlighter-rouge">s</code> is a string for a single sort and an array for
+several, hence both forms. Use <code class="language-plaintext highlighter-rouge">fetch</code> rather than <code class="language-plaintext highlighter-rouge">require</code>, because a request
+with no search is a normal request.</p>
+
+<p>A model that defines a list keeps it, and the list applies on top of the
+controller’s permit: a key must be permitted <em>and</em> in the list. Nothing
+changes for a model that already has its lists, and giving a model a list is
+how to restrict what any controller may permit for it. Each model on the path
+is asked for itself, so <code class="language-plaintext highlighter-rouge">author_name_cont</code> above consults <code class="language-plaintext highlighter-rouge">Author</code>’s lists if
+<code class="language-plaintext highlighter-rouge">Author</code> has them, whatever <code class="language-plaintext highlighter-rouge">Article</code> defines.</p>
+
+<p>A permitted key must still name something that exists, so a typo is dropped,
+or raises under <code class="language-plaintext highlighter-rouge">ransack!</code>, as before. Three things hold whatever the model
+defines:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ransackable_scopes</code> is always consulted. A permitted condition key can
+never call a class method the model has not listed. (The
+<code class="language-plaintext highlighter-rouge">sort_by_&lt;attribute&gt;_&lt;direction&gt;</code> convention for sort scopes is separate:
+it is reachable by name, takes nothing from the request, and permitting
+neither opens nor closes it.)</li>
+  <li>A plain Hash has no permitted flag, so a search built in the console, a job
+or a test needs the model lists and raises without them, as before.</li>
+  <li>Unpermitted parameters need the model lists too.</li>
+</ul>
+
+<p>Sorting is the one place where <code class="language-plaintext highlighter-rouge">permit</code> cannot express a list. Permitting <code class="language-plaintext highlighter-rouge">s</code>
+permits the key, not the column names inside its value, so on a model with no
+list a permitted <code class="language-plaintext highlighter-rouge">s</code> can sort by any column, ransacker or alias, and through
+any association. Where sorting has to stay restricted, define
+<code class="language-plaintext highlighter-rouge">ransortable_attributes</code> on the model, or validate the value in the
+controller before passing it on:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">SORTS</span> <span class="o">=</span> <span class="sx">%w[title created_at]</span><span class="p">.</span><span class="nf">freeze</span>
+
+<span class="k">def</span> <span class="nf">search_params</span>
+  <span class="n">permitted</span> <span class="o">=</span> <span class="n">params</span><span class="p">.</span><span class="nf">fetch</span><span class="p">(</span><span class="ss">:q</span><span class="p">,</span> <span class="p">{}).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:title_cont</span><span class="p">,</span> <span class="ss">:s</span><span class="p">)</span>
+  <span class="n">permitted</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="ss">:s</span><span class="p">)</span> <span class="k">unless</span> <span class="no">SORTS</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="n">permitted</span><span class="p">[</span><span class="ss">:s</span><span class="p">].</span><span class="nf">to_s</span><span class="p">.</span><span class="nf">split</span><span class="p">.</span><span class="nf">first</span><span class="p">)</span>
+  <span class="n">permitted</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<blockquote class="warning">
+  <p><code class="language-plaintext highlighter-rouge">permit(q: {})</code>, which advanced mode’s <code class="language-plaintext highlighter-rouge">g</code> and <code class="language-plaintext highlighter-rouge">c</code> groupings need, permits
+everything under <code class="language-plaintext highlighter-rouge">q</code>, and Ransack cannot tell that apart from an explicit
+list. For a model with no allowlist, that action can search and sort every
+column and association. Permit the exact nested shape instead, or give the
+model a list.</p>
+</blockquote>
 
 <p>All four methods can receive a single optional parameter, <code class="language-plaintext highlighter-rouge">auth_object</code>. When
 you call the search or ransack method on your model, you can provide a value
