@@ -14,7 +14,9 @@ module Ransack
     # alone. The escaping only means anything because of the ESCAPE clause —
     # without it SQLite treats the backslash as an ordinary character.
     # See https://github.com/activerecord-hackery/ransack/issues/1581
-    shared_examples 'wildcard escaping' do |method, column_and_operator|
+    # `pattern` is the escaped value as the predicate's formatter wraps it;
+    # the default is the `cont` shape, `start` and `end` pass their own.
+    shared_examples 'wildcard escaping' do |method, column_and_operator, pattern = '%\\%.\\_\\\\%'|
       it 'automatically converts integers to strings' do
         subject.parent_id_cont = 1
         expect { subject.result }.to_not raise_error
@@ -23,7 +25,7 @@ module Ransack
       it "escapes '%', '_' and '\\\\' in value and emits an ESCAPE clause" do
         subject.send(:"#{method}=", '%._\\')
         expect(subject.result.to_sql).to include(
-          "#{column_and_operator} #{quote_value('%\\%.\\_\\\\%')} " \
+          "#{column_and_operator} #{quote_value(pattern)} " \
           "ESCAPE #{quote_value('\\')}"
         )
       end
@@ -294,6 +296,86 @@ module Ransack
       end
     end
 
+    # `start` and `end` had no case-insensitive form, so once `start` became
+    # `LIKE` on PostgreSQL there was no way to ask for "begins with, ignoring
+    # case" at all (#1715). These mirror `i_cont`.
+    describe 'i_start' do
+      it_has_behavior 'wildcard escaping', :name_i_start,
+        (case RansackHelper.dialect.name
+        when :postgresql then %{"people"."name" ILIKE}
+        when :mysql      then %{LOWER(`people`.`name`) LIKE}
+        else                  %{LOWER("people"."name") LIKE}
+        end), '\\%.\\_\\\\%' do
+        subject { @s }
+      end
+
+      it 'generates a LIKE query with LOWER(column) and value followed by %' do
+        @s.name_i_start = 'Er'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} ILIKE 'er%'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) LIKE 'er%'/
+        end
+      end
+
+      it 'finds a record whose case differs from the search term' do
+        person = Person.create!(name: 'Zyxwvut Qponml')
+        expect(Person.ransack(name_i_start: 'zYXW').result.count).to eq 1
+        expect(Person.ransack(name_start: 'zYXW').result.count).to eq 0 if dialect.postgresql?
+      ensure
+        person&.destroy
+      end
+
+      it 'registers the _any and _all compounds' do
+        expect(Predicate.names).to include('i_start_any', 'i_start_all', 'not_i_start_any', 'not_i_start_all')
+      end
+
+      it 'keeps both halves of an _any compound case-insensitive' do
+        @s.name_i_start_any = %w(Er Ri)
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} ILIKE 'er%'.* OR .*#{field} ILIKE 'ri%'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) LIKE 'er%'.* OR .*LOWER\(#{field}\) LIKE 'ri%'/
+        end
+      end
+
+      # Arel's does_not_match_any / _all take no case_sensitive argument, unlike
+      # matches_any / _all, so Condition maps them over does_not_match by hand.
+      # These are the compounds that would silently fall back to LIKE.
+      it 'keeps both halves of a not_ _any compound case-insensitive' do
+        @s.name_not_i_start_any = %w(Er Ri)
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} NOT ILIKE 'er%'.* OR .*#{field} NOT ILIKE 'ri%'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) NOT LIKE 'er%'.* OR .*LOWER\(#{field}\) NOT LIKE 'ri%'/
+        end
+      end
+    end
+
+    describe 'not_i_start' do
+      it_has_behavior 'wildcard escaping', :name_not_i_start,
+        (case RansackHelper.dialect.name
+        when :postgresql then %{"people"."name" NOT ILIKE}
+        when :mysql      then %{LOWER(`people`.`name`) NOT LIKE}
+        else                  %{LOWER("people"."name") NOT LIKE}
+        end), '\\%.\\_\\\\%' do
+        subject { @s }
+      end
+
+      it 'generates a NOT LIKE query with LOWER(column) and value followed by %' do
+        @s.name_not_i_start = 'Er'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} NOT ILIKE 'er%'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) NOT LIKE 'er%'/
+        end
+      end
+    end
+
     describe 'end' do
       it 'generates a LIKE query with value preceded by %' do
         @s.name_end = 'Miller'
@@ -331,6 +413,80 @@ module Ransack
         @s.stop_end_not_end = 'Ending'
         field = "#{quote_table_name("people")}.#{quote_column_name("stop_end")}"
         expect(@s.result.to_sql).to match /#{field} NOT I?LIKE '%Ending'/
+      end
+    end
+
+    describe 'i_end' do
+      it_has_behavior 'wildcard escaping', :name_i_end,
+        (case RansackHelper.dialect.name
+        when :postgresql then %{"people"."name" ILIKE}
+        when :mysql      then %{LOWER(`people`.`name`) LIKE}
+        else                  %{LOWER("people"."name") LIKE}
+        end), '%\\%.\\_\\\\' do
+        subject { @s }
+      end
+
+      it 'generates a LIKE query with LOWER(column) and value preceded by %' do
+        @s.name_i_end = 'Miller'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} ILIKE '%miller'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) LIKE '%miller'/
+        end
+      end
+
+      it 'finds a record whose case differs from the search term' do
+        person = Person.create!(name: 'Zyxwvut Qponml')
+        expect(Person.ransack(name_i_end: 'QPONML').result.count).to eq 1
+        expect(Person.ransack(name_end: 'QPONML').result.count).to eq 0 if dialect.postgresql?
+      ensure
+        person&.destroy
+      end
+
+      it 'registers the _any and _all compounds' do
+        expect(Predicate.names).to include('i_end_any', 'i_end_all', 'not_i_end_any', 'not_i_end_all')
+      end
+
+      it 'keeps both halves of an _all compound case-insensitive' do
+        @s.name_i_end_all = %w(Er Ri)
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} ILIKE '%er'.* AND .*#{field} ILIKE '%ri'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) LIKE '%er'.* AND .*LOWER\(#{field}\) LIKE '%ri'/
+        end
+      end
+
+      it 'keeps both halves of a not_ _all compound case-insensitive' do
+        @s.name_not_i_end_all = %w(Er Ri)
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} NOT ILIKE '%er'.* AND .*#{field} NOT ILIKE '%ri'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) NOT LIKE '%er'.* AND .*LOWER\(#{field}\) NOT LIKE '%ri'/
+        end
+      end
+    end
+
+    describe 'not_i_end' do
+      it_has_behavior 'wildcard escaping', :name_not_i_end,
+        (case RansackHelper.dialect.name
+        when :postgresql then %{"people"."name" NOT ILIKE}
+        when :mysql      then %{LOWER(`people`.`name`) NOT LIKE}
+        else                  %{LOWER("people"."name") NOT LIKE}
+        end), '%\\%.\\_\\\\' do
+        subject { @s }
+      end
+
+      it 'generates a NOT LIKE query with LOWER(column) and value preceded by %' do
+        @s.name_not_i_end = 'Miller'
+        field = "#{quote_table_name("people")}.#{quote_column_name("name")}"
+        if dialect.case_insensitive_like?
+          expect(@s.result.to_sql).to match /#{field} NOT ILIKE '%miller'/
+        else
+          expect(@s.result.to_sql).to match /LOWER\(#{field}\) NOT LIKE '%miller'/
+        end
       end
     end
 

@@ -92,12 +92,25 @@ module Ransack
         reflect_on_all_associations.map { |a| a.name.to_s }
       end
 
+      # Whether this model, or a superclass of it, defines `method` itself
+      # rather than inheriting Ransack's default. The search context asks
+      # before trusting permitted strong parameters: a model with a list of
+      # its own always applies it, and only a model without one lets the
+      # controller's permit list be the boundary (#1403).
+      def ransackable_list_defined?(method)
+        definer_ancestor = singleton_class.ancestors.find do |ancestor|
+          ancestor.instance_methods(false).include?(method)
+        end
+
+        definer_ancestor != Ransack::ActiveRecord::Base
+      end
+
       private
 
       def deprecated_ransackable_list(method)
         list_type = method.to_s.delete_prefix("ransackable_")
 
-        if explicitly_defined?(method)
+        if ransackable_list_defined?(method)
           warn_deprecated <<~ERROR
             Ransack's builtin `#{method}` method is deprecated and will result
             in an error in the future. If you want to authorize the full list
@@ -129,14 +142,6 @@ module Ransack
             ```
           MESSAGE
         end
-      end
-
-      def explicitly_defined?(method)
-        definer_ancestor = singleton_class.ancestors.find do |ancestor|
-          ancestor.instance_methods(false).include?(method)
-        end
-
-        definer_ancestor != Ransack::ActiveRecord::Base
       end
 
       def warn_deprecated(message)

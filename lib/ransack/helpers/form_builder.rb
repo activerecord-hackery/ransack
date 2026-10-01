@@ -112,7 +112,6 @@ module Ransack
 
       def predicate_select(options = {}, html_options = {})
         options[:compounds] = true if options[:compounds].nil?
-        options[:selected] ||= nil
         default = options.delete(:default) || Constants::CONT
 
         keys =
@@ -134,6 +133,7 @@ module Ransack
         collection = keys.map { |k| [k, Translate.predicate(k)] }
         object.predicate ||= Predicate.named(default) if
           can_use_default?(default, :predicate, keys)
+        options[:selected] = selected_predicate unless options.key?(:selected)
         template_collection_select(:p, collection, options, html_options)
       end
 
@@ -144,17 +144,25 @@ module Ransack
 
       private
 
+      # Rails reads a select's current value back through the field name, which
+      # for the predicate select is +p+. Only a Condition has a public +p+, and
+      # +Kernel#p+ is private, so a builder for a Search or Grouping would
+      # raise instead of finding nothing. Resolve the value here instead.
+      def selected_predicate
+        object.predicate_name if object.respond_to?(:predicate_name)
+      end
+
       def template_grouped_collection_select(collection, options, html_options)
         @template.grouped_collection_select(
           @object_name, :name, collection, :last, :first, :first, :last,
-          objectify_options(options), @default_options.merge(html_options)
+          objectify_options(options), @default_html_options.merge(html_options)
           )
       end
 
       def template_collection_select(name, collection, options, html_options)
         @template.collection_select(
           @object_name, name, collection, :first, :last,
-          objectify_options(options), @default_options.merge(html_options)
+          objectify_options(options), @default_html_options.merge(html_options)
           )
       end
 
@@ -188,31 +196,28 @@ module Ransack
         end
       end
 
+      # Expands the +associations:+ option of +attribute_select+ into the flat
+      # list of association paths ransack understands. A String or Symbol
+      # names one association; an Array lists several; a Hash reaches through
+      # an association to its own associations, so +{ articles: :comments }+
+      # yields +articles+ and +articles_comments+. Shapes nest freely.
       def association_array(obj, prefix = nil)
-        ([prefix] + association_object(obj))
-        .compact
-        .flat_map { |v| [prefix, v].compact.join(Constants::UNDERSCORE) }
-      end
-
-      def association_object(obj)
-        case obj
-        when Array
-          obj
-        when Hash
-          association_hash(obj)
-        else
-          [obj]
-        end
-      end
-
-      def association_hash(obj)
-        obj.map do |key, value|
-          case value
-          when Array, Hash
-            association_array(value, key.to_s)
+        Array.wrap(obj).flat_map do |item|
+          case item
+          when Hash
+            association_hash(item, prefix)
+          when nil
+            []
           else
-            [key.to_s, [key, value].join(Constants::UNDERSCORE)]
+            [[prefix, item].compact.join(Constants::UNDERSCORE)]
           end
+        end.uniq
+      end
+
+      def association_hash(obj, prefix = nil)
+        obj.flat_map do |key, value|
+          path = [prefix, key].compact.join(Constants::UNDERSCORE)
+          [path] + association_array(value, path)
         end
       end
 

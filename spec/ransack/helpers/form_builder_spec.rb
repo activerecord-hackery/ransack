@@ -110,6 +110,39 @@ module Ransack
             expect(html).to match /<optgroup label="#{model}">/
           end
         end
+        it 'reaches nested associations given as a Hash' do
+          html = @f.attribute_select(associations: { articles: :comments })
+          [Person, Article, Comment].each do |model|
+            expect(html).to match /<optgroup label="#{model}">/
+          end
+          expect(html).to match /<option value="articles_comments_body">/
+        end
+        it 'expands every shape of :associations into association paths' do
+          expand = ->(shape) { @f.send(:association_array, shape) }
+          expect(expand.call('articles')).to eq ['articles']
+          expect(expand.call([:articles, :comments])).to eq %w[articles comments]
+          expect(expand.call({ articles: :comments })).to eq %w[articles articles_comments]
+          expect(expand.call({ articles: [:comments, :tags] })).to eq %w[articles articles_comments articles_tags]
+          expect(expand.call([:comments, { articles: :tags }])).to eq %w[comments articles articles_tags]
+          expect(expand.call({ articles: { comments: :tags } })).to eq %w[articles articles_comments articles_comments_tags]
+          expect(expand.call({ articles: [] })).to eq ['articles']
+          expect(expand.call({ articles: nil })).to eq ['articles']
+        end
+      end
+
+      describe 'select html attributes' do
+        # @default_options carries the builder's :skip_default_ids and
+        # :allow_method_names_outside_object settings, which Rails strips from
+        # its own selects via @default_html_options; merging the former into the
+        # html options printed them as attributes on every ransack select.
+        it 'does not leak form builder options as attributes' do
+          [@f.attribute_select, @f.predicate_select, @f.combinator_select].each do |html|
+            expect(html).not_to match /skip_default_ids|allow_method_names_outside_object/
+          end
+        end
+        it 'still applies html options' do
+          expect(@f.predicate_select({}, class: 'predicate')).to match /<select class="predicate"/
+        end
       end
 
       describe '#predicate_select' do
@@ -136,6 +169,31 @@ module Ransack
           Predicate.names.select { |k| k =~ /_(any|all)$/ }.each do |key|
             expect(html).not_to match /<option value="#{key}">/
           end
+        end
+        it 'selects the predicate of the condition being rendered' do
+          search = Person.ransack(
+            c: { '0' => { a: { '0' => { name: 'name' } }, p: 'start', v: { '0' => { value: 'x' } } } }
+          )
+          html = nil
+          @controller.view_context.search_form_for(search) do |f|
+            f.condition_fields { |c| html = c.predicate_select }
+          end
+          expect(html).to match /<option selected="selected" value="start">/
+          expect(html.scan(/selected="selected"/).size).to eq(1)
+        end
+        it 'selects the :default predicate for a new condition' do
+          html = nil
+          @controller.view_context.search_form_for(@s) do |f|
+            f.condition_fields(@s.build_condition) { |c| html = c.predicate_select default: 'eq' }
+          end
+          expect(html).to match /<option selected="selected" value="eq">/
+        end
+        it 'honours an explicit :selected option' do
+          html = @f.predicate_select selected: 'lt'
+          expect(html).to match /<option selected="selected" value="lt">/
+        end
+        it 'selects nothing on a builder whose object has no predicate' do
+          expect(@f.predicate_select).not_to match /selected="selected"/
         end
       end
 

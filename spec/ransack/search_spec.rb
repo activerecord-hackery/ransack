@@ -151,6 +151,35 @@ module Ransack
         end
       end
 
+      context 'a per-search null_sentinel override' do
+        let(:sentinel) { '__ransack_null__' }
+        let(:null_col) { "#{quote_table_name('people')}.#{quote_column_name('name')} IS NULL" }
+
+        after { Ransack.configure { |c| c.null_sentinel = nil } }
+
+        it 'applies when no global null_sentinel is configured' do
+          search = Search.new(Person, { name_in: ['Aaron', sentinel] }, { null_sentinel: sentinel })
+          expect(search.result.to_sql).to include(null_col)
+        end
+
+        it 'turns the feature off for one search, with false, while the global setting stays on' do
+          Ransack.configure { |c| c.null_sentinel = sentinel }
+          search = Search.new(Person, { name_in: ['Aaron', sentinel] }, { null_sentinel: false })
+          expect(search.result.to_sql).not_to include('IS NULL')
+        end
+
+        # A Context can be reused by several searches (see the shared-context
+        # specs in active_record/context_spec). Each condition captures the
+        # override when it is built, so the later search's setting (here,
+        # none) does not rewrite the earlier search's SQL.
+        it 'is kept by an earlier search when a later one reuses its context' do
+          context = Context.for(Person)
+          first = Search.new(Person, { name_in: ['Aaron', sentinel] }, { context: context, null_sentinel: sentinel })
+          Search.new(Person, { name_in: ['Aaron'] }, { context: context })
+          expect(first.result.to_sql).to include(null_col)
+        end
+      end
+
       it 'removes empty suffixed conditions before building' do
         expect_any_instance_of(Search).to receive(:build).with({})
         Search.new(Person, name_eq_any: [''])
@@ -485,6 +514,66 @@ module Ransack
         end
       end
 
+      context 'a single-value predicate given several values' do
+        let(:params) do
+          { c: [{ a: ['name'], p: 'eq', v: [{ value: 'Aric' }, { value: 'Fern' }] }] }
+        end
+
+        it 'raises in strict mode, naming the predicate and attribute' do
+          expect { Search.new(Person, params, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+        end
+
+        it 'raises for a nested grouping in strict mode' do
+          expect { Search.new(Person, { g: [params] }, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError)
+        end
+
+        it 'drops the condition in the default lenient mode' do
+          search = Search.new(Person, params)
+          expect(search.base.conditions).to be_empty
+          expect(search.result.to_sql).not_to include('name')
+        end
+
+        it 'drops a condition with an unknown predicate instead of an arity error' do
+          search = Search.new(Person, { c: [{ a: ['name'], p: 'nope', v: [{ value: 'a' }, { value: 'b' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.base.conditions).to be_empty
+        end
+
+        it 'drops a condition with an unknown attribute instead of an arity error' do
+          search = Search.new(Person, { c: [{ a: ['nope'], p: 'eq', v: [{ value: 'a' }, { value: 'b' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.base.conditions).to be_empty
+        end
+
+        it 'accepts several values for a predicate that wants an array' do
+          search = Search.new(Person, { c: [{ a: ['name'], p: 'in', v: [{ value: 'Aric' }, { value: 'Fern' }] }] },
+            ignore_unknown_conditions: false)
+          expect(search.result.to_sql).to include('IN')
+        end
+
+        context 'when one of the extra values is the configured null_sentinel' do
+          let(:sentinel) { '__ransack_null__' }
+          let(:params) do
+            { c: [{ a: ['name'], p: 'eq', v: [{ value: 'Aric' }, { value: sentinel }] }] }
+          end
+
+          before { Ransack.configure { |c| c.null_sentinel = sentinel } }
+          after { Ransack.configure { |c| c.null_sentinel = nil } }
+
+          it 'still raises in strict mode, rather than being absorbed by the sentinel bypass' do
+            expect { Search.new(Person, params, ignore_unknown_conditions: false) }
+              .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+          end
+
+          it 'still drops the condition in the default lenient mode' do
+            search = Search.new(Person, params)
+            expect(search.base.conditions).to be_empty
+          end
+        end
+      end
+
       context 'combinator validation in strict mode' do
         it 'accepts any spelling of a valid combinator' do
           expect { Search.new(Person, { combinator: 'OR', name_eq: 'a' }, ignore_unknown_conditions: false) }
@@ -730,6 +819,79 @@ module Ransack
           sql = s.result.to_sql
           expect(sql).to match(/age > '?18'?/)
           expect(sql).to match(/name.* = 'Aaron'/)
+        end
+      end
+    end
+
+    describe '#collapse_multiparameter_attributes!' do
+      def collapse(attrs)
+        Search.allocate.send(:collapse_multiparameter_attributes!, attrs)
+      end
+
+      it 'collapses legitimate multiparameter attributes' do
+        result = collapse(
+          'created_at(1i)' => '2021',
+          'created_at(2i)' => '1',
+          'created_at(3i)' => '5'
+        )
+        expect(result['created_at']).to eq [2021, 1, 5]
+      end
+
+      it 'drops a position larger than the allowed number of components' do
+        result = collapse('created_at(100000000000i)' => '1')
+        expect(result).not_to have_key('created_at')
+      end
+
+      it 'drops a zero or negative position' do
+        result = collapse('created_at(0i)' => '1', 'created_at(-1i)' => '1')
+        expect(result).not_to have_key('created_at')
+      end
+
+      it 'drops a key with no position' do
+        result = collapse('created_at(' => '1', 'created_at()' => '2')
+        expect(result).to eq({})
+        expect {
+          Person.ransack('created_at(' => '1').result.to_sql
+        }.not_to raise_error
+      end
+
+      it 'keeps a plain value and drops the fragments given alongside it' do
+        result = collapse('created_at' => '2020', 'created_at(1i)' => '2021')
+        expect(result).to eq('created_at' => '2020')
+        expect {
+          Person.ransack('created_at' => '2020', 'created_at(1i)' => '2021').result.to_sql
+        }.not_to raise_error
+      end
+
+      it 'keeps the position at the upper boundary and drops just past it' do
+        at_limit = collapse('created_at(16i)' => '1')
+        expect(at_limit['created_at'].length).to eq 16
+
+        past_limit = collapse('created_at(17i)' => '1')
+        expect(past_limit).not_to have_key('created_at')
+      end
+
+      it 'does not raise or exhaust memory for a crafted huge position (DoS)' do
+        expect {
+          Person.ransack('created_at(100000000000i)' => '1').result.to_sql
+        }.not_to raise_error
+      end
+
+      context 'when the position has no cast suffix (e.g. (10000) not (10000i))' do
+        it 'stores a small uncast position as its raw value' do
+          result = collapse('created_at(1)' => 'x')
+          expect(result['created_at']).to eq ['x']
+        end
+
+        it 'drops a large uncast position' do
+          result = collapse('created_at(10000)' => '1')
+          expect(result).not_to have_key('created_at')
+        end
+
+        it 'does not raise or exhaust memory for a crafted huge uncast position (DoS)' do
+          expect {
+            Person.ransack('created_at(100000000000)' => '1').result.to_sql
+          }.not_to raise_error
         end
       end
     end

@@ -9,6 +9,18 @@ module Ransack
 
       attr_accessor :predicate
 
+      # The effective null sentinel, captured when the condition is built. A
+      # Context can be shared by several searches, each with its own
+      # per-search override; reading the context lazily at SQL generation or
+      # form rendering time would let a later search's setting rewrite an
+      # earlier search's conditions.
+      attr_reader :null_sentinel
+
+      def initialize(context)
+        super
+        @null_sentinel = context&.null_sentinel
+      end
+
       class << self
         def extract(context, key, values)
           attributes, predicate, combinator =
@@ -24,7 +36,7 @@ module Ransack
             )
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything. Tempted to go with "garbage in, garbage out" here.
-            if predicate.validate(condition.values, condition.default_type)
+            if predicate.validate(condition.values, condition.default_type, condition.null_sentinel)
               condition
             else
               nil
@@ -78,7 +90,7 @@ module Ransack
 
       def valid?
         attributes.detect(&:valid?) && predicate && valid_arity? &&
-          predicate.validate(values, default_type) && valid_combinator?
+          predicate.validate(values, default_type, null_sentinel) && valid_combinator?
       end
 
       def valid_arity?
@@ -96,14 +108,14 @@ module Ransack
           args.each do |attr|
             if attr.is_a?(Hash) && (attr.key?(:name) || attr.key?("name"))
               attr = attr.with_indifferent_access
-              build_attribute(attr[:name], attr[:ransacker_args])
+              build_attributes(attr[:name], attr[:ransacker_args])
             else
-              build_attribute(attr)
+              build_attributes(attr)
             end
           end
         when Hash
           args.each do |index, attrs|
-            build_attribute(attrs[:name], attrs[:ransacker_args])
+            build_attributes(attrs[:name], attrs[:ransacker_args])
           end
         else
           raise ArgumentError,
@@ -138,12 +150,21 @@ module Ransack
       end
       alias :v= :values=
 
+      # A supplied combinator wins; the one an expanded alias carried is the
+      # fallback, so `a: { '0' => { name: 'term' } }` with `term` aliasing
+      # `name_or_email` ORs its two attributes without an `m` in the params.
+      # The fallback covers a missing or blank `m` only: an unknown one that
+      # `Node#combinator=` normalised to nil still fails `valid_combinator?`,
+      # as it does for any other multi-attribute condition.
       def combinator
-        @attributes.size > 1 ? @combinator : nil
+        return nil unless @attributes.size > 1
+
+        @combinator || (@alias_combinator unless @combinator_supplied)
       end
 
       def combinator=(val)
         super
+        @combinator_supplied = !val.to_s.strip.empty?
       end
 
       alias :m= :combinator=
@@ -167,6 +188,25 @@ module Ransack
       #  TODO: Add test coverage for this behavior and ensure that `name.nil?`
       #  isn't fixing issue #701 by introducing untested regressions.
       #
+      # An attribute named in advanced-search params (`a: { '0' => { name:
+      # 'term' } }`) arrives raw, unlike a simple key, which `Condition.extract`
+      # resolves before it gets here. So a `ransack_alias` is expanded here the
+      # same way: an alias to one attribute is built under that name, and an
+      # alias to a compound becomes one attribute per segment, joined by the
+      # compound's combinator (#1728). Left alone, the alias passed `valid?`
+      # by being allowlisted and bound a column that does not exist.
+      def build_attributes(name, ransacker_args = [])
+        return build_attribute(name, ransacker_args) if name.blank? || @context.nil?
+
+        resolved = @context.resolve_aliases(name.to_s)
+        if resolved == name.to_s || @context.attribute_method?(resolved)
+          build_attribute(resolved, ransacker_args)
+        else
+          @alias_combinator = resolved[/_(or|and)_/, 1]
+          resolved.split(/_and_|_or_/).each { |segment| build_attribute(segment, ransacker_args) }
+        end
+      end
+
       def build_attribute(name = nil, ransacker_args = [])
         Attribute.new(@context, name, ransacker_args).tap do |attribute|
           @context.bind(attribute, attribute.name)
@@ -185,9 +225,22 @@ module Ransack
 
       def value
         if predicate.wants_array
-          values.map { |v| v.cast(default_type) }
+          values.map { |v| cast_unless_null_sentinel(v) }
         else
-          values.first.cast(default_type)
+          cast_unless_null_sentinel(values.first)
+        end
+      end
+
+      # Casting the sentinel here would turn it into a real value on a
+      # typed column (e.g. an integer column casts it to 0), so a form
+      # re-rendering this condition's current value would resubmit that
+      # literal instead of the sentinel.
+      def cast_unless_null_sentinel(v)
+        if Constants.null_sentinel_predicate?(predicate.name, null_sentinel) &&
+           Constants.null_sentinel_value?(v.value, null_sentinel)
+          v.value
+        else
+          v.cast(default_type)
         end
       end
 
@@ -234,7 +287,7 @@ module Ransack
 
       def predicate_name=(name)
         self.predicate = Predicate.named(name)
-        unless negative?
+        if predicate && !negative?
           attributes.each { |a| context.lock_association(a.parent) }
         end
         @predicate
@@ -247,7 +300,17 @@ module Ransack
       alias :p :predicate_name
 
       def validated_values
-        values.select { |v| predicate.validator.call(v.value) }
+        selected = values.select { |v| predicate.validator.call(v.value) }
+        return selected unless null_sentinel_requested?
+
+        # The sentinel is a marker to detect, never a value to search for
+        # or to cast to the column's type, so it is excluded from the
+        # values #format_predicate builds the ordinary IN/EQ node from.
+        selected.reject { |v| Constants.null_sentinel_value?(v.value, null_sentinel) }
+      end
+
+      def null_sentinel_requested?
+        Constants.null_sentinel_requested?(predicate.name, values, null_sentinel)
       end
 
       def casted_values_for_attribute(attr)
@@ -348,19 +411,6 @@ module Ransack
             format_predicate(attribute)
           end
 
-          # Applied per attribute rather than to the reduced node: once several
-          # attributes are combined, the result is an And/Or whose `right` is
-          # another predicate node rather than a Casted value, so
-          # replace_right_node? returns false and nothing is unwrapped at all.
-          if replace_right_node?(predicate)
-            # Replace right node object to plain integer value in order to avoid
-            # ActiveModel::RangeError from Arel::Node::Casted.
-            # The error can be ignored here because RDBMSs accept large numbers
-            # in condition clauses.
-            plain_value = predicate.right.value
-            predicate.right = plain_value
-          end
-
           predicate
         }.reduce(combinator_method)
       end
@@ -403,7 +453,37 @@ module Ransack
           end
         end
 
+        predicate = null_sentinel_requested? ? apply_null_sentinel(predicate, attr_value) : predicate
+
+        # Replace an oversized Casted integer value with the plain integer,
+        # in order to avoid ActiveModel::RangeError from Arel::Node::Casted.
+        # The error can be ignored here because RDBMSs accept large numbers
+        # in condition clauses. Applied recursively rather than only to the
+        # top-level node, because the Casted value can sit inside an In /
+        # NotIn node's `right` Array, or inside the Grouping / And / Or
+        # that Arel's own `_any` / `_all` predicates build. Done here rather
+        # than in #arel_predicate because the negated collection branch there
+        # renders this node to SQL for its correlated subquery straight away,
+        # which is where the Casted value would raise. Runs last so it also
+        # covers the OR grouping the null sentinel may have added.
+        unwrap_oversized_integers(predicate)
+
         predicate
+      end
+
+      # `validated_values` has already excluded the sentinel above, so
+      # `predicate` here is built from the real values alone (or, when
+      # the sentinel was the only value submitted, from an empty
+      # array). An empty IN or eq_any/in_any is not `IS NULL` on its
+      # own terms (an empty `IN` is a literal false, and an empty
+      # `eq_any` builds a broken Grouping), so that case is replaced
+      # outright rather than OR'd.
+      def apply_null_sentinel(predicate, attr_value)
+        if validated_values.empty?
+          attr_value.eq(nil)
+        else
+          predicate.or(attr_value.eq(nil))
+        end
       end
 
       def in_predicate?(predicate)
@@ -477,15 +557,45 @@ module Ransack
         end
       end
 
-      def replace_right_node?(predicate)
-        return false unless predicate.is_a?(Arel::Nodes::Binary)
+      # Walks a predicate node for the shapes `#arel_predicate` can produce
+      # (a single Binary, an In/NotIn holding an Array, or several of these
+      # combined with Grouping/And/Or) and replaces each integer Casted
+      # value it finds with the plain integer, in place.
+      def unwrap_oversized_integers(node)
+        case node
+        when Arel::Nodes::Grouping
+          unwrap_oversized_integers(node.expr)
+        when Arel::Nodes::And, Arel::Nodes::Or
+          # Both are Nary: `grouping_any` (behind every `_any` predicate)
+          # builds a single Or with one child per value, not a pairwise
+          # chain, so `left`/`right` alone would miss the third value on.
+          node.children.each { |child| unwrap_oversized_integers(child) }
+        when Arel::Nodes::In, Arel::Nodes::NotIn
+          if node.right.is_a?(Array)
+            node.right = node.right.map { |v| plain_integer(v) || v }
+          else
+            # In / NotIn are Binary subclasses and match before that arm, so a
+            # bare Casted right (not an Array) needs the same handling as one.
+            unwrap_binary_right(node)
+          end
+        when Arel::Nodes::Binary
+          unwrap_binary_right(node)
+        end
+      end
 
-        arel_node = predicate.right
-        return false unless arel_node.is_a?(Arel::Nodes::Casted)
+      def unwrap_binary_right(node)
+        plain_value = plain_integer(node.right)
+        node.right = plain_value if plain_value
+      end
+
+      def plain_integer(arel_node)
+        return nil unless arel_node.is_a?(Arel::Nodes::Casted)
 
         relation, name = arel_node.attribute.values
         attribute_type = relation.type_for_attribute(name).type
-        attribute_type == :integer && arel_node.value.is_a?(Integer)
+        return nil unless attribute_type == :integer && arel_node.value.is_a?(Integer)
+
+        arel_node.value
       end
 
       def length_predicate?

@@ -22,6 +22,11 @@ module Ransack
 
     def initialize(object, params = {}, options = {})
       strip_whitespace = options.fetch(:strip_whitespace, Ransack.options[:strip_whitespace])
+      # Strong parameters carry whether the controller permitted them. Read
+      # that before the unwrap below discards it: a model with no allowlist
+      # of its own lets a permitted controller be the boundary, and a plain
+      # Hash never counts (#1403).
+      permitted = params.respond_to?(:permitted?) && params.permitted?
       params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
       if params.is_a? Hash
         # deep_transform_values rebuilds every nested hash and array, which
@@ -36,7 +41,9 @@ module Ransack
       end
       @context = options[:context] || Context.for(object, options)
       @context.auth_object = options[:auth_object]
+      @context.permitted = permitted
       @context.ignore_unknown_conditions = options[:ignore_unknown_conditions]
+      @context.null_sentinel = options[:null_sentinel]
       @base = Nodes::Grouping.new(
         @context, options[:grouping] || Constants::AND
         )
@@ -178,19 +185,31 @@ module Ransack
       @context.chain_scope(key, sanitized_args)
     end
 
+    # The largest position a multiparameter key (`created_at(1i)`) may carry.
+    # Rails' date and time selects emit at most six, year to second. The
+    # position indexes an array, so an unbounded one from a crafted query
+    # string would allocate an array that size (GHSA-vxc9-rm8f-p56j).
+    MULTIPARAMETER_POSITION_LIMIT = 16
+
+    # Folds `created_at(1i)`, `created_at(2i)`, ... into `created_at` as an
+    # array of cast values, the way Active Record does for form input. The
+    # keys are untrusted, so a malformed one is dropped rather than raised
+    # on: no position (`created_at(`), a position outside 1 to the limit,
+    # or a fragment for an attribute that was also given as a plain value.
     def collapse_multiparameter_attributes!(attrs)
       attrs.keys.each do |k|
         if k.include?(Constants::LEFT_PARENTHESIS)
           real_attribute, position = k.split(/\(|\)/)
-          cast =
-          if Constants::A_S_I.include?(position.last)
-            position.last
-          else
-            nil
-          end
-          position = position.to_i - 1
           value = attrs.delete(k)
+          next if position.nil?
+
+          cast = Constants::A_S_I.include?(position.last) ? position.last : nil
+          position = position.to_i - 1
+          next if position < 0 || position >= MULTIPARAMETER_POSITION_LIMIT
+
           attrs[real_attribute] ||= []
+          next unless attrs[real_attribute].is_a?(Array)
+
           attrs[real_attribute][position] =
           if cast
             if value.blank? && cast == Constants::I

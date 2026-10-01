@@ -39,6 +39,21 @@ module Ransack
     ].freeze
     A_S_I               = ['a'.freeze, 's'.freeze, 'i'.freeze].freeze
 
+    # The predicates `Ransack.options[:null_sentinel]` applies to. Limited to
+    # the positive equality family (`eq`, `in`, and their `_any` compounds)
+    # because these are the only predicates where "or is null" is
+    # unambiguous. The `_all` compounds are excluded because they are
+    # conjunctive: `eq_all`/`in_all` require a single column to equal every
+    # supplied value at once, so ORing in `IS NULL` would widen a query that
+    # already matches nothing (or almost nothing) rather than narrow it. A
+    # negative predicate treats the sentinel as a literal value for the same
+    # reason of unambiguity: `not_eq` matching the sentinel would otherwise
+    # mean "is not unassigned", which reads as the opposite of what a caller
+    # submitting it alone almost certainly wants.
+    NULL_SENTINEL_PREDICATES = [
+      'eq'.freeze, 'in'.freeze, 'eq_any'.freeze, 'in_any'.freeze
+    ].freeze
+
     EQ                  = 'eq'.freeze
     NOT_EQ              = 'not_eq'.freeze
     EQ_ANY              = 'eq_any'.freeze
@@ -49,6 +64,15 @@ module Ransack
     RANSACK_SLASH_SEARCHES_SLASH_SEARCH = 'ransack/searches/search'.freeze
 
     DISTINCT = 'DISTINCT '.freeze
+
+    # The most `_`-separated segments a single condition or sort key may have
+    # before Ransack rejects it as invalid instead of parsing it. Working out
+    # whether a key is an attribute, an `_and_`/`_or_` compound or a path
+    # through associations is superlinear in this count, and the key comes
+    # straight from the query string, so an unbounded one is a CPU-exhaustion
+    # denial of service (GHSA-j3f8-w227-4hh8). No real search key is this
+    # long: OR-ing every column of a very wide table stays well under it.
+    MAX_KEY_DEPTH = 200
 
     DERIVED_PREDICATES = [
       [CONT, {
@@ -83,6 +107,18 @@ module Ransack
         formatter: proc { |v| "#{escape_wildcards(v)}%" }
         }
       ],
+      ['i_start'.freeze, {
+        arel_predicate: 'matches'.freeze,
+        formatter: proc { |v| "#{escape_wildcards(v.downcase)}%" },
+        case_insensitive: true
+        }
+      ],
+      ['not_i_start'.freeze, {
+        arel_predicate: 'does_not_match'.freeze,
+        formatter: proc { |v| "#{escape_wildcards(v.downcase)}%" },
+        case_insensitive: true
+        }
+      ],
       ['end'.freeze, {
         arel_predicate: 'matches'.freeze,
         formatter: proc { |v| "%#{escape_wildcards(v)}" }
@@ -91,6 +127,18 @@ module Ransack
       ['not_end'.freeze, {
         arel_predicate: 'does_not_match'.freeze,
         formatter: proc { |v| "%#{escape_wildcards(v)}" }
+        }
+      ],
+      ['i_end'.freeze, {
+        arel_predicate: 'matches'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v.downcase)}" },
+        case_insensitive: true
+        }
+      ],
+      ['not_i_end'.freeze, {
+        arel_predicate: 'does_not_match'.freeze,
+        formatter: proc { |v| "%#{escape_wildcards(v.downcase)}" },
+        case_insensitive: true
         }
       ],
       ['true'.freeze, {
@@ -196,6 +244,19 @@ module Ransack
     # on SQLite. See https://github.com/activerecord-hackery/ransack/issues/1581
     def escape_wildcards(unescaped)
       unescaped.to_s.gsub(/([\\%_])/) { "#{LIKE_ESCAPE_CHARACTER}#{$1}" }
+    end
+
+    def null_sentinel_predicate?(predicate_name, sentinel)
+      sentinel && NULL_SENTINEL_PREDICATES.include?(predicate_name)
+    end
+
+    def null_sentinel_value?(value, sentinel)
+      sentinel && value == sentinel
+    end
+
+    def null_sentinel_requested?(predicate_name, values, sentinel)
+      null_sentinel_predicate?(predicate_name, sentinel) &&
+        values.any? { |v| null_sentinel_value?(v.value, sentinel) }
     end
   end
 end
