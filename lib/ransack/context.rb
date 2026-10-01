@@ -6,6 +6,11 @@ module Ransack
     attr_accessor :auth_object, :search_key, :ignore_unknown_conditions
     attr_writer :null_sentinel
 
+    # True when the search was built from `ActionController::Parameters` the
+    # controller permitted. A model with no allowlist of its own then lets
+    # that permit list be the boundary (see `allowlist` below).
+    attr_accessor :permitted
+
     class << self
 
       # An ORM integration registers a block that returns a Context for the
@@ -228,15 +233,15 @@ module Ransack
     end
 
     def ransackable_attribute?(str, klass)
-      klass.ransackable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
+      attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransortable_attribute?(str, klass)
-      klass.ransortable_attributes(auth_object).any? { |s| s.to_sym == str.to_sym }
+      sortable_attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransackable_association?(str, klass)
-      klass.ransackable_associations(auth_object).any? { |s| s.to_sym == str.to_sym }
+      associations_for(klass).any? { |s| s.to_sym == str.to_sym }
     end
 
     def ransackable_scope?(str, klass)
@@ -248,18 +253,48 @@ module Ransack
     end
 
     def searchable_attributes(str = ''.freeze)
-      traverse(str).ransackable_attributes(auth_object)
+      attributes_for(traverse(str))
     end
 
     def sortable_attributes(str = ''.freeze)
-      traverse(str).ransortable_attributes(auth_object)
+      sortable_attributes_for(traverse(str))
     end
 
     def searchable_associations(str = ''.freeze)
-      traverse(str).ransackable_associations(auth_object)
+      associations_for(traverse(str))
     end
 
     private
+
+    def attributes_for(klass)
+      allowlist(klass, :ransackable_attributes) { klass.authorizable_ransackable_attributes }
+    end
+
+    # `ransortable_attributes` defaults to `ransackable_attributes`, so a
+    # model that defines either one has a sort list of its own.
+    def sortable_attributes_for(klass)
+      allowlist(klass, :ransortable_attributes, :ransackable_attributes) do
+        klass.authorizable_ransackable_attributes
+      end
+    end
+
+    def associations_for(klass)
+      allowlist(klass, :ransackable_associations) { klass.authorizable_ransackable_associations }
+    end
+
+    # The allowlist a search consults on `klass`. A model that defines its
+    # own `method` is always asked, so its list applies on top of whatever
+    # the controller permitted. A model that defines none has left the
+    # decision to the controller: when the parameters were permitted, the
+    # block's list of everything that exists is used, and otherwise the
+    # model's default runs, which raises asking for a list (#1403).
+    def allowlist(klass, method, *fallbacks)
+      if permitted && [method, *fallbacks].none? { |m| klass.ransackable_list_defined?(m) }
+        yield
+      else
+        klass.public_send(method, auth_object)
+      end
+    end
 
     def resolve_alias_segment(segment)
       target = ransackable_alias(segment)

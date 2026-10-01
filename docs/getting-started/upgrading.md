@@ -127,6 +127,20 @@ The Active Record integration now lives under `Ransack::ActiveRecord`. See
   registry, `Ransack::Context.register`, so another ORM can plug in without
   patching Ransack.
 
+### A model without allowlists can be searched through strong parameters
+
+`ransackable_attributes`, `ransackable_associations` and
+`ransortable_attributes` are now optional for a model that is only searched
+through a controller that permits the search keys. When the model defines
+none of them, a search built from permitted `ActionController::Parameters`
+treats the controller's `permit` list as the authorization, and every
+permitted key that names a real column, ransacker, alias or association is
+searchable. A model that defines a list is always asked, so nothing changes
+for an existing model until you remove its lists. A plain Hash, or
+unpermitted parameters, still need the lists and raise without them, and
+`ransackable_scopes` still applies to every search. See
+[Authorization](../going-further/other-notes.md#strong-parameters-instead-of-model-allowlists).
+
 ## Upgrading to 5.0
 
 Ransack 5.0 shipped on 2026-09-21 with these behaviour changes. Each is

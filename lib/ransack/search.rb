@@ -22,6 +22,11 @@ module Ransack
 
     def initialize(object, params = {}, options = {})
       strip_whitespace = options.fetch(:strip_whitespace, Ransack.options[:strip_whitespace])
+      # Strong parameters carry whether the controller permitted them. Read
+      # that before the unwrap below discards it: a model with no allowlist
+      # of its own lets a permitted controller be the boundary, and a plain
+      # Hash never counts (#1403).
+      permitted = params.respond_to?(:permitted?) && params.permitted?
       params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
       if params.is_a? Hash
         # deep_transform_values rebuilds every nested hash and array, which
@@ -36,6 +41,7 @@ module Ransack
       end
       @context = options[:context] || Context.for(object, options)
       @context.auth_object = options[:auth_object]
+      @context.permitted = permitted
       @context.ignore_unknown_conditions = options[:ignore_unknown_conditions]
       @context.null_sentinel = options[:null_sentinel]
       @base = Nodes::Grouping.new(
