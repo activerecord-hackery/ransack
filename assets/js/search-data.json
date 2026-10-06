@@ -302,31 +302,31 @@
   },"43": {
     "doc": "Introduction",
     "title": "Contributions",
-    "content": "To support the project: . | Consider supporting us via Open Collective | Use Ransack in your apps, and let us know if you encounter anything that’s broken or missing. A failing spec to demonstrate the issue is awesome. A pull request with passing tests is even better! | Before filing an issue or pull request, be sure to read and follow the Contributing Guide. | Please use Stack Overflow or other sites for questions or discussion not directly related to bug reports, pull requests, or documentation improvements. | Spread the word on Twitter, Facebook, and elsewhere if Ransack’s been useful to you. The more people who are using the project, the quicker we can find and fix bugs! | . ",
+    "content": "To support the project: . | Use Ransack in your apps, and let us know if you encounter anything that’s broken or missing. A failing spec to demonstrate the issue is awesome. A pull request with passing tests is even better! | Before filing an issue or pull request, be sure to read and follow the Contributing Guide. | Please use Stack Overflow or other sites for questions or discussion not directly related to bug reports, pull requests, or documentation improvements. | Spread the word on Twitter, Facebook, and elsewhere if Ransack’s been useful to you. The more people who are using the project, the quicker we can find and fix bugs! | . ",
     "url": "/ransack/#contributions",
     
     "relUrl": "/#contributions"
   },"44": {
+    "doc": "Introduction",
+    "title": "Ransack for enterprise",
+    "content": "Available as part of the Tidelift Subscription. The maintainers of Ransack and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. Learn more. ",
+    "url": "/ransack/#ransack-for-enterprise",
+    
+    "relUrl": "/#ransack-for-enterprise"
+  },"45": {
+    "doc": "Introduction",
+    "title": "Security contact information",
+    "content": "To report a security vulnerability, please use the Tidelift security contact. Tidelift will coordinate the fix and disclosure. See the Security Policy for supported versions. ",
+    "url": "/ransack/#security-contact-information",
+    
+    "relUrl": "/#security-contact-information"
+  },"46": {
     "doc": "Introduction",
     "title": "Contributors",
     "content": "Ransack was created by Ernie Miller and is developed and maintained by: . | Sean Carroll | Deivid Rodriguez | Greg Molnar | A great group of contributors. | Ransack’s logo is designed by Anıl Kılıç. | . Alumni Maintainers . | Jon Atack | Ryan Bigg | . This project exists thanks to all the people who contribute. ",
     "url": "/ransack/#contributors",
     
     "relUrl": "/#contributors"
-  },"45": {
-    "doc": "Introduction",
-    "title": "Backers",
-    "content": "Thank you to all our backers! 🙏 [Become a backer] . ",
-    "url": "/ransack/#backers",
-    
-    "relUrl": "/#backers"
-  },"46": {
-    "doc": "Introduction",
-    "title": "Sponsors",
-    "content": "Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor] . ",
-    "url": "/ransack/#sponsors",
-    
-    "relUrl": "/#sponsors"
   },"47": {
     "doc": "Merging searches",
     "title": "Merging searches",
