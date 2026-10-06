@@ -79,6 +79,16 @@ directly related to bug reports, pull requests, or documentation improvements.
 to you. The more people who are using the project, the quicker we can find and
 fix bugs!
 
+## Ransack for enterprise
+
+Available as part of the [Tidelift Subscription](https://tidelift.com/subscription/pkg/rubygems-ransack?utm_source=rubygems-ransack&utm_medium=referral&utm_campaign=enterprise&utm_term=docs).
+
+The maintainers of Ransack and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/rubygems-ransack?utm_source=rubygems-ransack&utm_medium=referral&utm_campaign=enterprise&utm_term=docs)
+
+## Security contact information
+
+To report a security vulnerability, please use the [Tidelift security contact](https://tidelift.com/security). Tidelift will coordinate the fix and disclosure. See the [Security Policy](https://github.com/activerecord-hackery/ransack/security/policy) for supported versions.
+
 ## Contributors
 
 Ransack was created by [Ernie Miller](http://twitter.com/erniemiller) and is developed and maintained by:
