@@ -248,7 +248,8 @@ module Ransack
           'a class that is not a model' => 'notable_of_String_type_name_eq',
           'a module' => 'notable_of_Comparable_type_name_eq',
           'an abstract model' => 'notable_of_ApplicationRecord_type_name_eq',
-          'ActiveRecord::Base itself' => 'notable_of_ActiveRecord::Base_type_name_eq'
+          'ActiveRecord::Base itself' => 'notable_of_ActiveRecord::Base_type_name_eq',
+          'a namespace that is not a module' => 'notable_of_ENV::Person_type_name_eq'
         }.each do |label, key|
           it "ignores a condition on #{label} by default" do
             s = Search.new(Note, key => 'Ernie')
@@ -263,16 +264,21 @@ module Ransack
           end
         end
 
-        it 'drops a sort on an unknown type by default' do
-          s = Search.new(Note, s: 'notable_of_NoSuchType_type_name asc')
-          expect(s.result.to_sql).not_to include('NoSuchType')
-          expect { s.result.to_a }.not_to raise_error
-        end
+        {
+          'an unknown type' => 'NoSuchType',
+          'a namespace that is not a module' => 'ENV::Person'
+        }.each do |label, type|
+          it "drops a sort on #{label} by default" do
+            s = Search.new(Note, s: "notable_of_#{type}_type_name asc")
+            expect(s.result.to_sql).not_to include('ORDER BY')
+            expect { s.result.to_a }.not_to raise_error
+          end
 
-        it 'raises InvalidSearchError for a sort on an unknown type in a strict search' do
-          Ransack.configure { |c| c.ignore_unknown_conditions = false }
-          expect { Search.new(Note, s: 'notable_of_NoSuchType_type_name asc') }
-            .to raise_error(InvalidSearchError)
+          it "raises InvalidSearchError for a sort on #{label} in a strict search" do
+            Ransack.configure { |c| c.ignore_unknown_conditions = false }
+            expect { Search.new(Note, s: "notable_of_#{type}_type_name asc") }
+              .to raise_error(InvalidSearchError)
+          end
         end
 
         it 'still searches a known type' do

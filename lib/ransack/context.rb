@@ -212,7 +212,8 @@ module Ransack
 
     # The class named in an `_of_Model_type` suffix comes from the query
     # string, so it can name anything: a constant that does not exist, a
-    # lowercase word, a module, a class with no table. None of those is a
+    # lowercase word, a module, a class with no table, a path through
+    # something that is no module at all (`ENV::Person`). None of those is a
     # model to search, so the suffix is then no polymorphic reference at all
     # and the whole key fails as any other unknown attribute does, ignored or
     # raised as `InvalidSearchError` under `ignore_unknown_conditions`.
@@ -221,6 +222,10 @@ module Ransack
     def polymorphic_class(name)
       klass = name.safe_constantize
       klass if klass.is_a?(Class) && searchable_class?(klass)
+    rescue TypeError
+      # `safe_constantize` swallows a missing constant but not a namespace
+      # that is not a module, which Ruby reports as a TypeError.
+      nil
     end
 
     def ransackable_alias(str)
