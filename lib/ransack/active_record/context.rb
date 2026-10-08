@@ -116,6 +116,12 @@ module Ransack
         end
       end
 
+      # A concrete model. `ActiveRecord::Base` itself and an abstract class
+      # have no table to search.
+      def searchable_class?(klass)
+        ::ActiveRecord::Base > klass && !klass.abstract_class?
+      end
+
       # All dependent Arel::Join nodes used in the search query.
       #
       # This could otherwise be done as `@object.arel.join_sources`, except
