@@ -262,6 +262,26 @@
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Location</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="s1">'locatable_of_Residences::House_type_number_eq'</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">).</span><span class="nf">result</span>
 </code></pre></div></div>
 
+<p>The type must name a model. A suffix naming anything else, such as a constant
+that does not exist, a lowercase word or a class with no table, is not a
+polymorphic reference, and the key is treated like any other unknown
+attribute: ignored by default, or raised as <code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code> when
+<code class="language-plaintext highlighter-rouge">ignore_unknown_conditions</code> is <code class="language-plaintext highlighter-rouge">false</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Location</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">locatable_of_Nowhere_type_number_eq: </span><span class="mi">100</span><span class="p">).</span><span class="nf">result</span>
+<span class="c1"># =&gt; every location; the condition is ignored</span>
+
+<span class="no">Location</span><span class="p">.</span><span class="nf">ransack!</span><span class="p">(</span><span class="ss">locatable_of_Nowhere_type_number_eq: </span><span class="mi">100</span><span class="p">)</span>
+<span class="c1"># Ransack::InvalidSearchError: Invalid search term locatable_of_Nowhere_type_number_eq</span>
+</code></pre></div></div>
+
+<blockquote class="note">
+  <p>Before 6.0 the type was looked up with <code class="language-plaintext highlighter-rouge">Kernel.const_get</code>, so a suffix that
+named no constant raised <code class="language-plaintext highlighter-rouge">NameError</code> from the query string, whatever
+<code class="language-plaintext highlighter-rouge">ignore_unknown_conditions</code> was set to. See
+<a href="https://github.com/activerecord-hackery/ransack/issues/1738">#1738</a>.</p>
+</blockquote>
+
           
 
           
