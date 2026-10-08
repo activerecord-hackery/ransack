@@ -42,6 +42,23 @@ module Ransack
           end
         end
 
+        context 'with a multiparameter index' do
+          it 'strips the index, then the predicate' do
+            expect(subject.attribute_method?('created_at(1i)')).to be true
+            expect(subject.attribute_method?('name_eq(1)')).to be true
+          end
+
+          it 'is false for an index alone' do
+            expect(subject.attribute_method?('(1i)')).to be false
+          end
+
+          # The key is scanned once for its `(`; the regex this replaced could
+          # re-run from every position (CodeQL rb/polynomial-redos).
+          it 'is false for a long key without an index' do
+            expect(subject.attribute_method?('a' * 10_000)).to be false
+          end
+        end
+
         context 'for unknown attributes' do
           it 'is false' do
             expect(subject.attribute_method?('not_an_attribute')).to be false

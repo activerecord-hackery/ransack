@@ -199,8 +199,14 @@ module Ransack
         end
       end
 
+      # Drops a multiparameter index (`created_at(1i)`) and then the predicate
+      # from a key. The index is found by a plain scan. The `/(.+?)\(/` this
+      # replaces let its lazy group re-run from every position of a long key,
+      # which CodeQL reports as polynomial (rb/polynomial-redos); Ruby's engine
+      # short-circuits that in practice, but one pass needs no such help.
       def strip_predicate_and_index(str)
-        string = str[/(.+?)\(/, 1] || str.dup
+        paren = str.index('(')
+        string = paren&.positive? ? str[0...paren] : str.dup
         Predicate.detect_and_strip_from_string!(string)
         string
       end
