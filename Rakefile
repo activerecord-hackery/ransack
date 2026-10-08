@@ -29,6 +29,22 @@ task :test do
   Rake::Task["spec"].invoke
 end
 
+# Runs the spec task against one database, or SQLite when `db` is nil.
+#
+# `Rake::Task#invoke` runs a task once per process however often it is
+# called, so a task that invokes `spec` for each database must re-enable it
+# first. Without that only the first database's specs ran, while every later
+# one was announced and then silently skipped (#1737).
+def run_specs(db)
+  if db
+    ENV['DB'] = db
+  else
+    ENV.delete('DB')
+  end
+  Rake::Task["spec"].reenable
+  Rake::Task["spec"].invoke
+end
+
 # Test with PostgreSQL
 desc "Run all tests with PostgreSQL"
 task :test_pg do
@@ -36,8 +52,7 @@ task :test_pg do
   Rake::Task["rubocop"].invoke
   
   puts "\nRunning RSpec tests with PostgreSQL..."
-  ENV['DB'] = 'pg'
-  Rake::Task["spec"].invoke
+  run_specs('pg')
 end
 
 # Test with MySQL
@@ -47,8 +62,7 @@ task :test_mysql do
   Rake::Task["rubocop"].invoke
   
   puts "\nRunning RSpec tests with MySQL..."
-  ENV['DB'] = 'mysql'
-  Rake::Task["spec"].invoke
+  run_specs('mysql')
 end
 
 # Helper method to check database availability
@@ -84,22 +98,20 @@ task :test_all do
   Rake::Task["rubocop"].invoke
   
   puts "\nRunning RSpec tests with SQLite..."
-  ENV.delete('DB')
-  Rake::Task["spec"].invoke
+  run_specs(nil)
   
   if database_available?('pg')
     puts "\nPostgreSQL detected. Running RSpec tests with PostgreSQL..."
-    ENV['DB'] = 'pg'
-    Rake::Task["spec"].invoke
+    run_specs('pg')
   else
     puts "\nPostgreSQL not available. Skipping PostgreSQL tests."
   end
   
   if database_available?('mysql')
     puts "\nMySQL detected. Running RSpec tests with MySQL..."
-    ENV['DB'] = 'mysql'
-    Rake::Task["spec"].invoke
+    run_specs('mysql')
   else
+
     puts "\nMySQL not available. Skipping MySQL tests."
   end
 end
@@ -121,8 +133,7 @@ task :test_detected do
   
   available_dbs.each do |db|
     puts "\nRunning RSpec tests with #{db.capitalize}..."
-    ENV['DB'] = db
-    Rake::Task["spec"].invoke
+    run_specs(db)
   end
 end
 
