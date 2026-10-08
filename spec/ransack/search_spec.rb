@@ -270,6 +270,59 @@ module Ransack
         expect(condition.value).to eq 'Ernie'
       end
 
+      # The type in an `_of_Model_type` suffix comes from the query string, so
+      # it can name anything. A name that is not a searchable model makes the
+      # key invalid, as an unknown attribute is, rather than raising from the
+      # constant lookup (#1738).
+      context 'with a polymorphic type that is not a searchable model' do
+        after { Ransack.configure { |c| c.ignore_unknown_conditions = true } }
+
+        {
+          'an unknown constant' => 'notable_of_NoSuchType_type_name_eq',
+          'an unknown namespaced constant' => 'notable_of_Nope::Model_type_name_eq',
+          'a lowercase name' => 'notable_of_person_type_name_eq',
+          'a class that is not a model' => 'notable_of_String_type_name_eq',
+          'a module' => 'notable_of_Comparable_type_name_eq',
+          'an abstract model' => 'notable_of_ApplicationRecord_type_name_eq',
+          'ActiveRecord::Base itself' => 'notable_of_ActiveRecord::Base_type_name_eq',
+          'a namespace that is not a module' => 'notable_of_ENV::Person_type_name_eq'
+        }.each do |label, key|
+          it "ignores a condition on #{label} by default" do
+            s = Search.new(Note, key => 'Ernie')
+            expect(s.base.conditions).to be_empty
+            expect { s.result.to_a }.not_to raise_error
+          end
+
+          it "raises InvalidSearchError for a condition on #{label} in a strict search" do
+            Ransack.configure { |c| c.ignore_unknown_conditions = false }
+            expect { Search.new(Note, key => 'Ernie') }
+              .to raise_error(InvalidSearchError, /#{Regexp.escape(key)}/)
+          end
+        end
+
+        {
+          'an unknown type' => 'NoSuchType',
+          'a namespace that is not a module' => 'ENV::Person'
+        }.each do |label, type|
+          it "drops a sort on #{label} by default" do
+            s = Search.new(Note, s: "notable_of_#{type}_type_name asc")
+            expect(s.result.to_sql).not_to include('ORDER BY')
+            expect { s.result.to_a }.not_to raise_error
+          end
+
+          it "raises InvalidSearchError for a sort on #{label} in a strict search" do
+            Ransack.configure { |c| c.ignore_unknown_conditions = false }
+            expect { Search.new(Note, s: "notable_of_#{type}_type_name asc") }
+              .to raise_error(InvalidSearchError)
+          end
+        end
+
+        it 'still searches a known type' do
+          s = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie')
+          expect(s.result.to_sql).to include quote_table_name('people')
+        end
+      end
+
       it 'creates conditions for polymorphic belongs_to association attributes' do
         s = Search.new(Note, notable_of_Person_type_name_eq: 'Ernie')
         condition = s.base[:notable_of_Person_type_name_eq]

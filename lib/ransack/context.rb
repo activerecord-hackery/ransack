@@ -94,6 +94,12 @@ module Ransack
       raise NotImplementedError, "#{self.class} must implement #klassify"
     end
 
+    # Whether a class can be the base of a search. An ORM integration refines
+    # this; by default any class Ransack has been mixed into qualifies.
+    def searchable_class?(klass)
+      klass.respond_to?(:ransackable_attributes)
+    end
+
     # Convert a string representing a chain of associations and an attribute
     # into the attribute itself
     def contextualize(str)
@@ -196,11 +202,30 @@ module Ransack
     end
 
     def unpolymorphize_association(str)
-      if (match = str.match(/_of_([^_]+?)_type$/))
-        [match.pre_match, Kernel.const_get(match.captures.first)]
+      if (match = str.match(/_of_([^_]+?)_type$/)) &&
+         (klass = polymorphic_class(match.captures.first))
+        [match.pre_match, klass]
       else
         [str, nil]
       end
+    end
+
+    # The class named in an `_of_Model_type` suffix comes from the query
+    # string, so it can name anything: a constant that does not exist, a
+    # lowercase word, a module, a class with no table, a path through
+    # something that is no module at all (`ENV::Person`). None of those is a
+    # model to search, so the suffix is then no polymorphic reference at all
+    # and the whole key fails as any other unknown attribute does, ignored or
+    # raised as `InvalidSearchError` under `ignore_unknown_conditions`.
+    # `Kernel.const_get` used to raise `NameError` straight from the URL
+    # (#1738).
+    def polymorphic_class(name)
+      klass = name.safe_constantize
+      klass if klass.is_a?(Class) && searchable_class?(klass)
+    rescue TypeError
+      # `safe_constantize` swallows a missing constant but not a namespace
+      # that is not a module, which Ruby reports as a TypeError.
+      nil
     end
 
     def ransackable_alias(str)

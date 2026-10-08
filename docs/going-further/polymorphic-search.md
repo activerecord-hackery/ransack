@@ -45,3 +45,23 @@ For namespaced models you should use a quoted string containing the standard Rub
 ```ruby
 Location.ransack('locatable_of_Residences::House_type_number_eq' => 100).result
 ```
+
+The type must name a model. A suffix naming anything else, such as a constant
+that does not exist, a lowercase word or a class with no table, is not a
+polymorphic reference, and the key is treated like any other unknown
+attribute: ignored by default, or raised as `Ransack::InvalidSearchError` when
+`ignore_unknown_conditions` is `false`.
+
+```ruby
+Location.ransack(locatable_of_Nowhere_type_number_eq: 100).result
+# => every location; the condition is ignored
+
+Location.ransack!(locatable_of_Nowhere_type_number_eq: 100)
+# Ransack::InvalidSearchError: Invalid search term locatable_of_Nowhere_type_number_eq
+```
+
+{: .note }
+> Before 6.0 the type was looked up with `Kernel.const_get`, so a suffix that
+> named no constant raised `NameError` from the query string, whatever
+> `ignore_unknown_conditions` was set to. See
+> [#1738](https://github.com/activerecord-hackery/ransack/issues/1738).
