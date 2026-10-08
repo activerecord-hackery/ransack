@@ -38,6 +38,22 @@ module Ransack
             expect_any_instance_of(Search).to receive(:build).with({})
             Search.new(Person, name_eq: '   ')
           end
+
+          it 'keeps false wrapped in a c: value envelope' do
+            s = Search.new(Person,
+              c: { '0' => { a: ['awesome'], p: 'eq', v: [{ value: false }] } }
+            )
+            expect(s.base.conditions.flat_map(&:values).map(&:value)).to eq [false]
+            field = "#{quote_table_name('people')}.#{quote_column_name('awesome')}"
+            expect(s.result.to_sql).to include "#{field} = "
+          end
+
+          it 'removes nil wrapped in a c: value envelope' do
+            s = Search.new(Person,
+              c: { '0' => { a: ['awesome'], p: 'eq', v: [{ value: nil }] } }
+            )
+            expect(s.base.conditions).to be_empty
+          end
         end
 
         context 'when ignore_blank_values is false' do
@@ -58,6 +74,26 @@ module Ransack
           it 'still removes nil conditions before building' do
             expect_any_instance_of(Search).to receive(:build).with({})
             Search.new(Person, name_eq: nil)
+          end
+
+          # The envelope hash can carry a symbol or a string key; `false` was
+          # lost under the symbol key alone (#1736).
+          [{ value: false }, { 'value' => false }].each do |envelope|
+            it "keeps false wrapped as #{envelope.inspect} in a c: condition" do
+              s = Search.new(Person,
+                c: { '0' => { a: ['awesome'], p: 'eq', v: [envelope] } }
+              )
+              expect(s.base.conditions.flat_map(&:values).map(&:value)).to eq [false]
+              field = "#{quote_table_name('people')}.#{quote_column_name('awesome')}"
+              expect(s.result.to_sql).to include "#{field} = "
+            end
+          end
+
+          it 'still removes nil wrapped in a c: value envelope' do
+            s = Search.new(Person,
+              c: { '0' => { a: ['awesome'], p: 'eq', v: [{ value: nil }] } }
+            )
+            expect(s.base.conditions).to be_empty
           end
 
           it 'searches for the empty string with an eq predicate' do

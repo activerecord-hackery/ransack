@@ -146,7 +146,9 @@ Person.ransack(id_in: []).result.to_a
 ```
 
 A `nil` value is ignored under either setting, so params that were never sent
-are still not turned into conditions.
+are still not turned into conditions. `false` is a value under either setting,
+whether given bare or inside a `c:` envelope (`v: [{ value: false }]`), so a
+boolean filter set to "no" is searched for rather than dropped.
 
 On a non-string column a blank has no literal to compare against, so it is
 treated as `NULL`: `parent_id_eq: ""` becomes `parent_id IS NULL`, and the

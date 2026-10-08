@@ -280,9 +280,14 @@ module Ransack
     end
 
     # Values in the `c:` API may be given bare or wrapped in a `{ value: ... }`
-    # envelope, the same two forms `Condition#values=` accepts.
+    # envelope, the same two forms `Condition#values=` accepts. The envelope is
+    # opened by key rather than by truthiness: `false` is a value to search
+    # for, and `value[:value] || value['value']` read it as nil, which the
+    # pruning above then dropped (#1736).
     def unwrap_value(value)
-      value.is_a?(Hash) ? (value[:value] || value['value']) : value
+      return value unless value.is_a?(Hash)
+
+      value.key?(:value) ? value[:value] : value['value']
     end
   end
 end
