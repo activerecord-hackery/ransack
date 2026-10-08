@@ -380,7 +380,9 @@ instead of dropping it:</p>
 </code></pre></div></div>
 
 <p>A <code class="language-plaintext highlighter-rouge">nil</code> value is ignored under either setting, so params that were never sent
-are still not turned into conditions.</p>
+are still not turned into conditions. <code class="language-plaintext highlighter-rouge">false</code> is a value under either setting,
+whether given bare or inside a <code class="language-plaintext highlighter-rouge">c:</code> envelope (<code class="language-plaintext highlighter-rouge">v: [{ value: false }]</code>), so a
+boolean filter set to “no” is searched for rather than dropped.</p>
 
 <p>On a non-string column a blank has no literal to compare against, so it is
 treated as <code class="language-plaintext highlighter-rouge">NULL</code>: <code class="language-plaintext highlighter-rouge">parent_id_eq: ""</code> becomes <code class="language-plaintext highlighter-rouge">parent_id IS NULL</code>, and the

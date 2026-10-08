@@ -346,6 +346,7 @@ submits for an untouched field, is never an error.</p>
   <p>Before Ransack 5.0, <code class="language-plaintext highlighter-rouge">'OR'</code> and <code class="language-plaintext highlighter-rouge">:or</code> were not recognised and silently fell back
 to <code class="language-plaintext highlighter-rouge">'and'</code> — a search that looked correct returned the wrong rows. See
 <a href="https://github.com/activerecord-hackery/ransack/pull/1465">#1465</a>.</p>
+</blockquote>
 <h2 id="blank-values">
   
   
@@ -355,29 +356,38 @@ to <code class="language-plaintext highlighter-rouge">'and'</code> — a search 
 </h2>
     
 
-  <p>A condition whose value is blank is dropped before the query is built, so a
+<p>A condition whose value is blank is dropped before the query is built, so a
 search form submitted with empty fields returns every record rather than none.
 This applies to the low-level <code class="language-plaintext highlighter-rouge">c:</code> form as well as the shorthand:</p>
 
-  <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">children_name_eq: </span><span class="s1">''</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">children_name_eq: </span><span class="s1">''</span><span class="p">).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
 <span class="c1"># =&gt; SELECT "people".* FROM "people"</span>
 
 <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">c: </span><span class="p">{</span> <span class="s1">'0'</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">a: </span><span class="p">[</span><span class="s1">'children_name'</span><span class="p">],</span> <span class="ss">p: </span><span class="s1">'eq'</span><span class="p">,</span> <span class="ss">v: </span><span class="p">[</span><span class="s1">''</span><span class="p">]</span> <span class="p">}</span> <span class="p">}).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
 <span class="c1"># =&gt; SELECT "people".* FROM "people"</span>
-</code></pre></div>  </div>
+</code></pre></div></div>
 
-  <p>Both forms drop the condition, so neither contributes a join. This applies at
+<p>Both forms drop the condition, so neither contributes a join. This applies at
 any depth of nested groupings, under the short or long key spellings.</p>
 
-  <p>To search <em>for</em> a blank value instead of ignoring it, see
+<p><code class="language-plaintext highlighter-rouge">false</code> is never blank. A value may be given bare (<code class="language-plaintext highlighter-rouge">v: [false]</code>) or in an
+envelope (<code class="language-plaintext highlighter-rouge">v: [{ value: false }]</code>), and both forms keep it:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">c: </span><span class="p">{</span> <span class="s1">'0'</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">a: </span><span class="p">[</span><span class="s1">'awesome'</span><span class="p">],</span> <span class="ss">p: </span><span class="s1">'eq'</span><span class="p">,</span> <span class="ss">v: </span><span class="p">[{</span> <span class="ss">value: </span><span class="kp">false</span> <span class="p">}]</span> <span class="p">}</span> <span class="p">}).</span><span class="nf">result</span><span class="p">.</span><span class="nf">to_sql</span>
+<span class="c1"># =&gt; SELECT "people".* FROM "people" WHERE "people"."awesome" = FALSE</span>
+</code></pre></div></div>
+
+<p>To search <em>for</em> a blank value instead of ignoring it, see
 <a href="/ransack/getting-started/configuration/#blank-values"><code class="language-plaintext highlighter-rouge">ignore_blank_values</code></a>.</p>
 
-  <p>:::note</p>
-
+<blockquote class="note">
   <p>Before Ransack 5.0 only the shorthand form was pruned. A <code class="language-plaintext highlighter-rouge">c:</code> condition with an
 empty value still built its attribute and contributed a join, producing a
 <code class="language-plaintext highlighter-rouge">LEFT OUTER JOIN</code> with no <code class="language-plaintext highlighter-rouge">WHERE</code> clause to go with it. See
-<a href="https://github.com/activerecord-hackery/ransack/pull/1653">#1653</a>.</p>
+<a href="https://github.com/activerecord-hackery/ransack/pull/1653">#1653</a>.
+Before 6.0, <code class="language-plaintext highlighter-rouge">false</code> inside an envelope with a symbol key was read as <code class="language-plaintext highlighter-rouge">nil</code> and
+dropped. See <a href="https://github.com/activerecord-hackery/ransack/issues/1736">#1736</a>.</p>
+</blockquote>
 <h2 id="tweak-your-routes">
   
   
@@ -386,7 +396,6 @@ empty value still built its attribute and contributed a join, producing a
   
 </h2>
     
-</blockquote>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">resources</span> <span class="ss">:people</span> <span class="k">do</span>
   <span class="n">collection</span> <span class="k">do</span>
