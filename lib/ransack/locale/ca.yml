@@ -93,7 +93,7 @@ ca:
       length_eq_all: "longitud és igual a tots"
       length_lt: "longitud menor que"
       length_lt_any: "longitud menor que qualsevol"
-      length_lt_all: "longitud menor o igual a"
+      length_lt_all: "longitud menor que tots"
       length_lteq: "longitud menor que o igual a"
       length_lteq_any: "longitud menor o igual a qualsevol"
       length_lteq_all: "longitud menor o igual a tots"
