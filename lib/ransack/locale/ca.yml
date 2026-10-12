@@ -28,7 +28,7 @@ ca:
       does_not_match_all: "no coincideix amb tots"
       lt: "menor que"
       lt_any: "menor que qualsevol"
-      lt_all: "menor o igual a"
+      lt_all: "menor que tots"
       lteq: "menor que o igual a"
       lteq_any: "menor o igual a qualsevol"
       lteq_all: "menor o igual a tots"
