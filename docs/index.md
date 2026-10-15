@@ -1,105 +1,91 @@
 ---
-title: Introduction
-nav_order: 1
+title: Ransack
+description: Object-based searching for Active Record. Add search forms and sortable columns to a Rails application with plain Ruby and ERB.
+layout: home
 permalink: /
+hero:
+  name: Ransack
+  text: Search for Active Record
+  tagline: Search forms and sortable columns for your Rails app, in plain Ruby and ERB. No search server, no extra infrastructure.
+  image:
+    src: /assets/logo/ransack.svg
+    alt: Ransack
+    width: 320
+    height: 333
+  actions:
+    - theme: brand
+      text: Get started
+      link: /getting-started/
+    - theme: alt
+      text: Upgrading to 6.x
+      link: /getting-started/upgrading/
+    - theme: alt
+      text: View on GitHub
+      link: https://github.com/activerecord-hackery/ransack
+features:
+  - title: Simple mode
+    details: One `search_form_for` and a `sort_link` give any model a search form and sortable columns.
+    link: /getting-started/simple-mode/
+  - title: Predicates
+    details: Name the comparison in the parameter, `title_cont`, `price_gteq`, `deleted_at_null`, and Ransack writes the SQL.
+    link: /getting-started/search-matches/
+  - title: Associations
+    details: Search and sort through associations by name, `author_name_cont`, with the joins built for you.
+    link: /going-further/associations/
+  - title: Advanced mode
+    details: Nested groups of conditions, combined with `AND` and `OR`, for searches a flat form cannot express.
+    link: /getting-started/advanced-mode/
+  - title: Safe by default
+    details: Nothing is searchable until a model allowlists it, or a controller permits it with strong parameters.
+    link: /getting-started/authorization/
+  - title: Ransackers
+    details: Define your own searchable attributes in Arel, for dates, concatenations, JSON and anything SQL can compute.
+    link: /going-further/ransackers/
 ---
 
-# Introduction
+## A search in three steps
 
-Ransack will help you easily add **searching to your Rails application**, without any additional dependencies.
-
-There are advanced searching solutions around, like ElasticSearch or Algolia. **Ransack** will do the job for many Rails websites, without the need to run additional infrastructure or work in a different language. With Ransack you do it all with standard Ruby and ERB.
-
-Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
-
-Ransack is supported for Rails 8.1 and 8.0 on Ruby 3.3 and later.
-
-### Databases
-
-Ransack generates SQL through Arel, so it works with any database Active
-Record can talk to. Three are tested on every change and get first-class
-treatment for the handful of places where the SQL differs:
-
-| Database | Adapters | Tested in CI |
-| --- | --- | --- |
-| PostgreSQL | `postgresql`, and any adapter built on it such as `postgis` | yes |
-| MySQL / MariaDB | `mysql2`, `trilogy` | yes |
-| SQLite | `sqlite3` | yes |
-
-An adapter that subclasses one of Rails' own is recognised as that database
-without any configuration. Other adapters (`sqlserver`, `oracle_enhanced`)
-are treated as standard SQL; they are known to work but are not tested here,
-and the [`dialect` option](./getting-started/configuration.md#sql-dialect) lets you name a
-dialect explicitly if one of the known ones is a better fit.
-
-## Installation
-
-To install `ransack` and add it to your Gemfile, run
+Allow the attributes a search may use:
 
 ```ruby
-gem 'ransack'
+class Post < ApplicationRecord
+  def self.ransackable_attributes(auth_object = nil)
+    %w[title published_at]
+  end
+end
 ```
 
-### Bleeding edge
-
-If you would like to use the latest updates not yet published to RubyGems, use the `main` branch:
+Build the search from the request:
 
 ```ruby
-gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
+class PostsController < ApplicationController
+  def index
+    @q = Post.ransack(params[:q])
+    @posts = @q.result
+  end
+end
 ```
 
-### Demo application
+Render a form and a sortable column:
 
-The [Ransack Demo application](https://github.com/activerecord-hackery/ransack_demo) shows how to create [simple](http://ransack-demo.herokuapp.com) and
-[advanced](http://ransack-demo.herokuapp.com/users/advanced_search) search forms for your Ruby on Rails application.
+```erb
+<%= search_form_for @q do |f| %>
+  <%= f.label :title_cont %>
+  <%= f.search_field :title_cont %>
+  <%= f.submit %>
+<% end %>
 
+<%= sort_link(@q, :published_at) %>
+```
 
-## Issues tracker
+`GET /posts?q[title_cont]=ransack&q[s]=published_at+desc` then runs:
 
-* Before filing an issue, please read the [Contributing Guide](https://github.com/activerecord-hackery/ransack/CONTRIBUTING.md).
-* File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
-* Please consider creating a pull request with a failing test that demonstrates the problem.
-* Contributions are welcome. :smiley:
-* Please do not use the issue tracker for personal support requests. Stack Overflow is a better place for that where a wider community can help you!
+```sql
+SELECT "posts".* FROM "posts"
+WHERE "posts"."title" LIKE '%ransack%' ESCAPE '\'
+ORDER BY "posts"."published_at" DESC
+```
 
-
-## Contributions
-
-To support the project:
-
-* Consider supporting us via [Open Collective](https://opencollective.com/ransack)
-* Use Ransack in your apps, and let us know if you encounter anything that's
-broken or missing. A failing spec to demonstrate the issue is awesome. A pull
-request with passing tests is even better!
-* Before filing an issue or pull request, be sure to read and follow the
-[Contributing Guide](https://github.com/activerecord-hackery/ransack/CONTRIBUTING.md).
-* Please use Stack Overflow or other sites for questions or discussion not
-directly related to bug reports, pull requests, or documentation improvements.
-* Spread the word on Twitter, Facebook, and elsewhere if Ransack's been useful
-to you. The more people who are using the project, the quicker we can find and
-fix bugs!
-
-## Ransack for enterprise
-
-Available as part of the [Tidelift Subscription](https://tidelift.com/subscription/pkg/rubygems-ransack?utm_source=rubygems-ransack&utm_medium=referral&utm_campaign=enterprise&utm_term=docs).
-
-The maintainers of Ransack and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/rubygems-ransack?utm_source=rubygems-ransack&utm_medium=referral&utm_campaign=enterprise&utm_term=docs)
-
-## Security contact information
-
-To report a security vulnerability, please use the [Tidelift security contact](https://tidelift.com/security). Tidelift will coordinate the fix and disclosure. See the [Security Policy](https://github.com/activerecord-hackery/ransack/security/policy) for supported versions.
-
-## Contributors
-
-Ransack was created by [Ernie Miller](http://twitter.com/erniemiller) and is developed and maintained by:
-* [Sean Carroll](https://github.com/scarroll32)
-* [Deivid Rodriguez](https://github.com/deivid-rodriguez)
-* [Greg Molnar](https://github.com/gregmolnar)
-* [A great group of contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
-- Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).
-
-Alumni Maintainers
-- [Jon Atack](http://twitter.com/jonatack)
-- [Ryan Bigg](http://twitter.com/ryanbigg)
-
-This project exists thanks to all the people who contribute. <img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" alt="Contributors" />
+Ransack supports Rails 8.1 and 8.0 on Ruby 3.3 and later, on PostgreSQL,
+MySQL, MariaDB and SQLite. See [Installation](_getting_started/installation.md)
+to add it to your app.

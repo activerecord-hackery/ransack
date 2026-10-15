@@ -1,0 +1,7 @@
+# Sidebar sections, one per collection (see _config.yml), in this order.
+- title: Getting started
+  collection: getting_started
+- title: Going further
+  collection: going_further
+- title: Project
+  collection: project
