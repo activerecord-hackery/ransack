@@ -162,10 +162,17 @@ module Ransack
       # Drops a join Ransack added, when a negative condition on a collection
       # replaces it with a correlated subquery. A join the relation already
       # had, or one another condition needs, is locked and stays.
+      #
+      # The parent is kept aside, because the condition still holds the
+      # association and builds the subquery from it again each time the
+      # search is evaluated (#1745). Keeping it out of @associations_pot
+      # means a later binding builds a fresh join rather than reusing the
+      # removed one.
       def remove_association(association)
         return if @lock_associations.include?(association)
 
-        @associations_pot.delete(association)
+        parent = @associations_pot.delete(association)
+        @removed_associations[association] = parent if parent
         @base.children.delete_if { |child| child.equal?(association) }
         @object.left_outer_joins_values = @object.left_outer_joins_values.reject { |jd|
           jd.is_a?(JoinDependency) &&
@@ -457,6 +464,7 @@ module Ransack
 
       def parent_of(node)
         @associations_pot[node] ||
+          @removed_associations[node] ||
           @base.detect { |candidate| candidate.children.any? { |child| child.equal?(node) } }
       end
 

@@ -225,6 +225,12 @@ with no articles. A join would instead select people who have *at least one*
 article with a different title, which is a different question; ask it with a
 scope or a ransacker if you need it.
 
+Each negative condition gets its own subquery, so `articles_title_not_eq:
+'Draft', articles_body_not_cont: 'spam'` selects people with no `Draft`
+article and no article mentioning `spam`. The search can be evaluated as often
+as you like; Ransack 6.0.0 raised `NoMethodError` on a second negative
+condition on the same collection, and on a second call to `result` (#1745).
+
 The subquery reaches the same records the association does. It keeps the
 association's own conditions: the type column of a polymorphic (`as:`) or
 STI association, the association's scope and the target's default scope. It
