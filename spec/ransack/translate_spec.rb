@@ -22,6 +22,44 @@ module Ransack
           )
         expect(translation).to eq 'Full Name equals'
       end
+
+      # The name being translated used to be kept on the module, which every
+      # thread shares, and read back after an I18n call. Two requests rendering
+      # sort links at once could then label one with the other's association,
+      # or raise I18n::MissingInterpolationArgument.
+      context 'from several threads at once' do
+        let(:context) { Person.ransack.context }
+        let(:expected) do
+          %w[articles_title name].to_h do |name|
+            [name, Translate.attribute(name, context: context, include_associations: true)]
+          end
+        end
+
+        it 'keeps nothing on the module between calls' do
+          Translate.attribute('articles_title', context: context, include_associations: true)
+          expect(Translate.instance_variables).to be_empty
+        end
+
+        it 'gives each call its own translation' do
+          expected
+          # Hand the other thread a turn inside every lookup, where the state
+          # used to be overwritten.
+          allow(I18n).to receive(:t).and_wrap_original do |original, *args, **opts|
+            Thread.pass
+            original.call(*args, **opts)
+          end
+
+          results = expected.keys.map do |name|
+            Thread.new do
+              Array.new(50) do
+                Translate.attribute(name, context: context, include_associations: true)
+              end
+            end
+          end.map(&:value)
+
+          expect(results.map(&:uniq)).to eq(expected.values.map { |v| [v] })
+        end
+      end
     end
 
     describe '.predicate' do
