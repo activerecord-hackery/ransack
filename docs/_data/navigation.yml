@@ -1,0 +1,10 @@
+# Top navbar. `collections` marks the item active on that section's pages.
+- title: Getting started
+  url: /getting-started/
+  collections: [getting_started]
+- title: Going further
+  url: /going-further/associations/
+  collections: [going_further]
+- title: Project
+  url: /project/community/
+  collections: [project]
