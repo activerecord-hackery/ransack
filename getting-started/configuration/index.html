@@ -504,8 +504,8 @@ as a literal value there instead. See
   <p>This was called <code class="language-plaintext highlighter-rouge">postgres_fields_sort_option</code> before Ransack 5.0, and was built
 by interpolating SQL fragments. It now goes through Arel’s <code class="language-plaintext highlighter-rouge">nulls_first</code> /
 <code class="language-plaintext highlighter-rouge">nulls_last</code> nodes, so it works on every database Arel renders them for,
-including MySQL, where Arel emulates them as <code class="language-plaintext highlighter-rouge">ORDER BY col IS NULL, col</code>
-(Rails 7.2 and later). The old name still works.</p>
+including MySQL, where Arel emulates them as <code class="language-plaintext highlighter-rouge">ORDER BY col IS NULL, col</code>.
+The old name still works.</p>
 <h2 id="custom-search-parameter-key-name">
   
   

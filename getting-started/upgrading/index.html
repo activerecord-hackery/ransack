@@ -226,10 +226,35 @@
         <main>
           
             <p>Ransack follows <a href="/ransack/going-further/release_process/#semantic-versioning">semantic versioning</a>:
-a major release is the only place a breaking change can land. This page lists
-what changed in each major release and what to do about it. The full list of
+a breaking change to Ransack’s behaviour only lands in a major release, while
+support for a Ruby or Rails version that has reached end of life can be dropped
+in a minor one. This page lists what changed in each of those releases and what
+to do about it. The full list of
 changes in every release is in the
 <a href="https://github.com/activerecord-hackery/ransack/releases">GitHub release notes</a>.</p>
+<h2 id="upgrading-to-61">
+  
+  
+    <a href="#upgrading-to-61" class="anchor-heading" aria-labelledby="upgrading-to-61"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Upgrading to 6.1
+  
+  
+</h2>
+    
+<h3 id="ruby-33-and-rails-80-or-later-are-required">
+  
+  
+    <a href="#ruby-33-and-rails-80-or-later-are-required" class="anchor-heading" aria-labelledby="ruby-33-and-rails-80-or-later-are-required"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Ruby 3.3 and Rails 8.0 or later are required
+  
+  
+</h3>
+    
+
+<p>Ruby 3.2 reached end of life in March 2026 and Rails 7.2 in August 2026;
+neither receives security fixes any more. Ransack 6.1 requires Ruby 3.3 or
+later and Active Record 8.0 or later. Nothing else changes: if you are on a
+supported Ruby and Rails, upgrading needs no code changes. If you are still on
+Ruby 3.2 or Rails 7.2, stay on Ransack 6.0 until you can upgrade; Bundler will
+not resolve 6.1 for you.</p>
 <h2 id="upgrading-to-60">
   
   

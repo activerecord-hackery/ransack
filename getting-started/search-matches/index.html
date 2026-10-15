@@ -786,7 +786,7 @@ condition on the same collection, and on a second call to <code class="language-
 association’s own conditions: the type column of a polymorphic (<code class="language-plaintext highlighter-rouge">as:</code>) or
 STI association, the association’s scope and the target’s default scope. It
 correlates on the association’s keys, so an association with a <code class="language-plaintext highlighter-rouge">primary_key:</code>
-option is tested on that column rather than on <code class="language-plaintext highlighter-rouge">id</code>. Before Ransack 6.0.1 the
+option is tested on that column rather than on <code class="language-plaintext highlighter-rouge">id</code>. Before Ransack 6.1 the
 subquery dropped those conditions, so a note on another model with the same
 id, or a comment hidden by a default scope, still excluded the record
 (#1747).</p>
@@ -795,7 +795,7 @@ id, or a comment hidden by a default scope, still excluded the record
 reads it. A sort on the collection (<code class="language-plaintext highlighter-rouge">s: 'articles_title asc'</code>), or a condition
 or sort on an association nested under it (<code class="language-plaintext highlighter-rouge">articles_comments_body_eq</code>), keeps
 the join alongside the subquery. As with any sort on a <code class="language-plaintext highlighter-rouge">has_many</code>, a record
-then appears once per associated row. Before Ransack 6.0.1 the join was
+then appears once per associated row. Before Ransack 6.1 the join was
 dropped anyway and the query failed (#1749).</p>
 
 <p>Evaluating a search doesn’t change it, so you can add a condition or a sort
@@ -807,7 +807,7 @@ after calling <code class="language-plaintext highlighter-rouge">result</code> a
 <span class="n">search</span><span class="p">.</span><span class="nf">result</span>            <span class="c1"># same as building it with the sort up front</span>
 </code></pre></div></div>
 
-<p>Before Ransack 6.0.1 the second query referenced a join the first evaluation
+<p>Before Ransack 6.1 the second query referenced a join the first evaluation
 had dropped (#1750). The joins are chosen from the search as it stands when
 it is evaluated, so a sort or condition you clear takes its join with it
 rather than leaving one behind to repeat records.</p>
