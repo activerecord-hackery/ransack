@@ -1604,6 +1604,21 @@ supported Ruby and Rails, upgrading needs no code changes. If you are still on
 Ruby 3.2 or Rails 7.2, stay on Ransack 6.0 until you can upgrade; Bundler will
 not resolve 6.1 for you.
 
+### Malformed search params raise `InvalidSearchError`
+
+A search built from params of the wrong shape, such as `?q[g]=x` or
+`?q[c][0]=x`, used to raise `ArgumentError`, `NoMethodError` or `TypeError`,
+depending on where the shape first broke; an array or a hash where a single
+name, predicate, direction or combinator belongs (`?q[s][0][dir][]=desc`) was
+stringified and then silently ignored, or for a direction, read as ascending. Each of these now raises
+`Ransack::InvalidSearchError`, from `ransack` as well as from `ransack!`; see
+[Malformed params](/ransack/going-further/other-notes/#malformed-params). Code that
+rescues `Ransack::InvalidSearchError` or `ArgumentError` needs no change.
+
+A sort given as a hash without a direction, `s: [{ name: &apos;title&apos; }]`, used
+to raise `TypeError`; it now sorts ascending, as `s: &apos;title&apos;` does. A symbol
+direction, `dir: :desc`, is now read instead of being treated as ascending.
+
 ## Upgrading to 6.0
 
 ### Ruby 3.2 or later is required
@@ -1776,6 +1791,21 @@ later and Active Record 8.0 or later. Nothing else changes: if you are on a
 supported Ruby and Rails, upgrading needs no code changes. If you are still on
 Ruby 3.2 or Rails 7.2, stay on Ransack 6.0 until you can upgrade; Bundler will
 not resolve 6.1 for you.</p>
+
+<h3 id="malformed-search-params-raise-invalidsearcherror">Malformed search params raise <code class="language-plaintext highlighter-rouge">InvalidSearchError</code></h3>
+
+<p>A search built from params of the wrong shape, such as <code class="language-plaintext highlighter-rouge">?q[g]=x</code> or
+<code class="language-plaintext highlighter-rouge">?q[c][0]=x</code>, used to raise <code class="language-plaintext highlighter-rouge">ArgumentError</code>, <code class="language-plaintext highlighter-rouge">NoMethodError</code> or <code class="language-plaintext highlighter-rouge">TypeError</code>,
+depending on where the shape first broke; an array or a hash where a single
+name, predicate, direction or combinator belongs (<code class="language-plaintext highlighter-rouge">?q[s][0][dir][]=desc</code>) was
+stringified and then silently ignored, or for a direction, read as ascending. Each of these now raises
+<code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code>, from <code class="language-plaintext highlighter-rouge">ransack</code> as well as from <code class="language-plaintext highlighter-rouge">ransack!</code>; see
+<a href="/ransack/going-further/other-notes/#malformed-params">Malformed params</a>. Code that
+rescues <code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code> or <code class="language-plaintext highlighter-rouge">ArgumentError</code> needs no change.</p>
+
+<p>A sort given as a hash without a direction, <code class="language-plaintext highlighter-rouge">s: [{ name: 'title' }]</code>, used
+to raise <code class="language-plaintext highlighter-rouge">TypeError</code>; it now sorts ascending, as <code class="language-plaintext highlighter-rouge">s: 'title'</code> does. A symbol
+direction, <code class="language-plaintext highlighter-rouge">dir: :desc</code>, is now read instead of being treated as ascending.</p>
 
 <h2 id="upgrading-to-60">Upgrading to 6.0</h2>
 

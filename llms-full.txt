@@ -1885,6 +1885,21 @@ supported Ruby and Rails, upgrading needs no code changes. If you are still on
 Ruby 3.2 or Rails 7.2, stay on Ransack 6.0 until you can upgrade; Bundler will
 not resolve 6.1 for you.
 
+### Malformed search params raise `InvalidSearchError`
+
+A search built from params of the wrong shape, such as `?q[g]=x` or
+`?q[c][0]=x`, used to raise `ArgumentError`, `NoMethodError` or `TypeError`,
+depending on where the shape first broke; an array or a hash where a single
+name, predicate, direction or combinator belongs (`?q[s][0][dir][]=desc`) was
+stringified and then silently ignored, or for a direction, read as ascending. Each of these now raises
+`Ransack::InvalidSearchError`, from `ransack` as well as from `ransack!`; see
+[Malformed params](../_going_further/other-notes.md#malformed-params). Code that
+rescues `Ransack::InvalidSearchError` or `ArgumentError` needs no change.
+
+A sort given as a hash without a direction, `s: [{ name: 'title' }]`, used
+to raise `TypeError`; it now sorts ascending, as `s: 'title'` does. A symbol
+direction, `dir: :desc`, is now read instead of being treated as ascending.
+
 ## Upgrading to 6.0
 
 ### Ruby 3.2 or later is required
@@ -3609,6 +3624,27 @@ Article.ransack!(unknown_attr_eq: 'Ernie')
 
 This is equivalent to the `ignore_unknown_conditions` configuration option,
 except it may be applied on a case-by-case basis.
+
+### Malformed params
+
+Params of the wrong shape, such as a string where advanced mode expects a hash
+of groupings or conditions (`?q[g]=x`, `?q[c][0]=x`), or an array or a hash
+where a single name, predicate, direction or combinator belongs
+(`?q[s][0][dir][]=desc`), are not unknown conditions that can be ignored: Ransack cannot tell what the search was meant
+to be. They raise `Ransack::InvalidSearchError` from `ransack` as well as from
+`ransack!`. Search params usually come straight from the query string, so
+rescue it to answer a hand-edited URL with a 400 rather than a 500:
+
+```ruby
+class ApplicationController < ActionController::Base
+  rescue_from Ransack::InvalidSearchError do |error|
+    render plain: error.message, status: :bad_request
+  end
+end
+```
+
+`Ransack::InvalidSearchError` is a subclass of `ArgumentError`, so code that
+rescues `ArgumentError` catches it too.
 
 ## Grouping queries by OR instead of AND
 

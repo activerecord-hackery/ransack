@@ -1766,6 +1766,27 @@ Article.ransack!(unknown_attr_eq: &apos;Ernie&apos;)
 This is equivalent to the `ignore_unknown_conditions` configuration option,
 except it may be applied on a case-by-case basis.
 
+### Malformed params
+
+Params of the wrong shape, such as a string where advanced mode expects a hash
+of groupings or conditions (`?q[g]=x`, `?q[c][0]=x`), or an array or a hash
+where a single name, predicate, direction or combinator belongs
+(`?q[s][0][dir][]=desc`), are not unknown conditions that can be ignored: Ransack cannot tell what the search was meant
+to be. They raise `Ransack::InvalidSearchError` from `ransack` as well as from
+`ransack!`. Search params usually come straight from the query string, so
+rescue it to answer a hand-edited URL with a 400 rather than a 500:
+
+```ruby
+class ApplicationController &lt; ActionController::Base
+  rescue_from Ransack::InvalidSearchError do |error|
+    render plain: error.message, status: :bad_request
+  end
+end
+```
+
+`Ransack::InvalidSearchError` is a subclass of `ArgumentError`, so code that
+rescues `ArgumentError` catches it too.
+
 ## Grouping queries by OR instead of AND
 
 The default `AND` grouping can be changed to `OR` by adding `m: &apos;or&apos;` to the
@@ -1992,6 +2013,26 @@ class method also raises an error if passed an unknown condition:</p>
 
 <p>This is equivalent to the <code class="language-plaintext highlighter-rouge">ignore_unknown_conditions</code> configuration option,
 except it may be applied on a case-by-case basis.</p>
+
+<h3 id="malformed-params">Malformed params</h3>
+
+<p>Params of the wrong shape, such as a string where advanced mode expects a hash
+of groupings or conditions (<code class="language-plaintext highlighter-rouge">?q[g]=x</code>, <code class="language-plaintext highlighter-rouge">?q[c][0]=x</code>), or an array or a hash
+where a single name, predicate, direction or combinator belongs
+(<code class="language-plaintext highlighter-rouge">?q[s][0][dir][]=desc</code>), are not unknown conditions that can be ignored: Ransack cannot tell what the search was meant
+to be. They raise <code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code> from <code class="language-plaintext highlighter-rouge">ransack</code> as well as from
+<code class="language-plaintext highlighter-rouge">ransack!</code>. Search params usually come straight from the query string, so
+rescue it to answer a hand-edited URL with a 400 rather than a 500:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">rescue_from</span> <span class="no">Ransack</span><span class="o">::</span><span class="no">InvalidSearchError</span> <span class="k">do</span> <span class="o">|</span><span class="n">error</span><span class="o">|</span>
+    <span class="n">render</span> <span class="ss">plain: </span><span class="n">error</span><span class="p">.</span><span class="nf">message</span><span class="p">,</span> <span class="ss">status: :bad_request</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Ransack::InvalidSearchError</code> is a subclass of <code class="language-plaintext highlighter-rouge">ArgumentError</code>, so code that
+rescues <code class="language-plaintext highlighter-rouge">ArgumentError</code> catches it too.</p>
 
 <h2 id="grouping-queries-by-or-instead-of-and">Grouping queries by OR instead of AND</h2>
 

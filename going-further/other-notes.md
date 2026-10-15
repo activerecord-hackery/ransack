@@ -181,6 +181,27 @@ Article.ransack!(unknown_attr_eq: 'Ernie')
 This is equivalent to the `ignore_unknown_conditions` configuration option,
 except it may be applied on a case-by-case basis.
 
+### Malformed params
+
+Params of the wrong shape, such as a string where advanced mode expects a hash
+of groupings or conditions (`?q[g]=x`, `?q[c][0]=x`), or an array or a hash
+where a single name, predicate, direction or combinator belongs
+(`?q[s][0][dir][]=desc`), are not unknown conditions that can be ignored: Ransack cannot tell what the search was meant
+to be. They raise `Ransack::InvalidSearchError` from `ransack` as well as from
+`ransack!`. Search params usually come straight from the query string, so
+rescue it to answer a hand-edited URL with a 400 rather than a 500:
+
+```ruby
+class ApplicationController < ActionController::Base
+  rescue_from Ransack::InvalidSearchError do |error|
+    render plain: error.message, status: :bad_request
+  end
+end
+```
+
+`Ransack::InvalidSearchError` is a subclass of `ArgumentError`, so code that
+rescues `ArgumentError` catches it too.
+
 ## Grouping queries by OR instead of AND
 
 The default `AND` grouping can be changed to `OR` by adding `m: 'or'` to the
