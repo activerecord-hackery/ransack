@@ -30,7 +30,16 @@ module Ransack
       'an indexed value that is a string'         =>
         'q[c][0][a][0][name]=name&q[c][0][p]=eq&q[c][0][v][0]=x',
       'an indexed sort that is a string'          => 'q[s][0]=name',
-      'a sort entry that is an array'             => 'q[s][][]=x'
+'a sort entry that is an array'             => 'q[s][][]=x',
+'a sort direction that is an array'         => 'q[s][0][name]=name&q[s][0][dir][]=desc',
+'a sort direction that is a hash'           => 'q[s][0][name]=name&q[s][0][dir][x]=desc',
+'a sort name that is an array'              => 'q[s][0][name][]=name',
+'a predicate that is an array'              =>
+  'q[c][0][a][0][name]=name&q[c][0][p][]=eq&q[c][0][v][0][value]=x',
+'an attribute name that is an array'        =>
+  'q[c][0][a][0][name][]=name&q[c][0][p]=eq&q[c][0][v][0][value]=x',
+'a combinator that is an array'             => 'q[m][]=or&q[name_eq]=x',
+'a grouping combinator that is a hash'      => 'q[g][0][m][x]=or&q[g][0][name_eq]=x'
     }
 
     shapes.each do |description, query|

@@ -28,7 +28,9 @@ not resolve 6.1 for you.
 
 A search built from params of the wrong shape, such as `?q[g]=x` or
 `?q[c][0]=x`, used to raise `ArgumentError`, `NoMethodError` or `TypeError`,
-depending on where the shape first broke. Each of these now raises
+depending on where the shape first broke; an array or a hash where a single
+name, predicate, direction or combinator belongs (`?q[s][0][dir][]=desc`) was
+stringified and then silently ignored, or for a direction, read as ascending. Each of these now raises
 `Ransack::InvalidSearchError`, from `ransack` as well as from `ransack!`; see
 [Malformed params](../_going_further/other-notes.md#malformed-params). Code that
 rescues `Ransack::InvalidSearchError` or `ArgumentError` needs no change.

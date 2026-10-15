@@ -33,12 +33,12 @@ module Ransack
       end
 
       def name=(name)
-        @name = context.resolve_aliases(name.to_s)
+        @name = context.resolve_aliases(scalar_param(name, 'a sort name').to_s)
         context.bind(self, @name)
       end
 
       def dir=(dir)
-        dir = dir.to_s.downcase
+        dir = scalar_param(dir, 'a sort direction').to_s.downcase
         @dir =
           if dir == 'asc'.freeze || dir == 'desc'.freeze
             dir

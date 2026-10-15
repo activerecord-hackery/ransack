@@ -197,6 +197,7 @@ module Ransack
       # compound's combinator (#1728). Left alone, the alias passed `valid?`
       # by being allowlisted and bound a column that does not exist.
       def build_attributes(name, ransacker_args = [])
+        scalar_param(name, 'an attribute name')
         return build_attribute(name, ransacker_args) if name.blank? || @context.nil?
 
         resolved = @context.resolve_aliases(name.to_s)
@@ -284,7 +285,7 @@ module Ransack
       end
 
       def predicate_name=(name)
-        self.predicate = Predicate.named(name)
+        self.predicate = Predicate.named(scalar_param(name, 'a predicate'))
         @predicate
       end
       alias :p= :predicate_name=

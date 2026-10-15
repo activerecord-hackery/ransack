@@ -34,7 +34,7 @@ module Ransack
       # this is the one place that normalises the spelling and, when the search
       # is strict, rejects a value it does not recognise.
       def combinator=(val)
-        normalised = val.to_s.downcase
+        normalised = scalar_param(val, 'combinator').to_s.downcase
         @combinator = Constants::AND_OR.detect { |v| v == normalised }
 
         if @combinator.nil? && !normalised.empty? && context&.strict_conditions?
@@ -50,9 +50,19 @@ module Ransack
       def indifferent_params(params, node_name)
         return params.with_indifferent_access if params.respond_to?(:with_indifferent_access)
 
-        raise InvalidSearchError,
-          "Invalid argument (#{params.class}) supplied for a #{node_name}"
-      end
+  raise InvalidSearchError,
+    "Invalid argument (#{params.class}) supplied for a #{node_name}"
+end
+
+# A name, predicate, direction or combinator is a single value. Given an
+# array or a hash (`q[s][0][dir][]=desc`), it used to be stringified and
+# then silently ignored or defaulted, so the search ran as something
+# other than what was asked for.
+def scalar_param(value, field)
+  return value unless value.is_a?(Enumerable) || value.respond_to?(:to_unsafe_h)
+
+  raise InvalidSearchError, "Invalid argument (#{value.class}) supplied for #{field}"
+end
 
     end
   end
