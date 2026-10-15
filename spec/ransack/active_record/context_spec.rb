@@ -102,10 +102,14 @@ module Ransack
         it 'build correlated subquery for Root STI model' do
           search = Search.new(Person, { articles_title_not_eq: 'some_title' }, context: subject)
           attribute = search.conditions.first.attributes.first
-          constraints = subject.build_correlated_subquery(attribute.parent).constraints
+          subquery = subject.build_correlated_subquery(attribute.parent)
+          constraints = subquery.constraints
           constraint = constraints.first
 
-          expect(constraints.length).to eql 1
+          # The correlation, then the join's own condition: Article's
+          # default scope.
+          expect(constraints.length).to eql 2
+          expect(subject.subquery_sql(subquery)).to end_with "AND ('default_scope' = 'default_scope')"
           expect(constraint.left.name).to eql 'person_id'
           expect(constraint.left.relation.name).to eql 'articles'
           expect(constraint.right.name).to eql 'id'
@@ -115,10 +119,13 @@ module Ransack
         it 'build correlated subquery for Child STI model when predicate is not_eq' do
           search = Search.new(Person, { story_articles_title_not_eq: 'some_title' }, context: subject)
           attribute = search.conditions.first.attributes.first
-          constraints = subject.build_correlated_subquery(attribute.parent).constraints
+          subquery = subject.build_correlated_subquery(attribute.parent)
+          constraints = subquery.constraints
           constraint = constraints.first
 
-          expect(constraints.length).to eql 1
+          # The STI type condition and the default scope come with it.
+          expect(constraints.length).to eql 3
+          expect(subject.subquery_sql(subquery)).to include("#{quote_table_name('articles')}.#{quote_column_name('type')} = 'StoryArticle'")
           expect(constraint.left.relation.name).to eql 'articles'
           expect(constraint.left.name).to eql 'person_id'
           expect(constraint.right.relation.name).to eql 'people'
@@ -128,10 +135,13 @@ module Ransack
         it 'build correlated subquery for Child STI model when predicate is eq' do
           search = Search.new(Person, { story_articles_title_not_eq: 'some_title' }, context: subject)
           attribute = search.conditions.first.attributes.first
-          constraints = subject.build_correlated_subquery(attribute.parent).constraints
+          subquery = subject.build_correlated_subquery(attribute.parent)
+          constraints = subquery.constraints
           constraint = constraints.first
 
-          expect(constraints.length).to eql 1
+          # The STI type condition and the default scope come with it.
+          expect(constraints.length).to eql 3
+          expect(subject.subquery_sql(subquery)).to include("#{quote_table_name('articles')}.#{quote_column_name('type')} = 'StoryArticle'")
           expect(constraint.left.relation.name).to eql 'articles'
           expect(constraint.left.name).to eql 'person_id'
           expect(constraint.right.relation.name).to eql 'people'
@@ -161,10 +171,14 @@ module Ransack
           # Create a mock Arel::Nodes::And with children for testing
           search = Search.new(Person, { articles_title_not_eq: 'some_title', articles_body_not_eq: 'some_body' }, context: subject)
           attribute = search.conditions.first.attributes.first
-          constraints = subject.build_correlated_subquery(attribute.parent).constraints
+          subquery = subject.build_correlated_subquery(attribute.parent)
+          constraints = subquery.constraints
           constraint = constraints.first
 
-          expect(constraints.length).to eql 1
+          # The correlation, then the join's own condition: Article's
+          # default scope.
+          expect(constraints.length).to eql 2
+          expect(subject.subquery_sql(subquery)).to end_with "AND ('default_scope' = 'default_scope')"
           expect(constraint.left.name).to eql 'person_id'
           expect(constraint.left.relation.name).to eql 'articles'
           expect(constraint.right.name).to eql 'id'
@@ -184,10 +198,11 @@ module Ransack
           )
 
           attribute = search.conditions.first.attributes.first
-          constraints = subject.build_correlated_subquery(attribute.parent).constraints
+          subquery = subject.build_correlated_subquery(attribute.parent)
+          constraints = subquery.constraints
           constraint = constraints.first
 
-          expect(constraints.length).to eql 1
+          expect(constraints.length).to eql 2
           expect(constraint.left.relation.name).to eql 'articles'
           expect(constraint.left.name).to eql 'person_id'
           expect(constraint.right.relation.name).to eql 'people'
