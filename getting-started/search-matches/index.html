@@ -776,6 +776,12 @@ with no articles. A join would instead select people who have <em>at least one</
 article with a different title, which is a different question; ask it with a
 scope or a ransacker if you need it.</p>
 
+<p>Each negative condition gets its own subquery, so <code class="language-plaintext highlighter-rouge">articles_title_not_eq:
+'Draft', articles_body_not_cont: 'spam'</code> selects people with no <code class="language-plaintext highlighter-rouge">Draft</code>
+article and no article mentioning <code class="language-plaintext highlighter-rouge">spam</code>. The search can be evaluated as often
+as you like; Ransack 6.0.0 raised <code class="language-plaintext highlighter-rouge">NoMethodError</code> on a second negative
+condition on the same collection, and on a second call to <code class="language-plaintext highlighter-rouge">result</code> (#1745).</p>
+
 <p><code class="language-plaintext highlighter-rouge">not_null</code> is the exception: <code class="language-plaintext highlighter-rouge">articles_title_not_null: true</code> means <em>at least
 one</em> associated record has a value (<code class="language-plaintext highlighter-rouge">"people"."id" IN (SELECT ... WHERE
 "articles"."title" IS NOT NULL)</code>), so it excludes people with no articles.</p>
