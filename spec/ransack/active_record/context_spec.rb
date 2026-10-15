@@ -2,9 +2,6 @@ require 'spec_helper'
 
 module Ransack
   module ActiveRecord
-    version = ::ActiveRecord::VERSION
-    AR_version = "#{version::MAJOR}.#{version::MINOR}"
-
     describe Context do
       subject { Context.new(Person) }
 
