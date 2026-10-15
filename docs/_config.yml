@@ -1,53 +1,83 @@
-# Ransack documentation, built with Jekyll and the Just the Docs theme and
-# published to GitHub Pages by .github/workflows/deploy.yml.
+# Ransack documentation, built with Jekyll and the VitePress theme for Jekyll
+# (https://jekyll-vitepress.dev) and published to GitHub Pages by
+# .github/workflows/deploy.yml.
 title: Ransack
 description: Object-based searching for Active Record
 url: https://activerecord-hackery.github.io
 baseurl: /ransack
+lang: en
 
-theme: just-the-docs
-logo: /assets/logo/ransack-h.png
-favicon_ico: /assets/img/favicon.ico
+theme: jekyll-vitepress-theme
 
 permalink: pretty
-search_enabled: true
-heading_anchors: true
 
-# Every page uses the theme's layout; the theme gem does not set this itself.
-defaults:
-  - scope:
-      path: ""
-    values:
-      layout: default
+# One collection per sidebar section; the theme builds the sidebar, the
+# pager and the search index from collections. Pages are ordered by
+# nav_order. The URLs are the ones the site had under Just the Docs; pages
+# that moved carry their old URL in redirect_from.
+collections:
+  getting_started:
+    permalink: /getting-started/:path/
+    output: true
+  going_further:
+    permalink: /going-further/:path/
+    output: true
+  project:
+    permalink: /project/:path/
+    output: true
 
-aux_links:
-  Ransack on GitHub: https://github.com/activerecord-hackery/ransack
-aux_links_new_tab: true
-
-gh_edit_link: true
-gh_edit_link_text: Edit this page on GitHub
-gh_edit_repository: https://github.com/activerecord-hackery/ransack
-gh_edit_branch: main
-gh_edit_source: docs
-gh_edit_view_mode: edit
-
-callouts_level: quiet
-callouts:
-  note:
-    title: Note
-    color: blue
-  caution:
-    title: Caution
-    color: yellow
+jekyll_vitepress:
+  branding:
+    site_title: Ransack
+    logo:
+      default: /assets/logo/ransack.svg
+      alt: Ransack
+      width: 24
+      height: 25
+  syntax:
+    light_theme: github
+    dark_theme: github.dark
+  # The logo's blues: rgb(51, 51, 180) and rgb(132, 132, 220).
+  tokens:
+    light:
+      --vp-c-brand-1: "#3333b4"
+      --vp-c-brand-2: "#4747c2"
+      --vp-c-brand-3: "#2a2a96"
+      --vp-c-brand-soft: "rgba(51, 51, 180, 0.14)"
+      --vp-home-hero-name-color: "transparent"
+      --vp-home-hero-name-background: "linear-gradient(120deg, #3333b4 30%, #8484dc)"
+      --vp-home-hero-image-background-image: "linear-gradient(-45deg, #8484dc 50%, #3333b4 50%)"
+      --vp-home-hero-image-filter: "blur(56px)"
+    dark:
+      --vp-c-brand-1: "#8484dc"
+      --vp-c-brand-2: "#a0a0e6"
+      --vp-c-brand-3: "#6b6bd0"
+      --vp-c-brand-soft: "rgba(132, 132, 220, 0.16)"
+      --vp-home-hero-name-background: "linear-gradient(120deg, #8484dc 30%, #c4c4f4)"
+  github_star:
+    repository: activerecord-hackery/ransack
+  seo:
+    publisher:
+      type: Organization
+      name: Ransack
+      url: https://github.com/activerecord-hackery/ransack
+  edit_link:
+    pattern: https://github.com/activerecord-hackery/ransack/edit/main/docs/:path
+    text: Edit this page on GitHub
+  # CI checkouts reset file times, so "Last updated" would show the build date.
+  last_updated:
+    enabled: false
+  footer:
+    message: 'Ransack is <a href="https://github.com/activerecord-hackery/ransack/blob/main/LICENSE">MIT licensed</a>. Questions belong in <a href="https://github.com/activerecord-hackery/ransack/discussions">Discussions</a>; reproducible bugs in <a href="https://github.com/activerecord-hackery/ransack/issues">Issues</a>.'
 
 plugins:
+  - jekyll-vitepress-theme
   - jekyll-relative-links
   - jekyll-redirect-from
-  - jekyll-seo-tag
 
 relative_links:
   enabled: true
-  collections: false
+  collections: true
 
 exclude:
   - Gemfile
@@ -56,4 +86,9 @@ exclude:
   - vendor
   - node_modules
 
-footer_content: 'Ransack is <a href="https://github.com/activerecord-hackery/ransack/blob/main/LICENSE">MIT licensed</a>. Questions belong in <a href="https://github.com/activerecord-hackery/ransack/discussions">Discussions</a>; reproducible bugs in <a href="https://github.com/activerecord-hackery/ransack/issues">Issues</a>.'
+# Every page and document uses the theme's layout; the home page sets its own.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
