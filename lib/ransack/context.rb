@@ -3,13 +3,25 @@ require 'ransack/visitor'
 module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
-    attr_accessor :auth_object, :search_key, :ignore_unknown_conditions
+    attr_accessor :search_key, :ignore_unknown_conditions
+    attr_reader :auth_object, :permitted
     attr_writer :null_sentinel
+
+    # The allowlists are read once per model and kept for the life of the
+    # context (see `allowlist_set`), so changing what they depend on drops
+    # the kept copies.
+    def auth_object=(value)
+      reset_name_caches
+      @auth_object = value
+    end
 
     # True when the search was built from `ActionController::Parameters` the
     # controller permitted. A model with no allowlist of its own then lets
     # that permit list be the boundary (see `allowlist` below).
-    attr_accessor :permitted
+    def permitted=(value)
+      reset_name_caches
+      @permitted = value
+    end
 
     class << self
 
@@ -258,15 +270,15 @@ module Ransack
     end
 
     def ransackable_attribute?(str, klass)
-      attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
+      allowlist_set(klass, :attributes_for).include?(str.to_s)
     end
 
     def ransortable_attribute?(str, klass)
-      sortable_attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
+      allowlist_set(klass, :sortable_attributes_for).include?(str.to_s)
     end
 
     def ransackable_association?(str, klass)
-      associations_for(klass).any? { |s| s.to_sym == str.to_sym }
+      allowlist_set(klass, :associations_for).include?(str.to_s)
     end
 
     def ransackable_scope?(str, klass)
@@ -299,6 +311,20 @@ module Ransack
     def use_ancestors_of(_association); end
 
     private
+
+    # Every name in a search is checked against the allowlists several times
+    # over, and each check used to call the model's `ransackable_*` method
+    # and scan the array it returned. They are asked once per model per
+    # context instead, and what is cached here is dropped whenever the auth
+    # object or the permitted flag changes.
+    def reset_name_caches
+      @allowlist_sets = nil
+    end
+
+    def allowlist_set(klass, kind)
+      ((@allowlist_sets ||= {})[kind] ||= {})[klass] ||=
+        send(kind, klass).to_set(&:to_s).freeze
+    end
 
     def attributes_for(klass)
       allowlist(klass, :ransackable_attributes) { klass.authorizable_ransackable_attributes }

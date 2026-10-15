@@ -1,0 +1,39 @@
+require 'spec_helper'
+
+module Ransack
+  # A search checks each name against the allowlists several times over. The
+  # model is asked for each list once per search, and asked again when the
+  # auth object or the permitted flag the lists depend on changes.
+  describe 'allowlists within a search' do
+    let(:context) { Person.ransack.context }
+
+    it 'asks the model for each list once, however many names are checked' do
+      expect(Person).to receive(:ransackable_attributes).once.and_call_original
+      Person.ransack(name_cont: 'a', email_eq: 'b', name_or_email_start: 'c', s: 'name asc')
+    end
+
+    it 'asks again when the auth object changes' do
+      expect(context.ransackable_attribute?('only_admin', Person)).to be false
+
+      context.auth_object = :admin
+      expect(context.ransackable_attribute?('only_admin', Person)).to be true
+
+      context.auth_object = nil
+      expect(context.ransackable_attribute?('only_admin', Person)).to be false
+    end
+
+    it 'asks again when the permitted flag changes' do
+      expect(Person).to receive(:ransackable_attributes).twice.and_call_original
+      context.ransackable_attribute?('name', Person)
+      context.permitted = true
+      context.ransackable_attribute?('name', Person)
+    end
+
+    it 'matches symbol and string allowlists alike' do
+      allow(Person).to receive(:ransackable_attributes).and_return(%i[name])
+      expect(context.ransackable_attribute?('name', Person)).to be true
+      expect(context.ransackable_attribute?(:name, Person)).to be true
+      expect(context.ransackable_attribute?('email', Person)).to be false
+    end
+  end
+end
