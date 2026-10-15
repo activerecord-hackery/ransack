@@ -211,9 +211,7 @@ module Ransack
         Attribute.new(@context, name, ransacker_args).tap do |attribute|
           @context.bind(attribute, attribute.name)
           self.attributes << attribute if name.nil? || attribute.valid?
-          if predicate && !negative?
-            @context.lock_association(attribute.parent)
-          end
+          lock_joins_for(attribute) if predicate
         end
       end
 
@@ -287,9 +285,7 @@ module Ransack
 
       def predicate_name=(name)
         self.predicate = Predicate.named(name)
-        if predicate && !negative?
-          attributes.each { |a| context.lock_association(a.parent) }
-        end
+        attributes.each { |a| lock_joins_for(a) } if predicate
         @predicate
       end
       alias :p= :predicate_name=
@@ -420,6 +416,17 @@ module Ransack
       end
 
       private
+
+      # Keeps the joins this condition reads from. A negative condition on a
+      # collection is a subquery, so it lets its own join go, but it still
+      # needs the joins its association hangs off.
+      def lock_joins_for(attribute)
+        if negative?
+          context.lock_ancestors_of(attribute.parent)
+        else
+          context.lock_association(attribute.parent)
+        end
+      end
 
       def combinator_method
         combinator === Constants::OR ? :or : :and

@@ -29,9 +29,13 @@ module Ransack
           context.ransortable_attribute?(attr_name.split('.').last, context.klassify(parent))
       end
 
+      # A sort reads the joined table, so its join stays even when a
+      # negative condition on the same collection makes that a subquery
+      # (#1749).
       def name=(name)
         @name = context.resolve_aliases(name.to_s)
         context.bind(self, @name)
+        context.lock_association(parent) if parent
       end
 
       def dir=(dir)

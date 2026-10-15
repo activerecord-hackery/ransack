@@ -155,8 +155,23 @@ module Ransack
         @join_dependency.send(:alias_tracker)
       end
 
+      # Keeps a join, and every join it hangs off, that a negative condition
+      # on a collection would otherwise drop: a positive condition or a sort
+      # reads the joined table (#1749).
       def lock_association(association)
         @lock_associations << association
+        lock_ancestors_of(association)
+      end
+
+      # Keeps the joins an association hangs off, but not its own. A negative
+      # condition on a collection needs no join of its own, since it becomes
+      # a subquery, but one nested under another collection still needs that
+      # collection's join to reach its table.
+      def lock_ancestors_of(association)
+        node = association
+        while node && (node = parent_of(node)) && !node.equal?(@base)
+          @lock_associations << node
+        end
       end
 
       # Drops a join Ransack added, when a negative condition on a collection

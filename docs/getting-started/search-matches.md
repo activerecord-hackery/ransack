@@ -231,6 +231,13 @@ article and no article mentioning `spam`. The search can be evaluated as often
 as you like; Ransack 6.0.0 raised `NoMethodError` on a second negative
 condition on the same collection, and on a second call to `result` (#1745).
 
+The join for the collection is dropped only when nothing else in the search
+reads it. A sort on the collection (`s: 'articles_title asc'`), or a condition
+or sort on an association nested under it (`articles_comments_body_eq`), keeps
+the join alongside the subquery. As with any sort on a `has_many`, a record
+then appears once per associated row. Before Ransack 6.0.1 the join was
+dropped anyway and the query failed (#1749).
+
 `not_null` is the exception: `articles_title_not_null: true` means *at least
 one* associated record has a value (`"people"."id" IN (SELECT ... WHERE
 "articles"."title" IS NOT NULL)`), so it excludes people with no articles.
