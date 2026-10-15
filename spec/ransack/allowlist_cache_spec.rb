@@ -45,6 +45,15 @@ module Ransack
       context.resolve_aliases('term')
     end
 
+    it 'answers attribute_method? again when the auth object changes' do
+      expect(context.attribute_method?('only_admin')).to be false
+      expect(context.attribute_method?('children_only_admin')).to be false
+
+      context.auth_object = :admin
+      expect(context.attribute_method?('only_admin')).to be true
+      expect(context.attribute_method?('children_only_admin')).to be true
+    end
+
     it 'matches symbol and string allowlists alike' do
       allow(Person).to receive(:ransackable_attributes).and_return(%i[name])
       expect(context.ransackable_attribute?('name', Person)).to be true

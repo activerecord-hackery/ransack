@@ -87,9 +87,20 @@ module Ransack
         opts[:distinct] ? relation.distinct : relation
       end
 
+      # Asked for the same names over and over while a search is built, and
+      # answered from the allowlists, so kept per model for the life of the
+      # context and dropped with them.
       def attribute_method?(str, klass = @klass)
         return false unless key_within_depth_limit?(str)
 
+        cache = ((@attribute_methods ||= {})[klass] ||= {})
+        key = str.to_s
+        return cache[key] if cache.key?(key)
+
+        cache[key] = attribute_method_uncached?(key, klass)
+      end
+
+      def attribute_method_uncached?(str, klass)
         exists = false
         if ransackable_attribute?(str, klass) ||
            ransortable_attribute?(str, klass)
@@ -103,7 +114,7 @@ module Ransack
               segments.join(Constants::UNDERSCORE)
               )
             if found_assoc = traversable_association(assoc, poly_class, klass)
-              exists = attribute_method?(
+              exists = attribute_method_uncached?(
                 remainder.join(Constants::UNDERSCORE),
                 poly_class || found_assoc.klass
                 )
@@ -112,6 +123,7 @@ module Ransack
         end
         exists
       end
+      private :attribute_method_uncached?
 
       def table_for(parent)
         parent.table

@@ -329,7 +329,7 @@ module Ransack
     # context instead, and what is cached here is dropped whenever the auth
     # object or the permitted flag changes.
     def reset_name_caches
-      @allowlist_sets = @resolved_aliases = nil
+      @allowlist_sets = @resolved_aliases = @attribute_methods = nil
     end
 
     def allowlist_set(klass, kind)
