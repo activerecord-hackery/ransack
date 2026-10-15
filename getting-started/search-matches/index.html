@@ -791,6 +791,27 @@ subquery dropped those conditions, so a note on another model with the same
 id, or a comment hidden by a default scope, still excluded the record
 (#1747).</p>
 
+<p>The join for the collection is dropped only when nothing else in the search
+reads it. A sort on the collection (<code class="language-plaintext highlighter-rouge">s: 'articles_title asc'</code>), or a condition
+or sort on an association nested under it (<code class="language-plaintext highlighter-rouge">articles_comments_body_eq</code>), keeps
+the join alongside the subquery. As with any sort on a <code class="language-plaintext highlighter-rouge">has_many</code>, a record
+then appears once per associated row. Before Ransack 6.0.1 the join was
+dropped anyway and the query failed (#1749).</p>
+
+<p>Evaluating a search doesn’t change it, so you can add a condition or a sort
+after calling <code class="language-plaintext highlighter-rouge">result</code> and evaluate it again:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">search</span> <span class="o">=</span> <span class="no">Person</span><span class="p">.</span><span class="nf">ransack</span><span class="p">(</span><span class="ss">articles_title_not_eq: </span><span class="s1">'Draft'</span><span class="p">)</span>
+<span class="n">search</span><span class="p">.</span><span class="nf">result</span>            <span class="c1"># the first page</span>
+<span class="n">search</span><span class="p">.</span><span class="nf">sorts</span> <span class="o">=</span> <span class="s1">'articles_title asc'</span>
+<span class="n">search</span><span class="p">.</span><span class="nf">result</span>            <span class="c1"># same as building it with the sort up front</span>
+</code></pre></div></div>
+
+<p>Before Ransack 6.0.1 the second query referenced a join the first evaluation
+had dropped (#1750). The joins are chosen from the search as it stands when
+it is evaluated, so a sort or condition you clear takes its join with it
+rather than leaving one behind to repeat records.</p>
+
 <p><code class="language-plaintext highlighter-rouge">not_null</code> is the exception: <code class="language-plaintext highlighter-rouge">articles_title_not_null: true</code> means <em>at least
 one</em> associated record has a value (<code class="language-plaintext highlighter-rouge">"people"."id" IN (SELECT ... WHERE
 "articles"."title" IS NOT NULL)</code>), so it excludes people with no articles.</p>
