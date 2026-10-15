@@ -146,6 +146,87 @@ module Ransack
         end
       end
 
+      # The join is dropped only when nothing else in the search reads the
+      # joined table. A sort on the collection, or a condition or sort on an
+      # association nested under it, keeps it; before, the query referenced
+      # a table it no longer joined (#1749).
+      describe 'a join something else in the search still needs' do
+        def join_count(sql, table) = outer_query(sql).scan(/JOIN #{Regexp.escape(t(table))}/).size
+
+        it 'is kept for a sort on the same collection' do
+          sql = expect_stable(Person.ransack(articles_title_not_eq: 'Draft', s: 'articles_title asc'))
+          expect(join_count(sql, 'articles')).to eq 1
+          expect(subquery_count(sql)).to eq 1
+          expect(sql).to include("ORDER BY #{t('articles')}.#{c('title')} ASC")
+        end
+
+        it 'is kept whichever comes first in the params' do
+          sql = expect_stable(Person.ransack(s: 'articles_title desc', articles_title_not_eq: 'Draft'))
+          expect(join_count(sql, 'articles')).to eq 1
+        end
+
+        it 'is kept for a sort set with sorts= before the first result' do
+          search = Person.ransack(articles_title_not_eq: 'Draft')
+          search.sorts = ['name asc', 'articles_body desc']
+          sql = expect_stable(search)
+          expect(join_count(sql, 'articles')).to eq 1
+        end
+
+        it 'is kept for a sort on the same has_and_belongs_to_many' do
+          sql = expect_stable(Article.ransack(tags_name_not_in: %w[a b], s: 'tags_name asc'))
+          expect(join_count(sql, 'tags')).to eq 1
+          expect(subquery_count(sql)).to eq 1
+        end
+
+        it 'is kept for a condition nested under the collection' do
+          sql = expect_stable(Person.ransack(articles_title_not_eq: 'Draft', articles_comments_body_eq: 'x'))
+          expect(join_count(sql, 'articles')).to eq 1
+          expect(join_count(sql, 'comments')).to eq 1
+        end
+
+        it 'is kept for a negative condition nested under the collection' do
+          sql = expect_stable(Person.ransack(articles_title_not_eq: 'Draft', articles_comments_body_not_eq: 'x'))
+          expect(join_count(sql, 'articles')).to eq 1
+          expect(join_count(sql, 'comments')).to eq 1
+        end
+
+        it 'is kept for a sort nested under the collection' do
+          sql = expect_stable(Person.ransack(articles_title_not_eq: 'Draft', s: 'articles_comments_body asc'))
+          expect(join_count(sql, 'articles')).to eq 1
+          expect(join_count(sql, 'comments')).to eq 1
+        end
+
+        # Attributes then predicate, and predicate then attributes, lock
+        # through different paths in Condition.
+        it 'is kept for a nested condition built from advanced params, in either order' do
+          [
+            { a: { '0' => { name: 'articles_comments_body' } }, p: 'eq', v: { '0' => { value: 'x' } } },
+            { p: 'eq', a: { '0' => { name: 'articles_comments_body' } }, v: { '0' => { value: 'x' } } }
+          ].each do |condition|
+            search = Person.ransack(articles_title_not_eq: 'Draft', c: { '0' => condition })
+            sql = expect_stable(search)
+            expect(join_count(sql, 'articles')).to eq 1
+          end
+        end
+
+        it 'is still dropped for a sort on the model' do
+          sql = expect_stable(Person.ransack(articles_title_not_eq: 'Draft', s: 'name asc'))
+          expect(sql).not_to include('JOIN')
+        end
+
+        it 'is still dropped for a sort on another collection' do
+          sql = expect_stable(Person.ransack(articles_title_not_eq: 'Draft', s: 'comments_body asc'))
+          expect(join_count(sql, 'articles')).to eq 0
+          expect(join_count(sql, 'comments')).to eq 1
+        end
+
+        it 'is still dropped for a negative condition on a sibling collection' do
+          sql = expect_stable(Person.ransack(articles_title_not_eq: 'Draft', comments_body_not_eq: 'x'))
+          expect(sql).not_to include('JOIN')
+          expect(subquery_count(sql)).to eq 2
+        end
+      end
+
       describe 'the records returned' do
         let(:suffix)   { SecureRandom.hex(4) }
         let!(:ruby)    { Tag.create!(name: "ruby-#{suffix}") }
@@ -164,6 +245,7 @@ module Ransack
           [tagged_ruby, tagged_rails].each { |article| article.tags.clear }
           [tagged_ruby, tagged_rails, untagged, ruby, rails].each(&:delete)
           people = [drafter, spammer, writer, idle]
+          Comment.unscoped.where('body LIKE ?', "%#{suffix}%").delete_all
           Article.unscoped.where(person_id: people.map(&:id)).delete_all
           people.each(&:delete)
         end
@@ -198,6 +280,21 @@ module Ransack
           expect(search.result.to_a).to match_array [spammer, writer, idle]
         end
 
+        it 'are sorted by the collection the negative condition is on' do
+          search = Person.ransack(articles_title_not_eq: 'Draft', name_end: suffix, s: 'articles_body asc')
+          # idle has no articles, so its joined row sorts as NULL: first on
+          # SQLite and MySQL, last on PostgreSQL.
+          expect(search.result.to_a).to match_array [spammer, writer, idle]
+          expect(search.result.to_a - [idle]).to eq [writer, spammer]
+        end
+
+        it 'honour a condition nested under the collection' do
+          drafter.articles.first.comments.create!(body: "nested #{suffix}")
+          writer.articles.first.comments.create!(body: "nested #{suffix}")
+          search = Person.ransack(articles_title_not_eq: 'Draft', articles_comments_body_eq: "nested #{suffix}")
+          expect(search.result.to_a).to eq [writer]
+        end
+
         it 'keep the same order and count when the result is reused' do
           search = Person.ransack(articles_title_not_eq: 'Draft', name_end: suffix, s: 'name asc')
           expect(search.result.pluck(:name)).to eq ["idle #{suffix}", "spammer #{suffix}", "writer #{suffix}"]
@@ -208,6 +305,43 @@ module Ransack
     end
 
     describe Context do
+      describe '#lock_association' do
+        let(:context) { Context.for(Person) }
+        let(:search)  { Search.new(Person, { articles_comments_body_eq: 'x' }, context: context) }
+        let(:comments) { search.conditions.first.attributes.first.parent }
+        let(:articles) { context.send(:parent_of, comments) }
+
+        it 'locks the association and the ones it hangs off' do
+          context.remove_association(articles)
+          context.remove_association(comments)
+          expect(context.object.left_outer_joins_values.size).to eq 2
+        end
+
+        it 'does not lock the base' do
+          expect(context.instance_variable_get(:@lock_associations)).not_to include(context.base)
+        end
+      end
+
+      describe '#lock_ancestors_of' do
+        let(:context) { Context.for(Person) }
+        let(:search)  { Search.new(Person, { articles_comments_body_not_eq: 'x' }, context: context) }
+        let(:comments) { search.conditions.first.attributes.first.parent }
+        let(:articles) { context.send(:parent_of, comments) }
+
+        it 'locks the associations it hangs off but not its own' do
+          locked = context.instance_variable_get(:@lock_associations)
+          expect(locked).to include(articles)
+          expect(locked).not_to include(comments)
+        end
+
+        it 'does nothing for an association on the base' do
+          context = Context.for(Person)
+          search = Search.new(Person, { articles_title_not_eq: 'x' }, context: context)
+          context.lock_ancestors_of(search.conditions.first.attributes.first.parent)
+          expect(context.instance_variable_get(:@lock_associations)).to be_empty
+        end
+      end
+
       describe '#remove_association' do
         let(:context) { Context.for(Person) }
         let(:search)  { Search.new(Person, { articles_title_not_eq: 'Draft' }, context: context) }
