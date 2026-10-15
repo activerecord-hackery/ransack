@@ -1,4 +1,4 @@
-require 'ransack/invalid_search_error'
+require 'ransack/errors'
 
 module Ransack
   module Nodes
@@ -115,10 +115,11 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
+            attrs = indifferent_params(attrs, 'attribute')
             build_attributes(attrs[:name], attrs[:ransacker_args])
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{args.class}) supplied to attributes="
         end
       end
@@ -140,11 +141,11 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
-            val = Value.new(@context, attrs[:value])
+            val = Value.new(@context, indifferent_params(attrs, 'value')[:value])
             self.values << val
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{args.class}) supplied to values="
         end
       end
@@ -251,7 +252,7 @@ module Ransack
       }.freeze
 
       def build(params)
-        params.with_indifferent_access.each do |key, value|
+        indifferent_params(params, 'condition').each do |key, value|
           if key.match(/^(a|v|p|m|attributes|values|predicate|predicate_name|combinator)$/)
             self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end

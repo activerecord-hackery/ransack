@@ -499,6 +499,26 @@ Article.ransack!(unknown_attr_eq: 'Ernie')
 This is equivalent to the `ignore_unknown_conditions` configuration option,
 except it may be applied on a case-by-case basis.
 
+#### Malformed params
+
+Params of the wrong shape, such as a string where advanced mode expects a hash
+of groupings or conditions (`?q[g]=x`, `?q[c][0]=x`), are not unknown
+conditions that can be ignored: Ransack cannot tell what the search was meant
+to be. They raise `Ransack::InvalidSearchError` from `ransack` as well as from
+`ransack!`. Search params usually come straight from the query string, so
+rescue it to answer a hand-edited URL with a 400 rather than a 500:
+
+```ruby
+class ApplicationController < ActionController::Base
+  rescue_from Ransack::InvalidSearchError do |error|
+    render plain: error.message, status: :bad_request
+  end
+end
+```
+
+`Ransack::InvalidSearchError` is a subclass of `ArgumentError`, so code that
+rescues `ArgumentError` catches it too.
+
 ### Using Scopes/Class Methods
 
 Continuing on from the preceding section, searching by scopes requires defining

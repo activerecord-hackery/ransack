@@ -7,7 +7,7 @@ require 'ransack/nodes/sort'
 require 'ransack/nodes/grouping'
 require 'ransack/context'
 require 'ransack/naming'
-require 'ransack/invalid_search_error'
+require 'ransack/errors'
 
 module Ransack
   class Search
@@ -79,11 +79,12 @@ module Ransack
       case args
       when Array
         args.each do |sort|
-          if sort.kind_of? Hash
-            sort = Nodes::Sort.new(@context).build(sort)
-          else
-            sort = Nodes::Sort.extract(@context, sort)
-          end
+          sort =
+            case sort
+            when Hash then Nodes::Sort.new(@context).build(sort)
+            when String, Symbol, nil then Nodes::Sort.extract(@context, sort.to_s)
+            else raise InvalidSearchError, "Invalid argument (#{sort.class}) supplied to sorts="
+            end
           add_sort(sort) if sort
         end
       when Hash
@@ -202,6 +203,7 @@ module Ransack
           real_attribute, position = k.split(/\(|\)/)
           value = attrs.delete(k)
           next if position.nil?
+          next if value.is_a?(Array) || value.is_a?(Hash)
 
           cast = Constants::A_S_I.include?(position.last) ? position.last : nil
           position = position.to_i - 1
