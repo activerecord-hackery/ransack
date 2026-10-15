@@ -235,7 +235,7 @@ The subquery reaches the same records the association does. It keeps the
 association's own conditions: the type column of a polymorphic (`as:`) or
 STI association, the association's scope and the target's default scope. It
 correlates on the association's keys, so an association with a `primary_key:`
-option is tested on that column rather than on `id`. Before Ransack 6.0.1 the
+option is tested on that column rather than on `id`. Before Ransack 6.1 the
 subquery dropped those conditions, so a note on another model with the same
 id, or a comment hidden by a default scope, still excluded the record
 (#1747).
@@ -244,7 +244,7 @@ The join for the collection is dropped only when nothing else in the search
 reads it. A sort on the collection (`s: 'articles_title asc'`), or a condition
 or sort on an association nested under it (`articles_comments_body_eq`), keeps
 the join alongside the subquery. As with any sort on a `has_many`, a record
-then appears once per associated row. Before Ransack 6.0.1 the join was
+then appears once per associated row. Before Ransack 6.1 the join was
 dropped anyway and the query failed (#1749).
 
 Evaluating a search doesn't change it, so you can add a condition or a sort
@@ -257,7 +257,7 @@ search.sorts = 'articles_title asc'
 search.result            # same as building it with the sort up front
 ```
 
-Before Ransack 6.0.1 the second query referenced a join the first evaluation
+Before Ransack 6.1 the second query referenced a join the first evaluation
 had dropped (#1750). The joins are chosen from the search as it stands when
 it is evaluated, so a sort or condition you clear takes its join with it
 rather than leaving one behind to repeat records.
