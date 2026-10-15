@@ -504,23 +504,32 @@ module Ransack
           ::ActiveRecord::Base.lease_connection.drop_table(:users, if_exists: true)
         end
 
+        # The association joins on `uid`, not the primary key, so the
+        # subquery has to correlate on `uid` and the outer query test it;
+        # it used to render invalid SQL comparing `tasks.id` with a uid.
         it 'correctly handles not_in predicate with polymorphic associations' do
-          # Create the search
-          search = TestTask.ransack(users_uid_not_in: ['uid_example'])
-          sql = search.result.to_sql
+          relation = TestTask.ransack(users_uid_not_in: ['uid_example']).result
+          sql = relation.to_sql
 
-          # Verify the SQL contains the expected NOT IN clause
-          expect(sql).to include('NOT IN')
-          expect(sql).to include("follower_uid")
-          expect(sql).to include("followed_uid")
+          tasks_uid = "#{quote_table_name('tasks')}.#{quote_column_name('uid')}"
+          followed_uid = "#{quote_table_name('follows')}.#{quote_column_name('followed_uid')}"
+          expect(sql).to include("#{tasks_uid} NOT IN (SELECT #{followed_uid} FROM #{quote_table_name('follows')}")
+          expect(sql).to include("WHERE #{followed_uid} = #{tasks_uid}")
+          expect(sql).to include("#{quote_table_name('follows')}.#{quote_column_name('follower_type')} = 'TestUser'")
           expect(sql).to include("'uid_example'")
+          expect { relation.to_a }.not_to raise_error
+        end
 
-          # The SQL should include a reference to tasks.uid
-          expect(sql).to include("tasks")
-          expect(sql).to include("uid")
+        it 'returns the records with no matching associated record' do
+          followed = TestTask.create!(uid: 'task_followed')
+          unfollowed = TestTask.create!(uid: 'task_unfollowed')
+          other_type = TestTask.create!(uid: 'task_other_type')
+          user = TestUser.create!(uid: 'uid_example')
+          TestFollow.create!(follower_uid: user.uid, follower_type: 'TestUser', followed_uid: followed.uid, followed_type: 'TestTask')
+          TestFollow.create!(follower_uid: user.uid, follower_type: 'Other', followed_uid: other_type.uid, followed_type: 'TestTask')
 
-          # The SQL should include a reference to follows table
-          expect(sql).to include("follows")
+          result = TestTask.ransack(users_uid_not_in: ['uid_example']).result.to_a
+          expect(result).to match_array [unfollowed, other_type]
         end
       end
     end
