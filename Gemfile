@@ -3,13 +3,13 @@ gemspec
 
 gem 'rake'
 
-rails = ENV['RAILS'] || '7-2-stable'
+rails = ENV['RAILS'] || '8-1-stable'
 
 gem 'faker'
 # CVE-2026-54619 (use-after-free when redefining a SQLite function with a
 # different arity) is fixed in sqlite3 2.9.5. The 1.x line ended at 1.7.3 and
 # never received the fix, so the old Rails-version split could not be kept on a
-# patched version; Rails 7.2 runs fine against sqlite3 2.x, so it is gone.
+# patched version, and it is gone.
 gem 'sqlite3', '>= 2.9.5'
 gem 'pg'
 gem 'pry'
