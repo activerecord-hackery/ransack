@@ -107,7 +107,7 @@ module Ransack
 
       def method_missing(method_id, *args)
         method_name = method_id.to_s.dup
-        writer = method_name.sub!(/\=$/, ''.freeze)
+        writer = method_name.sub!(/=\z/, ''.freeze)
         if attribute_method?(method_name)
           if writer
             write_attribute(method_name, *args)
@@ -126,7 +126,7 @@ module Ransack
         return true if @context.attribute_method?(stripped_name) ||
                        @context.attribute_method?(name)
         case stripped_name
-        when /^(g|c|m|groupings|conditions|combinator)=?$/
+        when /\A(g|c|m|groupings|conditions|combinator)=?\z/
           true
         else
           stripped_name
@@ -149,7 +149,7 @@ module Ransack
       def build(params)
         indifferent_params(params, 'grouping').each do |key, value|
           case key
-          when /^(g|c|m|groupings|conditions|combinator)$/
+          when /\A(g|c|m|groupings|conditions|combinator)\z/
             self.send("#{key}=", value)
           else
             if @context.ransackable_scope?(key, @context.object)

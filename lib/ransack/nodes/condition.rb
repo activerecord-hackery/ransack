@@ -254,7 +254,7 @@ module Ransack
 
       def build(params)
         indifferent_params(params, 'condition').each do |key, value|
-          if key.match(/^(a|v|p|m|attributes|values|predicate|predicate_name|combinator)$/)
+          if key.match(/\A(a|v|p|m|attributes|values|predicate|predicate_name|combinator)\z/)
             self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end
         end

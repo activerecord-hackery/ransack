@@ -202,7 +202,7 @@ module Ransack
     end
 
     def unpolymorphize_association(str)
-      if (match = str.match(/_of_([^_]+?)_type$/)) &&
+      if (match = str.match(/_of_([^_]+?)_type\z/)) &&
          (klass = polymorphic_class(match.captures.first))
         [match.pre_match, klass]
       else
