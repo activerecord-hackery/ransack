@@ -3,11 +3,11 @@ require 'active_support/deprecation'
 require 'active_support/deprecator'
 
 require 'active_support/core_ext'
+require 'ransack/errors'
 require 'ransack/configuration'
 
 module Ransack
   extend Configuration
-  class UntraversableAssociationError < StandardError; end
 
   def self.deprecator
     @deprecator ||= ActiveSupport::Deprecation.new('7.0', 'Ransack')

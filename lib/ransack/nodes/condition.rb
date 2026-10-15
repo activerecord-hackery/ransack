@@ -1,4 +1,4 @@
-require 'ransack/invalid_search_error'
+require 'ransack/errors'
 
 module Ransack
   module Nodes
@@ -115,10 +115,11 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
+            attrs = indifferent_params(attrs, 'attribute')
             build_attributes(attrs[:name], attrs[:ransacker_args])
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{args.class}) supplied to attributes="
         end
       end
@@ -140,11 +141,11 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
-            val = Value.new(@context, attrs[:value])
+            val = Value.new(@context, indifferent_params(attrs, 'value')[:value])
             self.values << val
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{args.class}) supplied to values="
         end
       end
@@ -196,6 +197,7 @@ module Ransack
       # compound's combinator (#1728). Left alone, the alias passed `valid?`
       # by being allowlisted and bound a column that does not exist.
       def build_attributes(name, ransacker_args = [])
+        scalar_param(name, 'an attribute name')
         return build_attribute(name, ransacker_args) if name.blank? || @context.nil?
 
         resolved = @context.resolve_aliases(name.to_s)
@@ -251,7 +253,7 @@ module Ransack
       }.freeze
 
       def build(params)
-        params.with_indifferent_access.each do |key, value|
+        indifferent_params(params, 'condition').each do |key, value|
           if key.match(/^(a|v|p|m|attributes|values|predicate|predicate_name|combinator)$/)
             self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end
@@ -283,7 +285,7 @@ module Ransack
       end
 
       def predicate_name=(name)
-        self.predicate = Predicate.named(name)
+        self.predicate = Predicate.named(scalar_param(name, 'a predicate'))
         @predicate
       end
       alias :p= :predicate_name=

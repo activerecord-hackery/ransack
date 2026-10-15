@@ -99,7 +99,7 @@ module Ransack
             self.groupings << grouping_object if grouping_object.values.any?
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{groupings.class}) supplied to groupings="
         end
       end
@@ -147,7 +147,7 @@ module Ransack
       end
 
       def build(params)
-        params.with_indifferent_access.each do |key, value|
+        indifferent_params(params, 'grouping').each do |key, value|
           case key
           when /^(g|c|m|groupings|conditions|combinator)$/
             self.send("#{key}=", value)

@@ -15,11 +15,14 @@ module Ransack
       end
 
       def build(params)
-        params.with_indifferent_access.each do |key, value|
+        indifferent_params(params, 'sort').each do |key, value|
           if key.match(/^(name|dir|ransacker_args)$/)
             self.send("#{key}=", value)
           end
         end
+        # A sort given without a direction is ascending, as it is from a
+        # string (`s: 'name'`).
+        self.dir = nil unless defined?(@dir)
 
         self
       end
@@ -30,12 +33,12 @@ module Ransack
       end
 
       def name=(name)
-        @name = context.resolve_aliases(name.to_s)
+        @name = context.resolve_aliases(scalar_param(name, 'a sort name').to_s)
         context.bind(self, @name)
       end
 
       def dir=(dir)
-        dir = dir.downcase if dir
+        dir = scalar_param(dir, 'a sort direction').to_s.downcase
         @dir =
           if dir == 'asc'.freeze || dir == 'desc'.freeze
             dir

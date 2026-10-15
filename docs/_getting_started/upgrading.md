@@ -24,6 +24,21 @@ supported Ruby and Rails, upgrading needs no code changes. If you are still on
 Ruby 3.2 or Rails 7.2, stay on Ransack 6.0 until you can upgrade; Bundler will
 not resolve 6.1 for you.
 
+### Malformed search params raise `InvalidSearchError`
+
+A search built from params of the wrong shape, such as `?q[g]=x` or
+`?q[c][0]=x`, used to raise `ArgumentError`, `NoMethodError` or `TypeError`,
+depending on where the shape first broke; an array or a hash where a single
+name, predicate, direction or combinator belongs (`?q[s][0][dir][]=desc`) was
+stringified and then silently ignored, or for a direction, read as ascending. Each of these now raises
+`Ransack::InvalidSearchError`, from `ransack` as well as from `ransack!`; see
+[Malformed params](../_going_further/other-notes.md#malformed-params). Code that
+rescues `Ransack::InvalidSearchError` or `ArgumentError` needs no change.
+
+A sort given as a hash without a direction, `s: [{ name: 'title' }]`, used
+to raise `TypeError`; it now sorts ascending, as `s: 'title'` does. A symbol
+direction, `dir: :desc`, is now read instead of being treated as ascending.
+
 ## Upgrading to 6.0
 
 ### Ruby 3.2 or later is required
