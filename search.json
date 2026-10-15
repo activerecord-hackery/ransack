@@ -1,0 +1,355 @@
+[
+
+
+
+  
+  {
+    "title": "Ransack",
+    "url": "/ransack/",
+    "content": "A search in three stepsAllow the attributes a search may use:class Post &lt; ApplicationRecord def self.ransackable_attributes(auth_object = nil)  %w[title published_at] endendBuild the search from the request:class PostsController &lt; ApplicationController def index  @q = Post.ransack(params[:q])  @posts = @q.result endendRender a form and a sortable column:&lt;%= search_form_for @q do |f| %&gt; &lt;%= f.label :title_cont %&gt; &lt;%= f.search_field :title_cont %&gt; &lt;%= f.submit %&gt;&lt;% end %&gt;&lt;%= sort_link(@q, :published_at) %&gt;GET /posts?q[title_cont]=ransack&amp;q[s]=published_at+desc then runs:SELECT \"posts\".* FROM \"posts\"WHERE \"posts\".\"title\" LIKE '%ransack%' ESCAPE '\\'ORDER BY \"posts\".\"published_at\" DESCRansack supports Rails 8.1 and 8.0 on Ruby 3.3 and later, on PostgreSQL,MySQL, MariaDB and SQLite. See Installationto add it to your app."
+  }
+  
+
+
+
+
+  
+  
+    
+      ,
+      
+      {
+        "title": "Installation",
+        "url": "/ransack/getting-started/",
+        "content": "Ransack is supported for Rails 8.1 and 8.0 on Ruby 3.3 and later.Add it to your Gemfile and run bundle install:gem 'ransack'There is nothing to generate. Every Active Record model gets a ransackclass method, and every view gets the search_form_for and sort_linkhelpers. Optional settings go in an initializer; seeConfiguration.Bleeding edgeTo use changes that are not yet released to RubyGems, use the main branch:gem 'ransack', github: 'activerecord-hackery/ransack', branch: 'main'DatabasesRansack generates SQL through Arel, so it works with any database ActiveRecord can talk to. Three are tested on every change and get first-classtreatment for the handful of places where the SQL differs:      Database   Adapters   Tested in CI         PostgreSQL   postgresql, and any adapter built on it such as postgis   yes       MySQL / MariaDB   mysql2, trilogy   yes       SQLite   sqlite3   yes   An adapter that subclasses one of Rails’ own is recognised as that databasewithout any configuration. Other adapters (sqlserver, oracle_enhanced)are treated as standard SQL; they are known to work but are not tested here,and the dialect option lets you name adialect explicitly if one of the known ones is a better fit.Demo applicationThe Ransack Demo applicationshows how to build simple andadvanced searchforms in a Rails application.Next steps Simple mode: a search form and sortable columns. Authorization: nothing is searchable until a modelsays so. Using predicates: eq, cont, in, null andthe rest."
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Simple mode",
+        "url": "/ransack/getting-started/simple-mode/",
+        "content": "Ransack can be used in one of two modes, simple or advanced. Forsearching/filtering not requiring complex boolean logic, Ransack’s simplemode should meet your needs.In your controllerdef index @q = Person.ransack(params[:q]) @people = @q.result(distinct: true)endor without distinct: true, for sorting on an associated table’s columns (inthis example, with preloading each Person’s Articles and pagination):def index @q = Person.ransack(params[:q]) @people = @q.result.includes(:articles).page(params[:page])end Caution As of v4.0, searching and sorting are not authorized on any column of your model by default. See Authorization (allowlisting/denylisting) on how to define searchable attributes.Prior to v4.0, searching and sorting were authorized on any column of your model by default.Default search optionsSearch parameterRansack uses a default :q param key for search params. This may be changed bysetting the search_key option in a Ransack initializer file (typicallyconfig/initializers/ransack.rb):Ransack.configure do |c| # Change default search parameter key name. # Default key name is :q c.search_key = :queryendString searchAfter version 2.4.0 when searching a string query Ransack by default strips all whitespace around the query string.This may be disabled by setting the strip_whitespace option in a Ransack initializer file:Ransack.configure do |c| # Change whitespace stripping behavior. # Default is true c.strip_whitespace = falseendIn your viewThe two primary Ransack view helpers are search_form_for and sort_link,which are defined inRansack::Helpers::FormHelper.Form helperRansack’s search_form_for helper replaces form_for for creating the view search form&lt;%= search_form_for @q do |f| %&gt; # Search if the name field contains... &lt;%= f.label :name_cont %&gt; &lt;%= f.search_field :name_cont %&gt; # Search if an associated articles.title starts with... &lt;%= f.label :articles_title_start %&gt; &lt;%= f.search_field :articles_title_start %&gt; # Attributes may be chained. Search multiple attributes for one value... &lt;%= f.label :name_or_description_or_email_or_articles_title_cont %&gt; &lt;%= f.search_field :name_or_description_or_email_or_articles_title_cont %&gt; &lt;%= f.submit %&gt;&lt;% end %&gt;The argument of f.search_field has to be in this form: attribute_name[_or_attribute_name]..._predicatewhere [_or_another_attribute_name]... means any repetit"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Authorization",
+        "url": "/ransack/getting-started/authorization/",
+        "content": "By default, searching and sorting are not authorized on any column of your modeland no class methods/scopes are allowlisted.Ransack adds four methods to ActiveRecord::Base that you can redefine asclass methods in your models to apply selective authorization: ransackable_attributes ransackable_associations ransackable_scopes ransortable_attributesHere is how these four methods could be implemented in your application: # `ransackable_attributes` returns searchable column names # and any defined ransackers as an array of strings. # def ransackable_attributes(auth_object = nil)  %w(title body) + _ransackers.keys end # `ransackable_associations` returns the names # of searchable associations as an array of strings. # def ransackable_associations(auth_object = nil)  %w[author] end # `ransortable_attributes` by default returns the names # of all attributes available for sorting as an array of strings. # def ransortable_attributes(auth_object = nil)  ransackable_attributes(auth_object) end # `ransackable_scopes` by default returns an empty array # i.e. no class methods/scopes are authorized. # For overriding with an allowlist, return an array of *symbols*. # def ransackable_scopes(auth_object = nil)  [] endAny values not returned from these methods will be ignored by Ransack, i.e.they are not authorized.Searching everythingRansack also defines authorizable_ransackable_attributes andauthorizable_ransackable_associations, which return every column, ransackerand alias, and every association. To restore the pre-4.0 behaviour whereeverything is searchable, delegate to them once in the base class:class ApplicationRecord &lt; ActiveRecord::Base primary_abstract_class def self.ransackable_attributes(auth_object = nil)  authorizable_ransackable_attributes end def self.ransackable_associations(auth_object = nil)  authorizable_ransackable_associations endendThink before doing this in an application that exposes search params tousers: it makes encrypted_password, reset_token and every other columnsearchable. They are also a convenient base for an exclusion list:authorizable_ransackable_attributes - %w[encrypted_password].For models that inherit from ActiveRecord::Base directly (some gems definetheir own), put the two methods in a module and extend every model with itfrom an initializer: ActiveSupport.on_load(:active_record) { extend TheModule }.Strong parameters instead of mode"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Advanced mode",
+        "url": "/ransack/getting-started/advanced-mode/",
+        "content": "“Advanced” searches Rails’s nested attributes functionality in order togenerate complex queries with nested AND/OR groupings, etc. This takes a bitmore work but can generate some pretty cool search interfaces that put a lot ofpower in the hands of your users.A notable drawback with these searches isthat the increased size of the parameter string will typically force you to usethe HTTP POST method instead of GET.The search parameter structureAn advanced search is expressed as nested groupings. Each key has a short and along spelling, and the two are interchangeable:      Short   Long   Meaning         g   groupings   Nested groupings       c   conditions   The conditions in a grouping       m   combinator   How this grouping’s members are joined       a   attributes   The attributes a condition applies to       p   predicate   The predicate to apply (predicate_name is accepted too)       v   values   The values to match against   Person.ransack( g: [  { m: 'or', name_cont: 'Ernie', email_cont: 'ernie' } ])Groupings nest, so you can express (A OR B) AND (C OR D):Person.ransack( m: 'and', g: [  { m: 'or', name_cont: 'Ernie', email_cont: 'ernie' },  { m: 'or', salary_gteq: 50_000, parent_name_eq: 'Ruby' } ])Combinatorsm (or combinator) takes 'and' or 'or', and defaults to 'and'. Case andSymbols are accepted, so 'or', 'OR', 'Or' and :or all mean the same:Person.ransack(g: [{ m: 'OR', name_eq: 'Ernie', email_eq: 'ernie@example.com' }])# ... WHERE (\"people\".\"name\" = 'Ernie' OR \"people\".\"email\" = 'ernie@example.com')An unrecognised combinator is ignored and the grouping falls back to 'and':Person.ransack(g: [{ m: 'nand', name_eq: 'Ernie', email_eq: 'ernie@example.com' }])# ... WHERE (\"people\".\"name\" = 'Ernie' AND \"people\".\"email\" = 'ernie@example.com')This is deliberate — a search built from user input should not blow up on a badparameter. If you would rather hear about it, use ransack!, or setignore_unknown_conditions to false, and an unrecognised combinator raisesjust as an unknown predicate or attribute does — at any level of nesting:Person.ransack!(name_eq: 'Ernie', combinator: 'nand')# Ransack::InvalidSearchError: Invalid combinator nandPerson.ransack!(g: [{ m: 'nand', name_eq: 'Ernie', email_eq: 'ernie@example.com' }])# Ransack::InvalidSearchError: Invalid combinator nandRansack::InvalidSearchError is a subclass of ArgumentError, so existingrescue ArgumentErro"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Using predicates",
+        "url": "/ransack/getting-started/using-predicates/",
+        "content": "The primary method of searching in Ransack is by using what is known as predicates.Predicates are used within Ransack search queries to determine what information tomatch. For instance, the cont predicate will check to see if an attribute called“first_name” contains a value using a wildcard query:&gt;&gt; User.ransack(first_name_cont: 'Rya').result.to_sql=&gt; SELECT \"users\".* FROM \"users\" WHERE (\"users\".\"first_name\" LIKE '%Rya%')You can also combine predicates for OR queries:&gt;&gt; User.ransack(first_name_or_last_name_cont: 'Rya').result.to_sql=&gt; SELECT \"users\".* FROM \"users\" WHERE (\"users\".\"first_name\" LIKE '%Rya%'  OR \"users\".\"last_name\" LIKE '%Rya%')The syntax for OR queries on an associated model is not immediately obvious, but makes sense. Assuming a User has_one Account and the Account has attributes foo and bar:&gt;&gt; User.ransack(account_foo_or_account_bar_cont: 'val').result.to_sql=&gt; SELECT \"users\".* FROM \"users\" INNER JOIN accounts ON accounts.user_id = users.id WHERE (\"accounts.foo LIKE '%val%' OR accounts.bar LIKE '%val%')Below is a list of the built-in predicates of Ransack and their opposites. You may alreadybe familiar with some of the predicates, as they also exist in the ARel library.If you want to add your own, pleasesee the [[Custom-Predicates|Custom Predicates]] page.Please note: any attempt to use a predicate for an attribute that does not exist willsilently fail. For instance, this will not work when there is no name attribute:&gt;&gt; User.ransack(name_cont: 'Rya').result.to_sql=&gt; \"SELECT \"users\".* FROM \"users\"eq (equals)The eq predicate returns all records where a field is exactly equal to a given value:&gt;&gt; User.ransack(first_name_eq: 'Ryan').result.to_sql=&gt; SELECT \"users\".* FROM \"users\" WHERE \"users\".\"first_name\" = 'Ryan'Opposite: not_eqmatchesThe matches predicate returns all records where a field is like a given value:&gt;&gt; User.ransack(first_name_matches: 'Ryan').result.to_sql=&gt; SELECT \"users\".* FROM \"users\" WHERE (\"users\".\"first_name\" LIKE 'Ryan')matches is case-sensitive on PostgreSQL; MySQL and SQLite apply theircollation’s rules. Use i_cont for a match that ignores case everywhere.Opposite: does_not_matchNote: If you want to do wildcard matching, you may be looking for the cont/not_contpredicates instead.lt (less than)The lt predicate returns all records where a field is less than a given value:&gt;"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Search matchers",
+        "url": "/ransack/getting-started/search-matches/",
+        "content": "List of all possible predicates      Predicate   Description   Notes         *_eq   equal           *_eq_any   equal to any of the provided values           *_not_eq   not equal           *_matches   matches with LIKE   e.g. q[email_matches]=%@gmail.com       *_does_not_match   does not match with LIKE           *_matches_any   Matches any           *_matches_all   Matches all           *_does_not_match_any   Does not match any           *_does_not_match_all   Does not match all           *_lt   less than           *_lteq   less than or equal           *_gt   greater than           *_gteq   greater than or equal           *_present   not null and not empty   Example: q[name_present]=1. On string columns, SQL: col IS NOT NULL AND col != ''. On other column types the empty-string half is dropped, giving col IS NOT NULL       *_blank   is null or empty   On string columns, SQL: col IS NULL OR col = ''. On other column types, col IS NULL       *_null   is null           *_not_null   is not null           *_in   match any values in array   e.g. q[name_in][]=Alice&amp;q[name_in][]=Bob       *_not_in   match none of values in array           *_lt_any   Less than any   SQL: col &lt; value1 OR col &lt; value2       *_lteq_any   Less than or equal to any           *_gt_any   Greater than any           *_gteq_any   Greater than or equal to any           *_lt_all   Less than all   SQL: col &lt; value1 AND col &lt; value2       *_lteq_all   Less than or equal to all           *_gt_all   Greater than all           *_gteq_all   Greater than or equal to all           *_not_eq_all   none of values in a set           *_start   Starts with   SQL: col LIKE 'value%'       *_not_start   Does not start with           *_start_any   Starts with any of           *_start_all   Starts with all of           *_not_start_any   Does not start with any of           *_not_start_all   Does not start with all of           *_end   Ends with   SQL: col LIKE '%value'       *_not_end   Does not end with           *_end_any   Ends with any of           *_end_all   Ends with all of           *_not_end_any   Does not end with any of           *_not_end_all   Does not end with all of           *_cont   Contains value   SQL: col LIKE '%value%'       *_cont_any   Contains any of           *_cont_all   Contains all of           *_not_cont   Does not contain           *_not_cont_any   Does not contain any"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Sorting",
+        "url": "/ransack/getting-started/sorting/",
+        "content": "Sorting in the ViewYou can add a form to capture sorting and filtering options together.# app/views/posts/index.html.erb&lt;%= search_form_for @q do |f| %&gt; &lt;%= f.label :title_cont %&gt; &lt;%= f.search_field :title_cont %&gt; &lt;%= f.submit \"Search\" %&gt;&lt;% end %&gt;&lt;table&gt; &lt;thead&gt;  &lt;tr&gt;   &lt;th&gt;&lt;%= sort_link(@q, :title, \"Title\") %&gt;&lt;/th&gt;   &lt;th&gt;&lt;%= sort_link(@q, :category, \"Category\") %&gt;&lt;/th&gt;   &lt;th&gt;&lt;%= sort_link(@q, :created_at, \"Created at\") %&gt;&lt;/th&gt;  &lt;/tr&gt; &lt;/thead&gt; &lt;tbody&gt;  &lt;% @posts.each do |post| %&gt;   &lt;tr&gt;    &lt;td&gt;&lt;%= post.title %&gt;&lt;/td&gt;    &lt;td&gt;&lt;%= post.category %&gt;&lt;/td&gt;    &lt;td&gt;&lt;%= post.created_at.to_s(:long) %&gt;&lt;/td&gt;   &lt;/tr&gt;  &lt;% end %&gt; &lt;/tbody&gt;&lt;/table&gt;Sorting in the ControllerTo specify a default search sort field + order in the controller index:# app/controllers/posts_controller.rbclass PostsController &lt; ActionController::Base def index  @q = Post.ransack(params[:q])  @q.sorts = 'title asc' if @q.sorts.empty?  @posts = @q.result(distinct: true) endendMultiple sorts can be set by:# app/controllers/posts_controller.rbclass PostsController &lt; ActionController::Base def index  @q = Post.ransack(params[:q])  @q.sorts = ['title asc', 'created_at desc'] if @q.sorts.empty?  @posts = @q.result(distinct: true) endendSorting on Association AttributesYou can sort on attributes of associated models by using the association name followed by the attribute name:# Sort by the name of the associated category@q = Post.ransack(s: 'category_name asc')@posts = @q.result# Sort by attributes of nested associations@q = Post.ransack(s: 'category_section_title desc')@posts = @q.resultSorting on Globalized/Translated AttributesWhen working with internationalized models (like those using the Globalize gem), special care is needed when sorting on translated attributes of associations. The simplest approach is to use the sort_link helper directly with the translation attribute:&lt;!-- This works perfectly for sorting on translated attributes --&gt;&lt;%= sort_link @q, :translations_name %&gt;&lt;%= sort_link @q, :category_translations_name %&gt;For programmatic sorting, let Ransack handle the joins first:# Let Ransack establish the necessary joins for sorting@q = Book.ransack(s: 'category_translatio"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Configuration",
+        "url": "/ransack/getting-started/configuration/",
+        "content": "Ransack may be easily configured. The best place to put configuration is in an initializer file at config/initializers/ransack.rb, containing code such as:Ransack.configure do |config| # Change default search parameter key name. # Default key name is :q config.search_key = :query # Raise errors if a query contains an unknown predicate, attribute, combinator # or sort. Default is true (do not raise error on unknown conditions). config.ignore_unknown_conditions = false # Globally display sort links without the order indicator arrow. # Default is false (sort order indicators are displayed). # This can also be configured individually in each sort link (see the README). config.hide_sort_order_indicators = true # By default, Ransack displays sort order indicator arrows with HTML codes, but # these can be overridden. `up_arrow` is shown when the column is sorted # descending and `down_arrow` when it is sorted ascending: the arrow names the # direction the link will sort in next, not the current one. config.custom_arrows = {  up_arrow:  '&lt;i class=\"fa fa-long-arrow-up\"&gt;&lt;/i&gt;', # default: '&amp;#9660;'  down_arrow: 'U+02193',               # default: '&amp;#9650;'  default_arrow: 'U+11047'              # default: nil  } # Ransack sanitizes many values in your custom scopes into booleans. # You can turn this off for custom scopes. config.sanitize_custom_scope_booleans = false # Configure a default predicate if an unknown predicate is passed; setting it to # e.g. 'eq' allows for allowing for exact matches by just the attribute name. config.default_predicate = 'eq' # Where NULLs are placed when sorting. config.fields_sort_option = :nulls_first # or e.g. :nulls_always_last # Strip leading and trailing whitespace from string search values. # Default is true. config.strip_whitespace = false # Treat blank values as conditions to search for, rather than as absent. # Default is true (blank values are ignored). config.ignore_blank_values = false # Name the SQL dialect explicitly instead of detecting it from the adapter. # Default is nil (detect). One of :postgresql, :mysql, :sqlite, :generic. config.dialect = :postgresql # A unique String value that, when submitted to an eq/in predicate (or their # _any compounds), also matches NULL. Default is nil (disabled). config.null_sentinel = '__ransack_null__'endSQL dialectNearly everything Ransack generates goes through Arel"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Upgrading",
+        "url": "/ransack/getting-started/upgrading/",
+        "content": "Ransack follows semantic versioning:a breaking change to Ransack’s behaviour only lands in a major release, whilesupport for a Ruby or Rails version that has reached end of life can be droppedin a minor one. This page lists what changed in each of those releases and whatto do about it. The full list ofchanges in every release is in theGitHub release notes.Upgrading to 6.1Ruby 3.3 and Rails 8.0 or later are requiredRuby 3.2 reached end of life in March 2026 and Rails 7.2 in August 2026;neither receives security fixes any more. Ransack 6.1 requires Ruby 3.3 orlater and Active Record 8.0 or later. Nothing else changes: if you are on asupported Ruby and Rails, upgrading needs no code changes. If you are still onRuby 3.2 or Rails 7.2, stay on Ransack 6.0 until you can upgrade; Bundler willnot resolve 6.1 for you.Upgrading to 6.0Ruby 3.2 or later is requiredRuby 3.1 reached end of life in March 2025 and no longer receives securityfixes. Ransack 6.0 requires Ruby 3.2 or later, which is also the floor forRails 8.0. If you are on Ruby 3.1 you are already limited to Rails 7.2; stay onRansack 5.x until you can upgrade Ruby.cont, start and end are case-sensitive on PostgreSQLRansack never told Arel whether a LIKE should be case-sensitive, and Arel’sPostgreSQL visitor renders the default as ILIKE. So on PostgreSQL cont,start, end and matches all ignored case, while the docs said cont usedLIKE. They now do: cont, start and end are LIKE; i_cont and thenew i_start and i_end are ILIKE. A PostgreSQL application that reliedon those predicates ignoring case should switch to the i_ form. Nothingraises when it does not; the search just stops matching rows whose casediffers, so check filters that are wired up by another library. ActiveAdmin’sstring filter, for example, offers cont, start and end. MySQL and SQLiteare unaffected; their LIKE follows the column’s collation as before. SeeSearch Matchers.Database dialects are detected from the adapter classA few places generate different SQL per database. They used to compare theadapter’s name against a list (\"PostgreSQL\", \"PostGIS\", \"Mysql2\",\"Trilogy\"), so an adapter that was not on the list — even one built on aknown adapter — got the wrong SQL, and PostGIS was carried as a developmentdependency just to keep it on the list. The dialect is now read from theadapter class’s ancestry, so PostGIS is PostgreSQL without being named, andconfi"
+      }
+      
+    
+  
+
+  
+  
+    
+      ,
+      
+      {
+        "title": "Associations",
+        "url": "/ransack/going-further/associations/",
+        "content": "You can easily use Ransack to search for objects in has_many and belongs_toassociations.Given these associations…class Employee &lt; ActiveRecord::Base belongs_to :supervisor # has attributes first_name:string and last_name:stringendclass Department &lt; ActiveRecord::Base has_many :supervisors # has attribute title:stringendclass Supervisor &lt; ActiveRecord::Base belongs_to :department has_many :employees # has attribute last_name:stringend… and a controller…class SupervisorsController &lt; ApplicationController def index  @q = Supervisor.ransack(params[:q])  @supervisors = @q.result.includes(:department, :employees) endend… you might set up your form like this…&lt;%= search_form_for @q do |f| %&gt; &lt;%= f.label :last_name_cont %&gt; &lt;%= f.search_field :last_name_cont %&gt; &lt;%= f.label :department_title_cont %&gt; &lt;%= f.search_field :department_title_cont %&gt; &lt;%= f.label :employees_first_name_or_employees_last_name_cont %&gt; &lt;%= f.search_field :employees_first_name_or_employees_last_name_cont %&gt; &lt;%= f.submit \"search\" %&gt;&lt;% end %&gt;...&lt;%= content_tag :table do %&gt; &lt;%= content_tag :th, sort_link(@q, :last_name) %&gt; &lt;%= content_tag :th, sort_link(@q, :department_title) %&gt; &lt;%= content_tag :th, sort_link(@q, :employees_last_name) %&gt;&lt;% end %&gt;If you have trouble sorting on associations, try using an SQL string with thepluralized table ('departments.title','employees.last_name') instead of thesymbolized association (:department_title), :employees_last_name).Searching a relation that already has joinsA search can start from a relation rather than a model, and the relation mayalready join the tables the search needs — through joins,left_outer_joins, an includes that will be eager loaded, or a previoussearch. Ransack reuses those joins: the condition is bound to the aliasActive Record gives the existing join, and no second join is added.Supervisor.joins(:department).where(departments: { title: 'Sales' })     .ransack(department_title_cont: 'Eng').result.to_sql# ... INNER JOIN \"departments\" ON ... WHERE \"departments\".\"title\" = 'Sales'#   AND \"departments\".\"title\" LIKE '%Eng%' ESCAPE '\\'Supervisor.joins(:department, :backup_department)  # both belongs_to Department     .ransack(backup_department_title_eq: 'Ops').result.to_sql# ... INNER JOIN \"departments\" ON ...#   INNER JOIN \"departments\" AS \"backup_departmen"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Ransackers",
+        "url": "/ransack/going-further/ransackers/",
+        "content": "Add custom search functionsThe main premise behind Ransack is to provide access to Arel predicate methods. Ransack provides special methods, called ransackers, for creating additional search functions via Arel.A ransacker method can return any Arel node that allows the usual predicate methods. Custom ransackers are an expert feature, and require a thorough understanding of Arel.ArelHere are some resources for more information about Arel: Using Arel to Compose SQL Queries The definitive guide to Arel, the SQL manager for Ruby Creating Advanced Active Record DB Queries with ArelRansacker methods enable search customization and are placed in the model. Arguments may be passed to a ransacker method via ransacker_args (see Example #6 below).Ransackers, like scopes, are not a cure-all. Many use cases can be better solved with a standard Ransack search on a dedicated database search field, which is faster, index-able, and scales better than converting/ransacking data on the fly.Example RansackersSearch on fieldSearch on the name field reversed:# in the model:ransacker :reversed_name, formatter: proc { |v| v.reverse } do |parent| parent.table[:name]endSearch using DatetimeConvert a user string input and a database datetime field to the same date format to find all records with a datetime field (created_at in this example) equal to that date :# in the model:ransacker :created_at do Arel.sql('date(created_at)')endin the view:&lt;%= f.search_field( :created_at_date_equals, placeholder: t(:date_format) ) %&gt;...&lt;%= sort_link(@search, :created_at, default_order: :desc) %&gt;# config/initializers/ransack.rbRansack.configure do |config| config.add_predicate 'date_equals',  arel_predicate: 'eq',  formatter: proc { |v| v.to_date },  validator: proc { |v| v.present? },  type: :stringend2.1It seems to be enough to change the model only, but don’t forget to define the type that will returned as well.# in the model:ransacker :created_at, type: :date do Arel.sql('date(created_at)')end2.2. Postgresql with time zonesIf you’re using different time zones for Rails and Postgresql you should expect to have some problems using the above solution.Example: Rails at GMT -03:00 Postgresql at GMT -00:00 (UTC)A timestamp like 2019-07-18 01:21:29.826484 will be truncated to 2019-07-18.But for your Rails application 2019-07-18 01:21:29.826484 is 2019-07-17 22:21:29.826484 at your time zone "
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Aliases",
+        "url": "/ransack/going-further/aliases/",
+        "content": "You can customize the attribute names for your Ransack searches by using aransack_alias. This is particularly useful for long attribute names that arenecessary when querying associations or multiple columns.class Post &lt; ActiveRecord::Base belongs_to :author # Abbreviate :author_first_name_or_author_last_name to :author ransack_alias :author, :author_first_name_or_author_last_nameendNow, rather than using :author_first_name_or_author_last_name_cont in yourform, you can simply use :author_cont. This serves to produce more expressivequery parameters in your URLs.&lt;%= search_form_for @q do |f| %&gt; &lt;%= f.label :author_cont %&gt; &lt;%= f.search_field :author_cont %&gt;&lt;% end %&gt;You can also use ransack_alias for sorting.class Post &lt; ActiveRecord::Base belongs_to :author # Abbreviate :author_first_name to :author ransack_alias :author, :author_first_nameendNow, you can use :author instead of :author_first_name in a sort_link.&lt;%= sort_link(@q, :author) %&gt;Note that using :author_first_name_or_author_last_name_cont would produce an invalid sql query. In those cases, Ransack ignores the sorting clause.Aliases through associations and in compoundsAn alias is resolved wherever its name appears: on its own, as a segment of an_or_ / _and_ name, and after an association path when it is defined onthe associated model.class Author &lt; ActiveRecord::Base ransack_alias :name, :first_name_or_last_nameendclass Post &lt; ActiveRecord::Base belongs_to :author ransack_alias :text, :title_or_bodyendPost.ransack(author_name_cont: 'a')    # first_name OR last_name on authorsPost.ransack(text_or_author_name_cont: 'a') # title OR body OR first_name OR last_nameAn alias that expands to a compound joins with its own combinator, so combineit with the same one: text_and_author_name_cont would mix _or_ and_and_, which a strict search rejects (seeSimple Mode).The alias name itself does not need to be in ransackable_attributes; theattributes it expands to do. An alias whose target is not a searchableattribute is ignored, or raises Ransack::InvalidSearchError underransack!, like any other unknown attribute.Before Ransack 6.0 an alias was only resolved on the searched model and onlyas the whole name: author_name_cont and text_or_author_name_cont producedSQL referring to columns that do not exist."
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Scopes",
+        "url": "/ransack/going-further/scopes/",
+        "content": "A scope or class method can be used as a search condition once it isallowlisted with ransackable_scopes (see Authorization).The allowlist is an array of symbols. By default, all class methods(e.g. scopes) are ignored.Scopes will be applied for matching true values, or for given values if thescope accepts a value:class Employee &lt; ActiveRecord::Base scope :activated, -&gt;(boolean = true) { where(active: boolean) } scope :salary_gt, -&gt;(amount) { where('salary &gt; ?', amount) } # Scopes are just syntactical sugar for class methods, which may also be used: def self.hired_since(date)  where('start_date &gt;= ?', date) end def self.ransackable_scopes(auth_object = nil)  if auth_object.try(:admin?)   # allow admin users access to all three methods   %i(activated hired_since salary_gt)  else   # allow other users to search on `activated` and `hired_since` only   %i(activated hired_since)  end endendEmployee.ransack({ activated: true, hired_since: '2013-01-01' })Employee.ransack({ salary_gt: 100_000 }, { auth_object: current_user })Values such as 'true' and '1' from a form are sanitized to booleans. Perhapsyou have user_id: [1] and you do not want Ransack to convert1 into a boolean. (Values sanitized to booleans can be found in theconstants.rb).To turn this off globally, and handle type conversions yourself, setsanitize_custom_scope_booleans to false in an initializer file likeconfig/initializers/ransack.rb:Ransack.configure do |c| c.sanitize_custom_scope_booleans = falseendTo turn this off on a per-scope basis Ransack adds the following method toActiveRecord::Base that you can redefine to selectively override sanitization:ransackable_scopes_skip_sanitize_argsAdd the scope you wish to bypass this behavior to ransackable_scopes_skip_sanitize_args:def self.ransackable_scopes_skip_sanitize_args [:scope_to_skip_sanitize_args]endScopes and falseA bare false (or '0' / 'false', which are sanitized to false) is takento mean “this checkbox was not ticked”, and the scope is not applied at all.That is right for a scope with no argument, but wrong for a scope such asactivated(boolean) driven by a yes / no / any select, which needs to receivefalse. List that scope in ransackable_scopes_skip_sanitize_args: it thenreceives every value as given, including false, and can cast for itself:class Employee &lt; ActiveRecord::Base # `true` is passed as a bare call, so the argument n"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Custom predicates",
+        "url": "/ransack/going-further/custom-predicates/",
+        "content": "If you’d like to add your own custom Ransack predicates:# config/initializers/ransack.rbRansack.configure do |config| config.add_predicate 'equals_diddly', # Name your predicate  # What non-compound ARel predicate will it use? (eq, matches, etc)  arel_predicate: 'eq',  # Format incoming values as you see fit. (Default: Don't do formatting)  formatter: proc { |v| \"#{v}-diddly\" },  # Validate a value. An \"invalid\" value won't be used in a search.  # Below is default.  validator: proc { |v| v.present? },  # Should compounds be created? Will use the compound (any/all) version  # of the arel_predicate to create a corresponding any/all version of  # your predicate. (Default: true)  compounds: true,  # Force a specific column type for type-casting of supplied values.  # (Default: use type from DB column)  type: :string,  # Use LOWER(column on database).  # (Default: false)  case_insensitive: trueendYou can check all Arel predicates here.What a formatter returnsThe formatter runs once per value and its return value is quoted as a singleliteral, so it cannot build a piece of SQL. For an in / not_in predicatethat takes one delimited string, return an Array and Ransack quotes eachelement:Ransack.configure do |config| config.add_predicate 'in_list', arel_predicate: 'in',  formatter: proc { |v| v.split(';') }endPerson.ransack(name_in_list: 'Aaron;Ernie').result.to_sql# ... WHERE \"people\".\"name\" IN ('Aaron', 'Ernie')Returning \"Aaron','Ernie\" instead gives IN ('Aaron'',''Ernie'): the stringis one value, and treating it as SQL would be an injection vector.If Arel does not have the predicate you are looking for, consider monkey patching it:# config/initializers/ransack.rbmodule Arel module Predications  def gteq_or_null(other)   left = gteq(other)   right = eq(nil)   left.or(right)  end endendRansack.configure do |config| config.add_predicate 'gteq_or_null', arel_predicate: 'gteq_or_null'end"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Merging searches",
+        "url": "/ransack/going-further/merging-searches/",
+        "content": "To find records that match multiple searches, it’s possible to merge all the ransack search conditions into an ActiveRecord relation to perform a single query. In order to avoid conflicts between joined table names it’s necessary to set up a shared context to track table aliases used across all the conditions before initializing the searches:shared_context = Ransack::Context.for(Person)search_parents = Person.ransack( { parent_name_eq: \"A\" }, context: shared_context)search_children = Person.ransack( { children_name_eq: \"B\" }, context: shared_context)shared_conditions = [search_parents, search_children].map { |search| Ransack::Visitor.new.accept(search.base)}Person.joins(shared_context.join_sources) .where(shared_conditions.reduce(&amp;:or)) .to_sqlProduces:SELECT \"people\".*FROM \"people\"LEFT OUTER JOIN \"people\" \"parents_people\" ON \"parents_people\".\"id\" = \"people\".\"parent_id\"LEFT OUTER JOIN \"people\" \"children_people\" ON \"children_people\".\"parent_id\" = \"people\".\"id\"WHERE ( (\"parents_people\".\"name\" = 'A' OR \"children_people\".\"name\" = 'B') )ORDER BY \"people\".\"id\" DESCAdmittedly this is not as simple as it should be, but it’s workable for now. (Implementing issue 417 could make this more straightforward.)"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Form customisation",
+        "url": "/ransack/going-further/form-customisation/",
+        "content": "Predicate and attribute labels in forms may be specified with I18n in a translation file (see the locale files in Ransack::Locale for more examples):# locales/en.ymlen: ransack:  asc: ascending  desc: descending  predicates:   cont: contains   not_cont: not contains   start: starts with   end: ends with   gt: greater than   lt: less than  attributes:   person:    name: Full Name   article:    title: Article Title    body: Main ContentThe names of attribute fields may also be changed globally or under activerecord:# locales/en.ymlen: attributes:  model_name:   model_field1: field name1   model_field2: field name2 activerecord:  attributes:   namespace/article:    title: AR Namespaced Title   namespace_article:    title: Old Ransack Namespaced TitleTo limit the predicates in the predicate_select form helper in a view template, pass an array of permitted predicates with only:&lt;%= f.predicate_select only: %i(cont not_cont eq not_eq blank null) %&gt;Compound predicates (_any &amp; _all) may be removed by passing the option compounds: false.&lt;%= f.predicate_select compounds: false %&gt;To let the user pick the predicate for one fixed attribute, use thecondition builders from advanced modewith the attribute name in a hidden field:&lt;%= search_form_for @q do |f| %&gt; &lt;%= f.condition_fields do |c| %&gt;  &lt;%= c.attribute_fields do |a| %&gt;   &lt;%= a.hidden_field :name, value: 'title' %&gt;  &lt;% end %&gt;  &lt;%= c.predicate_select only: %i(cont start eq) %&gt;  &lt;%= c.value_fields do |v| %&gt;   &lt;%= v.text_field :value %&gt;  &lt;% end %&gt; &lt;% end %&gt;&lt;% end %&gt;This posts q[c][0][a][0][name]=title, q[c][0][p]=cont andq[c][0][v][0][value]=..., which Ransack reads as a single condition.Searchable attributes versus non-searchable ones may be specified as follows:def self.ransackable_attributes(auth_object = nil) %w(searchable_attribute_1 searchable_attribute_2 ...) + _ransackers.keysendUsing SimpleFormIf you would like to combine the Ransack and SimpleForm form builders, set theRANSACK_FORM_BUILDER environment variable before Rails boots up, e.g. inconfig/application.rb before require 'rails/all' as shown below (and addgem 'simple_form' in your Gemfile).require File.expand_path('../boot', __FILE__)ENV['RANSACK_FORM_BUILDER'] = '::SimpleForm::FormBuilder'require 'rails/all'"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "i18n",
+        "url": "/ransack/going-further/i18n/",
+        "content": "Ransack translation files are available inRansack::Locale. You may also be interested in one of themany translations for Ransack available athttp://www.localeapp.com/projects/2999.Predicate and attribute translations in forms may be specified as follows (seethe translation files in Ransack::Locale for more examples):locales/en.yml:en: ransack:  asc: ascending  desc: descending  predicates:   cont: contains   not_cont: not contains   start: starts with   end: ends with   gt: greater than   lt: less than  models:   person: Passenger  attributes:   person:    name: Full Name   article:    title: Article Title    body: Main ContentAttribute names may also be changed globally, or under activerecord:en: attributes:  model_name:   model_field1: field name1   model_field2: field name2 activerecord:  attributes:   namespace/article:    title: AR Namespaced Title   namespace_article:    title: Old Ransack Namespaced TitleWorking with Globalized AttributesIf you’re using the Globalize gem for internationalized model attributes, you may encounter issues when sorting on translated attributes of associations while also joining the main model’s translations.For example, if you have a Book model with translated title and a Category model with translated name, sorting on the category’s translated name while joining the book’s translations may not work as expected:# This may not work correctly:Book.joins(:translations).ransack({ s: ['category_translations_name asc'] }).resultWorkaround for Globalized Attributes SortingWhen working with globalized attributes and you need to sort on translated fields of associations, the simplest and most effective approach is to use the sort_link helper with the translation attribute directly:&lt;!-- This works perfectly for sorting on translated attributes --&gt;&lt;%= sort_link @search, :translations_name %&gt;&lt;%= sort_link @search, :category_translations_name %&gt;For programmatic sorting, let Ransack handle the joins first:# Instead of joining translations first, let Ransack handle the joins:search = Book.ransack({ s: ['category_translations_name asc'] })results = search.result.joins(:translations)# Or use the includes method to ensure all necessary translations are loaded:search = Book.ransack({ s: ['category_translations_name asc'] })results = search.result.includes(:translations, category: :translations)# For more complex scenarios, "
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Polymorphic searches",
+        "url": "/ransack/going-further/polymorphic-search/",
+        "content": "When making searches from polymorphic models it is necessary to specify the type of model you are searching.For example:Given two modelsclass House &lt; ActiveRecord::Base has_one :location, as: :locatableendclass Location &lt; ActiveRecord::Base belongs_to :locatable, polymorphic: trueendNormally (without polymorphic relationship) you would be able to search as per below:Location.ransack(locatable_number_eq: 100).resultHowever when this is searched you will get the following errorActiveRecord::EagerLoadPolymorphicError: Can not eagerly load the polymorphic association :locatableIn order to search for locations by house number when the relationship is polymorphic you have to specify the type of records you will be searching and construct your search as below:Location.ransack(locatable_of_House_type_number_eq: 100).resultnote the _of_House_type_ added to the search key. This allows Ransack to correctly specify the table names in SQL join queries.For namespaced models you should use a quoted string containing the standard Ruby module notationLocation.ransack('locatable_of_Residences::House_type_number_eq' =&gt; 100).resultThe type must name a model. A suffix naming anything else, such as a constantthat does not exist, a lowercase word or a class with no table, is not apolymorphic reference, and the key is treated like any other unknownattribute: ignored by default, or raised as Ransack::InvalidSearchError whenignore_unknown_conditions is false.Location.ransack(locatable_of_Nowhere_type_number_eq: 100).result# =&gt; every location; the condition is ignoredLocation.ransack!(locatable_of_Nowhere_type_number_eq: 100)# Ransack::InvalidSearchError: Invalid search term locatable_of_Nowhere_type_number_eq Note Before 6.0 the type was looked up with Kernel.const_get, so a suffix thatnamed no constant raised NameError from the query string, whateverignore_unknown_conditions was set to. See#1738."
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "PostgreSQL searches",
+        "url": "/ransack/going-further/searching-postgres/",
+        "content": "Searching on Postgres-specific column types.Postgres Array searchesSee this issue for details.PostgreSQL JSONB searchesUsing a fixed keySee here for searching on a fixed key in a JSONB column: Ransackers: Postgres columnsUsing the JSONB contains operatorTo fully use the power of the JSONB column you may want to filter on any key though:Install the ActiveRecordExtended gem to add the contains arel predicate to your project. It let’s you use the Postgres contains operator @&gt;.Add a custom predicate in the config/initializers/ransack.rb file:Ransack.configure do |config| config.add_predicate 'jcont', arel_predicate: 'contains', formatter: proc { |v| JSON.parse(v) }endNow you can ransack the JSONB columns using the _jcont predicate. For example the Person model has a data JSONB column, find entries where the column contains the {“group”: “experts”} key-value pair:Person.ransack(data_jcont: '{\"group\": \"experts\"}').result.to_sqlSELECT \"persons\".* FROM \"persons\" WHERE \"persons\".\"data\" @&gt; '\"{\\\"group\\\": \\\"experts\\\"}\"'If you have a GIN index on that column, the database will quickly be able to find that result.Treating the column as a stringWarning: This method converts the column to a string and matches the given string to the result. This will be slow on large data_sets and does not make good use of the JSONB capabilities of Postgres, such as indexes.class Contact &lt; ApplicationRecord ransacker :within_json do |parent|  Arel.sql(\"table.jsonb_data::text\") endendContact.all.ransack(\"within_json_cont\" =&gt; \"my\")Will generateSELECT \"contacts\".* FROM \"contacts\" WHERE contacts.json_data LIKE '%my%' ESCAPE '\\'(within_json_i_cont gives ILIKE for a match that ignores case.)Note that this search treats the entire JSON as string, including parens, etc. i.e. you can search for e.g.: Contact.all.ransack(\"within_json_cont\" =&gt; '{\"key\": \"value\"}')"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Acts-as-taggable-on",
+        "url": "/ransack/going-further/acts-as-taggable-on/",
+        "content": "Using Acts As Taggable OnIf you have an ActiveRecord model and you’re using acts-as-taggable-on,chances are you might want to search on tagged fields. Follow the instructions to install the gem and then set up your project files.Configure the modelapp/models/tasks.rbYou can call the tagging field anything you like, it just needs to be plural. No migration is needed as this is stored in the internal ActsAsTaggable tables (tags and taggings).class Task &lt; ApplicationRecord acts_as_taggable_on :projectsendControllerAdd a field to strong params in the controller. Use the singular name with _list.app/controllers/tasks_controller.rbdef strong_params params  .require(:tasks)  .permit(:task, :example_field, :project_list)FormWe need to send the tag fieldname to our model, also using the singular naming.&lt;div class='form-group'&gt; &lt;%= f.label :project_list %&gt; &lt;%= f.text_field :project_list, value: @task.send(:project_list).to_s %&gt; &lt;/div&gt;Now we can collect our data via the form, with tags separated by commas.AllowlistingRansack only searches attributes and associations a model allowlists, and acondition on anything else is dropped silently (or raises under ransack!).The tagging association and the tag model both need entries. Only theassociation named in the search key is checked; Active Record follows thethrough reflection to the taggings table by itself, so taggings need notbe allowlisted:class Task &lt; ApplicationRecord acts_as_taggable_on :projects def self.ransackable_associations(auth_object = nil)  %w[projects] endend# config/initializers/acts_as_taggable_on.rbActsAsTaggableOn::Tag.class_eval do def self.ransackable_attributes(auth_object = nil)  %w[name] endendWithout these, projects_name_in produces a query with no WHERE clause andevery task comes back.Ransack SearchImagine you have the following two instances of Task:{ id: 1, name: 'Clean up my room',    projects: [ 'Home', 'Personal' ] }{ id: 2, name: 'Complete math exercises', projects: [ 'Homework', 'Study' ] }When you’re writing a Ransack search form, you can choose any of the following options:&lt;%= search_form_for @search do |f| %&gt; &lt;%= f.text_field :projects_name_in  %&gt; &lt;!-- option a --&gt; &lt;%= f.text_field :projects_name_eq  %&gt; &lt;!-- option b --&gt; &lt;%= f.text_field :projects_name_cont %&gt; &lt;!-- option c --&gt;&lt;% end %&gt;Option A - Match keys exa"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "CSV export",
+        "url": "/ransack/going-further/exporting-to-csv/",
+        "content": "Exporting to CSVExample downloading a csv file preserving ransack search, based on this gist&lt;h1&gt;Users&lt;/h1&gt;&lt;%= search_form_for @q, url: dashboard_index_path do |f| %&gt; &lt;%= f.label :name_cont %&gt; &lt;%= f.search_field :name_cont %&gt; &lt;%= f.submit %&gt;&lt;% end %&gt;&lt;ul&gt; &lt;% @users.each do |user| %&gt;  &lt;li&gt;&lt;%= user.name %&gt; [&lt;%= user.devices.map {|device| device.name }.join(', ') %&gt;]&lt;/li&gt; &lt;% end %&gt;&lt;/ul&gt;&lt;% if params[:q] %&gt; &lt;%= link_to 'Export 1', dashboard_index_path({name: params[:q][:name_cont]}.merge({format: :csv})) %&gt;&lt;% else %&gt; &lt;%= link_to 'Export 2', dashboard_index_path(format: 'csv') %&gt;&lt;% end %&gt;require 'csv'class User &lt; ApplicationRecord has_many :devices def self.get_csv(users)  CSV.generate do |csv|   csv &lt;&lt; [\"Name\", \"Devices\"]   users.each do |user|    csv &lt;&lt; [user.name, user.devices.map{|device| device.name}.join(', ')]   end  end endend"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Saving queries",
+        "url": "/ransack/going-further/saving-queries/",
+        "content": "Ransack Memory GemThe Ransack Memory gem accomplishes this.Custom solutionIf you want a custom solution, you can build it yourself. My ransack AJAX searching doesn’t save your search parameters across transactions. In this post I’ll show you how to easily add this capability in a generic way.In this example I added AJAX search ability to index pages.def index @search = ComponentDefinition.search(search_params) # make name the default sort column @search.sorts = 'name' if @search.sorts.empty? @component_definitions = @search.result().page(params[:page])endI added methods(search_params, clear_search_index) in the ApplicationController to add a level of abstraction from the search gem I was using. Turns out this made things super easy, especially considering I won’t have to update my code generation tools for index pages.class ApplicationController &lt; ActionController::Base def search_params  params[:q] end def clear_search_index  if params[:search_cancel]   params.delete(:search_cancel)   if(!search_params.nil?)    search_params.each do |key, param|     search_params[key] = nil    end   end  end endendI decided to store the ransack search parameters, params[:q], in the session. To make the session parameter unique I used a key creed from the controllers name and “_search”.class ApplicationController &lt; ActionController::Base # CHECK THE SESSION FOR SEARCH PARAMETERS IS THEY AREN'T IN THE REQUEST def search_params  if params[:q] == nil    params[:q] = session[search_key]  end  if params[:q]     session[search_key] = params[:q]    end    params[:q] end # DELETE SEARCH PARAMETERS FROM THE SESSION def clear_search_index   if params[:search_cancel]    params.delete(:search_cancel)    if(!search_params.nil?)      search_params.each do |key, param|        search_params[key] = nil      end    end    # REMOVE FROM SESSION    session.delete(search_key)   end endprotected # GENERATE A GENERIC SESSION KEY BASED ON THE CONTROLLER NAME def search_key  \"#{controller_name}_search\".to_sym endendBased on Saving queries"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Other notes",
+        "url": "/ransack/going-further/other-notes/",
+        "content": "Problem with DISTINCT selectsIf passed distinct: true, result will generate a SELECT DISTINCT toavoid returning duplicate rows, even if conditions on a join would otherwiseresult in some. It generates the same SQL as calling uniq on the relation.Please note that for many databases, a sort on an associated table’s columnsmay result in invalid SQL with distinct: true – in those cases, youwill need to modify the result as needed to allow these queries to work.For example, you could call joins and includes on the result which has theeffect of adding those tables columns to the select statement, overcomingthe issue, like so:def index @q = Person.ransack(params[:q]) @people = @q.result(distinct: true)       .includes(:articles)       .joins(:articles)       .page(params[:page])endIf the above doesn’t help, you can also use ActiveRecord’s select queryto explicitly add the columns you need, which brute force’s adding thecolumns you need that your SQL engine is complaining about, you need tomake sure you give all of the columns you care about, for example:def index @q = Person.ransack(params[:q]) @people = @q.result(distinct: true)       .select('people.*, articles.name, articles.description')       .page(params[:page])endAnother method to approach this when using Postgresql is to use ActiveRecords’s .includes in combination with .group instead of distinct: true.For example:def index @q = Person.ransack(params[:q]) @people = @q.result       .group('persons.id')       .includes(:articles)       .page(params[:page])endA final way of last resort is to call to_a.uniq on the collection at the endwith the caveat that the de-duping is taking place in Ruby instead of in SQL,which is potentially slower and uses more memory, and that it may displayawkwardly with pagination if the number of results is greater than the page size.For example:def index @q = Person.ransack(params[:q]) @people = @q.result.includes(:articles).page(params[:page]).to_a.uniqendProblem with Globalized Attributes and SortingWhen using internationalization gems like Globalize, you may encounter issues when trying to sort on translated attributes of associations while also having pre-existing joins to translation tables.Problem scenario:# This may fail to generate proper joins:Book.joins(:translations).ransack({ s: ['category_translations_name asc'] }).resultSolution:The simplest and most effective approach"
+      }
+      
+    
+  
+
+  
+  
+    
+      ,
+      
+      {
+        "title": "Community and support",
+        "url": "/ransack/project/community/",
+        "content": "Questions and bugs Questions and discussion belong inGitHub Discussions,where a wider community can help. File an issue if abug is caused by Ransack, is new (has not already been reported), and can bereproduced from the information you provide. A pull request with a failing test that demonstrates the problem is the bestbug report of all.Before filing an issue or a pull request, read theContributing Guide.SecurityTo report a security vulnerability, use theTidelift security contact. Tidelift willcoordinate the fix and disclosure. See theSecurity Policyfor supported versions.Supporting Ransack Support the project on Open Collective. Use Ransack in your apps, and tell us when something is broken or missing.A failing spec to demonstrate the issue is awesome; a pull request withpassing tests is even better. Spread the word if Ransack has been useful to you. The more people use it,the quicker bugs are found and fixed.Ransack for enterpriseAvailable as part of the Tidelift Subscription.The maintainers of Ransack and thousands of other packages are working withTidelift to deliver commercial support and maintenance for the open sourcedependencies you use to build your applications. Save time, reduce risk, andimprove code health, while paying the maintainers of the exact dependencies youuse. Learn more.ContributorsRansack is maintained by: Sean Carroll Deivid Rodriguez Greg Molnar A great group of contributorsAlumni maintainers: Ernie Miller (original author) Jon Atack Ryan BiggRansack’s logo is designed by Anıl Kılıç.This project exists thanks to all the people who contribute."
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "How Ransack is built",
+        "url": "/ransack/project/architecture/",
+        "content": "This page is for anyone reading or changing Ransack’s source. It describes thepieces, where the boundary with Active Record is, and which parts of ActiveRecord Ransack reaches into.The piecesA search goes through four stages. Each has a home under lib/ransack/.      Stage   Where   What it does         Parse   search.rb, nodes/   Turns the params hash into a tree of Grouping, Condition, Attribute, Value and Sort nodes. Nothing here knows about the database.       Resolve   context.rb, active_record/context.rb   Maps attribute names like articles_title onto tables, columns and the joins needed to reach them.       Build   visitor.rb, predicate.rb, constants.rb   Walks the node tree and produces Arel predicates and orderings.       Integrate   active_record/   Everything that touches Active Record: the class methods added to models, the join machinery, and the Context that evaluates the search into a relation.   Around those sit configuration.rb (global options and the predicate registry),translate.rb and locale/ (i18n), helpers/ (the form builder and viewhelpers, loaded only when Action Controller is) and ransacker.rb (customattributes).The Active Record boundaryRansack::Context is the seam. The generic class holds what every ORM wouldneed: binding attribute names to nodes, walking association paths, checkingthe ransackable_* allowlists and chaining scopes. Everything that needs a realdatabase sits in the subclass Ransack::ActiveRecord::Context.A context is chosen through a registry rather than a hard-coded check, so anintegration for another ORM can register its own:Ransack::Context.register do |object, options| case object when Class  MyOrm::Context.new(object, options) if object &lt; MyOrm::Document when MyOrm::Criteria  MyOrm::Context.new(object, options) endendThe resolver receives whatever was passed to ransack, a model class or aquery object, and returns a context or nil. Ransack’s own Active Record resolver isregistered in lib/ransack/active_record/context.rb. A context subclassimplements relation_for, type_for, evaluate, attribute_method?,table_for, klassify and the join-building methods; the Active Recordcontext is the reference implementation.What Ransack takes from Active Record’s internalsActive Record’s public query interface cannot express two things Ransackneeds: an outer join that is added one association at a time on top of arelation that al"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Documentation",
+        "url": "/ransack/project/documentation/",
+        "content": "The documentation site is built with Jekyll and theVitePress theme for Jekyll from the Markdown files underdocs/ in the Ransack repository, and published to GitHub Pages on every pushto main. To contribute, use the Edit this page on GitHub link at the bottomof any page, or edit locally.Local developmentcd docsbundle installbundle exec jekyll serveOpen http://localhost:4000/ransack/. Most changes are reflected live.Adding a pageEach sidebar section is a Jekyll collection: _getting_started/,_going_further/ and _project/. Create a Markdown file in one of them withthis front matter, and the page appears in that section of the sidebar,ordered by nav_order:---title: My pagedescription: One sentence for search results and link previews.nav_order: 15---The title is rendered as the page heading, so start the page body at ##.Sections are listed in _data/sidebar.yml, and the top navigation in_data/navigation.yml.For a note or a warning, use a custom block:&lt;div class=\"info custom-block\" markdown=\"1\"&gt;&lt;p class=\"custom-block-title\"&gt;Note&lt;/p&gt;Text, in Markdown.&lt;/div&gt;info, tip, warning and danger give the four colours.When a page moves, add its old URL to redirect_from so existing links keepworking.Link to other pages by their file path, [Sorting](/ransack/getting-started/sorting/);the build turns it into the page’s URL and the build fails if the target doesnot exist.Checking the buildThe pull request check runs the same build and a link check:bundle exec jekyll build --strict_front_matterbundle exec htmlproofer _site --disable-external --no-enforce-https --swap-urls '^/ransack/:/'"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Versions and releases",
+        "url": "/ransack/project/release_process/",
+        "content": "Semantic VersioningRansack attempts to follow semantic versioning in the format of x.y.z, where:x stands for a major version (new features that are not backward-compatible).y stands for a minor version (new features that are backward-compatible).A minor version can also drop support for a Ruby or Rails version that hasreached end of life.z stands for a patch (bug fixes).In other words: Major.Minor.Patch.Release ProcessFor the maintainers of Ransack.Publishing to RubyGems is automatic. Publishing a GitHub Release triggers theRelease to RubyGemsworkflow, which builds the gem and pushes it usingRubyGems Trusted Publishing.There is no API key to hold or rotate, and nothing to run locally.The flowExample for release 5.1.0.   Merge the pull requests that make up the release. Everything on main at thetime of the version bump is what ships, so check the queue is in the state you want.    Merge a version pull request. Open a PR that changes onlyversion.rb:  module Ransack VERSION = '5.1.0'end    Merge it last, so the bump is the final commit before the tag.    Create the release. ClickDraft a new release and set:              Field     Value                   Tag     v5.1.0 — Create new tag on publish, target main             Release title     5.1.0             Notes     Click Generate release notes. GitHub lists every merged PR since the previous release; group them under headings (breaking changes, features, bug fixes) and remove anything internal             Set as the latest release     checked             Publish the release. That is the trigger. Within a minute the workflow starts;watch it under Actions → Release to RubyGems.It checks out the tag, verifies the tag matches Ransack::VERSION, builds the gem,exchanges a short-lived OIDC token for RubyGems credentials, and pushes. When itfinishes, the version is live at https://rubygems.org/gems/ransack. Since 4.4.0 the release notes are the changelog; CHANGELOG.md is not updated.If something goes wrongThe tag and Ransack::VERSION disagree. The workflow refuses to publish and fails onthe Check the tag matches step before building anything. This happens when therelease is published before the version PR is merged, or with a typo in the tag. Deletethe release and the tag, fix main, and redo step 3.The workflow failed after the tag exists (for example a RubyGems outage). Don’tcreate a new tag. Re-run it from the Action"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "External resources",
+        "url": "/ransack/project/external-guides/",
+        "content": "There is a plethora of material on Ransack around the internet. We’ve collected some here for your convenience.Do you want to have a blog post or other content on Ransack highlighted? Please just edit the page, add your content and a Pull Request will be sent to Ransack maintainers for approval.Cheatsheets and references Quick-start cheatsheet by @raghubetina AI-generated documentation by devin.ai (DeepWiki)Screencasts DriftingRuby: Ransack Search and Hotwire GoRails: Forum Series Part 6: Search with Ransack Railscast 370 - Ransack               [Search And Sort Ransack Associations With The Rails Ransack Gem     Ruby On Rails 6 Ransack Tutorial](https://www.youtube.com/watch?v=rtg-5EXwpbg)          Gems ActiveAdmin The Administration Framework for Rails uses Ransack internally Ransack Memory Automatically save and load Ransack’s filtered params into the Rail’s session Mobility Ransack Search attributes translated by Mobility with Ransack. Ransack UI Framework for building a search UI with Ransack seems abandoned search_syntax Parses a GitHub-style query string (title:foo author:&gt;bar) into a Ransack params hashBlogs Search And Sort In Ruby On Rails 6 With The Ransack Gem Implement Ransack Gem in Ruby on Rails Searching and Sorting with Ransack How to Build Your Own ActiveAdmin Filters with Ransack Avoid Ransack’s N+1 Pitfall! Filter and paging with Kaminari Pagination for Ransack Forms AJAX Search, Sort, Paginate with Ransack and Kaminari Searching with Ransack in Ruby on Rails Role scopes with gem Ransack Searching and Sorting with Ransack Using custom scopes with Ransack gem in Rails Query Date Range With Ransack ransack vs searchkick: Building a search feature in Rails Using ransack and delegate in Rails Using Ransack as a Search Engine Advanced Search with Ransack Sort a table of records in Rails with Ransack Ransack: Search with Multiple Checkboxes (Rails) Rails : Ransack : Sorting data by ratings Setting Up Rails 5 API Only App with ActiveAdmin enabled Ransack, the library formerly known as MetaSearch 2.0 some Ransack historyIn French Faciliter les recherches avec RansackIn Vietnamese Ransack - công cụ tuyệt vời giúp tìm kiếm và sắp xếp dữ liệu đơn giản hơn"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Wiki contributors",
+        "url": "/ransack/project/wiki-contributors/",
+        "content": "Ransack previously had documentation contained in a GitHub Wiki, and this content has been merged into this documentation website. The following long list of amazing people all made contributions to the Wiki: Abinoam P. Marques Jr Alex Stophel Andrea Schiavini Andrew Vit Ben Koshy Brainkurv Brandan Lennox Brendon Muir Chris Salzberg Colleen McGuckin David Aldridge Davidson Mohanty Denis Tataurov Drew Moore Eike Send Feodor Cherashev Glauco Custódio Grey Baker Harold.Luo Herman Singh Ian Smith Jake Haber Jan Klimo Jared Beck Jon Atack Juanito Fatas JungaJk Leo Chen Leon Miller-Out Luca F Marc Poris Matt Oakley Michael Kopchick Nathan Colgate Nguyen Phi Viet(Sun*) Nguyễn Đức Long NielsKSchjoedt Patrick Copeland Pedro Chambino Rene Hopf Richa Arora Rob Jones Roman Sokhan Ryan Bates Ryan Bigg Sean Sean Linsley Sergey Sunny Ripert Tanbir Hasan ThuyNguyen97 Vanda Yana Agun Siswanto bonyiii charly chifung7 colorfulberry ddonahue99 ernie gaaady gingerlime grumpit itsalongstory jonatack kogre nguyentrungson97 nslocum omitter radar rilian terraplane tyronewilson vansy61 willnet wzcolon"
+      }
+      
+    
+  
+    
+      ,
+      
+      {
+        "title": "Ransack 3.0.0 announcement",
+        "url": "/ransack/project/ransack-3-0-0/",
+        "content": "Ransack has been a part of many Rubyists toolboxes for years and 3.0.0 is a major release. We have a number of new features and one breaking change. As part of 3.0.0, we decided to launch this documentation website, merging in the Wiki and the content from the README.With 3.0.0 we are hoping to re-energise the community, we need help on closing out old issues, refactoring the codebase and even some design work.I also wanted to let you know that Ernie Miller (creator of Ransack) has decided to leave the project completely, he has this message for the community: While my own personal development efforts have been spent elsewhere as of late, I’m keenly aware of how many people still depend on some of the software I originally wrote all those years ago. That’s why I’m grateful to be able to step away from the ActiveRecord Hackery organization (and, specifically, maintenance of Ransack) without impacting those users. I’m thankful that Sean, David, Greg, and others will continue to support users, and wish them the best as they move forward without me!Please join me in thanking Ernie for bringing Ransack to life, I personally think it is one of the most amazing Rails libraries out there."
+      }
+      
+    
+  
+
+]

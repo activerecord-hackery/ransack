@@ -1,0 +1,50 @@
+# Ransack
+
+> Object-based searching for Active Record
+
+## Full Documentation
+
+- [Complete documentation](https://activerecord-hackery.github.io/ransack/llms-full.txt): All canonical pages in one Markdown document.
+
+## Overview
+
+- [Ransack](https://activerecord-hackery.github.io/ransack/): Object-based searching for Active Record. Add search forms and sortable columns to a Rails application with plain Ruby and ERB.
+
+## Getting started
+
+- [Installation](https://activerecord-hackery.github.io/ransack/getting-started/): Add Ransack to a Rails application, and the Ruby, Rails and database versions it supports.
+- [Simple mode](https://activerecord-hackery.github.io/ransack/getting-started/simple-mode/): Search from a controller and a form with search_form_for, sort_link and the default options.
+- [Authorization](https://activerecord-hackery.github.io/ransack/getting-started/authorization/): Allowlist the attributes, associations, scopes and sorts a search may use, in the model or with strong parameters.
+- [Advanced mode](https://activerecord-hackery.github.io/ransack/getting-started/advanced-mode/): Build nested condition groups with combinators for searches simple mode cannot express.
+- [Using predicates](https://activerecord-hackery.github.io/ransack/getting-started/using-predicates/): How eq, cont, in, null and the other predicates turn a parameter into SQL.
+- [Search matchers](https://activerecord-hackery.github.io/ransack/getting-started/search-matches/): Every predicate Ransack provides, with case sensitivity, wildcards, enums and attribute types.
+- [Sorting](https://activerecord-hackery.github.io/ransack/getting-started/sorting/): Sort in the view and the controller, on associations, and what happens to unknown sorts.
+- [Configuration](https://activerecord-hackery.github.io/ransack/getting-started/configuration/): Global options: SQL dialect, whitespace, blank values, the null sentinel, NULL ordering and the search key.
+- [Upgrading](https://activerecord-hackery.github.io/ransack/getting-started/upgrading/): What changes between major and minor versions of Ransack, and what to do about it.
+
+## Going further
+
+- [Associations](https://activerecord-hackery.github.io/ransack/going-further/associations/): Search through has_many and belongs_to associations, and relations that already have joins.
+- [Ransackers](https://activerecord-hackery.github.io/ransack/going-further/ransackers/): Define custom searchable attributes with Arel: dates, concatenated fields, Postgres columns and more.
+- [Aliases](https://activerecord-hackery.github.io/ransack/going-further/aliases/): Give long attribute paths short names with ransack_alias, for searching and sorting.
+- [Scopes](https://activerecord-hackery.github.io/ransack/going-further/scopes/): Use allowlisted scopes and class methods as search conditions, and how they handle false.
+- [Custom predicates](https://activerecord-hackery.github.io/ransack/going-further/custom-predicates/): Add your own predicates with Ransack.configure and add_predicate.
+- [Merging searches](https://activerecord-hackery.github.io/ransack/going-further/merging-searches/): Combine two searches into one relation.
+- [Form customisation](https://activerecord-hackery.github.io/ransack/going-further/form-customisation/): Build search forms by hand, with SimpleForm, or with custom labels and fields.
+- [i18n](https://activerecord-hackery.github.io/ransack/going-further/i18n/): Translate predicates and attributes, and search Globalize-translated attributes.
+- [Polymorphic searches](https://activerecord-hackery.github.io/ransack/going-further/polymorphic-search/): Search through a polymorphic belongs_to by naming the type.
+- [PostgreSQL searches](https://activerecord-hackery.github.io/ransack/going-further/searching-postgres/): Search PostgreSQL array and JSONB columns.
+- [Acts-as-taggable-on](https://activerecord-hackery.github.io/ransack/going-further/acts-as-taggable-on/): Search tags from acts-as-taggable-on, exactly, in combination, or by substring.
+- [CSV export](https://activerecord-hackery.github.io/ransack/going-further/exporting-to-csv/): Export the results of a search as CSV.
+- [Saving queries](https://activerecord-hackery.github.io/ransack/going-further/saving-queries/): Remember a user's search between requests.
+- [Other notes](https://activerecord-hackery.github.io/ransack/going-further/other-notes/): DISTINCT selects, Action Text, encrypted attributes, unknown conditions and OR grouping.
+
+## Project
+
+- [Community and support](https://activerecord-hackery.github.io/ransack/project/community/): Where to ask questions, report bugs and security issues, and how to support Ransack.
+- [How Ransack is built](https://activerecord-hackery.github.io/ransack/project/architecture/): The pieces of Ransack and where it depends on Active Record's internals.
+- [Documentation](https://activerecord-hackery.github.io/ransack/project/documentation/): Build and preview this site locally, and add a page.
+- [Versions and releases](https://activerecord-hackery.github.io/ransack/project/release_process/): Semantic versioning and how a Ransack release is cut and published.
+- [External resources](https://activerecord-hackery.github.io/ransack/project/external-guides/): Screencasts, related gems and blog posts about Ransack.
+- [Wiki contributors](https://activerecord-hackery.github.io/ransack/project/wiki-contributors/): The people who wrote the original Ransack wiki.
+- [Ransack 3.0.0 announcement](https://activerecord-hackery.github.io/ransack/project/ransack-3-0-0/): The 3.0.0 announcement.

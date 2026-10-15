@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="More than VitePress">
+  <defs>
+    <linearGradient id="more-card" x1="9" x2="38" y1="10" y2="39" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#41D1FF"/>
+      <stop offset="1" stop-color="#BD34FE"/>
+    </linearGradient>
+    <linearGradient id="more-plus" x1="19" x2="34" y1="19" y2="34" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFEA83"/>
+      <stop offset="1" stop-color="#FFA800"/>
+    </linearGradient>
+    <filter id="more-shadow" x="5" y="5" width="38" height="39" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1F2A44" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <g filter="url(#more-shadow)">
+    <path fill="#fff" d="M13.3 8.8 33 6.2a4.1 4.1 0 0 1 4.6 3.5l3.4 25.6a4.1 4.1 0 0 1-3.5 4.6l-19.7 2.6a4.1 4.1 0 0 1-4.6-3.5L9.8 13.4a4.1 4.1 0 0 1 3.5-4.6Z"/>
+    <path fill="url(#more-card)" d="M14.1 11.4 32.9 9a1.6 1.6 0 0 1 1.8 1.4l3.2 24.1a1.6 1.6 0 0 1-1.4 1.8l-18.8 2.5a1.6 1.6 0 0 1-1.8-1.4l-3.2-24.1a1.6 1.6 0 0 1 1.4-1.9Z" opacity=".9"/>
+    <path fill="#fff" d="M17 17.6a1.1 1.1 0 0 1 1-1.3l12.8-1.7a1.1 1.1 0 1 1 .3 2.2l-12.8 1.7a1.1 1.1 0 0 1-1.3-.9Zm.8 6.3a1.1 1.1 0 0 1 1-1.3l7.7-1a1.1 1.1 0 1 1 .3 2.2l-7.7 1a1.1 1.1 0 0 1-1.3-.9Z" opacity=".72"/>
+    <path fill="url(#more-plus)" d="M28.7 26.4a1.5 1.5 0 0 1 1.3-1.7a1.5 1.5 0 0 1 1.7 1.3l.4 2.8 2.8-.4a1.5 1.5 0 0 1 .4 3l-2.8.4.4 2.8a1.5 1.5 0 1 1-3 .4l-.4-2.8-2.8.4a1.5 1.5 0 0 1-.4-3l2.8-.4-.4-2.8Z"/>
+  </g>
+</svg>

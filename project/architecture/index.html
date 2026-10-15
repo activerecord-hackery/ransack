@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+
+
+
+
+  
+  
+    <title>How Ransack is built | Ransack</title>
+    <meta name="description" content="The pieces of Ransack and where it depends on Active Record&#39;s internals.">
+    
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <link rel="canonical" href="https://activerecord-hackery.github.io/ransack/project/architecture/">
+    <link rel="sitemap" type="application/xml" href="https://activerecord-hackery.github.io/ransack/sitemap.xml">
+
+    <meta property="og:site_name" content="Ransack">
+    <meta property="og:title" content="How Ransack is built">
+    <meta property="og:description" content="The pieces of Ransack and where it depends on Active Record&#39;s internals.">
+    <meta property="og:url" content="https://activerecord-hackery.github.io/ransack/project/architecture/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en">
+    
+    
+    
+    
+    
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="How Ransack is built">
+    <meta name="twitter:description" content="The pieces of Ransack and where it depends on Active Record&#39;s internals.">
+    
+    
+    
+    
+
+    
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://activerecord-hackery.github.io/ransack/#identity","name":"Ransack","url":"https://github.com/activerecord-hackery/ransack"},{"@type":"WebSite","@id":"https://activerecord-hackery.github.io/ransack/#website","url":"https://activerecord-hackery.github.io/ransack/","name":"Ransack","description":"Object-based searching for Active Record","inLanguage":"en","publisher":{"@id":"https://activerecord-hackery.github.io/ransack/#identity"}},{"@type":"BreadcrumbList","@id":"https://activerecord-hackery.github.io/ransack/project/architecture/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Ransack","item":"https://activerecord-hackery.github.io/ransack/"},{"@type":"ListItem","position":2,"name":"How Ransack is built","item":"https://activerecord-hackery.github.io/ransack/project/architecture/"}]},{"@type":"WebPage","@id":"https://activerecord-hackery.github.io/ransack/project/architecture/#webpage","url":"https://activerecord-hackery.github.io/ransack/project/architecture/","name":"How Ransack is built","description":"The pieces of Ransack and where it depends on Active Record's internals.","isPartOf":{"@id":"https://activerecord-hackery.github.io/ransack/#website"},"inLanguage":"en","breadcrumb":{"@id":"https://activerecord-hackery.github.io/ransack/project/architecture/#breadcrumb"}}]}</script>
+  
+
+
+
+  
+  
+  
+  <link rel="icon" href="/ransack/assets/logo/ransack.svg">
+
+  
+  
+  
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap">
+  
+
+  <script>
+    (function() {
+      var storageKey = 'vitepress-theme-appearance';
+      var validModes = ['auto', 'dark', 'light'];
+      function normalizeMode(value) {
+        return validModes.indexOf(value) >= 0 ? value : 'auto';
+      }
+      var mode = 'auto';
+      try {
+        var stored = window.localStorage.getItem(storageKey);
+        if (stored) mode = normalizeMode(stored);
+      } catch (e) {}
+
+      var isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.classList.toggle('light', !isDark);
+      document.documentElement.setAttribute('data-appearance-mode', mode);
+
+      if (/Mac|iPhone|iPad|iPod/.test(navigator.platform)) {
+        document.documentElement.classList.add('mac');
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="/ransack/assets/css/vitepress-core.css">
+  <link rel="stylesheet" href="/ransack/assets/css/vitepress-components.css">
+  <link rel="stylesheet" href="/ransack/assets/css/vp-icons.css">
+  <link rel="stylesheet" href="/ransack/assets/css/vitepress-overrides.css">
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <style id="vp-theme-vars">
+      :root {
+        
+        
+        
+          
+            
+            
+              --vp-c-brand-1: #3333b4;
+            
+          
+            
+            
+              --vp-c-brand-2: #4747c2;
+            
+          
+            
+            
+              --vp-c-brand-3: #2a2a96;
+            
+          
+            
+            
+              --vp-c-brand-soft: rgba(51, 51, 180, 0.14);
+            
+          
+            
+            
+              --vp-home-hero-name-color: transparent;
+            
+          
+            
+            
+              --vp-home-hero-name-background: linear-gradient(120deg, #3333b4 30%, #8484dc);
+            
+          
+            
+            
+              --vp-home-hero-image-background-image: linear-gradient(-45deg, #8484dc 50%, #3333b4 50%);
+            
+          
+            
+            
+              --vp-home-hero-image-filter: blur(56px);
+            
+          
+        
+      }
+      
+        .dark {
+          
+            
+            
+              --vp-c-brand-1: #8484dc;
+            
+          
+            
+            
+              --vp-c-brand-2: #a0a0e6;
+            
+          
+            
+            
+              --vp-c-brand-3: #6b6bd0;
+            
+          
+            
+            
+              --vp-c-brand-soft: rgba(132, 132, 220, 0.16);
+            
+          
+            
+            
+              --vp-home-hero-name-background: linear-gradient(120deg, #8484dc 30%, #c4c4f4);
+            
+          
+        }
+      
+    </style>
+  
+
+  
+  
+    <style id="vp-rouge-theme">
+.vp-doc .highlighter-rouge .highlight table td { padding: 5px; }
+.vp-doc .highlighter-rouge .highlight table pre { margin: 0; }
+.vp-doc .highlighter-rouge .highlight, .vp-doc .highlighter-rouge .highlight .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+.vp-doc .highlighter-rouge .highlight .k, .vp-doc .highlighter-rouge .highlight .kd, .vp-doc .highlighter-rouge .highlight .kn, .vp-doc .highlighter-rouge .highlight .kp, .vp-doc .highlighter-rouge .highlight .kr, .vp-doc .highlighter-rouge .highlight .kt, .vp-doc .highlighter-rouge .highlight .kv {
+  color: #cf222e;
+}
+.vp-doc .highlighter-rouge .highlight .gr {
+  color: #f6f8fa;
+}
+.vp-doc .highlighter-rouge .highlight .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+.vp-doc .highlighter-rouge .highlight .nb {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .nc {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .no {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .nn {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .sr {
+  color: #116329;
+}
+.vp-doc .highlighter-rouge .highlight .na {
+  color: #116329;
+}
+.vp-doc .highlighter-rouge .highlight .nt {
+  color: #116329;
+}
+.vp-doc .highlighter-rouge .highlight .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+.vp-doc .highlighter-rouge .highlight .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+.vp-doc .highlighter-rouge .highlight .kc {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .l, .vp-doc .highlighter-rouge .highlight .ld, .vp-doc .highlighter-rouge .highlight .m, .vp-doc .highlighter-rouge .highlight .mb, .vp-doc .highlighter-rouge .highlight .mf, .vp-doc .highlighter-rouge .highlight .mh, .vp-doc .highlighter-rouge .highlight .mi, .vp-doc .highlighter-rouge .highlight .il, .vp-doc .highlighter-rouge .highlight .mo, .vp-doc .highlighter-rouge .highlight .mx {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .sb {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .bp {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .ne {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .nl {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .py {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .nv, .vp-doc .highlighter-rouge .highlight .vc, .vp-doc .highlighter-rouge .highlight .vg, .vp-doc .highlighter-rouge .highlight .vi, .vp-doc .highlighter-rouge .highlight .vm {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .o, .vp-doc .highlighter-rouge .highlight .ow {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+.vp-doc .highlighter-rouge .highlight .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+.vp-doc .highlighter-rouge .highlight .s, .vp-doc .highlighter-rouge .highlight .sa, .vp-doc .highlighter-rouge .highlight .sc, .vp-doc .highlighter-rouge .highlight .dl, .vp-doc .highlighter-rouge .highlight .sd, .vp-doc .highlighter-rouge .highlight .s2, .vp-doc .highlighter-rouge .highlight .se, .vp-doc .highlighter-rouge .highlight .sh, .vp-doc .highlighter-rouge .highlight .sx, .vp-doc .highlighter-rouge .highlight .s1, .vp-doc .highlighter-rouge .highlight .ss {
+  color: #0a3069;
+}
+.vp-doc .highlighter-rouge .highlight .nd {
+  color: #8250df;
+}
+.vp-doc .highlighter-rouge .highlight .nf, .vp-doc .highlighter-rouge .highlight .fm {
+  color: #8250df;
+}
+.vp-doc .highlighter-rouge .highlight .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+.vp-doc .highlighter-rouge .highlight .c, .vp-doc .highlighter-rouge .highlight .ch, .vp-doc .highlighter-rouge .highlight .cd, .vp-doc .highlighter-rouge .highlight .cm, .vp-doc .highlighter-rouge .highlight .cp, .vp-doc .highlighter-rouge .highlight .cpf, .vp-doc .highlighter-rouge .highlight .c1, .vp-doc .highlighter-rouge .highlight .cs {
+  color: #6e7781;
+}
+.vp-doc .highlighter-rouge .highlight .gl {
+  color: #6e7781;
+}
+.vp-doc .highlighter-rouge .highlight .gt {
+  color: #6e7781;
+}
+.vp-doc .highlighter-rouge .highlight .ni {
+  color: #24292f;
+}
+.vp-doc .highlighter-rouge .highlight .si {
+  color: #24292f;
+}
+.vp-doc .highlighter-rouge .highlight .ge {
+  color: #24292f;
+  font-style: italic;
+}
+.vp-doc .highlighter-rouge .highlight .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+.dark .vp-doc .highlighter-rouge .highlight table td { padding: 5px; }
+.dark .vp-doc .highlighter-rouge .highlight table pre { margin: 0; }
+.dark .vp-doc .highlighter-rouge .highlight, .dark .vp-doc .highlighter-rouge .highlight .w {
+  color: #c9d1d9;
+  background-color: #161b22;
+}
+.dark .vp-doc .highlighter-rouge .highlight .k, .dark .vp-doc .highlighter-rouge .highlight .kd, .dark .vp-doc .highlighter-rouge .highlight .kn, .dark .vp-doc .highlighter-rouge .highlight .kp, .dark .vp-doc .highlighter-rouge .highlight .kr, .dark .vp-doc .highlighter-rouge .highlight .kt, .dark .vp-doc .highlighter-rouge .highlight .kv {
+  color: #ff7b72;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gr {
+  color: #f0f6fc;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gd {
+  color: #ffdcd7;
+  background-color: #67060c;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nb {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nc {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .no {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nn {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .sr {
+  color: #7ee787;
+}
+.dark .vp-doc .highlighter-rouge .highlight .na {
+  color: #7ee787;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nt {
+  color: #7ee787;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gi {
+  color: #aff5b4;
+  background-color: #033a16;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+.dark .vp-doc .highlighter-rouge .highlight .kc {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .l, .dark .vp-doc .highlighter-rouge .highlight .ld, .dark .vp-doc .highlighter-rouge .highlight .m, .dark .vp-doc .highlighter-rouge .highlight .mb, .dark .vp-doc .highlighter-rouge .highlight .mf, .dark .vp-doc .highlighter-rouge .highlight .mh, .dark .vp-doc .highlighter-rouge .highlight .mi, .dark .vp-doc .highlighter-rouge .highlight .il, .dark .vp-doc .highlighter-rouge .highlight .mo, .dark .vp-doc .highlighter-rouge .highlight .mx {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .sb {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .bp {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ne {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nl {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .py {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nv, .dark .vp-doc .highlighter-rouge .highlight .vc, .dark .vp-doc .highlighter-rouge .highlight .vg, .dark .vp-doc .highlighter-rouge .highlight .vi, .dark .vp-doc .highlighter-rouge .highlight .vm {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .o, .dark .vp-doc .highlighter-rouge .highlight .ow {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gh {
+  color: #1f6feb;
+  font-weight: bold;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gu {
+  color: #1f6feb;
+  font-weight: bold;
+}
+.dark .vp-doc .highlighter-rouge .highlight .s, .dark .vp-doc .highlighter-rouge .highlight .sa, .dark .vp-doc .highlighter-rouge .highlight .sc, .dark .vp-doc .highlighter-rouge .highlight .dl, .dark .vp-doc .highlighter-rouge .highlight .sd, .dark .vp-doc .highlighter-rouge .highlight .s2, .dark .vp-doc .highlighter-rouge .highlight .se, .dark .vp-doc .highlighter-rouge .highlight .sh, .dark .vp-doc .highlighter-rouge .highlight .sx, .dark .vp-doc .highlighter-rouge .highlight .s1, .dark .vp-doc .highlighter-rouge .highlight .ss {
+  color: #a5d6ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nd {
+  color: #d2a8ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nf, .dark .vp-doc .highlighter-rouge .highlight .fm {
+  color: #d2a8ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .err {
+  color: #f0f6fc;
+  background-color: #8e1519;
+}
+.dark .vp-doc .highlighter-rouge .highlight .c, .dark .vp-doc .highlighter-rouge .highlight .ch, .dark .vp-doc .highlighter-rouge .highlight .cd, .dark .vp-doc .highlighter-rouge .highlight .cm, .dark .vp-doc .highlighter-rouge .highlight .cp, .dark .vp-doc .highlighter-rouge .highlight .cpf, .dark .vp-doc .highlighter-rouge .highlight .c1, .dark .vp-doc .highlighter-rouge .highlight .cs {
+  color: #8b949e;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gl {
+  color: #8b949e;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gt {
+  color: #8b949e;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ni {
+  color: #c9d1d9;
+}
+.dark .vp-doc .highlighter-rouge .highlight .si {
+  color: #c9d1d9;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ge {
+  color: #c9d1d9;
+  font-style: italic;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gs {
+  color: #c9d1d9;
+  font-weight: bold;
+}
+    </style>
+  
+
+  <!-- Optional head hook. Override in your site at _includes/jekyll_vitepress/head_end.html. -->
+
+  <script src="/ransack/assets/vendor/turbo.js" defer></script>
+  <script src="/ransack/assets/js/vitepress-theme.js" defer></script>
+</head>
+
+  
+  
+  
+  
+  <body data-vp-scroll-offset="134" style="--vp-scroll-offset: 134px;">
+    
+    
+
+    
+    
+
+    <div id="app">
+      <div class="Layout">
+        <span tabindex="-1"></span>
+        <a href="#VPContent" class="VPSkipLink visually-hidden">Skip to content</a>
+
+        <div class="VPBackdrop backdrop" id="vp-backdrop"></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="VPNav">
+  <div class="VPNavBar has-sidebar top" id="vp-nav-bar">
+    <div class="wrapper">
+      <div class="container">
+        <div class="title">
+          <div class="VPNavBarTitle has-sidebar">
+            <a class="title" href="/ransack/">
+              
+              
+              
+              
+              
+              
+                <img class="VPImage logo" src="/ransack/assets/logo/ransack.svg" width="24" height="25" alt="Ransack">
+              
+              
+              
+                <span>Ransack</span>
+              
+            </a>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="content-body">
+            <div class="VPNavBarSearch search">
+              <button type="button" class="VPNavBarSearchButton" aria-label="Search" aria-keyshortcuts="/ control+k meta+k" aria-controls="vp-search" aria-expanded="false" id="vp-search-button">
+                <span class="vpi-search" aria-hidden="true"></span>
+                <span class="text">Search</span>
+                <span class="keys" aria-hidden="true">
+                  <kbd class="key-cmd">⌘</kbd>
+                  <kbd class="key-ctrl">Ctrl</kbd>
+                  <kbd>K</kbd>
+                </span>
+              </button>
+            </div>
+
+            <nav aria-labelledby="main-nav-aria-label" class="VPNavBarMenu menu">
+              <span id="main-nav-aria-label" class="visually-hidden">Main Navigation</span>
+              
+                
+
+
+<a class="VPLink link VPNavBarMenuLink" href="/ransack/getting-started/" data-vp-nav-link data-collections="getting_started" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Getting started</span>
+</a>
+
+              
+                
+
+
+<a class="VPLink link VPNavBarMenuLink" href="/ransack/going-further/associations/" data-vp-nav-link data-collections="going_further" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Going further</span>
+</a>
+
+              
+                
+
+
+<a class="VPLink link VPNavBarMenuLink active" href="/ransack/project/community/" data-vp-nav-link data-collections="project" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Project</span>
+</a>
+
+              
+
+              
+            </nav>
+
+            <div class="VPNavBarExtra extra" id="vp-nav-extra">
+              <button type="button" class="button" id="vp-nav-extra-button" aria-haspopup="true" aria-expanded="false" aria-controls="vp-nav-extra-menu" aria-label="extra navigation">
+                <span class="vpi-more-horizontal icon" aria-hidden="true"></span>
+              </button>
+              <div class="menu vp-menu-transition" id="vp-nav-extra-menu" aria-hidden="true">
+                <div class="VPMenu">
+                  <div class="group">
+                    <div class="item appearance">
+                      <p class="label">Appearance</p>
+                      <div class="action appearance-action">
+                        <button class="VPSwitch VPSwitchAppearance theme-toggle" type="button" role="switch" aria-checked="false" title="Switch to dark theme">
+                          <span class="check">
+                            <span class="icon">
+                              <span class="vpi-sun sun"></span>
+                              <span class="vpi-moon moon"></span>
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <div class="item social-links">
+                      
+
+
+
+<div class="VPSocialLinks VPNavBarExtraSocialLinks social-links-list">
+  
+    <div class="VPNavBarStar">
+      <a class="VPLink link no-icon VPNavBarStarLink" href="https://github.com/activerecord-hackery/ransack" aria-label="Star activerecord-hackery/ransack on GitHub" target="_blank" rel="noreferrer noopener" data-github-star-repo="activerecord-hackery/ransack" data-github-star-show-count="true">
+        <span class="VPNavBarStarIcon vpi-social-github" aria-hidden="true"></span>
+        <span class="VPNavBarStarText">Star</span>
+        <span class="VPNavBarStarCount" aria-hidden="true">...</span>
+      </a>
+    </div>
+  
+  
+  
+</div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="VPNavBarAppearance appearance">
+              <button class="VPSwitch VPSwitchAppearance theme-toggle" type="button" role="switch" aria-checked="false" title="Switch to dark theme">
+                <span class="check">
+                  <span class="icon">
+                    <span class="vpi-sun sun"></span>
+                    <span class="vpi-moon moon"></span>
+                  </span>
+                </span>
+              </button>
+            </div>
+
+            
+
+
+
+<div class="VPSocialLinks VPNavBarSocialLinks social-links">
+  
+    <div class="VPNavBarStar" id="vp-nav-star">
+      <a class="VPLink link no-icon VPNavBarStarLink" href="https://github.com/activerecord-hackery/ransack" aria-label="Star activerecord-hackery/ransack on GitHub" target="_blank" rel="noreferrer noopener" data-github-star-repo="activerecord-hackery/ransack" data-github-star-show-count="true">
+        <span class="VPNavBarStarIcon vpi-social-github" aria-hidden="true"></span>
+        <span class="VPNavBarStarText">Star</span>
+        <span class="VPNavBarStarCount" aria-hidden="true">...</span>
+      </a>
+    </div>
+  
+  
+  
+</div>
+
+
+            <button type="button" class="VPNavBarHamburger hamburger" id="vp-nav-hamburger" aria-label="mobile navigation" aria-expanded="false" aria-controls="VPNavScreen">
+              <span class="container">
+                <span class="top"></span>
+                <span class="middle"></span>
+                <span class="bottom"></span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+    </div>
+  </div>
+
+  <div class="VPNavScreen" id="VPNavScreen" hidden>
+    <div class="container">
+      <nav class="VPNavScreenMenu">
+        
+          
+
+
+<a class="VPLink link VPNavScreenMenuLink" href="/ransack/getting-started/" data-vp-nav-link data-collections="getting_started" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Getting started</span>
+</a>
+
+        
+          
+
+
+<a class="VPLink link VPNavScreenMenuLink" href="/ransack/going-further/associations/" data-vp-nav-link data-collections="going_further" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Going further</span>
+</a>
+
+        
+          
+
+
+<a class="VPLink link VPNavScreenMenuLink active" href="/ransack/project/community/" data-vp-nav-link data-collections="project" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Project</span>
+</a>
+
+        
+      </nav>
+
+      
+
+      <div class="VPNavScreenAppearance appearance">
+        <p class="text">Appearance</p>
+        <button class="VPSwitch VPSwitchAppearance theme-toggle" type="button" role="switch" aria-checked="false" title="Switch to dark theme">
+          <span class="check">
+            <span class="icon">
+              <span class="vpi-sun sun"></span>
+              <span class="vpi-moon moon"></span>
+            </span>
+          </span>
+        </button>
+      </div>
+
+      
+
+
+
+<div class="VPSocialLinks VPNavScreenSocialLinks social-links">
+  
+    <div class="VPNavBarStar VPNavScreenStar">
+      <a class="VPLink link no-icon VPNavBarStarLink VPNavScreenStarLink" href="https://github.com/activerecord-hackery/ransack" aria-label="Star activerecord-hackery/ransack on GitHub" target="_blank" rel="noreferrer noopener" data-github-star-repo="activerecord-hackery/ransack" data-github-star-show-count="true">
+        <span class="VPNavBarStarIcon vpi-social-github" aria-hidden="true"></span>
+        <span class="VPNavBarStarText">Star</span>
+        <span class="VPNavBarStarCount" aria-hidden="true">...</span>
+      </a>
+    </div>
+  
+  
+  
+</div>
+
+    </div>
+  </div>
+</header>
+
+        <div class="VPSearch" id="vp-search" data-search-index-url="/ransack/search.json" data-search-frame-target="vp-content-frame" hidden>
+  <div class="VPSearchBackdrop" id="vp-search-backdrop"></div>
+
+  <div class="VPSearchDialog" role="dialog" aria-modal="true" aria-labelledby="vp-search-label">
+    <div class="VPSearchBar">
+      <span class="vpi-search" aria-hidden="true"></span>
+      <label class="visually-hidden" for="vp-search-input" id="vp-search-label">Search documentation</label>
+      <input id="vp-search-input" type="search" autocomplete="off" placeholder="Search docs" />
+      <kbd>Esc</kbd>
+    </div>
+
+    <div class="VPSearchResults" id="vp-search-results" role="listbox" aria-label="Search results"></div>
+  </div>
+</div>
+
+        
+          
+<div class="VPLocalNav has-sidebar" id="vp-local-nav">
+  <div class="container">
+    <button class="menu" aria-expanded="false" aria-controls="VPSidebarNav" id="vp-local-menu-button">
+      <span class="vpi-align-left menu-icon"></span>
+      <span class="menu-text">Menu</span>
+    </button>
+
+    <div class="VPLocalNavOutlineDropdown" id="vp-local-outline-dropdown">
+      <button type="button" id="vp-local-outline-button" aria-expanded="false" aria-controls="vp-local-outline-items">
+        <span class="menu-text">On this page</span>
+        <span class="vpi-chevron-right icon"></span>
+      </button>
+      <div class="items" id="vp-local-outline-items" hidden>
+        <div class="header">
+          <a class="top-link" href="#top" id="vp-local-top-link">Return to top</a>
+        </div>
+        <div class="outline">
+          <ul class="VPDocOutlineItem"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+          <aside class="VPSidebar" id="vp-sidebar">
+  <div class="curtain"></div>
+  <nav class="nav" id="VPSidebarNav" aria-labelledby="sidebar-aria-label" tabindex="-1">
+    <span class="visually-hidden" id="sidebar-aria-label">Sidebar Navigation</span>
+
+    
+    
+    
+      
+      
+        
+        
+        
+        
+
+        <div class="group no-transition">
+          <section class="VPSidebarItem level-0 collapsible" data-vp-sidebar-group data-collection="getting_started">
+            <div class="item" role="button" tabindex="0" aria-expanded="true">
+              <div class="indicator"></div>
+              <h2 class="text">Getting started</h2>
+              <div class="caret" role="button" aria-label="toggle section" tabindex="0" aria-expanded="true">
+                <span class="vpi-chevron-right caret-icon"></span>
+              </div>
+            </div>
+
+            <div class="items">
+              
+                
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Installation</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/simple-mode/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Simple mode</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/authorization/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Authorization</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/advanced-mode/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Advanced mode</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/using-predicates/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Using predicates</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/search-matches/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Search matchers</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/sorting/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Sorting</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/configuration/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Configuration</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/upgrading/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Upgrading</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+
+              
+            </div>
+          </section>
+        </div>
+      
+    
+      
+      
+        
+        
+        
+        
+
+        <div class="group no-transition">
+          <section class="VPSidebarItem level-0 collapsible" data-vp-sidebar-group data-collection="going_further">
+            <div class="item" role="button" tabindex="0" aria-expanded="true">
+              <div class="indicator"></div>
+              <h2 class="text">Going further</h2>
+              <div class="caret" role="button" aria-label="toggle section" tabindex="0" aria-expanded="true">
+                <span class="vpi-chevron-right caret-icon"></span>
+              </div>
+            </div>
+
+            <div class="items">
+              
+                
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/associations/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Associations</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/ransackers/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Ransackers</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/aliases/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Aliases</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/scopes/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Scopes</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/custom-predicates/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Custom predicates</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/merging-searches/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Merging searches</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/form-customisation/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Form customisation</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/i18n/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">i18n</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/polymorphic-search/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Polymorphic searches</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/searching-postgres/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">PostgreSQL searches</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/acts-as-taggable-on/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Acts-as-taggable-on</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/exporting-to-csv/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">CSV export</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/saving-queries/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Saving queries</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/other-notes/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Other notes</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+
+              
+            </div>
+          </section>
+        </div>
+      
+    
+      
+      
+        
+        
+        
+        
+
+        <div class="group no-transition">
+          <section class="VPSidebarItem level-0 collapsible has-active" data-vp-sidebar-group data-collection="project">
+            <div class="item" role="button" tabindex="0" aria-expanded="true">
+              <div class="indicator"></div>
+              <h2 class="text">Project</h2>
+              <div class="caret" role="button" aria-label="toggle section" tabindex="0" aria-expanded="true">
+                <span class="vpi-chevron-right caret-icon"></span>
+              </div>
+            </div>
+
+            <div class="items">
+              
+                
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/community/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Community and support</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link is-active has-active">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/architecture/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">How Ransack is built</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/documentation/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Documentation</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/release_process/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Versions and releases</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/external-guides/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">External resources</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/wiki-contributors/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Wiki contributors</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/ransack-3-0-0/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Ransack 3.0.0 announcement</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+
+              
+            </div>
+          </section>
+        </div>
+      
+    
+  </nav>
+</aside>
+
+        
+
+        <div class="VPContent has-sidebar" id="VPContent">
+          
+            
+            
+            <turbo-frame id="vp-content-frame" target="_top">
+              <div id="vp-page-state" hidden data-title="How Ransack is built | Ransack" data-url="/ransack/project/architecture/" data-collection="project"></div>
+              <div class="VPDoc has-sidebar has-aside">
+                <div class="container">
+                  <div class="aside">
+                    <div class="aside-curtain"></div>
+                    <div class="aside-container">
+                      <div class="aside-content">
+                        <div class="VPDocAside">
+                          <nav aria-labelledby="doc-outline-aria-label" class="VPDocAsideOutline has-outline" id="vp-doc-outline">
+                            <div class="content">
+                              <div class="outline-marker" id="vp-outline-marker"></div>
+                              <div aria-level="2" class="outline-title" id="doc-outline-aria-label" role="heading">On this page</div>
+                              <ul class="VPDocOutlineItem root"></ul>
+                            </div>
+                          </nav>
+                          <div class="spacer"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="content">
+                    <div class="content-container">
+                      
+<main class="main">
+  <div class="vp-doc external-link-icon-enabled _project_architecture_">
+    
+    
+    <div class="vp-doc-header">
+      
+        <h1>How Ransack is built</h1>
+      
+      
+        
+
+<div class="copy-md-group">
+  <button class="copy-md-btn" type="button" title="Copy page as Markdown">
+    <span class="vpi-copy copy-md-icon" aria-hidden="true"></span>
+    <span class="copy-md-label" aria-live="polite">Copy page</span>
+  </button>
+  <button class="copy-md-toggle" type="button" aria-label="More options" aria-expanded="false">
+    <span class="vpi-chevron-down copy-md-chevron"></span>
+  </button>
+  <div class="copy-md-dropdown vp-menu-transition" aria-hidden="true">
+    <button class="copy-md-dropdown-item" type="button" data-action="copy">
+      <span class="vpi-copy copy-md-dropdown-icon"></span>
+      <div class="copy-md-dropdown-text">
+        <span class="copy-md-dropdown-title">Copy page</span>
+        <span class="copy-md-dropdown-desc">Copy page as Markdown for LLMs</span>
+      </div>
+    </button>
+    <button class="copy-md-dropdown-item" type="button" data-action="view-markdown" data-url="/ransack/project/architecture.md">
+      <span class="vpi-file-text copy-md-dropdown-icon"></span>
+      <div class="copy-md-dropdown-text">
+        <span class="copy-md-dropdown-title">View as Markdown</span>
+        <span class="copy-md-dropdown-desc">View this page as plain text</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+      
+    </div>
+    
+      <textarea class="vp-raw-markdown" style="display:none" aria-hidden="true"># How Ransack is built
+
+This page is for anyone reading or changing Ransack&apos;s source. It describes the
+pieces, where the boundary with Active Record is, and which parts of Active
+Record Ransack reaches into.
+
+## The pieces
+
+A search goes through four stages. Each has a home under `lib/ransack/`.
+
+| Stage | Where | What it does |
+| --- | --- | --- |
+| Parse | `search.rb`, `nodes/` | Turns the params hash into a tree of `Grouping`, `Condition`, `Attribute`, `Value` and `Sort` nodes. Nothing here knows about the database. |
+| Resolve | `context.rb`, `active_record/context.rb` | Maps attribute names like `articles_title` onto tables, columns and the joins needed to reach them. |
+| Build | `visitor.rb`, `predicate.rb`, `constants.rb` | Walks the node tree and produces Arel predicates and orderings. |
+| Integrate | `active_record/` | Everything that touches Active Record: the class methods added to models, the join machinery, and the `Context` that evaluates the search into a relation. |
+
+Around those sit `configuration.rb` (global options and the predicate registry),
+`translate.rb` and `locale/` (i18n), `helpers/` (the form builder and view
+helpers, loaded only when Action Controller is) and `ransacker.rb` (custom
+attributes).
+
+## The Active Record boundary
+
+`Ransack::Context` is the seam. The generic class holds what every ORM would
+need: binding attribute names to nodes, walking association paths, checking
+the `ransackable_*` allowlists and chaining scopes. Everything that needs a real
+database sits in the subclass `Ransack::ActiveRecord::Context`.
+
+A context is chosen through a registry rather than a hard-coded check, so an
+integration for another ORM can register its own:
+
+```ruby
+Ransack::Context.register do |object, options|
+  case object
+  when Class
+    MyOrm::Context.new(object, options) if object &lt; MyOrm::Document
+  when MyOrm::Criteria
+    MyOrm::Context.new(object, options)
+  end
+end
+```
+
+The resolver receives whatever was passed to `ransack`, a model class or a
+query object, and returns a context or `nil`. Ransack&apos;s own Active Record resolver is
+registered in `lib/ransack/active_record/context.rb`. A context subclass
+implements `relation_for`, `type_for`, `evaluate`, `attribute_method?`,
+`table_for`, `klassify` and the join-building methods; the Active Record
+context is the reference implementation.
+
+## What Ransack takes from Active Record&apos;s internals
+
+Active Record&apos;s public query interface cannot express two things Ransack
+needs: an outer join that is added one association at a time on top of a
+relation that already has joins, and a join through a polymorphic `belongs_to`
+to one named class. To get them, `lib/ransack/active_record/` prepends small
+modules onto three internal classes:
+
+| Active Record class | Ransack module | Why |
+| --- | --- | --- |
+| `Associations::JoinDependency` | `JoinDependencyExtensions` | Accept `Ransack::ActiveRecord::Join` nodes in the association tree, and hand back the aliased tables for an association so a later correlated subquery can reuse them. |
+| `Associations::JoinDependency::JoinAssociation` | `JoinAssociationExtensions` | Carry the join type and the polymorphic target class; build join constraints against tables Ransack already aliased. |
+| `Reflection::AbstractReflection` | `ReflectionExtensions` | Add the `type = &apos;ClassName&apos;` constraint when a polymorphic association is joined to one class. |
+
+Before 6.0 these lived in a separate top-level `Polyamorous` namespace, a
+remnant of the gem of that name that was merged into Ransack in 2019.
+
+These are private APIs. They are the part of Ransack most likely to need
+attention when a new Rails version ships, which is why the nightly CI job runs
+the suite against Rails `main`. Keeping this list short, and moving items off
+it as Active Record grows public equivalents, is an explicit goal.
+
+Everything else goes through public API: `reflect_on_all_associations`,
+`columns_hash`, `type_for_attribute`, `attribute_aliases`, `defined_enums`,
+`arel_table`, the relation query methods, and the connection pool&apos;s schema
+cache for column types.
+
+## Databases
+
+Ransack does not have per-database code paths. Arel renders the query for
+whichever database is connected, and the two decisions that do depend on the
+database — whether a case-insensitive `LIKE` needs `LOWER()` and which
+function counts characters — are answered by `Ransack::ActiveRecord::Dialect`.
+A dialect is derived from the adapter class&apos;s ancestry (so an adapter built on
+the PostgreSQL adapter is PostgreSQL) or set with `config.dialect`, and is the
+only place a database is named in `lib/`. See
+[Configuration](/ransack/getting-started/configuration/#sql-dialect).
+</textarea>
+    
+    <p>This page is for anyone reading or changing Ransack’s source. It describes the
+pieces, where the boundary with Active Record is, and which parts of Active
+Record Ransack reaches into.</p>
+
+<h2 id="the-pieces">The pieces</h2>
+
+<p>A search goes through four stages. Each has a home under <code class="language-plaintext highlighter-rouge">lib/ransack/</code>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Where</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Parse</td>
+      <td><code class="language-plaintext highlighter-rouge">search.rb</code>, <code class="language-plaintext highlighter-rouge">nodes/</code></td>
+      <td>Turns the params hash into a tree of <code class="language-plaintext highlighter-rouge">Grouping</code>, <code class="language-plaintext highlighter-rouge">Condition</code>, <code class="language-plaintext highlighter-rouge">Attribute</code>, <code class="language-plaintext highlighter-rouge">Value</code> and <code class="language-plaintext highlighter-rouge">Sort</code> nodes. Nothing here knows about the database.</td>
+    </tr>
+    <tr>
+      <td>Resolve</td>
+      <td><code class="language-plaintext highlighter-rouge">context.rb</code>, <code class="language-plaintext highlighter-rouge">active_record/context.rb</code></td>
+      <td>Maps attribute names like <code class="language-plaintext highlighter-rouge">articles_title</code> onto tables, columns and the joins needed to reach them.</td>
+    </tr>
+    <tr>
+      <td>Build</td>
+      <td><code class="language-plaintext highlighter-rouge">visitor.rb</code>, <code class="language-plaintext highlighter-rouge">predicate.rb</code>, <code class="language-plaintext highlighter-rouge">constants.rb</code></td>
+      <td>Walks the node tree and produces Arel predicates and orderings.</td>
+    </tr>
+    <tr>
+      <td>Integrate</td>
+      <td><code class="language-plaintext highlighter-rouge">active_record/</code></td>
+      <td>Everything that touches Active Record: the class methods added to models, the join machinery, and the <code class="language-plaintext highlighter-rouge">Context</code> that evaluates the search into a relation.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Around those sit <code class="language-plaintext highlighter-rouge">configuration.rb</code> (global options and the predicate registry),
+<code class="language-plaintext highlighter-rouge">translate.rb</code> and <code class="language-plaintext highlighter-rouge">locale/</code> (i18n), <code class="language-plaintext highlighter-rouge">helpers/</code> (the form builder and view
+helpers, loaded only when Action Controller is) and <code class="language-plaintext highlighter-rouge">ransacker.rb</code> (custom
+attributes).</p>
+
+<h2 id="the-active-record-boundary">The Active Record boundary</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Ransack::Context</code> is the seam. The generic class holds what every ORM would
+need: binding attribute names to nodes, walking association paths, checking
+the <code class="language-plaintext highlighter-rouge">ransackable_*</code> allowlists and chaining scopes. Everything that needs a real
+database sits in the subclass <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Context</code>.</p>
+
+<p>A context is chosen through a registry rather than a hard-coded check, so an
+integration for another ORM can register its own:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Ransack</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">register</span> <span class="k">do</span> <span class="o">|</span><span class="n">object</span><span class="p">,</span> <span class="n">options</span><span class="o">|</span>
+  <span class="k">case</span> <span class="n">object</span>
+  <span class="k">when</span> <span class="no">Class</span>
+    <span class="no">MyOrm</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span> <span class="k">if</span> <span class="n">object</span> <span class="o">&lt;</span> <span class="no">MyOrm</span><span class="o">::</span><span class="no">Document</span>
+  <span class="k">when</span> <span class="no">MyOrm</span><span class="o">::</span><span class="no">Criteria</span>
+    <span class="no">MyOrm</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The resolver receives whatever was passed to <code class="language-plaintext highlighter-rouge">ransack</code>, a model class or a
+query object, and returns a context or <code class="language-plaintext highlighter-rouge">nil</code>. Ransack’s own Active Record resolver is
+registered in <code class="language-plaintext highlighter-rouge">lib/ransack/active_record/context.rb</code>. A context subclass
+implements <code class="language-plaintext highlighter-rouge">relation_for</code>, <code class="language-plaintext highlighter-rouge">type_for</code>, <code class="language-plaintext highlighter-rouge">evaluate</code>, <code class="language-plaintext highlighter-rouge">attribute_method?</code>,
+<code class="language-plaintext highlighter-rouge">table_for</code>, <code class="language-plaintext highlighter-rouge">klassify</code> and the join-building methods; the Active Record
+context is the reference implementation.</p>
+
+<h2 id="what-ransack-takes-from-active-records-internals">What Ransack takes from Active Record’s internals</h2>
+
+<p>Active Record’s public query interface cannot express two things Ransack
+needs: an outer join that is added one association at a time on top of a
+relation that already has joins, and a join through a polymorphic <code class="language-plaintext highlighter-rouge">belongs_to</code>
+to one named class. To get them, <code class="language-plaintext highlighter-rouge">lib/ransack/active_record/</code> prepends small
+modules onto three internal classes:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Active Record class</th>
+      <th>Ransack module</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Associations::JoinDependency</code></td>
+      <td><code class="language-plaintext highlighter-rouge">JoinDependencyExtensions</code></td>
+      <td>Accept <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Join</code> nodes in the association tree, and hand back the aliased tables for an association so a later correlated subquery can reuse them.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Associations::JoinDependency::JoinAssociation</code></td>
+      <td><code class="language-plaintext highlighter-rouge">JoinAssociationExtensions</code></td>
+      <td>Carry the join type and the polymorphic target class; build join constraints against tables Ransack already aliased.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Reflection::AbstractReflection</code></td>
+      <td><code class="language-plaintext highlighter-rouge">ReflectionExtensions</code></td>
+      <td>Add the <code class="language-plaintext highlighter-rouge">type = 'ClassName'</code> constraint when a polymorphic association is joined to one class.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Before 6.0 these lived in a separate top-level <code class="language-plaintext highlighter-rouge">Polyamorous</code> namespace, a
+remnant of the gem of that name that was merged into Ransack in 2019.</p>
+
+<p>These are private APIs. They are the part of Ransack most likely to need
+attention when a new Rails version ships, which is why the nightly CI job runs
+the suite against Rails <code class="language-plaintext highlighter-rouge">main</code>. Keeping this list short, and moving items off
+it as Active Record grows public equivalents, is an explicit goal.</p>
+
+<p>Everything else goes through public API: <code class="language-plaintext highlighter-rouge">reflect_on_all_associations</code>,
+<code class="language-plaintext highlighter-rouge">columns_hash</code>, <code class="language-plaintext highlighter-rouge">type_for_attribute</code>, <code class="language-plaintext highlighter-rouge">attribute_aliases</code>, <code class="language-plaintext highlighter-rouge">defined_enums</code>,
+<code class="language-plaintext highlighter-rouge">arel_table</code>, the relation query methods, and the connection pool’s schema
+cache for column types.</p>
+
+<h2 id="databases">Databases</h2>
+
+<p>Ransack does not have per-database code paths. Arel renders the query for
+whichever database is connected, and the two decisions that do depend on the
+database — whether a case-insensitive <code class="language-plaintext highlighter-rouge">LIKE</code> needs <code class="language-plaintext highlighter-rouge">LOWER()</code> and which
+function counts characters — are answered by <code class="language-plaintext highlighter-rouge">Ransack::ActiveRecord::Dialect</code>.
+A dialect is derived from the adapter class’s ancestry (so an adapter built on
+the PostgreSQL adapter is PostgreSQL) or set with <code class="language-plaintext highlighter-rouge">config.dialect</code>, and is the
+only place a database is named in <code class="language-plaintext highlighter-rouge">lib/</code>. See
+<a href="/ransack/getting-started/configuration/#sql-dialect">Configuration</a>.</p>
+
+  </div>
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <footer class="VPDocFooter">
+    
+      <div class="edit-info">
+        
+          <div class="edit-link">
+            <a class="VPLink link vp-external-link-icon no-icon edit-link-button" href="https://github.com/activerecord-hackery/ransack/edit/main/docs/_project/architecture.md" target="_blank" rel="noreferrer">
+              <span class="vpi-square-pen edit-link-icon"></span>
+              Edit this page on GitHub
+            </a>
+          </div>
+        
+        
+      </div>
+    
+
+    
+      <nav class="prev-next" aria-labelledby="doc-footer-aria-label">
+        <span class="visually-hidden" id="doc-footer-aria-label">Pager</span>
+
+        <div class="pager">
+          
+            <a class="VPLink link pager-link prev" href="/ransack/project/community/" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+              <span class="desc">Previous page</span>
+              <span class="title">Community and support</span>
+            </a>
+          
+        </div>
+
+        <div class="pager">
+          
+            <a class="VPLink link pager-link next" href="/ransack/project/documentation/" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+              <span class="desc">Next page</span>
+              <span class="title">Documentation</span>
+            </a>
+          
+        </div>
+      </nav>
+    
+
+    
+  </footer>
+
+
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </turbo-frame>
+          
+        </div>
+
+        
+        
+        
+
+        
+        
+
+        
+
+        
+      </div>
+    </div>
+  </body>
+</html>

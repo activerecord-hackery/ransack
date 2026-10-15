@@ -1,240 +1,1691 @@
-
-
 <!DOCTYPE html>
-
-<html lang="en-US">
-<head>
+<html lang="en">
+  <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-
-  <link rel="stylesheet" href="/ransack/assets/css/just-the-docs-default.css">
-
-  <link rel="stylesheet" href="/ransack/assets/css/just-the-docs-head-nav.css" id="jtd-head-nav-stylesheet">
-
-  <style id="jtd-nav-activation">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
 
-    .site-nav > ul.nav-list:first-child > li > a,
+
+
+
+  
+  
+    <title>Associations | Ransack</title>
+    <meta name="description" content="Search through has_many and belongs_to associations, and relations that already have joins.">
     
-    .site-nav > ul.nav-list:first-child > li > ul > li:not(:nth-child(1)) > a,
-    .site-nav > ul.nav-list:first-child > li > ul > li > ul > li a {
-      background-image: none;
-    }
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <link rel="canonical" href="https://activerecord-hackery.github.io/ransack/going-further/associations/">
+    <link rel="sitemap" type="application/xml" href="https://activerecord-hackery.github.io/ransack/sitemap.xml">
 
-    .site-nav > ul.nav-list:not(:first-child) a,
-    .site-nav li.external a {
-      background-image: none;
-    }
+    <meta property="og:site_name" content="Ransack">
+    <meta property="og:title" content="Associations">
+    <meta property="og:description" content="Search through has_many and belongs_to associations, and relations that already have joins.">
+    <meta property="og:url" content="https://activerecord-hackery.github.io/ransack/going-further/associations/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en">
+    
+    
+    
+    
+    
 
-    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(1) > a {
-      font-weight: 600;
-      text-decoration: none;
-    }.site-nav > ul.nav-list:first-child > li:nth-child(3) > button svg,
-    .site-nav > ul.nav-list:first-child > li:nth-child(3) > ul > li:nth-child(1) > button svg {
-      transform: rotate(-90deg);
-    }.site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(3) > ul.nav-list,
-    .site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(3) > ul.nav-list > li.nav-list-item:nth-child(1) > ul.nav-list {
-      display: block;
-    }
-  </style>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Associations">
+    <meta name="twitter:description" content="Search through has_many and belongs_to associations, and relations that already have joins.">
+    
+    
+    
+    
 
+    
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://activerecord-hackery.github.io/ransack/#identity","name":"Ransack","url":"https://github.com/activerecord-hackery/ransack"},{"@type":"WebSite","@id":"https://activerecord-hackery.github.io/ransack/#website","url":"https://activerecord-hackery.github.io/ransack/","name":"Ransack","description":"Object-based searching for Active Record","inLanguage":"en","publisher":{"@id":"https://activerecord-hackery.github.io/ransack/#identity"}},{"@type":"BreadcrumbList","@id":"https://activerecord-hackery.github.io/ransack/going-further/associations/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Ransack","item":"https://activerecord-hackery.github.io/ransack/"},{"@type":"ListItem","position":2,"name":"Associations","item":"https://activerecord-hackery.github.io/ransack/going-further/associations/"}]},{"@type":"WebPage","@id":"https://activerecord-hackery.github.io/ransack/going-further/associations/#webpage","url":"https://activerecord-hackery.github.io/ransack/going-further/associations/","name":"Associations","description":"Search through has_many and belongs_to associations, and relations that already have joins.","isPartOf":{"@id":"https://activerecord-hackery.github.io/ransack/#website"},"inLanguage":"en","breadcrumb":{"@id":"https://activerecord-hackery.github.io/ransack/going-further/associations/#breadcrumb"}}]}</script>
   
 
-  
-    <script src="/ransack/assets/js/vendor/lunr.min.js"></script>
-  
-
-  <script src="/ransack/assets/js/just-the-docs.js"></script>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-
-  <link rel="icon" href="/ransack/assets/img/favicon.ico" type="image/x-icon">
-
-
-
-  <!-- Begin Jekyll SEO tag v2.9.0 -->
-<title>Associations | Ransack</title>
-<meta name="generator" content="Jekyll v4.4.1" />
-<meta property="og:title" content="Associations" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="Object-based searching for Active Record" />
-<meta name="twitter:description" property="og:description" content="Object-based searching for Active Record" />
-<link rel="canonical" href="https://activerecord-hackery.github.io/ransack/going-further/associations/" />
-<meta property="og:url" content="https://activerecord-hackery.github.io/ransack/going-further/associations/" />
-<meta property="og:site_name" content="Ransack" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Associations" />
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","description":"Object-based searching for Active Record","headline":"Associations","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"https://activerecord-hackery.github.io/ransack/assets/logo/ransack-h.png"}},"url":"https://activerecord-hackery.github.io/ransack/going-further/associations/"}</script>
-<!-- End Jekyll SEO tag -->
 
 
   
+  
+  
+  <link rel="icon" href="/ransack/assets/logo/ransack.svg">
 
+  
+  
+  
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap">
+  
+
+  <script>
+    (function() {
+      var storageKey = 'vitepress-theme-appearance';
+      var validModes = ['auto', 'dark', 'light'];
+      function normalizeMode(value) {
+        return validModes.indexOf(value) >= 0 ? value : 'auto';
+      }
+      var mode = 'auto';
+      try {
+        var stored = window.localStorage.getItem(storageKey);
+        if (stored) mode = normalizeMode(stored);
+      } catch (e) {}
+
+      var isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.classList.toggle('light', !isDark);
+      document.documentElement.setAttribute('data-appearance-mode', mode);
+
+      if (/Mac|iPhone|iPad|iPod/.test(navigator.platform)) {
+        document.documentElement.classList.add('mac');
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="/ransack/assets/css/vitepress-core.css">
+  <link rel="stylesheet" href="/ransack/assets/css/vitepress-components.css">
+  <link rel="stylesheet" href="/ransack/assets/css/vp-icons.css">
+  <link rel="stylesheet" href="/ransack/assets/css/vitepress-overrides.css">
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <style id="vp-theme-vars">
+      :root {
+        
+        
+        
+          
+            
+            
+              --vp-c-brand-1: #3333b4;
+            
+          
+            
+            
+              --vp-c-brand-2: #4747c2;
+            
+          
+            
+            
+              --vp-c-brand-3: #2a2a96;
+            
+          
+            
+            
+              --vp-c-brand-soft: rgba(51, 51, 180, 0.14);
+            
+          
+            
+            
+              --vp-home-hero-name-color: transparent;
+            
+          
+            
+            
+              --vp-home-hero-name-background: linear-gradient(120deg, #3333b4 30%, #8484dc);
+            
+          
+            
+            
+              --vp-home-hero-image-background-image: linear-gradient(-45deg, #8484dc 50%, #3333b4 50%);
+            
+          
+            
+            
+              --vp-home-hero-image-filter: blur(56px);
+            
+          
+        
+      }
+      
+        .dark {
+          
+            
+            
+              --vp-c-brand-1: #8484dc;
+            
+          
+            
+            
+              --vp-c-brand-2: #a0a0e6;
+            
+          
+            
+            
+              --vp-c-brand-3: #6b6bd0;
+            
+          
+            
+            
+              --vp-c-brand-soft: rgba(132, 132, 220, 0.16);
+            
+          
+            
+            
+              --vp-home-hero-name-background: linear-gradient(120deg, #8484dc 30%, #c4c4f4);
+            
+          
+        }
+      
+    </style>
+  
+
+  
+  
+    <style id="vp-rouge-theme">
+.vp-doc .highlighter-rouge .highlight table td { padding: 5px; }
+.vp-doc .highlighter-rouge .highlight table pre { margin: 0; }
+.vp-doc .highlighter-rouge .highlight, .vp-doc .highlighter-rouge .highlight .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+.vp-doc .highlighter-rouge .highlight .k, .vp-doc .highlighter-rouge .highlight .kd, .vp-doc .highlighter-rouge .highlight .kn, .vp-doc .highlighter-rouge .highlight .kp, .vp-doc .highlighter-rouge .highlight .kr, .vp-doc .highlighter-rouge .highlight .kt, .vp-doc .highlighter-rouge .highlight .kv {
+  color: #cf222e;
+}
+.vp-doc .highlighter-rouge .highlight .gr {
+  color: #f6f8fa;
+}
+.vp-doc .highlighter-rouge .highlight .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+.vp-doc .highlighter-rouge .highlight .nb {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .nc {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .no {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .nn {
+  color: #953800;
+}
+.vp-doc .highlighter-rouge .highlight .sr {
+  color: #116329;
+}
+.vp-doc .highlighter-rouge .highlight .na {
+  color: #116329;
+}
+.vp-doc .highlighter-rouge .highlight .nt {
+  color: #116329;
+}
+.vp-doc .highlighter-rouge .highlight .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+.vp-doc .highlighter-rouge .highlight .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+.vp-doc .highlighter-rouge .highlight .kc {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .l, .vp-doc .highlighter-rouge .highlight .ld, .vp-doc .highlighter-rouge .highlight .m, .vp-doc .highlighter-rouge .highlight .mb, .vp-doc .highlighter-rouge .highlight .mf, .vp-doc .highlighter-rouge .highlight .mh, .vp-doc .highlighter-rouge .highlight .mi, .vp-doc .highlighter-rouge .highlight .il, .vp-doc .highlighter-rouge .highlight .mo, .vp-doc .highlighter-rouge .highlight .mx {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .sb {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .bp {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .ne {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .nl {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .py {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .nv, .vp-doc .highlighter-rouge .highlight .vc, .vp-doc .highlighter-rouge .highlight .vg, .vp-doc .highlighter-rouge .highlight .vi, .vp-doc .highlighter-rouge .highlight .vm {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .o, .vp-doc .highlighter-rouge .highlight .ow {
+  color: #0550ae;
+}
+.vp-doc .highlighter-rouge .highlight .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+.vp-doc .highlighter-rouge .highlight .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+.vp-doc .highlighter-rouge .highlight .s, .vp-doc .highlighter-rouge .highlight .sa, .vp-doc .highlighter-rouge .highlight .sc, .vp-doc .highlighter-rouge .highlight .dl, .vp-doc .highlighter-rouge .highlight .sd, .vp-doc .highlighter-rouge .highlight .s2, .vp-doc .highlighter-rouge .highlight .se, .vp-doc .highlighter-rouge .highlight .sh, .vp-doc .highlighter-rouge .highlight .sx, .vp-doc .highlighter-rouge .highlight .s1, .vp-doc .highlighter-rouge .highlight .ss {
+  color: #0a3069;
+}
+.vp-doc .highlighter-rouge .highlight .nd {
+  color: #8250df;
+}
+.vp-doc .highlighter-rouge .highlight .nf, .vp-doc .highlighter-rouge .highlight .fm {
+  color: #8250df;
+}
+.vp-doc .highlighter-rouge .highlight .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+.vp-doc .highlighter-rouge .highlight .c, .vp-doc .highlighter-rouge .highlight .ch, .vp-doc .highlighter-rouge .highlight .cd, .vp-doc .highlighter-rouge .highlight .cm, .vp-doc .highlighter-rouge .highlight .cp, .vp-doc .highlighter-rouge .highlight .cpf, .vp-doc .highlighter-rouge .highlight .c1, .vp-doc .highlighter-rouge .highlight .cs {
+  color: #6e7781;
+}
+.vp-doc .highlighter-rouge .highlight .gl {
+  color: #6e7781;
+}
+.vp-doc .highlighter-rouge .highlight .gt {
+  color: #6e7781;
+}
+.vp-doc .highlighter-rouge .highlight .ni {
+  color: #24292f;
+}
+.vp-doc .highlighter-rouge .highlight .si {
+  color: #24292f;
+}
+.vp-doc .highlighter-rouge .highlight .ge {
+  color: #24292f;
+  font-style: italic;
+}
+.vp-doc .highlighter-rouge .highlight .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+.dark .vp-doc .highlighter-rouge .highlight table td { padding: 5px; }
+.dark .vp-doc .highlighter-rouge .highlight table pre { margin: 0; }
+.dark .vp-doc .highlighter-rouge .highlight, .dark .vp-doc .highlighter-rouge .highlight .w {
+  color: #c9d1d9;
+  background-color: #161b22;
+}
+.dark .vp-doc .highlighter-rouge .highlight .k, .dark .vp-doc .highlighter-rouge .highlight .kd, .dark .vp-doc .highlighter-rouge .highlight .kn, .dark .vp-doc .highlighter-rouge .highlight .kp, .dark .vp-doc .highlighter-rouge .highlight .kr, .dark .vp-doc .highlighter-rouge .highlight .kt, .dark .vp-doc .highlighter-rouge .highlight .kv {
+  color: #ff7b72;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gr {
+  color: #f0f6fc;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gd {
+  color: #ffdcd7;
+  background-color: #67060c;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nb {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nc {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .no {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nn {
+  color: #ffa657;
+}
+.dark .vp-doc .highlighter-rouge .highlight .sr {
+  color: #7ee787;
+}
+.dark .vp-doc .highlighter-rouge .highlight .na {
+  color: #7ee787;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nt {
+  color: #7ee787;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gi {
+  color: #aff5b4;
+  background-color: #033a16;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+.dark .vp-doc .highlighter-rouge .highlight .kc {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .l, .dark .vp-doc .highlighter-rouge .highlight .ld, .dark .vp-doc .highlighter-rouge .highlight .m, .dark .vp-doc .highlighter-rouge .highlight .mb, .dark .vp-doc .highlighter-rouge .highlight .mf, .dark .vp-doc .highlighter-rouge .highlight .mh, .dark .vp-doc .highlighter-rouge .highlight .mi, .dark .vp-doc .highlighter-rouge .highlight .il, .dark .vp-doc .highlighter-rouge .highlight .mo, .dark .vp-doc .highlighter-rouge .highlight .mx {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .sb {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .bp {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ne {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nl {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .py {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nv, .dark .vp-doc .highlighter-rouge .highlight .vc, .dark .vp-doc .highlighter-rouge .highlight .vg, .dark .vp-doc .highlighter-rouge .highlight .vi, .dark .vp-doc .highlighter-rouge .highlight .vm {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .o, .dark .vp-doc .highlighter-rouge .highlight .ow {
+  color: #79c0ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gh {
+  color: #1f6feb;
+  font-weight: bold;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gu {
+  color: #1f6feb;
+  font-weight: bold;
+}
+.dark .vp-doc .highlighter-rouge .highlight .s, .dark .vp-doc .highlighter-rouge .highlight .sa, .dark .vp-doc .highlighter-rouge .highlight .sc, .dark .vp-doc .highlighter-rouge .highlight .dl, .dark .vp-doc .highlighter-rouge .highlight .sd, .dark .vp-doc .highlighter-rouge .highlight .s2, .dark .vp-doc .highlighter-rouge .highlight .se, .dark .vp-doc .highlighter-rouge .highlight .sh, .dark .vp-doc .highlighter-rouge .highlight .sx, .dark .vp-doc .highlighter-rouge .highlight .s1, .dark .vp-doc .highlighter-rouge .highlight .ss {
+  color: #a5d6ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nd {
+  color: #d2a8ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .nf, .dark .vp-doc .highlighter-rouge .highlight .fm {
+  color: #d2a8ff;
+}
+.dark .vp-doc .highlighter-rouge .highlight .err {
+  color: #f0f6fc;
+  background-color: #8e1519;
+}
+.dark .vp-doc .highlighter-rouge .highlight .c, .dark .vp-doc .highlighter-rouge .highlight .ch, .dark .vp-doc .highlighter-rouge .highlight .cd, .dark .vp-doc .highlighter-rouge .highlight .cm, .dark .vp-doc .highlighter-rouge .highlight .cp, .dark .vp-doc .highlighter-rouge .highlight .cpf, .dark .vp-doc .highlighter-rouge .highlight .c1, .dark .vp-doc .highlighter-rouge .highlight .cs {
+  color: #8b949e;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gl {
+  color: #8b949e;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gt {
+  color: #8b949e;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ni {
+  color: #c9d1d9;
+}
+.dark .vp-doc .highlighter-rouge .highlight .si {
+  color: #c9d1d9;
+}
+.dark .vp-doc .highlighter-rouge .highlight .ge {
+  color: #c9d1d9;
+  font-style: italic;
+}
+.dark .vp-doc .highlighter-rouge .highlight .gs {
+  color: #c9d1d9;
+  font-weight: bold;
+}
+    </style>
+  
+
+  <!-- Optional head hook. Override in your site at _includes/jekyll_vitepress/head_end.html. -->
+
+  <script src="/ransack/assets/vendor/turbo.js" defer></script>
+  <script src="/ransack/assets/js/vitepress-theme.js" defer></script>
 </head>
 
-<body>
-  <a class="skip-to-main" href="#main-content">Skip to main content</a>
-  <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
-  <symbol id="svg-link" viewBox="0 0 24 24">
-  <title>Link</title>
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link">
-    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-  </svg>
-</symbol>
-
-  <symbol id="svg-menu" viewBox="0 0 24 24">
-  <title>Menu</title>
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu">
-    <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
-  </svg>
-</symbol>
-
-  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
-  <title>Expand</title>
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
-    <polyline points="9 18 15 12 9 6"></polyline>
-  </svg>
-</symbol>
-
-  <!-- Feather. MIT License: https://github.com/feathericons/feather/blob/master/LICENSE -->
-<symbol id="svg-external-link" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link">
-  <title id="svg-external-link-title">(external link)</title>
-  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
-</symbol>
-
-  
-    <symbol id="svg-doc" viewBox="0 0 24 24">
-  <title>Document</title>
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file">
-    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline>
-  </svg>
-</symbol>
-
-    <symbol id="svg-search" viewBox="0 0 24 24">
-  <title>Search</title>
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
-    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-</symbol>
-
   
   
-    <!-- Bootstrap Icons. MIT License: https://github.com/twbs/icons/blob/main/LICENSE.md -->
-<symbol id="svg-copy" viewBox="0 0 16 16">
-  <title>Copy</title>
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
-    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-  </svg>
-</symbol>
-<symbol id="svg-copied" viewBox="0 0 16 16">
-  <title>Copied</title>
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check-fill" viewBox="0 0 16 16">
-    <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/>
-    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/>
-  </svg>
-</symbol>
-
   
-</svg>
-
   
-    <header class="side-bar">
-  <div class="site-header">
-    <a href="/ransack/" class="site-title lh-tight">
-  <div class="site-logo" role="img" aria-label="Ransack"></div>
+  <body data-vp-scroll-offset="134" style="--vp-scroll-offset: 134px;">
+    
+    
 
+    
+    
+
+    <div id="app">
+      <div class="Layout">
+        <span tabindex="-1"></span>
+        <a href="#VPContent" class="VPSkipLink visually-hidden">Skip to content</a>
+
+        <div class="VPBackdrop backdrop" id="vp-backdrop"></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="VPNav">
+  <div class="VPNavBar has-sidebar top" id="vp-nav-bar">
+    <div class="wrapper">
+      <div class="container">
+        <div class="title">
+          <div class="VPNavBarTitle has-sidebar">
+            <a class="title" href="/ransack/">
+              
+              
+              
+              
+              
+              
+                <img class="VPImage logo" src="/ransack/assets/logo/ransack.svg" width="24" height="25" alt="Ransack">
+              
+              
+              
+                <span>Ransack</span>
+              
+            </a>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="content-body">
+            <div class="VPNavBarSearch search">
+              <button type="button" class="VPNavBarSearchButton" aria-label="Search" aria-keyshortcuts="/ control+k meta+k" aria-controls="vp-search" aria-expanded="false" id="vp-search-button">
+                <span class="vpi-search" aria-hidden="true"></span>
+                <span class="text">Search</span>
+                <span class="keys" aria-hidden="true">
+                  <kbd class="key-cmd">⌘</kbd>
+                  <kbd class="key-ctrl">Ctrl</kbd>
+                  <kbd>K</kbd>
+                </span>
+              </button>
+            </div>
+
+            <nav aria-labelledby="main-nav-aria-label" class="VPNavBarMenu menu">
+              <span id="main-nav-aria-label" class="visually-hidden">Main Navigation</span>
+              
+                
+
+
+<a class="VPLink link VPNavBarMenuLink" href="/ransack/getting-started/" data-vp-nav-link data-collections="getting_started" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Getting started</span>
 </a>
-    <button id="menu-button" class="site-button btn-reset" aria-label="Menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><use xlink:href="#svg-menu"></use></svg>
-    </button>
+
+              
+                
+
+
+<a class="VPLink link VPNavBarMenuLink active" href="/ransack/going-further/associations/" data-vp-nav-link data-collections="going_further" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Going further</span>
+</a>
+
+              
+                
+
+
+<a class="VPLink link VPNavBarMenuLink" href="/ransack/project/community/" data-vp-nav-link data-collections="project" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Project</span>
+</a>
+
+              
+
+              
+            </nav>
+
+            <div class="VPNavBarExtra extra" id="vp-nav-extra">
+              <button type="button" class="button" id="vp-nav-extra-button" aria-haspopup="true" aria-expanded="false" aria-controls="vp-nav-extra-menu" aria-label="extra navigation">
+                <span class="vpi-more-horizontal icon" aria-hidden="true"></span>
+              </button>
+              <div class="menu vp-menu-transition" id="vp-nav-extra-menu" aria-hidden="true">
+                <div class="VPMenu">
+                  <div class="group">
+                    <div class="item appearance">
+                      <p class="label">Appearance</p>
+                      <div class="action appearance-action">
+                        <button class="VPSwitch VPSwitchAppearance theme-toggle" type="button" role="switch" aria-checked="false" title="Switch to dark theme">
+                          <span class="check">
+                            <span class="icon">
+                              <span class="vpi-sun sun"></span>
+                              <span class="vpi-moon moon"></span>
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <div class="item social-links">
+                      
+
+
+
+<div class="VPSocialLinks VPNavBarExtraSocialLinks social-links-list">
+  
+    <div class="VPNavBarStar">
+      <a class="VPLink link no-icon VPNavBarStarLink" href="https://github.com/activerecord-hackery/ransack" aria-label="Star activerecord-hackery/ransack on GitHub" target="_blank" rel="noreferrer noopener" data-github-star-repo="activerecord-hackery/ransack" data-github-star-show-count="true">
+        <span class="VPNavBarStarIcon vpi-social-github" aria-hidden="true"></span>
+        <span class="VPNavBarStarText">Star</span>
+        <span class="VPNavBarStarCount" aria-hidden="true">...</span>
+      </a>
+    </div>
+  
+  
+  
+</div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="VPNavBarAppearance appearance">
+              <button class="VPSwitch VPSwitchAppearance theme-toggle" type="button" role="switch" aria-checked="false" title="Switch to dark theme">
+                <span class="check">
+                  <span class="icon">
+                    <span class="vpi-sun sun"></span>
+                    <span class="vpi-moon moon"></span>
+                  </span>
+                </span>
+              </button>
+            </div>
+
+            
+
+
+
+<div class="VPSocialLinks VPNavBarSocialLinks social-links">
+  
+    <div class="VPNavBarStar" id="vp-nav-star">
+      <a class="VPLink link no-icon VPNavBarStarLink" href="https://github.com/activerecord-hackery/ransack" aria-label="Star activerecord-hackery/ransack on GitHub" target="_blank" rel="noreferrer noopener" data-github-star-repo="activerecord-hackery/ransack" data-github-star-show-count="true">
+        <span class="VPNavBarStarIcon vpi-social-github" aria-hidden="true"></span>
+        <span class="VPNavBarStarText">Star</span>
+        <span class="VPNavBarStarCount" aria-hidden="true">...</span>
+      </a>
+    </div>
+  
+  
+  
+</div>
+
+
+            <button type="button" class="VPNavBarHamburger hamburger" id="vp-nav-hamburger" aria-label="mobile navigation" aria-expanded="false" aria-controls="VPNavScreen">
+              <span class="container">
+                <span class="top"></span>
+                <span class="middle"></span>
+                <span class="bottom"></span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+    </div>
   </div>
 
-  <nav aria-label="Main" id="site-nav" class="site-nav">
-  
-  
-    <ul class="nav-list"><li class="nav-list-item"><a href="/ransack/" class="nav-list-link">Introduction</a></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="Getting started submenu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg>
-      </button><a href="/ransack/getting-started/" class="nav-list-link">Getting started</a><ul class="nav-list"><li class="nav-list-item"><a href="/ransack/getting-started/simple-mode/" class="nav-list-link">Simple mode</a></li><li class="nav-list-item"><a href="/ransack/getting-started/advanced-mode/" class="nav-list-link">Advanced Mode</a></li><li class="nav-list-item"><a href="/ransack/getting-started/using-predicates/" class="nav-list-link">Using Predicates</a></li><li class="nav-list-item"><a href="/ransack/getting-started/search-matches/" class="nav-list-link">Search Matchers</a></li><li class="nav-list-item"><a href="/ransack/getting-started/sorting/" class="nav-list-link">Sorting</a></li><li class="nav-list-item"><a href="/ransack/getting-started/configuration/" class="nav-list-link">Configuration</a></li><li class="nav-list-item"><a href="/ransack/getting-started/upgrading/" class="nav-list-link">Upgrading</a></li></ul></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="Going further submenu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg>
-      </button><a href="/ransack/going-further/" class="nav-list-link">Going further</a><ul class="nav-list"><li class="nav-list-item"><a href="/ransack/going-further/associations/" class="nav-list-link">Associations</a></li><li class="nav-list-item"><a href="/ransack/going-further/custom-predicates/" class="nav-list-link">Custom predicates</a></li><li class="nav-list-item"><a href="/ransack/going-further/exporting-to-csv/" class="nav-list-link">CSV Export</a></li><li class="nav-list-item"><a href="/ransack/going-further/i18n/" class="nav-list-link">i18n</a></li><li class="nav-list-item"><a href="/ransack/going-further/form-customisation/" class="nav-list-link">Form customisation</a></li><li class="nav-list-item"><a href="/ransack/going-further/merging-searches/" class="nav-list-link">Merging searches</a></li><li class="nav-list-item"><a href="/ransack/going-further/ransackers/" class="nav-list-link">Ransackers</a></li><li class="nav-list-item"><a href="/ransack/going-further/saving-queries/" class="nav-list-link">Saving queries</a></li><li class="nav-list-item"><a href="/ransack/going-further/searching-postgres/" class="nav-list-link">Postgres searches</a></li><li class="nav-list-item"><a href="/ransack/going-further/other-notes/" class="nav-list-link">Other notes</a></li><li class="nav-list-item"><a href="/ransack/going-further/external-guides/" class="nav-list-link">External resources</a></li><li class="nav-list-item"><a href="/ransack/going-further/architecture/" class="nav-list-link">How Ransack is built</a></li><li class="nav-list-item"><a href="/ransack/going-further/documentation/" class="nav-list-link">Documentation</a></li><li class="nav-list-item"><a href="/ransack/going-further/release_process/" class="nav-list-link">Versions and Releases</a></li><li class="nav-list-item"><a href="/ransack/going-further/acts-as-taggable-on/" class="nav-list-link">Acts-as-taggable-on</a></li><li class="nav-list-item"><a href="/ransack/going-further/polymorphic-search/" class="nav-list-link">Polymorphic Searches</a></li><li class="nav-list-item"><a href="/ransack/going-further/ransack-3-0-0/" class="nav-list-link">Ransack 3.0.0 announcement</a></li><li class="nav-list-item"><a href="/ransack/going-further/wiki-contributors/" class="nav-list-link">Wiki Contributors</a></li></ul></li></ul>
-  
-</nav>
+  <div class="VPNavScreen" id="VPNavScreen" hidden>
+    <div class="container">
+      <nav class="VPNavScreenMenu">
+        
+          
 
 
-<div class="d-md-block d-none site-footer">
+<a class="VPLink link VPNavScreenMenuLink" href="/ransack/getting-started/" data-vp-nav-link data-collections="getting_started" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Getting started</span>
+</a>
+
+        
+          
+
+
+<a class="VPLink link VPNavScreenMenuLink active" href="/ransack/going-further/associations/" data-vp-nav-link data-collections="going_further" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Going further</span>
+</a>
+
+        
+          
+
+
+<a class="VPLink link VPNavScreenMenuLink" href="/ransack/project/community/" data-vp-nav-link data-collections="project" data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+  <span>Project</span>
+</a>
+
+        
+      </nav>
+
+      
+
+      <div class="VPNavScreenAppearance appearance">
+        <p class="text">Appearance</p>
+        <button class="VPSwitch VPSwitchAppearance theme-toggle" type="button" role="switch" aria-checked="false" title="Switch to dark theme">
+          <span class="check">
+            <span class="icon">
+              <span class="vpi-sun sun"></span>
+              <span class="vpi-moon moon"></span>
+            </span>
+          </span>
+        </button>
+      </div>
+
+      
+
+
+
+<div class="VPSocialLinks VPNavScreenSocialLinks social-links">
+  
+    <div class="VPNavBarStar VPNavScreenStar">
+      <a class="VPLink link no-icon VPNavBarStarLink VPNavScreenStarLink" href="https://github.com/activerecord-hackery/ransack" aria-label="Star activerecord-hackery/ransack on GitHub" target="_blank" rel="noreferrer noopener" data-github-star-repo="activerecord-hackery/ransack" data-github-star-show-count="true">
+        <span class="VPNavBarStarIcon vpi-social-github" aria-hidden="true"></span>
+        <span class="VPNavBarStarText">Star</span>
+        <span class="VPNavBarStarCount" aria-hidden="true">...</span>
+      </a>
+    </div>
   
   
-    This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
   
+</div>
+
+    </div>
   </div>
 </header>
 
-  
-  <div class="main" id="top">
-    <div id="main-header" class="main-header">
-  
-    
+        <div class="VPSearch" id="vp-search" data-search-index-url="/ransack/search.json" data-search-frame-target="vp-content-frame" hidden>
+  <div class="VPSearchBackdrop" id="vp-search-backdrop"></div>
 
-<div class="search" role="search">
-  <div class="search-input-wrap">
-    <input type="text" id="search-input" class="search-input" tabindex="0" placeholder="Search Ransack" autocomplete="off">
-    <label for="search-input" class="search-label">
-      <span class="sr-only">Search Ransack</span>
-      <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><use xlink:href="#svg-search"></use></svg>
-    </label>
+  <div class="VPSearchDialog" role="dialog" aria-modal="true" aria-labelledby="vp-search-label">
+    <div class="VPSearchBar">
+      <span class="vpi-search" aria-hidden="true"></span>
+      <label class="visually-hidden" for="vp-search-input" id="vp-search-label">Search documentation</label>
+      <input id="vp-search-input" type="search" autocomplete="off" placeholder="Search docs" />
+      <kbd>Esc</kbd>
+    </div>
+
+    <div class="VPSearchResults" id="vp-search-results" role="listbox" aria-label="Search results"></div>
   </div>
-  <div id="search-results" class="search-results"></div>
 </div>
 
-  
-  
-  
-    <nav aria-label="Auxiliary" class="aux-nav">
-  <ul class="aux-nav-list">
-    
-      <li class="aux-nav-list-item">
-        <a href="https://github.com/activerecord-hackery/ransack" class="site-button"
+        
           
-          target="_blank" rel="noopener noreferrer"
-          
-        >
-          Ransack on GitHub
-        </a>
-      </li>
-    
-  </ul>
-</nav>
+<div class="VPLocalNav has-sidebar" id="vp-local-nav">
+  <div class="container">
+    <button class="menu" aria-expanded="false" aria-controls="VPSidebarNav" id="vp-local-menu-button">
+      <span class="vpi-align-left menu-icon"></span>
+      <span class="menu-text">Menu</span>
+    </button>
 
-  
+    <div class="VPLocalNavOutlineDropdown" id="vp-local-outline-dropdown">
+      <button type="button" id="vp-local-outline-button" aria-expanded="false" aria-controls="vp-local-outline-items">
+        <span class="menu-text">On this page</span>
+        <span class="vpi-chevron-right icon"></span>
+      </button>
+      <div class="items" id="vp-local-outline-items" hidden>
+        <div class="header">
+          <a class="top-link" href="#top" id="vp-local-top-link">Return to top</a>
+        </div>
+        <div class="outline">
+          <ul class="VPDocOutlineItem"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-    <div class="main-content-wrap">
-      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
-  <ol class="breadcrumb-nav-list">
-    <li class="breadcrumb-nav-list-item"><a href="/ransack/going-further/">Going further</a></li>
-    <li class="breadcrumb-nav-list-item"><span>Associations</span></li>
-  </ol>
-</nav>
+          <aside class="VPSidebar" id="vp-sidebar">
+  <div class="curtain"></div>
+  <nav class="nav" id="VPSidebarNav" aria-labelledby="sidebar-aria-label" tabindex="-1">
+    <span class="visually-hidden" id="sidebar-aria-label">Sidebar Navigation</span>
 
-
-      <div id="main-content" class="main-content">
-        <main>
-          
-            <h3 id="associations">
-  
-  
-    <a href="#associations" class="anchor-heading" aria-labelledby="associations"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Associations
-  
-  
-</h3>
     
+    
+    
+      
+      
+        
+        
+        
+        
 
-<p>You can easily use Ransack to search for objects in <code class="language-plaintext highlighter-rouge">has_many</code> and <code class="language-plaintext highlighter-rouge">belongs_to</code>
+        <div class="group no-transition">
+          <section class="VPSidebarItem level-0 collapsible" data-vp-sidebar-group data-collection="getting_started">
+            <div class="item" role="button" tabindex="0" aria-expanded="true">
+              <div class="indicator"></div>
+              <h2 class="text">Getting started</h2>
+              <div class="caret" role="button" aria-label="toggle section" tabindex="0" aria-expanded="true">
+                <span class="vpi-chevron-right caret-icon"></span>
+              </div>
+            </div>
+
+            <div class="items">
+              
+                
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Installation</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/simple-mode/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Simple mode</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/authorization/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Authorization</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/advanced-mode/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Advanced mode</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/using-predicates/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Using predicates</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/search-matches/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Search matchers</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/sorting/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Sorting</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/configuration/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Configuration</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/getting-started/upgrading/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Upgrading</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+
+              
+            </div>
+          </section>
+        </div>
+      
+    
+      
+      
+        
+        
+        
+        
+
+        <div class="group no-transition">
+          <section class="VPSidebarItem level-0 collapsible has-active" data-vp-sidebar-group data-collection="going_further">
+            <div class="item" role="button" tabindex="0" aria-expanded="true">
+              <div class="indicator"></div>
+              <h2 class="text">Going further</h2>
+              <div class="caret" role="button" aria-label="toggle section" tabindex="0" aria-expanded="true">
+                <span class="vpi-chevron-right caret-icon"></span>
+              </div>
+            </div>
+
+            <div class="items">
+              
+                
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link is-active has-active">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/associations/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Associations</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/ransackers/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Ransackers</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/aliases/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Aliases</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/scopes/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Scopes</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/custom-predicates/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Custom predicates</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/merging-searches/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Merging searches</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/form-customisation/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Form customisation</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/i18n/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">i18n</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/polymorphic-search/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Polymorphic searches</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/searching-postgres/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">PostgreSQL searches</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/acts-as-taggable-on/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Acts-as-taggable-on</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/exporting-to-csv/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">CSV export</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/saving-queries/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Saving queries</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/going-further/other-notes/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Other notes</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+
+              
+            </div>
+          </section>
+        </div>
+      
+    
+      
+      
+        
+        
+        
+        
+
+        <div class="group no-transition">
+          <section class="VPSidebarItem level-0 collapsible" data-vp-sidebar-group data-collection="project">
+            <div class="item" role="button" tabindex="0" aria-expanded="true">
+              <div class="indicator"></div>
+              <h2 class="text">Project</h2>
+              <div class="caret" role="button" aria-label="toggle section" tabindex="0" aria-expanded="true">
+                <span class="vpi-chevron-right caret-icon"></span>
+              </div>
+            </div>
+
+            <div class="items">
+              
+                
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/community/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Community and support</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/architecture/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">How Ransack is built</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/documentation/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Documentation</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/release_process/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Versions and releases</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/external-guides/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">External resources</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/wiki-contributors/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Wiki contributors</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="VPSidebarItem level-1 is-link">
+    <div class="item">
+      <div class="indicator"></div>
+      <a class="VPLink link link" href="/ransack/project/ransack-3-0-0/" data-vp-sidebar-link data-turbo="true" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+        <p class="text">Ransack 3.0.0 announcement</p>
+      </a>
+      
+    </div>
+
+    
+  </div>
+
+
+              
+            </div>
+          </section>
+        </div>
+      
+    
+  </nav>
+</aside>
+
+        
+
+        <div class="VPContent has-sidebar" id="VPContent">
+          
+            
+            
+            <turbo-frame id="vp-content-frame" target="_top">
+              <div id="vp-page-state" hidden data-title="Associations | Ransack" data-url="/ransack/going-further/associations/" data-collection="going_further"></div>
+              <div class="VPDoc has-sidebar has-aside">
+                <div class="container">
+                  <div class="aside">
+                    <div class="aside-curtain"></div>
+                    <div class="aside-container">
+                      <div class="aside-content">
+                        <div class="VPDocAside">
+                          <nav aria-labelledby="doc-outline-aria-label" class="VPDocAsideOutline has-outline" id="vp-doc-outline">
+                            <div class="content">
+                              <div class="outline-marker" id="vp-outline-marker"></div>
+                              <div aria-level="2" class="outline-title" id="doc-outline-aria-label" role="heading">On this page</div>
+                              <ul class="VPDocOutlineItem root"></ul>
+                            </div>
+                          </nav>
+                          <div class="spacer"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="content">
+                    <div class="content-container">
+                      
+<main class="main">
+  <div class="vp-doc external-link-icon-enabled _going-further_associations_">
+    
+    
+    <div class="vp-doc-header">
+      
+        <h1>Associations</h1>
+      
+      
+        
+
+<div class="copy-md-group">
+  <button class="copy-md-btn" type="button" title="Copy page as Markdown">
+    <span class="vpi-copy copy-md-icon" aria-hidden="true"></span>
+    <span class="copy-md-label" aria-live="polite">Copy page</span>
+  </button>
+  <button class="copy-md-toggle" type="button" aria-label="More options" aria-expanded="false">
+    <span class="vpi-chevron-down copy-md-chevron"></span>
+  </button>
+  <div class="copy-md-dropdown vp-menu-transition" aria-hidden="true">
+    <button class="copy-md-dropdown-item" type="button" data-action="copy">
+      <span class="vpi-copy copy-md-dropdown-icon"></span>
+      <div class="copy-md-dropdown-text">
+        <span class="copy-md-dropdown-title">Copy page</span>
+        <span class="copy-md-dropdown-desc">Copy page as Markdown for LLMs</span>
+      </div>
+    </button>
+    <button class="copy-md-dropdown-item" type="button" data-action="view-markdown" data-url="/ransack/going-further/associations.md">
+      <span class="vpi-file-text copy-md-dropdown-icon"></span>
+      <div class="copy-md-dropdown-text">
+        <span class="copy-md-dropdown-title">View as Markdown</span>
+        <span class="copy-md-dropdown-desc">View this page as plain text</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+      
+    </div>
+    
+      <textarea class="vp-raw-markdown" style="display:none" aria-hidden="true"># Associations
+
+You can easily use Ransack to search for objects in `has_many` and `belongs_to`
+associations.
+
+Given these associations...
+
+```ruby
+class Employee &lt; ActiveRecord::Base
+  belongs_to :supervisor
+
+  # has attributes first_name:string and last_name:string
+end
+
+class Department &lt; ActiveRecord::Base
+  has_many :supervisors
+
+  # has attribute title:string
+end
+
+class Supervisor &lt; ActiveRecord::Base
+  belongs_to :department
+  has_many :employees
+
+  # has attribute last_name:string
+end
+```
+
+... and a controller...
+
+```ruby
+class SupervisorsController &lt; ApplicationController
+  def index
+    @q = Supervisor.ransack(params[:q])
+    @supervisors = @q.result.includes(:department, :employees)
+  end
+end
+```
+
+... you might set up your form like this...
+
+```erb
+&lt;%= search_form_for @q do |f| %&gt;
+  &lt;%= f.label :last_name_cont %&gt;
+  &lt;%= f.search_field :last_name_cont %&gt;
+
+  &lt;%= f.label :department_title_cont %&gt;
+  &lt;%= f.search_field :department_title_cont %&gt;
+
+  &lt;%= f.label :employees_first_name_or_employees_last_name_cont %&gt;
+  &lt;%= f.search_field :employees_first_name_or_employees_last_name_cont %&gt;
+
+  &lt;%= f.submit &quot;search&quot; %&gt;
+&lt;% end %&gt;
+...
+&lt;%= content_tag :table do %&gt;
+  &lt;%= content_tag :th, sort_link(@q, :last_name) %&gt;
+  &lt;%= content_tag :th, sort_link(@q, :department_title) %&gt;
+  &lt;%= content_tag :th, sort_link(@q, :employees_last_name) %&gt;
+&lt;% end %&gt;
+```
+
+If you have trouble sorting on associations, try using an SQL string with the
+pluralized table (`&apos;departments.title&apos;`,`&apos;employees.last_name&apos;`) instead of the
+symbolized association (`:department_title)`, `:employees_last_name`).
+
+## Searching a relation that already has joins
+
+A search can start from a relation rather than a model, and the relation may
+already join the tables the search needs — through `joins`,
+`left_outer_joins`, an `includes` that will be eager loaded, or a previous
+search. Ransack reuses those joins: the condition is bound to the alias
+Active Record gives the existing join, and no second join is added.
+
+```ruby
+Supervisor.joins(:department).where(departments: { title: &apos;Sales&apos; })
+          .ransack(department_title_cont: &apos;Eng&apos;).result.to_sql
+# ... INNER JOIN &quot;departments&quot; ON ... WHERE &quot;departments&quot;.&quot;title&quot; = &apos;Sales&apos;
+#     AND &quot;departments&quot;.&quot;title&quot; LIKE &apos;%Eng%&apos; ESCAPE &apos;\&apos;
+
+Supervisor.joins(:department, :backup_department)   # both belongs_to Department
+          .ransack(backup_department_title_eq: &apos;Ops&apos;).result.to_sql
+# ... INNER JOIN &quot;departments&quot; ON ...
+#     INNER JOIN &quot;departments&quot; AS &quot;backup_departments_supervisors&quot; ON ...
+#     WHERE &quot;backup_departments_supervisors&quot;.&quot;title&quot; = &apos;Ops&apos;
+```
+
+This also covers the alias Active Record picks when a `where` hash is keyed by
+the association name (`where(department: { ... })` joins `departments` as
+`department`), and a search chained onto the result of another search.
+
+Before Ransack 6.0 the join tree was built from the model class alone, so a
+join already on the relation was joined a second time under a new alias, which
+multiplied rows for a `has_many`, and a condition could land on the wrong one
+of two joins to the same table.
+
+The joins Ransack adds itself are `LEFT OUTER JOIN`s, so a search on an
+association does not drop records that have nothing associated unless the
+condition itself does. To search with inner joins, join the association on the
+relation first.
+</textarea>
+    
+    <p>You can easily use Ransack to search for objects in <code class="language-plaintext highlighter-rouge">has_many</code> and <code class="language-plaintext highlighter-rouge">belongs_to</code>
 associations.</p>
 
 <p>Given these associations…</p>
@@ -294,14 +1745,8 @@ associations.</p>
 <p>If you have trouble sorting on associations, try using an SQL string with the
 pluralized table (<code class="language-plaintext highlighter-rouge">'departments.title'</code>,<code class="language-plaintext highlighter-rouge">'employees.last_name'</code>) instead of the
 symbolized association (<code class="language-plaintext highlighter-rouge">:department_title)</code>, <code class="language-plaintext highlighter-rouge">:employees_last_name</code>).</p>
-<h3 id="searching-a-relation-that-already-has-joins">
-  
-  
-    <a href="#searching-a-relation-that-already-has-joins" class="anchor-heading" aria-labelledby="searching-a-relation-that-already-has-joins"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Searching a relation that already has joins
-  
-  
-</h3>
-    
+
+<h2 id="searching-a-relation-that-already-has-joins">Searching a relation that already has joins</h2>
 
 <p>A search can start from a relation rather than a model, and the relation may
 already join the tables the search needs — through <code class="language-plaintext highlighter-rouge">joins</code>,
@@ -335,47 +1780,143 @@ association does not drop records that have nothing associated unless the
 condition itself does. To search with inner joins, join the association on the
 relation first.</p>
 
-          
-
-          
-            
-          
-        </main>
-        
-<hr>
-<footer>
-  
-
-  <p class="text-small mb-0">Ransack is <a href="https://github.com/activerecord-hackery/ransack/blob/main/LICENSE">MIT licensed</a>. Questions belong in <a href="https://github.com/activerecord-hackery/ransack/discussions">Discussions</a>; reproducible bugs in <a href="https://github.com/activerecord-hackery/ransack/issues">Issues</a>.</p>
-
-  
-    <div class="d-flex mt-2">
-      
-      
-        <p class="text-small mb-0">
-          <a href="https://github.com/activerecord-hackery/ransack/edit/main/docs/going-further/associations.md" id="edit-this-page">Edit this page on GitHub</a>
-        </p>
-      
-    </div>
-  <div class="d-md-none mt-4 fs-2">
-    
-    
-      This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
-    
   </div>
-</footer>
+</main>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <footer class="VPDocFooter">
+    
+      <div class="edit-info">
+        
+          <div class="edit-link">
+            <a class="VPLink link vp-external-link-icon no-icon edit-link-button" href="https://github.com/activerecord-hackery/ransack/edit/main/docs/_going_further/associations.md" target="_blank" rel="noreferrer">
+              <span class="vpi-square-pen edit-link-icon"></span>
+              Edit this page on GitHub
+            </a>
+          </div>
+        
+        
+      </div>
+    
+
+    
+      <nav class="prev-next" aria-labelledby="doc-footer-aria-label">
+        <span class="visually-hidden" id="doc-footer-aria-label">Pager</span>
+
+        <div class="pager">
+          
+        </div>
+
+        <div class="pager">
+          
+            <a class="VPLink link pager-link next" href="/ransack/going-further/ransackers/" data-turbo-frame="vp-content-frame" data-turbo-action="advance">
+              <span class="desc">Next page</span>
+              <span class="title">Ransackers</span>
+            </a>
+          
+        </div>
+      </nav>
+    
+
+    
+  </footer>
+
+
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </turbo-frame>
+          
+        </div>
+
+        
+        
+        
+
+        
+        
+
+        
+
+        
       </div>
     </div>
-    
-      
-
-<div class="search-overlay"></div>
-
-    
-  </div>
-
-  
-</body>
+  </body>
 </html>
-
