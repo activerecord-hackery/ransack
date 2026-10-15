@@ -29,6 +29,22 @@ module Ransack
       context.ransackable_attribute?('name', Person)
     end
 
+    it 'resolves the aliases in a key once per search' do
+      expect(context).to receive(:resolve_aliases_uncached).once.and_call_original
+      3.times { expect(context.resolve_aliases('term_or_daddy')).to eq 'name_or_email_or_parent_name' }
+    end
+
+    it 'returns a frozen name, so the kept copy cannot be changed through it' do
+      expect(context.resolve_aliases('term')).to be_frozen
+    end
+
+    it 'resolves aliases again when the auth object changes' do
+      context.resolve_aliases('term')
+      context.auth_object = :admin
+      expect(context).to receive(:resolve_aliases_uncached).once.and_call_original
+      context.resolve_aliases('term')
+    end
+
     it 'matches symbol and string allowlists alike' do
       allow(Person).to receive(:ransackable_attributes).and_return(%i[name])
       expect(context.ransackable_attribute?('name', Person)).to be true

@@ -252,9 +252,19 @@ module Ransack
     # `term_or_daddy` with `term => name_or_email` becomes
     # `name_or_email_or_parent_name`. Returns the name unchanged when it
     # holds no alias.
+    #
+    # A key is resolved several times while a search is built (to check it,
+    # to split it into attributes, to bind them), so the result is kept for
+    # the life of the context, frozen, and dropped with the allowlists it
+    # depends on.
     def resolve_aliases(str)
       return str.to_s unless key_within_depth_limit?(str)
 
+      key = str.to_s
+      (@resolved_aliases ||= {})[key] ||= -resolve_aliases_uncached(key)
+    end
+
+    def resolve_aliases_uncached(str)
       whole = resolve_alias_segment(str)
       return whole if whole != str
       # A name that is an attribute in its own right is never split, even if
@@ -268,6 +278,7 @@ module Ransack
       combinator = str[/_(or|and)_/, 1] || Constants::OR
       resolved.join("_#{combinator}_")
     end
+    private :resolve_aliases_uncached
 
     def ransackable_attribute?(str, klass)
       allowlist_set(klass, :attributes_for).include?(str.to_s)
@@ -318,7 +329,7 @@ module Ransack
     # context instead, and what is cached here is dropped whenever the auth
     # object or the permitted flag changes.
     def reset_name_caches
-      @allowlist_sets = nil
+      @allowlist_sets = @resolved_aliases = nil
     end
 
     def allowlist_set(klass, kind)
