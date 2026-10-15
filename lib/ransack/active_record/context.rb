@@ -199,34 +199,48 @@ module Ransack
       # because it is correlated to the primary key on the outer query.
       #
       def build_correlated_subquery(association)
+        correlated_subquery(association).last
+      end
+
+      # The subquery a negative condition on a collection is tested against,
+      # and the outer query's column to test: the primary key, or the
+      # association's `primary_key:` when it has one.
+      #
+      # The subquery correlates on the join condition that references the
+      # outer table, and keeps the join's other conditions: the type column
+      # of a polymorphic or STI association, the association's scope and the
+      # target's default scope. Leaving them out counted rows the association
+      # does not reach (#1747).
+      def correlated_subquery(association)
         join_constraints = extract_joins(association)
         join_root = join_constraints.shift
-        correlated_key = extract_correlated_key(join_root)
+        correlation = extract_correlation(join_root)
+        raise 'Ransack encountered an unexpected arel structure' unless correlation
+
+        inner_key, outer_key = correlated_keys(correlation)
         subquery = Arel::SelectManager.new(association.base_klass)
         subquery.from(join_root.left)
-        subquery.project(correlated_key)
+        subquery.project(inner_key)
         join_constraints.each do |j|
           subquery.join_sources << Arel::Nodes::InnerJoin.new(j.left, j.right)
         end
 
-        # Handle polymorphic associations where correlated_key is an array
-        if correlated_key.is_a?(Array)
-          # For polymorphic associations, we need to add conditions for both the foreign key and type
-          correlated_key.each_with_index do |key, index|
-            if index == 0
-              # This is the foreign key
-              subquery = subquery.where(key.eq(primary_key))
-            else
-              # This is the type key, which should be equal to the model name
-              subquery = subquery.where(key.eq(@klass.name))
-            end
-          end
-        else
-          # Original behavior for non-polymorphic associations
-          subquery = subquery.where(correlated_key.eq(primary_key))
+        subquery.where(inner_key.eq(outer_key))
+        join_conditions(join_root).each do |condition|
+          subquery.where(condition) unless condition.equal?(correlation)
         end
 
-        subquery
+        [outer_key, subquery]
+      end
+
+      # The SQL for a correlated subquery, with bind values inlined the way
+      # Relation#to_sql renders them, since the subquery is embedded in the
+      # outer query as a string. An association or default scope condition
+      # in the subquery carries its value as a bind.
+      def subquery_sql(subquery)
+        @klass.with_connection do |connection|
+          connection.unprepared_statement { connection.to_sql(subquery) }
+        end
       end
 
       def primary_key
@@ -235,41 +249,53 @@ module Ransack
 
       private
 
-      def extract_correlated_key(join_root)
-        case join_root
+      # The conditions in a join's ON clause, with its ANDs flattened.
+      def join_conditions(join)
+        on = [join.right, join.left].find { |node| node.is_a?(Arel::Nodes::On) }
+        on ? and_children(on.expr) : []
+      end
+
+      def and_children(node)
+        node.is_a?(Arel::Nodes::And) ? node.children.flat_map { |child| and_children(child) } : [node]
+      end
+
+      # The equality in a join's ON clause that ties the joined table to
+      # the outer query's table.
+      def extract_correlation(node)
+        case node
         when Arel::Nodes::OuterJoin
-          # one of join_root.right/join_root.left is expected to be Arel::Nodes::On
-          if join_root.right.is_a?(Arel::Nodes::On)
-            extract_correlated_key(join_root.right.expr)
-          elsif join_root.left.is_a?(Arel::Nodes::On)
-            extract_correlated_key(join_root.left.expr)
-          else
-            raise 'Ransack encountered an unexpected arel structure'
-          end
+          on = [node.right, node.left].find { |side| side.is_a?(Arel::Nodes::On) }
+          raise 'Ransack encountered an unexpected arel structure' unless on
+
+          extract_correlation(on.expr)
         when Arel::Nodes::Equality
-          pk = primary_key
-          if join_root.left.eql?(pk)
-            join_root.right
-          elsif join_root.right.eql?(pk)
-            join_root.left
-          else
-            nil
-          end
+          node if correlated_keys(node)
         when Arel::Nodes::And
-          # And may have multiple children, so we need to check all, not via left/right
-          if join_root.children.any?
-            join_root.children.each do |child|
-              key = extract_correlated_key(child)
-              return key if key
-            end
-          else
-            extract_correlated_key(join_root.left) || extract_correlated_key(join_root.right)
+          node.children.each do |child|
+            correlation = extract_correlation(child)
+            return correlation if correlation
           end
+          nil
         else
-          # eg parent was Arel::Nodes::And and the evaluated side was one of
-          # Arel::Nodes::Grouping or MultiTenant::TenantEnforcementClause
+          # eg a Grouping, or a MultiTenant::TenantEnforcementClause
           nil
         end
+      end
+
+      # [inner, outer] for an equality with exactly one side on the outer
+      # query's table, or nil.
+      def correlated_keys(equality)
+        left_outer  = outer_attribute?(equality.left)
+        right_outer = outer_attribute?(equality.right)
+        if left_outer && !right_outer
+          [equality.right, equality.left]
+        elsif right_outer && !left_outer
+          [equality.left, equality.right]
+        end
+      end
+
+      def outer_attribute?(node)
+        node.is_a?(Arel::Attributes::Attribute) && node.relation.eql?(@object.table)
       end
 
       def get_parent_and_attribute_name(str, parent = @base)

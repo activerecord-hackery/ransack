@@ -388,24 +388,24 @@ module Ransack
           parent_table = association.table
 
           predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
-            query = context.build_correlated_subquery(association)
+            outer_key, query = context.correlated_subquery(association)
             context.remove_association(association)
 
             case self.predicate_name
             when 'not_null'
               if self.value
                 query.where(format_predicate(attribute))
-                Arel::Nodes::In.new(context.primary_key, Arel.sql(query.to_sql))
+                Arel::Nodes::In.new(outer_key, Arel.sql(context.subquery_sql(query)))
               else
                 query.where(format_predicate(attribute).not)
-                Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+                Arel::Nodes::NotIn.new(outer_key, Arel.sql(context.subquery_sql(query)))
               end
             when 'not_cont'
               query.where(like_predicate(attribute, 'matches'.freeze))
-              Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+              Arel::Nodes::NotIn.new(outer_key, Arel.sql(context.subquery_sql(query)))
             else
               query.where(format_predicate(attribute).not)
-              Arel::Nodes::NotIn.new(context.primary_key, Arel.sql(query.to_sql))
+              Arel::Nodes::NotIn.new(outer_key, Arel.sql(context.subquery_sql(query)))
             end
           else
             format_predicate(attribute)

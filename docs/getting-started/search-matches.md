@@ -231,6 +231,15 @@ article and no article mentioning `spam`. The search can be evaluated as often
 as you like; Ransack 6.0.0 raised `NoMethodError` on a second negative
 condition on the same collection, and on a second call to `result` (#1745).
 
+The subquery reaches the same records the association does. It keeps the
+association's own conditions: the type column of a polymorphic (`as:`) or
+STI association, the association's scope and the target's default scope. It
+correlates on the association's keys, so an association with a `primary_key:`
+option is tested on that column rather than on `id`. Before Ransack 6.0.1 the
+subquery dropped those conditions, so a note on another model with the same
+id, or a comment hidden by a default scope, still excluded the record
+(#1747).
+
 `not_null` is the exception: `articles_title_not_null: true` means *at least
 one* associated record has a value (`"people"."id" IN (SELECT ... WHERE
 "articles"."title" IS NOT NULL)`), so it excludes people with no articles.
