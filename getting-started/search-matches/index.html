@@ -782,6 +782,15 @@ article and no article mentioning <code class="language-plaintext highlighter-ro
 as you like; Ransack 6.0.0 raised <code class="language-plaintext highlighter-rouge">NoMethodError</code> on a second negative
 condition on the same collection, and on a second call to <code class="language-plaintext highlighter-rouge">result</code> (#1745).</p>
 
+<p>The subquery reaches the same records the association does. It keeps the
+association’s own conditions: the type column of a polymorphic (<code class="language-plaintext highlighter-rouge">as:</code>) or
+STI association, the association’s scope and the target’s default scope. It
+correlates on the association’s keys, so an association with a <code class="language-plaintext highlighter-rouge">primary_key:</code>
+option is tested on that column rather than on <code class="language-plaintext highlighter-rouge">id</code>. Before Ransack 6.0.1 the
+subquery dropped those conditions, so a note on another model with the same
+id, or a comment hidden by a default scope, still excluded the record
+(#1747).</p>
+
 <p><code class="language-plaintext highlighter-rouge">not_null</code> is the exception: <code class="language-plaintext highlighter-rouge">articles_title_not_null: true</code> means <em>at least
 one</em> associated record has a value (<code class="language-plaintext highlighter-rouge">"people"."id" IN (SELECT ... WHERE
 "articles"."title" IS NOT NULL)</code>), so it excludes people with no articles.</p>
