@@ -50,6 +50,7 @@ This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quic
 
 To support the project:
 
+* Consider supporting us via [Open Collective](https://opencollective.com/ransack)
 * Use Ransack in your apps, and let us know if you encounter anything that's
 broken or missing. A failing spec to demonstrate the issue is awesome. A pull
 request with passing tests is even better!

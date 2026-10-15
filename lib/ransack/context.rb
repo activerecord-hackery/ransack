@@ -290,6 +290,13 @@ module Ransack
       associations_for(traverse(str))
     end
 
+    # Hooks a condition or sort calls to keep the joins it reads. The
+    # Active Record context overrides them; a context registered for
+    # another ORM need not, and a search through it still builds.
+    def lock_association(_association); end
+
+    def lock_ancestors_of(_association); end
+
     private
 
     def attributes_for(klass)
