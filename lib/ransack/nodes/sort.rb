@@ -16,7 +16,7 @@ module Ransack
 
       def build(params)
         indifferent_params(params, 'sort').each do |key, value|
-          if key.match(/^(name|dir|ransacker_args)$/)
+          if key.match(/\A(name|dir|ransacker_args)\z/)
             self.send("#{key}=", value)
           end
         end

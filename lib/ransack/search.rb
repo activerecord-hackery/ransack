@@ -119,9 +119,9 @@ module Ransack
     # params hash is built (#1472).
     def method_missing(method_id, *args)
       method_name = method_id.to_s
-      getter_name = method_name.sub(/=$/, ''.freeze)
+      getter_name = method_name.sub(/=\z/, ''.freeze)
       if @context.ransackable_scope?(getter_name, @context.object)
-        if method_name =~ /=$/
+        if method_name.end_with?('=')
           add_scope getter_name, args.size == 1 ? args.first : args
         else
           @scope_args[method_name]
@@ -138,7 +138,7 @@ module Ransack
     # before calling. Mirror method_missing so a search_form_with field is
     # pre-filled the same way a search_form_for one is.
     def respond_to_missing?(method_id, include_private = false)
-      getter_name = method_id.to_s.sub(/=$/, ''.freeze)
+      getter_name = method_id.to_s.sub(/=\z/, ''.freeze)
       base.attribute_method?(getter_name) ||
         @context.ransackable_scope?(getter_name, @context.object) ||
         super
