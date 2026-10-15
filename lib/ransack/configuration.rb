@@ -7,11 +7,12 @@ module Ransack
     mattr_accessor :predicates, :options
 
     class PredicateCollection
-      attr_reader :sorted_names_with_underscores
+      attr_reader :sorted_names_with_underscores, :max_name_length
 
       def initialize
         @collection = {}
         @sorted_names_with_underscores = []
+        @max_name_length = 0
       end
 
       delegate :[], :keys, :has_key?, to: :@collection
@@ -20,6 +21,7 @@ module Ransack
         @sorted_names_with_underscores << [key, '_' + key]
         @sorted_names_with_underscores.sort! { |(a, _), (b, _)| b.length <=> a.length }
 
+        @max_name_length = key.length if key.length > @max_name_length
         @collection[key] = value
       end
     end

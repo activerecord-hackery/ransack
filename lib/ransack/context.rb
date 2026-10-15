@@ -3,13 +3,25 @@ require 'ransack/visitor'
 module Ransack
   class Context
     attr_reader :search, :object, :klass, :base, :engine, :arel_visitor
-    attr_accessor :auth_object, :search_key, :ignore_unknown_conditions
+    attr_accessor :search_key, :ignore_unknown_conditions
+    attr_reader :auth_object, :permitted
     attr_writer :null_sentinel
+
+    # The allowlists are read once per model and kept for the life of the
+    # context (see `allowlist_set`), so changing what they depend on drops
+    # the kept copies.
+    def auth_object=(value)
+      reset_name_caches
+      @auth_object = value
+    end
 
     # True when the search was built from `ActionController::Parameters` the
     # controller permitted. A model with no allowlist of its own then lets
     # that permit list be the boundary (see `allowlist` below).
-    attr_accessor :permitted
+    def permitted=(value)
+      reset_name_caches
+      @permitted = value
+    end
 
     class << self
 
@@ -240,9 +252,19 @@ module Ransack
     # `term_or_daddy` with `term => name_or_email` becomes
     # `name_or_email_or_parent_name`. Returns the name unchanged when it
     # holds no alias.
+    #
+    # A key is resolved several times while a search is built (to check it,
+    # to split it into attributes, to bind them), so the result is kept for
+    # the life of the context, frozen, and dropped with the allowlists it
+    # depends on.
     def resolve_aliases(str)
       return str.to_s unless key_within_depth_limit?(str)
 
+      key = str.to_s
+      (@resolved_aliases ||= {})[key] ||= -resolve_aliases_uncached(key)
+    end
+
+    def resolve_aliases_uncached(str)
       whole = resolve_alias_segment(str)
       return whole if whole != str
       # A name that is an attribute in its own right is never split, even if
@@ -256,17 +278,18 @@ module Ransack
       combinator = str[/_(or|and)_/, 1] || Constants::OR
       resolved.join("_#{combinator}_")
     end
+    private :resolve_aliases_uncached
 
     def ransackable_attribute?(str, klass)
-      attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
+      allowlist_set(klass, :attributes_for).include?(str.to_s)
     end
 
     def ransortable_attribute?(str, klass)
-      sortable_attributes_for(klass).any? { |s| s.to_sym == str.to_sym }
+      allowlist_set(klass, :sortable_attributes_for).include?(str.to_s)
     end
 
     def ransackable_association?(str, klass)
-      associations_for(klass).any? { |s| s.to_sym == str.to_sym }
+      allowlist_set(klass, :associations_for).include?(str.to_s)
     end
 
     def ransackable_scope?(str, klass)
@@ -299,6 +322,20 @@ module Ransack
     def use_ancestors_of(_association); end
 
     private
+
+    # Every name in a search is checked against the allowlists several times
+    # over, and each check used to call the model's `ransackable_*` method
+    # and scan the array it returned. They are asked once per model per
+    # context instead, and what is cached here is dropped whenever the auth
+    # object or the permitted flag changes.
+    def reset_name_caches
+      @allowlist_sets = @resolved_aliases = @attribute_methods = nil
+    end
+
+    def allowlist_set(klass, kind)
+      ((@allowlist_sets ||= {})[kind] ||= {})[klass] ||=
+        send(kind, klass).to_set(&:to_s).freeze
+    end
 
     def attributes_for(klass)
       allowlist(klass, :ransackable_attributes) { klass.authorizable_ransackable_attributes }
