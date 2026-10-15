@@ -88,8 +88,8 @@ module Ransack
       private
 
       # Active Record's private append_constraints takes a leading connection
-      # argument in 7.2.0–7.2.2.2 and 8.0.0–8.0.2, and none in 7.2.3+, 8.0.3+
-      # and 8.1; the arity says which is loaded.
+      # argument in 8.0.0–8.0.2, and none in 8.0.3+ and 8.1; the arity says
+      # which is loaded.
       def append_constraints_to(join, constraints)
         if method(:append_constraints).arity == 3
           base_klass.with_connection do |connection|

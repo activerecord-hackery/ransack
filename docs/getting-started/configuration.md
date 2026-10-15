@@ -228,8 +228,8 @@ Person.ransack(s: 'name asc').result.to_sql
 > This was called `postgres_fields_sort_option` before Ransack 5.0, and was built
 > by interpolating SQL fragments. It now goes through Arel's `nulls_first` /
 > `nulls_last` nodes, so it works on every database Arel renders them for,
-> including MySQL, where Arel emulates them as `ORDER BY col IS NULL, col`
-> (Rails 7.2 and later). The old name still works.
+> including MySQL, where Arel emulates them as `ORDER BY col IS NULL, col`.
+> The old name still works.
 ## Custom search parameter key name
 
 Sometimes there are situations when the default search parameter name cannot be used, for instance,
