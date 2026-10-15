@@ -72,80 +72,88 @@ module Ransack
 
       private
 
-      def attribute_name(context, name, include_associations = nil)
-        @context, @name = context, name
-        @assoc_path = context.association_path(name)
-        @attr_name = @name.sub(/^#{@assoc_path}_/, ''.freeze)
-        associated_class = @context.traverse(@assoc_path) if @assoc_path.present?
-        @include_associated = include_associations && associated_class
+      # The module is shared by every thread, so nothing here is kept between
+      # calls: each helper is handed what it needs. Storing the name being
+      # translated on the module let one request read another's while both
+      # rendered sort links.
+      AttributeName = Struct.new(:context, :name, :attr_name, :assoc_path,
+                                 :associated_class, :include_associated)
+      private_constant :AttributeName
 
-        defaults = default_attribute_name << fallback_args
+      def attribute_name(context, name, include_associations = nil)
+        assoc_path = context.association_path(name)
+        associated_class = context.traverse(assoc_path) if assoc_path.present?
+        part = AttributeName.new(
+          context, name, name.sub(/\A#{Regexp.escape(assoc_path)}_/, ''.freeze),
+          assoc_path, associated_class, include_associations && associated_class
+        )
+
+        defaults = default_attribute_name(part) << fallback_args(part)
         options = { count: 1, default: defaults }
-        interpolations = build_interpolations(associated_class)
+        interpolations = build_interpolations(part)
 
         I18n.translate(defaults.shift, **options.merge(interpolations))
       end
 
-      def default_attribute_name
-        ["ransack.attributes.#{i18n_key(@context.klass)}.#{@name}".to_sym]
+      def default_attribute_name(part)
+        ["ransack.attributes.#{i18n_key(part.context.klass)}.#{part.name}".to_sym]
       end
 
-      def fallback_args
-        if @include_associated
+      def fallback_args(part)
+        if part.include_associated
           '%{association_name} %{attr_fallback_name}'.freeze
         else
           '%{attr_fallback_name}'.freeze
         end
       end
 
-      def build_interpolations(associated_class)
+      def build_interpolations(part)
         {
-          attr_fallback_name: attr_fallback_name(associated_class),
-          association_name: association_name
+          attr_fallback_name: attr_fallback_name(part),
+          association_name: association_name(part)
         }.reject { |_, value| value.nil? }
       end
 
-      def attr_fallback_name(associated_class)
+      def attr_fallback_name(part)
         I18n.t(
-          :"ransack.attributes.#{fallback_class(associated_class)}.#{@attr_name}",
-          default: default_interpolation(associated_class)
+          :"ransack.attributes.#{fallback_class(part)}.#{part.attr_name}",
+          default: default_interpolation(part)
         )
       end
 
-      def fallback_class(associated_class)
-        i18n_key(associated_class || @context.klass)
+      def fallback_class(part)
+        i18n_key(part.associated_class || part.context.klass)
       end
 
-      def association_name
-        association(@assoc_path, context: @context) if @include_associated
+      def association_name(part)
+        association(part.assoc_path, context: part.context) if part.include_associated
       end
 
-      def default_interpolation(associated_class)
+      def default_interpolation(part)
         [
-          associated_attribute(associated_class),
-          ".attributes.#{@attr_name}".to_sym,
-          @attr_name.humanize
+          associated_attribute(part),
+          ".attributes.#{part.attr_name}".to_sym,
+          part.attr_name.humanize
         ].flatten
       end
 
-      def associated_attribute(associated_class)
-        if associated_class
-          translated_attribute(associated_class)
+      def associated_attribute(part)
+        if part.associated_class
+          translated_attribute(part.associated_class, part.attr_name)
         else
-          translated_ancestor_attributes
+          translated_ancestor_attributes(part)
         end
       end
 
-      def translated_attribute(associated_class)
-        key = "#{associated_class.i18n_scope}.attributes.#{
-        i18n_key(associated_class)}.#{@attr_name}"
+      def translated_attribute(klass, attr_name)
+        key = "#{klass.i18n_scope}.attributes.#{i18n_key(klass)}.#{attr_name}"
         ["#{key}.one".to_sym, key.to_sym]
       end
 
-      def translated_ancestor_attributes
-        @context.klass.ancestors
+      def translated_ancestor_attributes(part)
+        part.context.klass.ancestors
           .select { |ancestor| ancestor.respond_to?(:model_name) }
-          .map { |ancestor| translated_attribute(ancestor) }
+          .map { |ancestor| translated_attribute(ancestor, part.attr_name) }
       end
 
       def i18n_key(klass)
