@@ -11,6 +11,8 @@ Ransack attempts to follow semantic versioning in the format of `x.y.z`, where:
 `x` stands for a major version (new features that are not backward-compatible).
 
 `y` stands for a minor version (new features that are backward-compatible).
+A minor version can also drop support for a Ruby or Rails version that has
+reached end of life.
 
 `z` stands for a patch (bug fixes).
 
