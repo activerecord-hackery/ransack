@@ -159,6 +159,15 @@ module Ransack
         let!(:writer)   { Person.create!(name: "writer #{suffix}").tap { |p| p.articles.create!(title: 'Post', body: 'ok') } }
         let!(:idle)     { Person.create!(name: "idle #{suffix}") }
 
+        # Rows persist across examples, and other specs count them.
+        after do
+          [tagged_ruby, tagged_rails].each { |article| article.tags.clear }
+          [tagged_ruby, tagged_rails, untagged, ruby, rails].each(&:delete)
+          people = [drafter, spammer, writer, idle]
+          Article.unscoped.where(person_id: people.map(&:id)).delete_all
+          people.each(&:delete)
+        end
+
         it 'are the same on every call (the #1745 repro)' do
           search = Article.ransack(tags_name_not_in: [ruby.name], title_end: suffix)
           first = search.result.to_a
