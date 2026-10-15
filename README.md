@@ -1,9 +1,14 @@
-# ![Ransack](./docs/assets/logo/ransack-h.png "Ransack")
+# Ransack
+
+> Search everywhere and in a hurry!
 
 [![Build Status](https://github.com/activerecord-hackery/ransack/workflows/test/badge.svg)](https://github.com/activerecord-hackery/ransack/actions)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/activerecord-hackery/ransack)
-[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
+
+# Support us
+
+Ransack is maintained by volunteer work. If it is useful to you, please consider supporting us via [Open Collective](https://opencollective.com/ransack)
+
 
 # Introduction
 
@@ -13,7 +18,7 @@ There are advanced searching solutions around, like ElasticSearch or Algolia. **
 
 Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
 
-Ransack is supported for Rails 8.1 and 8.0 on Ruby 3.3 and later.
+Ransack is supported for Rails 8.1 and 8.0 on Ruby 3.4 and later, on Postgres, MySQL, Trilogy and SQLite.
 
 ## Installation
 
@@ -56,11 +61,8 @@ broken or missing. A failing spec to demonstrate the issue is awesome. A pull
 request with passing tests is even better!
 * Before filing an issue or pull request, be sure to read and follow the
 [Contributing Guide](CONTRIBUTING.md).
-* Please use Stack Overflow or [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) for questions or discussion not
+* Please use [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) for questions or discussion not
 directly related to bug reports, pull requests, or documentation improvements.
-* Spread the word on social media if Ransack's been useful
-to you. The more people who are using the project, the quicker we can find and
-fix bugs!
 
 ## Ransack for enterprise
 
@@ -74,14 +76,14 @@ To report a security vulnerability, please use the [Tidelift security contact](h
 
 ## Contributors
 
-Ransack was created by [Ernie Miller](http://twitter.com/erniemiller) and is developed and maintained by:
+Ransack is maintained by:
 * [Sean Carroll](https://github.com/scarroll32)
 * [Deivid Rodriguez](https://github.com/deivid-rodriguez)
 * [Greg Molnar](https://github.com/gregmolnar)
 * [A great group of contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
-- Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).
 
 Alumni Maintainers
+- [Ernie Miller](http://twitter.com/erniemiller) (original author)
 - [Jon Atack](http://twitter.com/jonatack)
 - [Ryan Bigg](http://twitter.com/ryanbigg)
 
