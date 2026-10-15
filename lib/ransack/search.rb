@@ -57,14 +57,23 @@ module Ransack
       @context.evaluate(self, opts)
     end
 
+    GROUPING_KEYS = %w[g c m groupings conditions combinator].to_set.freeze
+    private_constant :GROUPING_KEYS
+
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
         if ['s'.freeze, 'sorts'.freeze].freeze.include?(key)
           send("#{key}=", value)
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
-        elsif base.attribute_method?(key)
+        elsif GROUPING_KEYS.include?(key)
           base.send("#{key}=", value)
+        elsif base.attribute_method?(key)
+          # Straight to the writer: going through the grouping's
+          # method_missing would check the key a second time, and would
+          # send a key that happens to name one of its own writers
+          # (`i18n_words`) there instead of building a condition.
+          base.send(:write_attribute, key, value)
         elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
           raise InvalidSearchError, "Invalid search term #{key}"
         end

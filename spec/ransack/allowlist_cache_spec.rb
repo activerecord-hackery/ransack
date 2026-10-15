@@ -54,6 +54,12 @@ module Ransack
       expect(context.attribute_method?('children_only_admin')).to be true
     end
 
+    it 'checks each top-level key once while building' do
+      expect_any_instance_of(Nodes::Grouping)
+        .to receive(:attribute_method?).with('name_cont').once.and_call_original
+      expect(Person.ransack(name_cont: 'a').result.to_sql).to include 'LIKE'
+    end
+
     it 'matches symbol and string allowlists alike' do
       allow(Person).to receive(:ransackable_attributes).and_return(%i[name])
       expect(context.ransackable_attribute?('name', Person)).to be true
