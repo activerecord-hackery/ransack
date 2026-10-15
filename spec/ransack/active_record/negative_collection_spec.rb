@@ -227,6 +227,83 @@ module Ransack
         end
       end
 
+      # Evaluating the search leaves its context as it was, so a sort or
+      # condition added after `result` lines up with the query Active Record
+      # builds. Before, the dropped join was gone from the context: a later
+      # sort on the collection had no join, and a later condition was bound
+      # to an alias (`articles_people`) the query did not have (#1750).
+      describe 'changing the search after result' do
+        def evaluated(params = { articles_title_not_eq: 'Draft' })
+          Person.ransack(params).tap { |search| search.result.to_a }
+        end
+
+        it 'keeps the context relation and its joins' do
+          search = Person.ransack(articles_title_not_eq: 'Draft')
+          before = search.context.object.left_outer_joins_values.dup
+          search.result.to_a
+          expect(search.context.object.left_outer_joins_values).to eq before
+          expect(search.context.join_sources.size).to eq 1
+        end
+
+        it 'accepts a sort on the same collection' do
+          search = evaluated
+          search.sorts = 'articles_title asc'
+          sql = expect_stable(search)
+          expect(outer_query(sql)).to include("LEFT OUTER JOIN #{t('articles')} ON")
+          expect(sql).to include("ORDER BY #{t('articles')}.#{c('title')} ASC")
+        end
+
+        it 'accepts a positive condition on the same collection' do
+          search = evaluated
+          search.build('articles_body_eq' => 'x')
+          sql = expect_stable(search)
+          expect(sql).to include("#{t('articles')}.#{c('body')} = 'x'")
+          expect(sql).not_to include('articles_people')
+        end
+
+        it 'accepts a negative condition on the same collection' do
+          search = evaluated
+          search.build('articles_body_not_eq' => 'x')
+          sql = expect_stable(search)
+          expect(subquery_count(sql)).to eq 2
+          expect(sql).not_to include('JOIN')
+        end
+
+        it 'accepts a condition nested under the collection' do
+          search = evaluated
+          search.build('articles_comments_body_eq' => 'x')
+          sql = expect_stable(search)
+          expect(outer_query(sql)).to include("JOIN #{t('articles')}")
+          expect(outer_query(sql)).to include("JOIN #{t('comments')}")
+        end
+
+        it 'gives the same SQL as a search built with everything up front' do
+          search = evaluated
+          search.build('articles_body_eq' => 'x')
+          search.sorts = 'articles_title asc'
+          upfront = Person.ransack(articles_title_not_eq: 'Draft', articles_body_eq: 'x', s: 'articles_title asc')
+          expect(search.result.to_sql).to eq upfront.result.to_sql
+        end
+
+        it 'leaves a relation returned earlier unchanged' do
+          search = Person.ransack(articles_title_not_eq: 'Draft')
+          first = search.result
+          sql = first.to_sql
+          search.build('articles_body_eq' => 'x')
+          search.result.to_a
+          expect(first.to_sql).to eq sql
+        end
+
+        it 'does not affect another search sharing the context' do
+          context = Context.for(Person)
+          negative = Search.new(Person, { articles_title_not_eq: 'Draft' }, context: context)
+          positive = Search.new(Person, { comments_body_eq: 'x' }, context: context)
+          negative.result.to_a
+          sql = expect_stable(positive)
+          expect(sql).to include("#{t('comments')}.#{c('body')} = 'x'")
+        end
+      end
+
       describe 'the records returned' do
         let(:suffix)   { SecureRandom.hex(4) }
         let!(:ruby)    { Tag.create!(name: "ruby-#{suffix}") }
@@ -295,6 +372,20 @@ module Ransack
           expect(search.result.to_a).to eq [writer]
         end
 
+        it 'are right when the search is changed after result' do
+          search = Person.ransack(articles_title_not_eq: 'Draft', name_end: suffix)
+          expect(search.result.to_a).to match_array [spammer, writer, idle]
+
+          search.build('articles_body_not_cont' => 'spam')
+          expect(search.result.to_a).to match_array [writer, idle]
+
+          search.sorts = 'articles_title asc'
+          expect(search.result.to_a).to match_array [writer, idle]
+
+          search.build('articles_body_eq' => 'ok')
+          expect(search.result.to_a).to eq [writer]
+        end
+
         it 'keep the same order and count when the result is reused' do
           search = Person.ransack(articles_title_not_eq: 'Draft', name_end: suffix, s: 'name asc')
           expect(search.result.pluck(:name)).to eq ["idle #{suffix}", "spammer #{suffix}", "writer #{suffix}"]
@@ -353,9 +444,16 @@ module Ransack
           expect(context.build_correlated_subquery(association).to_sql).to eq before_removal
         end
 
-        it 'drops the join from the relation' do
+        it 'drops the join from the evaluated relation' do
+          expect(search.result.left_outer_joins_values).to be_empty
+        end
+
+        # The context keeps the join, so a later evaluation or binding sees
+        # the same joins and aliases (#1750).
+        it 'leaves the context relation as it was' do
           context.remove_association(association)
-          expect(context.object.left_outer_joins_values).to be_empty
+          search.result
+          expect(context.object.left_outer_joins_values.size).to eq 1
         end
 
         it 'is safe to call again' do
@@ -363,20 +461,18 @@ module Ransack
           expect(context.build_correlated_subquery(association)).to be_a Arel::SelectManager
         end
 
-        # A later binding must not reuse the removed node: its join is gone
-        # from the relation.
-        it 'does not hand the removed association to a later binding' do
-          context.remove_association(association)
+        # Its join is still on the context's relation, so a later binding
+        # reuses it rather than adding a second, aliased one (#1750).
+        it 'hands the same association to a later binding' do
+          search.result
           attribute = Nodes::Attribute.new(context, 'articles_body')
           context.bind(attribute, attribute.name)
-          expect(attribute.parent).not_to equal association
-          expect(attribute.parent.reflection.name).to eq :articles
+          expect(attribute.parent).to equal association
         end
 
         it 'leaves a locked association in place' do
           context.lock_association(association)
-          context.remove_association(association)
-          expect(context.object.left_outer_joins_values).not_to be_empty
+          expect(search.result.left_outer_joins_values).not_to be_empty
         end
       end
     end

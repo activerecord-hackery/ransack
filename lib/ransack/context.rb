@@ -55,7 +55,7 @@ module Ransack
       @join_type = options[:join_type] || Arel::Nodes::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @associations_pot = {}
-      @removed_associations = {}
+      @dropped_associations = []
       @tables_pot = {}
       @lock_associations = []
       @join_dependency = join_dependency(@object)

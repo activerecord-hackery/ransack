@@ -34,9 +34,16 @@ module Ransack
         attr.klass.type_for_attribute(name).type
       end
 
+      # Evaluating a search leaves the context as it was, so the search can
+      # be evaluated again, or given another condition or sort, and still
+      # line up with the query Active Record builds (#1745, #1750). The
+      # joins a negative condition on a collection replaces with a subquery
+      # are dropped from the relation returned, not from the context.
       def evaluate(search, opts = {})
         viz = Visitor.new
-        relation = @object.where(viz.accept(search.base))
+        @dropped_associations = []
+        predicate = viz.accept(search.base)
+        relation = without_dropped_joins(@object).where(predicate)
 
         if search.sorts.any?
           relation = relation.except(:order)
@@ -174,25 +181,15 @@ module Ransack
         end
       end
 
-      # Drops a join Ransack added, when a negative condition on a collection
-      # replaces it with a correlated subquery. A join the relation already
-      # had, or one another condition needs, is locked and stays.
-      #
-      # The parent is kept aside, because the condition still holds the
-      # association and builds the subquery from it again each time the
-      # search is evaluated (#1745). Keeping it out of @associations_pot
-      # means a later binding builds a fresh join rather than reusing the
-      # removed one.
+      # Drops a join Ransack added from the relation being evaluated, when a
+      # negative condition on a collection replaces it with a correlated
+      # subquery. A join the relation already had, or one another part of
+      # the search reads, is locked and stays.
       def remove_association(association)
         return if @lock_associations.include?(association)
+        return if @dropped_associations.any? { |dropped| dropped.equal?(association) }
 
-        parent = @associations_pot.delete(association)
-        @removed_associations[association] = parent if parent
-        @base.children.delete_if { |child| child.equal?(association) }
-        @object.left_outer_joins_values = @object.left_outer_joins_values.reject { |jd|
-          jd.is_a?(JoinDependency) &&
-          jd.instance_variable_get(:@join_root).children.map(&:object_id) == [association.object_id]
-        }
+        @dropped_associations << association
       end
 
       # Build an Arel subquery that selects keys for the top query,
@@ -453,7 +450,6 @@ module Ransack
 
       def parent_of(node)
         @associations_pot[node] ||
-          @removed_associations[node] ||
           @base.detect { |candidate| candidate.children.any? { |child| child.equal?(node) } }
       end
 
@@ -461,6 +457,21 @@ module Ransack
       # plus the ones Ransack added under it.
       def children_of(parent)
         parent.children + @associations_pot.select { |_node, node_parent| node_parent.equal?(parent) }.keys
+      end
+
+      # The relation without the joins Ransack added for the associations a
+      # negative condition dropped while this search was evaluated.
+      def without_dropped_joins(relation)
+        return relation if @dropped_associations.empty?
+
+        dropped = @dropped_associations.map(&:object_id)
+        relation = relation.dup
+        relation.left_outer_joins_values = relation.left_outer_joins_values.reject { |jd|
+          jd.is_a?(JoinDependency) &&
+          (children = jd.instance_variable_get(:@join_root).children).size == 1 &&
+          dropped.include?(children.first.object_id)
+        }
+        relation
       end
 
       def build_or_find_association(name, parent = @base, klass = nil)
