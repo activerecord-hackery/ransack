@@ -240,6 +240,28 @@ subquery dropped those conditions, so a note on another model with the same
 id, or a comment hidden by a default scope, still excluded the record
 (#1747).
 
+The join for the collection is dropped only when nothing else in the search
+reads it. A sort on the collection (`s: 'articles_title asc'`), or a condition
+or sort on an association nested under it (`articles_comments_body_eq`), keeps
+the join alongside the subquery. As with any sort on a `has_many`, a record
+then appears once per associated row. Before Ransack 6.0.1 the join was
+dropped anyway and the query failed (#1749).
+
+Evaluating a search doesn't change it, so you can add a condition or a sort
+after calling `result` and evaluate it again:
+
+```ruby
+search = Person.ransack(articles_title_not_eq: 'Draft')
+search.result            # the first page
+search.sorts = 'articles_title asc'
+search.result            # same as building it with the sort up front
+```
+
+Before Ransack 6.0.1 the second query referenced a join the first evaluation
+had dropped (#1750). The joins are chosen from the search as it stands when
+it is evaluated, so a sort or condition you clear takes its join with it
+rather than leaving one behind to repeat records.
+
 `not_null` is the exception: `articles_title_not_null: true` means *at least
 one* associated record has a value (`"people"."id" IN (SELECT ... WHERE
 "articles"."title" IS NOT NULL)`), so it excludes people with no articles.

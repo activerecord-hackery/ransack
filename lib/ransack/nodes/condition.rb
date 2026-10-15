@@ -211,9 +211,6 @@ module Ransack
         Attribute.new(@context, name, ransacker_args).tap do |attribute|
           @context.bind(attribute, attribute.name)
           self.attributes << attribute if name.nil? || attribute.valid?
-          if predicate && !negative?
-            @context.lock_association(attribute.parent)
-          end
         end
       end
 
@@ -287,9 +284,6 @@ module Ransack
 
       def predicate_name=(name)
         self.predicate = Predicate.named(name)
-        if predicate && !negative?
-          attributes.each { |a| context.lock_association(a.parent) }
-        end
         @predicate
       end
       alias :p= :predicate_name=
@@ -389,7 +383,7 @@ module Ransack
 
           predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
             outer_key, query = context.correlated_subquery(association)
-            context.remove_association(association)
+            context.use_ancestors_of(association)
 
             case self.predicate_name
             when 'not_null'
@@ -408,6 +402,7 @@ module Ransack
               Arel::Nodes::NotIn.new(outer_key, Arel.sql(context.subquery_sql(query)))
             end
           else
+            context.use_association(attribute.parent)
             format_predicate(attribute)
           end
 

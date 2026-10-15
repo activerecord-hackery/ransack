@@ -55,7 +55,6 @@ module Ransack
       @join_type = options[:join_type] || Arel::Nodes::OuterJoin
       @search_key = options[:search_key] || Ransack.options[:search_key]
       @associations_pot = {}
-      @removed_associations = {}
       @tables_pot = {}
       @lock_associations = []
       @join_dependency = join_dependency(@object)
@@ -289,6 +288,15 @@ module Ransack
     def searchable_associations(str = ''.freeze)
       associations_for(traverse(str))
     end
+
+    # Hooks a condition calls to record the joins it reads. The Active
+    # Record context overrides them; a context registered for another ORM
+    # need not, and a search through it still builds.
+    def lock_association(_association); end
+
+    def use_association(_association); end
+
+    def use_ancestors_of(_association); end
 
     private
 
