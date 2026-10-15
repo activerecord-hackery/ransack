@@ -249,7 +249,9 @@ search.result            # same as building it with the sort up front
 ```
 
 Before Ransack 6.0.1 the second query referenced a join the first evaluation
-had dropped (#1750).
+had dropped (#1750). The joins are chosen from the search as it stands when
+it is evaluated, so a sort or condition you clear takes its join with it
+rather than leaving one behind to repeat records.
 
 `not_null` is the exception: `articles_title_not_null: true` means *at least
 one* associated record has a value (`"people"."id" IN (SELECT ... WHERE

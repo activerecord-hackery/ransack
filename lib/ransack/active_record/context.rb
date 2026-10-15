@@ -36,14 +36,20 @@ module Ransack
 
       # Evaluating a search leaves the context as it was, so the search can
       # be evaluated again, or given another condition or sort, and still
-      # line up with the query Active Record builds (#1745, #1750). The
-      # joins a negative condition on a collection replaces with a subquery
-      # are dropped from the relation returned, not from the context.
+      # line up with the query Active Record builds (#1745, #1750).
+      #
+      # The relation returned keeps only the joins Ransack added that the
+      # search, as it stands now, reads: a condition or sort on the joined
+      # table, or one on an association reached through it. A negative
+      # condition on a collection is a correlated subquery and reads none of
+      # its own. Joins the relation already had are always kept.
       def evaluate(search, opts = {})
         viz = Visitor.new
-        @dropped_associations = []
-        predicate = viz.accept(search.base)
-        relation = without_dropped_joins(@object).where(predicate)
+        predicate, used = tracking_used_associations do
+          search.sorts.each { |sort| use_association(sort.parent) if sort.valid? }
+          viz.accept(search.base)
+        end
+        relation = with_joins_used_by(@object, used).where(predicate)
 
         if search.sorts.any?
           relation = relation.except(:order)
@@ -162,35 +168,29 @@ module Ransack
         @join_dependency.send(:alias_tracker)
       end
 
-      # Keeps a join, and every join it hangs off, that a negative condition
-      # on a collection would otherwise drop: a positive condition or a sort
-      # reads the joined table (#1749).
+      # Keeps a join, and every join it hangs off, in every evaluation,
+      # whether or not the search reads it.
       def lock_association(association)
         @lock_associations << association
-        lock_ancestors_of(association)
       end
 
-      # Keeps the joins an association hangs off, but not its own. A negative
-      # condition on a collection needs no join of its own, since it becomes
-      # a subquery, but one nested under another collection still needs that
-      # collection's join to reach its table.
-      def lock_ancestors_of(association)
-        node = association
-        while node && (node = parent_of(node)) && !node.equal?(@base)
-          @lock_associations << node
-        end
+      # Records that the search being evaluated reads the association's
+      # joined table, so its join, and every join it hangs off, stays.
+      def use_association(association)
+        @used_associations << association if @used_associations && association
       end
 
-      # Drops a join Ransack added from the relation being evaluated, when a
-      # negative condition on a collection replaces it with a correlated
-      # subquery. A join the relation already had, or one another part of
-      # the search reads, is locked and stays.
-      def remove_association(association)
-        return if @lock_associations.include?(association)
-        return if @dropped_associations.any? { |dropped| dropped.equal?(association) }
-
-        @dropped_associations << association
+      # Records that the search being evaluated reads the joins the
+      # association hangs off but not its own: a negative condition on a
+      # collection is a subquery, but one nested under another collection
+      # still needs that collection's join.
+      def use_ancestors_of(association)
+        use_association(parent_of(association)) if association
       end
+
+      # Kept for callers of the 6.0.0 API. Evaluation now keeps only the
+      # joins the search reads, so a join nothing reads is already left out.
+      def remove_association(_association); end
 
       # Build an Arel subquery that selects keys for the top query,
       # drawn from the first join association's foreign_key.
@@ -459,19 +459,44 @@ module Ransack
         parent.children + @associations_pot.select { |_node, node_parent| node_parent.equal?(parent) }.keys
       end
 
-      # The relation without the joins Ransack added for the associations a
-      # negative condition dropped while this search was evaluated.
-      def without_dropped_joins(relation)
-        return relation if @dropped_associations.empty?
+      # Collects the associations the block's evaluation reads. Saved and
+      # restored, so an evaluation nested inside another one (a ransacker
+      # that runs a search on this context) keeps its own list.
+      def tracking_used_associations
+        outer = @used_associations
+        @used_associations = []
+        result = yield
+        [result, @used_associations]
+      ensure
+        @used_associations = outer
+      end
 
-        dropped = @dropped_associations.map(&:object_id)
+      # The relation without the joins Ransack added that the search does not
+      # read. A join the relation already had is not Ransack's, and stays.
+      def with_joins_used_by(relation, used)
+        needed = with_ancestors(used + @lock_associations).map(&:object_id)
+        unused = @associations_pot.keys.map(&:object_id) - needed
+        return relation if unused.empty?
+
         relation = relation.dup
         relation.left_outer_joins_values = relation.left_outer_joins_values.reject { |jd|
           jd.is_a?(JoinDependency) &&
           (children = jd.instance_variable_get(:@join_root).children).size == 1 &&
-          dropped.include?(children.first.object_id)
+          unused.include?(children.first.object_id)
         }
         relation
+      end
+
+      def with_ancestors(associations)
+        associations.flat_map do |association|
+          chain = []
+          node = association
+          while node && !node.equal?(@base)
+            chain << node
+            node = parent_of(node)
+          end
+          chain
+        end
       end
 
       def build_or_find_association(name, parent = @base, klass = nil)

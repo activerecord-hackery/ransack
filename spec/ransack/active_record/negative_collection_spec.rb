@@ -304,6 +304,66 @@ module Ransack
         end
       end
 
+      # The joins kept are the ones the search reads when it is evaluated,
+      # not the ones its conditions and sorts read when they were built: a
+      # sort or condition cleared before `result` leaves no join behind to
+      # multiply the rows.
+      describe 'a condition or sort removed before result' do
+        it 'leaves no join for a cleared sort on the collection' do
+          search = Person.ransack(articles_title_not_eq: 'Draft', s: 'articles_title asc')
+          search.sorts = []
+          sql = expect_stable(search)
+          expect(sql).not_to include('JOIN')
+          expect(subquery_count(sql)).to eq 1
+        end
+
+        it 'leaves no join for a sort cleared after result' do
+          search = Person.ransack(articles_title_not_eq: 'Draft', s: 'articles_title asc')
+          search.result.to_a
+          search.sorts = []
+          expect(expect_stable(search)).not_to include('JOIN')
+        end
+
+        it 'leaves no join for a negative condition cleared after result' do
+          search = Person.ransack(articles_title_not_eq: 'Draft')
+          search.result.to_a
+          search.base.conditions.clear
+          expect(expect_stable(search)).not_to include('JOIN')
+        end
+
+        it 'leaves no join for a cleared positive condition' do
+          search = Person.ransack(articles_title_eq: 'x')
+          search.base.conditions.clear
+          expect(expect_stable(search)).not_to include('JOIN')
+        end
+
+        it 'keeps the join a remaining sort reads' do
+          search = Person.ransack(articles_title_not_eq: 'Draft', articles_body_eq: 'x', s: 'articles_title asc')
+          search.base.conditions.clear
+          expect(outer_query(expect_stable(search))).to include("LEFT OUTER JOIN #{t('articles')}")
+        end
+      end
+
+      # A ransacker can run a search on the same context while the outer
+      # search is being evaluated. The inner evaluation keeps its own record
+      # of the joins it reads, so the outer one still drops the join its
+      # negative condition replaced.
+      describe 'an evaluation nested in another' do
+        it 'does not change which joins the outer evaluation keeps' do
+          context = Context.for(Person)
+          outer = Search.new(Person, { articles_title_not_eq: 'Draft', name_eq: 'x' }, context: context)
+          inner = Search.new(Person, {}, context: context)
+          allow(context).to receive(:type_for).and_wrap_original do |original, attribute|
+            inner.result.to_a if attribute.name == 'name'
+            original.call(attribute)
+          end
+
+          sql = outer.result.to_sql
+          expect(sql).not_to include('JOIN')
+          expect(subquery_count(sql)).to eq 1
+        end
+      end
+
       describe 'the records returned' do
         let(:suffix)   { SecureRandom.hex(4) }
         let!(:ruby)    { Tag.create!(name: "ruby-#{suffix}") }
@@ -386,6 +446,18 @@ module Ransack
           expect(search.result.to_a).to eq [writer]
         end
 
+        it 'are not repeated once a sort on the collection is cleared' do
+          writer.articles.create!(title: 'Second post', body: 'ok')
+          search = Person.ransack(articles_title_not_eq: 'Draft', name_end: suffix, s: 'articles_title asc')
+          search.sorts = []
+          expect(search.result.to_a).to match_array [spammer, writer, idle]
+
+          search.result.to_a
+          search.base.conditions.clear
+          search.build('name_end' => suffix)
+          expect(search.result.to_a).to match_array [drafter, spammer, writer, idle]
+        end
+
         it 'keep the same order and count when the result is reused' do
           search = Person.ransack(articles_title_not_eq: 'Draft', name_end: suffix, s: 'name asc')
           expect(search.result.pluck(:name)).to eq ["idle #{suffix}", "spammer #{suffix}", "writer #{suffix}"]
@@ -396,83 +468,69 @@ module Ransack
     end
 
     describe Context do
-      describe '#lock_association' do
-        let(:context) { Context.for(Person) }
-        let(:search)  { Search.new(Person, { articles_comments_body_eq: 'x' }, context: context) }
-        let(:comments) { search.conditions.first.attributes.first.parent }
-        let(:articles) { context.send(:parent_of, comments) }
+      let(:context) { Context.for(Person) }
 
-        it 'locks the association and the ones it hangs off' do
-          context.remove_association(articles)
-          context.remove_association(comments)
-          expect(context.object.left_outer_joins_values.size).to eq 2
-        end
-
-        it 'does not lock the base' do
-          expect(context.instance_variable_get(:@lock_associations)).not_to include(context.base)
-        end
-      end
-
-      describe '#lock_ancestors_of' do
-        let(:context) { Context.for(Person) }
-        let(:search)  { Search.new(Person, { articles_comments_body_not_eq: 'x' }, context: context) }
-        let(:comments) { search.conditions.first.attributes.first.parent }
-        let(:articles) { context.send(:parent_of, comments) }
-
-        it 'locks the associations it hangs off but not its own' do
-          locked = context.instance_variable_get(:@lock_associations)
-          expect(locked).to include(articles)
-          expect(locked).not_to include(comments)
-        end
-
-        it 'does nothing for an association on the base' do
-          context = Context.for(Person)
-          search = Search.new(Person, { articles_title_not_eq: 'x' }, context: context)
-          context.lock_ancestors_of(search.conditions.first.attributes.first.parent)
-          expect(context.instance_variable_get(:@lock_associations)).to be_empty
-        end
-      end
-
-      describe '#remove_association' do
-        let(:context) { Context.for(Person) }
-        let(:search)  { Search.new(Person, { articles_title_not_eq: 'Draft' }, context: context) }
+      describe '#evaluate' do
+        let(:search)      { Search.new(Person, { articles_title_not_eq: 'Draft' }, context: context) }
         let(:association) { search.conditions.first.attributes.first.parent }
 
-        it 'keeps the subquery buildable once the join is removed' do
-          before_removal = context.build_correlated_subquery(association).to_sql
-          context.remove_association(association)
-          expect(context.build_correlated_subquery(association).to_sql).to eq before_removal
+        it 'keeps the subquery buildable after an evaluation' do
+          before_evaluation = context.build_correlated_subquery(association).to_sql
+          search.result
+          expect(context.build_correlated_subquery(association).to_sql).to eq before_evaluation
         end
 
-        it 'drops the join from the evaluated relation' do
+        it 'drops a join the search does not read from the evaluated relation' do
           expect(search.result.left_outer_joins_values).to be_empty
         end
 
         # The context keeps the join, so a later evaluation or binding sees
         # the same joins and aliases (#1750).
         it 'leaves the context relation as it was' do
-          context.remove_association(association)
           search.result
           expect(context.object.left_outer_joins_values.size).to eq 1
         end
 
-        it 'is safe to call again' do
-          2.times { context.remove_association(association) }
-          expect(context.build_correlated_subquery(association)).to be_a Arel::SelectManager
-        end
-
-        # Its join is still on the context's relation, so a later binding
-        # reuses it rather than adding a second, aliased one (#1750).
         it 'hands the same association to a later binding' do
           search.result
           attribute = Nodes::Attribute.new(context, 'articles_body')
           context.bind(attribute, attribute.name)
           expect(attribute.parent).to equal association
         end
+      end
 
-        it 'leaves a locked association in place' do
+      describe '#lock_association' do
+        let(:search)   { Search.new(Person, { articles_comments_body_eq: 'x' }, context: context) }
+        let(:comments) { search.conditions.first.attributes.first.parent }
+
+        it 'keeps the join, and the ones it hangs off, when the search reads neither' do
+          association = comments
+          search.base.conditions.clear
           context.lock_association(association)
-          expect(search.result.left_outer_joins_values).not_to be_empty
+          expect(search.result.left_outer_joins_values.size).to eq 2
+        end
+      end
+
+      describe '#use_association and #use_ancestors_of' do
+        let(:search)      { Search.new(Person, { articles_title_eq: 'x' }, context: context) }
+        let(:association) { search.conditions.first.attributes.first.parent }
+
+        it 'do nothing outside an evaluation' do
+          expect { context.use_association(association) }.not_to raise_error
+          expect { context.use_ancestors_of(association) }.not_to raise_error
+          expect(context.instance_variable_get(:@used_associations)).to be_nil
+        end
+      end
+
+      describe '#remove_association' do
+        let(:search)      { Search.new(Person, { articles_title_eq: 'x' }, context: context) }
+        let(:association) { search.conditions.first.attributes.first.parent }
+
+        # Kept for callers of the 6.0.0 API.
+        it 'changes nothing' do
+          context.remove_association(association)
+          expect(context.object.left_outer_joins_values.size).to eq 1
+          expect(search.result.left_outer_joins_values.size).to eq 1
         end
       end
     end
