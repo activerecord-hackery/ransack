@@ -15,14 +15,14 @@ changes in every release is in the
 
 ## Upgrading to 6.1
 
-### Ruby 3.3 and Rails 8.0 or later are required
+### Ruby 3.3 and Rails 8.1 or later are required
 
-Ruby 3.2 reached end of life in March 2026 and Rails 7.2 in August 2026;
-neither receives security fixes any more. Ransack 6.1 requires Ruby 3.3 or
-later and Active Record 8.0 or later. Nothing else changes: if you are on a
-supported Ruby and Rails, upgrading needs no code changes. If you are still on
-Ruby 3.2 or Rails 7.2, stay on Ransack 6.0 until you can upgrade; Bundler will
-not resolve 6.1 for you.
+Ruby 3.2 reached end of life in March 2026, Rails 7.2 in August 2026 and
+Rails 8.0 in November 2026; none of them receives security fixes any more.
+Ransack 6.1 requires Ruby 3.3 or later and Active Record 8.1 or later. Nothing
+else changes: if you are on a supported Ruby and Rails, upgrading needs no code
+changes. If you are still on Ruby 3.2 or Rails 8.0 or earlier, stay on Ransack
+6.0 until you can upgrade; Bundler will not resolve 6.1 for you.
 
 ### Malformed search params raise `InvalidSearchError`
 

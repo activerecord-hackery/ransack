@@ -8,7 +8,7 @@
 Ransack adds **searching and sorting to your Rails application** with plain Ruby
 and ERB, without a search server or any other infrastructure.
 
-Ransack is supported for Rails 8.1 and 8.0 on Ruby 3.4 and later, on Postgres, MySQL, Trilogy and SQLite.
+Ransack is supported for Rails 8.1 on Ruby 3.4 and later, on Postgres, MySQL, Trilogy and SQLite.
 
 ```ruby
 gem 'ransack'
