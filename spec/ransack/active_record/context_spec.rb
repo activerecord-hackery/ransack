@@ -48,6 +48,54 @@ module Ransack
         end
       end
 
+      describe '#type_for on a table the schema cache does not list' do
+        # #1770: a temporary table is queryable but is not a data source the
+        # schema cache knows about, so the search raised "No table named
+        # temp_widgets exists." (#657).
+        context 'a temporary table' do
+          before(:all) do
+            ::ActiveRecord::Base.lease_connection.create_table(:temp_widgets, temporary: true, force: true) do |t|
+              t.string :name
+            end
+          end
+          after(:all) { ::ActiveRecord::Base.lease_connection.drop_table(:temp_widgets, if_exists: true) }
+          before { stub_const('TempWidget', Class.new(ApplicationRecord) { self.table_name = 'temp_widgets' }) }
+
+          it 'can be searched' do
+            TempWidget.create!(name: 'sprocket')
+            expect(TempWidget.ransack(name_cont: 'rock').result.pluck(:name)).to eq ['sprocket']
+          end
+        end
+
+        # #1770: SQLite matches table names case-insensitively, so a model
+        # whose table_name is "widgets" queries a table created as "Widgets",
+        # but the schema cache lookup is case-sensitive (#668).
+        context 'a table whose name differs only in case', if: RansackHelper.dialect.sqlite? do
+          before(:all) do
+            ::ActiveRecord::Base.lease_connection.create_table(:Widgets, force: true) { |t| t.string :name }
+          end
+          after(:all) { ::ActiveRecord::Base.lease_connection.drop_table(:Widgets, if_exists: true) }
+          before { stub_const('Widget', Class.new(ApplicationRecord) { self.table_name = 'widgets' }) }
+
+          it 'can be searched like Active Record queries it' do
+            Widget.create!(name: 'sprocket')
+            expect(Widget.where(name: 'sprocket').count).to eq 1
+            expect(Widget.ransack(name_cont: 'rock').result.pluck(:name)).to eq ['sprocket']
+          end
+        end
+
+        # A table that really is missing still fails, with Active Record's
+        # own error rather than one of Ransack's.
+        context 'a table that does not exist' do
+          before { stub_const('MissingWidget', Class.new(ApplicationRecord) { self.table_name = 'missing_widgets' }) }
+
+          it 'raises the error Active Record raises for it' do
+            expect { MissingWidget.ransack(name_cont: 'rock').result.to_a }
+              .to raise_error(::ActiveRecord::StatementInvalid, /missing_widgets/)
+          end
+        end
+      end
+
       describe 'a polymorphic association name with no _of_Model_type suffix' do
         # `notable_id_or_id` starts with the polymorphic association's name;
         # walking into it used to ask the reflection for a class (#1267).

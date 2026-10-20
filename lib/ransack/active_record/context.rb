@@ -20,15 +20,15 @@ module Ransack
       # Attributes API rather than the schema column, so that
       # `attribute :starts_at, :datetime` on a date column is honoured (#1028);
       # a column with no attribute override reports its column type.
+      #
+      # There is no separate check that the table exists: the schema cache
+      # does not list temporary tables, and matches names case-sensitively
+      # where SQLite does not, so it rejected tables Active Record queries
+      # fine (#1770, #657, #668). A table that really is missing fails when
+      # the model loads its columns, with Active Record's own error.
       def type_for(attr)
         return nil unless attr && attr.valid?
-        relation     = attr.arel_attribute.relation
-        name         = attr.arel_attribute.name.to_s
-        table        = relation.respond_to?(:table_name) ? relation.table_name : relation.name
-        schema_cache = self.klass.connection_pool.schema_cache
-        unless schema_cache.send(:data_source_exists?, table)
-          raise "No table named #{table} exists."
-        end
+        name = attr.arel_attribute.name.to_s
         return nil unless attr.klass.attribute_types.key?(name)
 
         attr.klass.type_for_attribute(name).type
