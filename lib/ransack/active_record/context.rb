@@ -420,14 +420,16 @@ module Ransack
         root.children.each { |child| adopt(mirror, root, child, Arel::Nodes::InnerJoin) }
         stashed.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
         graft(mirror, JoinDependency.new(relation.klass, relation.table, named_joins(left), Arel::Nodes::OuterJoin), Arel::Nodes::OuterJoin)
-        after_eager, before_eager = left.grep(JoinDependency).partition(&:after_eager_load)
+        # The joins a search added after counting the eager load are rendered
+        # after it (JoinDependencyExtensions#eager_load_first), as long as the
+        # relation still eager loads; otherwise they keep their order. Those
+        # this search adds are counted after it too.
+        @eager_loading = !eager_jd.nil? || eager.any?
+        after_eager, before_eager = left.grep(JoinDependency).partition { |jd| @eager_loading && jd.after_eager_load }
         before_eager.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
         graft(mirror, eager_jd, Arel::Nodes::OuterJoin) if eager_jd
         graft(mirror, JoinDependency.new(relation.klass, relation.table, eager, Arel::Nodes::OuterJoin), Arel::Nodes::OuterJoin)
         after_eager.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
-        # The joins this search adds are counted after the eager load, so
-        # they are rendered after it too (JoinDependencyExtensions#eager_load_first).
-        @eager_loading = !eager_jd.nil? || eager.any?
 
         mirror
       end

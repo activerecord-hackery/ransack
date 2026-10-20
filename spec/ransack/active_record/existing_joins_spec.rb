@@ -221,6 +221,24 @@ module Ransack
           end
           expect(join_count(relation.to_sql, 'articles')).to eq 1
         end
+
+        # A join the first search counted after an eager load keeps its place
+        # once the eager load is dropped, so a later search names the joins
+        # the way the query does.
+        it 'keeps the order of its joins after the eager load is dropped' do
+          ::ActiveRecord::Base.transaction do
+            a = Person.create!(name: 'previous-a')
+            b = Person.create!(name: 'previous-b')
+            match = Recommendation.create!(person: a, target_person: b)
+            Recommendation.create!(person: b, target_person: a)
+
+            relation = Recommendation.eager_load(:article).ransack(person_name_eq: 'previous-a').result
+              .except(:eager_load).ransack(target_person_name_eq: 'previous-b').result
+            expect(relation.ransack(target_person_name_eq: 'previous-b').result.to_a).to eq [match]
+            expect(relation.ransack(person_name_eq: 'previous-a').result.to_a).to eq [match]
+            raise ::ActiveRecord::Rollback
+          end
+        end
       end
 
       describe 'Context.for with a relation' do
