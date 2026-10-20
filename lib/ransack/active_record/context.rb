@@ -510,9 +510,13 @@ module Ransack
       end
 
       # The nodes that hang off a parent: the relation's own joins under it,
-      # plus the ones Ransack added under it.
+      # plus the ones Ransack added under it. The nodes Ransack added all sit
+      # under the mirror root whatever their parent, so the root's children
+      # are filtered to the relation's own; otherwise a nested `person` would
+      # be found as the root's `person` too (#1775).
       def children_of(parent)
-        parent.children + @associations_pot.select { |_node, node_parent| node_parent.equal?(parent) }.keys
+        parent.children.reject { |node| @associations_pot.key?(node) } +
+          @associations_pot.select { |_node, node_parent| node_parent.equal?(parent) }.keys
       end
 
       # Collects the associations the block's evaluation reads. Saved and
