@@ -363,58 +363,39 @@ module Ransack
       end
 
       context 'with nested conditions' do
-        it 'correctly identifies non-nested conditions' do
-          condition = Condition.extract(
-            Context.for(Person), 'name_eq', 'Test'
-          )
-
-          # Create a mock parent table
-          parent_table = Person.arel_table
-
-          # Get the attribute name and make sure it starts with the table name
-          attribute = condition.attributes.first
-          expect(attribute.name).to eq('name')
-          expect(parent_table.name).to eq('people')
-
-          # The method should return false because 'name' doesn't start with 'people'
-          result = condition.send(:not_nested_condition, attribute, parent_table)
-          expect(result).to be false
+        def not_nested?(key)
+          condition = Condition.extract(Context.for(Person), key, 'Test')
+          condition.not_nested_condition(condition.attributes.first)
         end
 
-        it 'correctly identifies truly non-nested conditions when attribute name starts with table name' do
-          # Create a condition with an attribute that starts with the table name
-          condition = Condition.extract(
-            Context.for(Person), 'name_eq', 'Test'
-          )
-
-          # Modify the attribute name to start with the table name for testing purposes
-          attribute = condition.attributes.first
-          allow(attribute).to receive(:name).and_return('people_name')
-
-          # Create a parent table
-          parent_table = Person.arel_table
-
-          # Now the method should return true because 'people_name' starts with 'people'
-          result = condition.send(:not_nested_condition, attribute, parent_table)
-          expect(result).to be true
+        it 'is false for an attribute on the model' do
+          expect(not_nested?('name_eq')).to be false
         end
 
-        it 'correctly identifies nested conditions' do
-          condition = Condition.extract(
-            Context.for(Person), 'articles_title_eq', 'Test'
-          )
+        it 'is true for a collection on the model' do
+          expect(not_nested?('articles_title_eq')).to be true
+        end
 
-          # Create a mock table alias
-          parent_table = Arel::Nodes::TableAlias.new(
-            Article.arel_table,
-            Article.arel_table
-          )
+        # #1773: told apart by depth, not by whether the attribute's name
+        # starts with the association's table name.
+        it 'is true for a collection on the model whatever it is called' do
+          %w[
+            story_articles_title_eq published_articles_title_eq
+            children_name_eq authored_article_comments_body_eq
+          ].each do |key|
+            expect(not_nested?(key)).to be(true), key
+          end
+        end
 
-          # Access the private method using send
-          result = condition.send(:not_nested_condition, condition.attributes.first, parent_table)
+        it 'is false for a collection nested under another' do
+          expect(not_nested?('articles_comments_body_eq')).to be false
+          expect(not_nested?('story_articles_comments_body_eq')).to be false
+        end
 
-          # Should return false for nested condition
-          expect(result).to be false
+        it 'still accepts the table it used to compare the name with' do
+          condition = Condition.extract(Context.for(Person), 'children_name_eq', 'Test')
+          attribute = condition.attributes.first
+          expect(condition.not_nested_condition(attribute, attribute.parent.table)).to be true
         end
       end
 

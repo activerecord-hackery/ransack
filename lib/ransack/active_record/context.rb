@@ -212,6 +212,12 @@ module Ransack
         use_association(parent_of(association)) if association
       end
 
+      # Whether the association hangs directly off the model searched,
+      # rather than off another association.
+      def root_association?(association)
+        parent_of(association).equal?(@base)
+      end
+
       # Kept for callers of the 6.0.0 API. Evaluation now keeps only the
       # joins the search reads, so a join nothing reads is already left out.
       def remove_association(_association); end
