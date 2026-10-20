@@ -241,6 +241,75 @@ module Ransack
         end
       end
 
+      # A join added to the result renders before the search's joins and took
+      # the table name the search had bound its conditions, and the joins
+      # nested under them, to (#1776, #1238).
+      describe 'joins added to the result' do
+        around do |example|
+          ::ActiveRecord::Base.transaction do
+            example.run
+            raise ::ActiveRecord::Rollback
+          end
+        end
+
+        # Each recommendation's person wrote an article; the second swaps the
+        # people round, so a condition on the wrong join returns it instead.
+        let(:person) { Person.create!(name: 'joins-after-p') }
+        let(:target) { Person.create!(name: 'joins-after-t') }
+        let!(:recommendation) { Recommendation.create!(person: person, target_person: target) }
+        let!(:swapped) { Recommendation.create!(person: target, target_person: person) }
+
+        before do
+          Article.create!(person: person, title: 'joins-after-by-p')
+          Article.create!(person: target, title: 'joins-after-by-t')
+        end
+
+        let(:result) do
+          Recommendation.ransack(person_name_eq: 'joins-after-p', person_articles_title_eq: 'joins-after-by-p').result
+        end
+
+        it 'keeps the search on its joins after joins' do
+          expect(result.joins(:target_person).to_a).to eq [recommendation]
+          expect(result.joins(:target_person).where(target_person: { name: 'joins-after-t' }).to_a)
+            .to eq [recommendation]
+        end
+
+        it 'keeps the search on its joins after left_outer_joins' do
+          expect(result.left_outer_joins(:target_person).to_a).to eq [recommendation]
+        end
+
+        it 'keeps the search on its joins after an eager load' do
+          expect(result.eager_load(:target_person).to_a).to eq [recommendation]
+          expect(result.includes(:target_person).references(:target_person).to_a).to eq [recommendation]
+          expect(result.eager_load(:target_person).first.target_person).to eq target
+        end
+
+        it 'lets a later join of the same association stand in for the search join' do
+          relation = result.joins(:target_person, :person)
+          expect(join_count(relation.to_sql, 'people')).to eq 2
+          expect(relation.to_a).to eq [recommendation]
+        end
+
+        it 'keeps the search on its joins when the joined result is searched again' do
+          relation = result.joins(:target_person).ransack(target_person_name_eq: 'joins-after-t').result
+          expect(relation.to_a).to eq [recommendation]
+        end
+
+        it 'leaves the result itself as it was' do
+          result.joins(:target_person, :person).to_a
+          result.joins(:target_person).to_a
+          expect(result.to_a).to eq [recommendation]
+        end
+
+        # A string join's table name is its own, so the search's join is
+        # aliased; the join nested under it follows the alias.
+        it 'keeps a nested join on its parent after a string join' do
+          relation = Recommendation.ransack(person_articles_title_eq: 'joins-after-by-p').result
+            .joins("INNER JOIN #{t('people')} ON #{t('people')}.#{c('id')} = #{t('recommendations')}.#{c('target_person_id')}")
+          expect(relation.to_a).to eq [recommendation]
+        end
+      end
+
       describe 'Context.for with a relation' do
         it 'keeps the relation, joins included' do
           context = Context.for(Person.joins(:articles))

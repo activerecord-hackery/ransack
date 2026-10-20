@@ -8,7 +8,13 @@ module Ransack
     # collection uses the same aliases as the outer query.
     module JoinAssociationExtensions
       def self.prepended(base)
-        base.class_eval { attr_reader :join_type }
+        base.class_eval do
+          attr_reader :join_type
+          # The tables of the joins this node renders itself, as Ransack
+          # assigned them: its reflection chain up to the first table an
+          # earlier join already provides.
+          attr_accessor :own_tables
+        end
       end
 
       def initialize(reflection, children, polymorphic_class = nil, join_type = Arel::Nodes::InnerJoin)

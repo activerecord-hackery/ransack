@@ -406,7 +406,9 @@ module Ransack
       # agree. Ransack stashes the joins it adds through `left_outer_joins`,
       # one dependency per association in the order they are added, which is
       # where they fall in that order; a join the relation already has is
-      # reused rather than added again.
+      # reused rather than added again. Their aliases are pinned, so a join
+      # added to the result later, which renders ahead of them, is aliased
+      # around them instead (see JoinDependencyExtensions#pin_search_tables).
       #
       # The relation's own joins keep their tree shape in the mirror. A node
       # Ransack adds sits directly under the mirror root whatever its depth,
@@ -432,6 +434,9 @@ module Ransack
         # `where(assoc: { ... })` records the association name as a reference,
         # and Active Record then aliases that join to the name (#1437).
         mirror.instance_variable_set(:@references, referenced_aliases(relation))
+        # Before any join is given an alias, so the joins an earlier search
+        # added keep theirs (#1776).
+        mirror.pin_search_tables(left.grep(JoinDependency))
         root = mirror.instance_variable_get(:@join_root)
 
         root.children.each { |child| adopt(mirror, root, child, Arel::Nodes::InnerJoin) }
