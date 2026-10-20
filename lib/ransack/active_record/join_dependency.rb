@@ -6,6 +6,11 @@ module Ransack
     # and exposes the table aliasing Ransack needs to add one association at a
     # time to a relation that may already carry joins of its own.
     module JoinDependencyExtensions
+      # Set on a dependency Ransack stashes on a relation for an association
+      # a search added, and whether the search counted the relation's eager
+      # load first.
+      attr_accessor :added_by_search, :after_eager_load
+
       # Replaces ActiveRecord::Associations::JoinDependency#build
       def build(associations, base_klass)
         associations.map do |name, right|
@@ -44,7 +49,7 @@ module Ransack
 
         joins = make_join_constraints(join_root, join_type)
 
-        joins.concat joins_to_add.flat_map { |oj|
+        joins.concat eager_load_first(joins_to_add.to_a).flat_map { |oj|
           if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
             walk join_root, oj.join_root, oj.join_type
           else
@@ -60,6 +65,17 @@ module Ransack
       end
 
       private
+
+      # Active Record renders the eager load last, after every
+      # `left_outer_joins` dependency. A search of a relation that eager
+      # loads counted the eager load's aliases before those of the joins it
+      # added, and may have rooted one of them at an eager-loaded join
+      # (#1767), so the eager load goes back in front of the first of them.
+      def eager_load_first(joins)
+        index = joins.index(&:after_eager_load)
+        joins.insert(index, joins.pop) if index && !joins.last.added_by_search
+        joins
+      end
 
       # The tables for a node's reflection chain, assigned the way Active
       # Record's JoinDependency#make_constraints assigns them, so that the

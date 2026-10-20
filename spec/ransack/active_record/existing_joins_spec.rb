@@ -101,6 +101,111 @@ module Ransack
         end
       end
 
+      # Active Record renders the eager load after the joins Ransack adds, so
+      # a join Ransack nested under an eager-loaded one read a table that was
+      # not joined yet (#1767).
+      describe 'a join nested under an eager-loaded join' do
+        before(:all) do
+          connection = ::ActiveRecord::Base.lease_connection
+          connection.create_table(:eager_authors, force: true)
+          connection.create_table(:eager_profiles, force: true) { |t| t.integer :author_id }
+          connection.create_table(:eager_articles, force: true) { |t| t.integer :author_id }
+        end
+
+        after(:all) do
+          connection = ::ActiveRecord::Base.lease_connection
+          %i[eager_authors eager_profiles eager_articles].each { |table| connection.drop_table(table, if_exists: true) }
+        end
+
+        before do
+          stub_const('EagerAuthor', Class.new(ApplicationRecord) {
+            self.table_name = 'eager_authors'
+            has_one :profile, class_name: 'EagerProfile', foreign_key: :author_id
+          })
+          stub_const('EagerProfile', Class.new(ApplicationRecord) {
+            self.table_name = 'eager_profiles'
+            belongs_to :author, class_name: 'EagerAuthor'
+          })
+          stub_const('EagerArticle', Class.new(ApplicationRecord) {
+            self.table_name = 'eager_articles'
+            belongs_to :author, class_name: 'EagerAuthor'
+          })
+        end
+
+        it 'joins the nested table after the eager-loaded one' do
+          sql = EagerArticle.eager_load(:author).ransack(author_profile_id_not_null: true).result.to_sql
+          expect(sql.index("JOIN #{t('eager_profiles')}")).to be > sql.index("JOIN #{t('eager_authors')}")
+          expect(EagerArticle.eager_load(:author).ransack(author_profile_id_not_null: true).result.limit(10).size).to eq 0
+        end
+
+        it 'finds the records the nested condition matches' do
+          with_profile = EagerArticle.create!(author: EagerAuthor.create!.tap { |a| EagerProfile.create!(author: a) })
+          without_profile = EagerArticle.create!(author: EagerAuthor.create!)
+
+          result = EagerArticle.eager_load(:author).ransack(author_profile_id_not_null: true).result.to_a
+          expect(result).to eq [with_profile]
+          expect(result.first.association(:author)).to be_loaded
+          expect(EagerArticle.eager_load(:author).ransack(author_profile_id_null: true).result.to_a).to eq [without_profile]
+        ensure
+          [EagerArticle, EagerProfile, EagerAuthor].each(&:delete_all)
+        end
+
+        it 'reuses the eager-loaded join' do
+          sql = EagerArticle.eager_load(:author).ransack(author_id_gt: 0, author_profile_id_not_null: true).result.to_sql
+          expect(join_count(sql, 'eager_authors')).to eq 1
+          expect(join_count(sql, 'eager_profiles')).to eq 1
+        end
+
+        it 'sorts on the nested table' do
+          relation = EagerArticle.eager_load(:author).ransack(s: 'author_profile_id desc').result
+          expect { relation.to_a }.not_to raise_error
+        end
+
+        it 'works with includes that will be eager loaded' do
+          relation = EagerArticle.includes(:author).references(:author).ransack(author_profile_id_not_null: true).result
+          expect { relation.to_a }.not_to raise_error
+        end
+
+        it 'works under an eager-loaded has_many' do
+          relation = Person.eager_load(:articles).ransack(articles_comments_body_cont: 'x').result
+          sql = relation.to_sql
+          expect(sql.index("JOIN #{t('comments')}")).to be > sql.index("JOIN #{t('articles')}")
+          expect(join_count(sql, 'articles')).to eq 1
+          expect(relation.to_a).to match_array Person.joins(articles: :comments).where('comments.body LIKE ?', '%x%').distinct.to_a
+        end
+
+        it 'aliases a nested join back to the searched table' do
+          relation = Organization.eager_load(:address).ransack(address_organization_name_cont: 'x').result
+          expect(relation.to_sql).to include("JOIN #{t('organizations')} #{t('organizations_addresses')}").or include("JOIN #{t('organizations')} AS #{t('organizations_addresses')}")
+          expect { relation.to_a }.not_to raise_error
+        end
+
+        # The search names the joins it adds in the order it adds them, after
+        # the eager load's. A direct join to the same table as a nested one
+        # must not take the name the nested one was given.
+        it 'keeps apart a nested join and a direct one to the same table' do
+          ::ActiveRecord::Base.transaction do
+            person = Person.create!(name: 'eager-mixed')
+            nested = Article.create!(person: person, title: 'eager-mixed-nested')
+            match = Recommendation.create!(person: person, article: Article.create!(person: person, title: 'eager-mixed-direct'))
+            Recommendation.create!(person: person, article: nested)
+
+            [
+              { person_articles_title_cont: 'eager-mixed-nested', article_title_cont: 'eager-mixed-direct' },
+              { article_title_cont: 'eager-mixed-direct', person_articles_title_cont: 'eager-mixed-nested' }
+            ].each do |params|
+              expect(Recommendation.eager_load(:person).ransack(params).result.to_a).to eq [match]
+            end
+            raise ::ActiveRecord::Rollback
+          end
+        end
+
+        it 'keeps a nested join apart from an eager-loaded one to the same table' do
+          relation = Recommendation.eager_load(:article).ransack(person_articles_title_cont: 'x').result
+          expect { relation.to_a }.not_to raise_error
+        end
+      end
+
       describe 'a previous search' do
         it 'reuses the join the previous search added' do
           relation = Person.ransack(articles_title_eq: 'Bar').result
@@ -115,6 +220,24 @@ module Ransack
             relation = relation.ransack(articles_title_cont: term, articles_body_cont: term, m: 'or').result
           end
           expect(join_count(relation.to_sql, 'articles')).to eq 1
+        end
+
+        # A join the first search counted after an eager load keeps its place
+        # once the eager load is dropped, so a later search names the joins
+        # the way the query does.
+        it 'keeps the order of its joins after the eager load is dropped' do
+          ::ActiveRecord::Base.transaction do
+            a = Person.create!(name: 'previous-a')
+            b = Person.create!(name: 'previous-b')
+            match = Recommendation.create!(person: a, target_person: b)
+            Recommendation.create!(person: b, target_person: a)
+
+            relation = Recommendation.eager_load(:article).ransack(person_name_eq: 'previous-a').result
+              .except(:eager_load).ransack(target_person_name_eq: 'previous-b').result
+            expect(relation.ransack(target_person_name_eq: 'previous-b').result.to_a).to eq [match]
+            expect(relation.ransack(person_name_eq: 'previous-a').result.to_a).to eq [match]
+            raise ::ActiveRecord::Rollback
+          end
         end
       end
 
