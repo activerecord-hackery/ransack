@@ -227,7 +227,7 @@ module Ransack
       context 'with an alias' do
         subject {
           Condition.extract(
-            Context.for(Person), 'term_start', Person.first(2).map(&:name)
+            Context.for(Person), 'term_start', Person.first.name
           )
         }
 

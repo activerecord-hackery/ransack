@@ -4,6 +4,12 @@ module Ransack
       attr_accessor :value
       delegate :present?, :blank?, to: :value
 
+      # The types whose cast builds one value from an Array: a multiparameter
+      # date or time (`created_at(1i)`, `created_at(2i)`, ...) arrives as one.
+      ARRAY_CAST_TYPES = %i[
+        date datetime timestamp time timestamptz datetimeoffset
+      ].freeze
+
       def initialize(context, value = nil)
         super(context)
         @value = value

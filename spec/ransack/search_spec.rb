@@ -663,6 +663,74 @@ module Ransack
         end
       end
 
+      # #1772: a group of check boxes posts `q[name_eq][]=a&q[name_eq][]=b`.
+      # The short form compared the column with the Array's string form, or
+      # cast it to nil on a typed column and dropped it without a word.
+      context 'a single-value predicate given an Array in the short form' do
+        it 'drops the condition in the default lenient mode' do
+          search = Search.new(Person, name_eq: ['Sleep', 'Use'])
+          expect(search.base.conditions).to be_empty
+          expect(search.result.to_sql).not_to include('Sleep')
+        end
+
+        it 'raises in strict mode, naming the predicate and attribute' do
+          expect { Search.new(Person, { name_eq: ['Sleep', 'Use'] }, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+          expect { Person.ransack!(salary_eq: [1, 2]) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for salary')
+        end
+
+        # #1216
+        it 'searches a one-element Array as its element' do
+          expect(Search.new(Person, name_eq: ['x']).result.to_sql)
+            .to include("#{quote_table_name('people')}.#{quote_column_name('name')} = 'x'")
+          expect(Search.new(Person, doubled_name_gteq: ['36']).result.to_sql)
+            .to match(/>= '36'/)
+        end
+
+        it 'ignores the blank value a check box group posts with its choices' do
+          expect(Search.new(Person, name_eq: ['', 'Sleep']).result.to_sql).to include("= 'Sleep'")
+        end
+
+        it 'keeps the Array a multiparameter date is collapsed into' do
+          search = Search.new(Person, 'created_at_gteq(1i)' => '2020', 'created_at_gteq(2i)' => '3',
+            'created_at_gteq(3i)' => '4')
+          expect(search.base.conditions.size).to eq 1
+          expect(search.result.to_sql).to include('2020-03-04')
+        end
+      end
+
+      # #1771: an Array inside one value envelope of the c: API was cast as a
+      # single value, so it matched every row or a stringified Array.
+      context 'an Array inside one value envelope' do
+        def params(attribute, predicate, value)
+          { c: { '0' => { a: { '0' => { name: attribute } }, p: predicate, v: { '0' => { value: value } } } } }
+        end
+
+        it 'is spread into one value per element for a predicate that wants an array' do
+          ids = Person.order(:id).limit(2).pluck(:id)
+          expect(Search.new(Person, params('id', 'in', ids)).result.pluck(:id)).to match_array ids
+          expect(Person.ransack!(params('id', 'in', ids)).result.pluck(:id)).to match_array ids
+          expect(Search.new(Person, params('name', 'in', %w[a b])).result.to_sql).to match(/IN \('a', 'b'\)/)
+          expect(Search.new(Person, params('name', 'not_eq_all', %w[a b])).result.to_sql)
+            .to match(/!= 'a' AND .*!= 'b'/)
+        end
+
+        it 'is dropped for a single-value predicate in the default lenient mode' do
+          search = Search.new(Person, params('name', 'eq', %w[a b]))
+          expect(search.base.conditions).to be_empty
+        end
+
+        it 'raises for a single-value predicate in strict mode' do
+          expect { Search.new(Person, params('name', 'eq', %w[a b]), ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+        end
+
+        it 'searches a one-element Array as its element for a single-value predicate' do
+          expect(Search.new(Person, params('name', 'eq', ['x'])).result.to_sql).to include("= 'x'")
+        end
+      end
+
       context 'combinator validation in strict mode' do
         it 'accepts any spelling of a valid combinator' do
           expect { Search.new(Person, { combinator: 'OR', name_eq: 'a' }, ignore_unknown_conditions: false) }
