@@ -394,9 +394,16 @@ module Ransack
         #     AND "articles"."title" = 'Test' AND "articles"."published" = 't' AND ('default_scope' = 'default_scope')
         # ) ORDER BY "people"."id" DESC
 
+        # #1773: the scope has to be inside the subquery. Checking only that
+        # `published` appeared passed for a LEFT OUTER JOIN with a
+        # row-level `!=` too, which is what the search fell back to.
         s = Search.new(Person, published_articles_title_not_eq: 'Test')
-        expect(s.result.to_sql).to include 'default_scope'
-        expect(s.result.to_sql).to include 'published'
+        outer, subquery = s.result.to_sql.split('NOT IN (SELECT', 2)
+        expect(subquery).not_to be_nil
+        expect(outer).not_to include 'JOIN'
+        expect(subquery).to include "#{quote_table_name('articles')}.#{quote_column_name('published')} = "
+        expect(subquery).to include "('default_scope' = 'default_scope')"
+        expect(subquery).to include "#{quote_table_name('articles')}.#{quote_column_name('title')} != 'Test'"
       end
 
       it 'discards empty conditions' do

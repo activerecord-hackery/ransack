@@ -432,9 +432,8 @@ module Ransack
       def arel_predicate
         attributes.map { |attribute|
           association = attribute.parent
-          parent_table = association.table
 
-          predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
+          predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute)
             outer_key, query = context.correlated_subquery(association)
             context.use_ancestors_of(association)
 
@@ -463,8 +462,15 @@ module Ransack
         }.reduce(combinator_method)
       end
 
-      def not_nested_condition(attribute, parent_table)
-        parent_table.class != Arel::Nodes::TableAlias && attribute.name.starts_with?(parent_table.name)
+      # Whether the attribute is on a collection the searched model has
+      # directly, rather than one nested under another association. A
+      # negative condition on a nested collection keeps its join (#1411).
+      # Told apart by the association's depth, not by its name: the name of
+      # an STI, scoped, aliased or through collection need not start with
+      # its table's (#1773). The table argument is no longer used, and is
+      # kept for callers of the 4.4.0 API.
+      def not_nested_condition(attribute, _parent_table = nil)
+        context.root_association?(attribute.parent)
       end
 
       private
