@@ -1095,6 +1095,48 @@ module Ransack
         expect(normalize_join_aliases.call(real_query)).to eq normalize_join_aliases.call(expected_query)
       end
 
+      # #1775: a table joined both directly and through another association.
+      # With the nested association searched first, the direct one was taken
+      # to be the nested join, so its join was never added and its condition
+      # was bound to the nested join's table.
+      describe 'a direct and a nested association to the same table' do
+        around do |example|
+          ::ActiveRecord::Base.transaction do
+            example.run
+            raise ::ActiveRecord::Rollback
+          end
+        end
+
+        let(:author)  { Person.create!(name: 'issue-1775-author') }
+        let(:article) { Article.create!(person: author, title: 'issue-1775-article') }
+
+        it 'binds each condition to its own join, in either param order' do
+          comment = Comment.create!(article: article, person: Person.create!(name: 'issue-1775-commenter'), body: 'issue-1775')
+          params = { article_person_name_eq: author.name, person_name_eq: 'issue-1775-commenter' }
+
+          [params, params.to_a.reverse.to_h].each do |ordered|
+            expect(Comment.ransack(ordered).result.to_a).to eq [comment]
+          end
+        end
+
+        it 'binds each condition to its own join from the other side too' do
+          Comment.create!(article: article, person: Person.create!(name: 'issue-1775-commenter'), body: 'issue-1775')
+          params = { comments_person_name_eq: 'issue-1775-commenter', person_name_eq: author.name }
+
+          [params, params.to_a.reverse.to_h].each do |ordered|
+            expect(Article.ransack(ordered).result.to_a).to eq [article]
+          end
+        end
+
+        it 'sorts on the direct association after a condition on the nested one' do
+          later = Comment.create!(article: article, person: Person.create!(name: 'issue-1775-z'), body: 'issue-1775')
+          sooner = Comment.create!(article: article, person: Person.create!(name: 'issue-1775-a'), body: 'issue-1775')
+
+          result = Comment.ransack(article_person_name_eq: author.name, s: 'person_name asc').result
+          expect(result.to_a).to eq [sooner, later]
+        end
+      end
+
       it 'evaluates compound conditions contextually' do
         s = Search.new(Person, children_name_or_name_eq: 'Ernie').result
         expect(s).to be_an ::ActiveRecord::Relation
