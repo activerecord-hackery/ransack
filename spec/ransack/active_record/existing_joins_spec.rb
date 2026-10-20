@@ -308,6 +308,19 @@ module Ransack
             .joins("INNER JOIN #{t('people')} ON #{t('people')}.#{c('id')} = #{t('recommendations')}.#{c('target_person_id')}")
           expect(relation.to_a).to eq [recommendation]
         end
+
+        # A through join added afterwards is aliased around the search's
+        # pinned table, so the search's join cannot reuse its intermediate
+        # table and has to be joined on its own.
+        it 'keeps the search on its join when a later through join passes the same table' do
+          organization = Organization.create!(name: 'joins-after-org', address: Address.create!(city: 'joins-after-city'))
+          employee = Employee.create!(name: 'joins-after-e', organization: organization)
+          Employee.create!(name: 'joins-after-other', organization: Organization.create!(name: 'joins-after-other-org'))
+
+          search = Employee.ransack(organization_name_eq: 'joins-after-org').result
+          expect(search.left_outer_joins(:address).to_a).to eq [employee]
+          expect(search.joins(:address).to_a).to eq [employee]
+        end
       end
 
       describe 'Context.for with a relation' do

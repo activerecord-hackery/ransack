@@ -172,14 +172,15 @@ module Ransack
         child.join_constraints(foreign_table, foreign_klass, join_type, alias_tracker) do |reflection, remaining_reflection_chain|
           table, terminated = @joined_tables[remaining_reflection_chain]
           root = reflection == child.reflection
+          index = child.reflection.chain.size - remaining_reflection_chain.size
+          pin = take_search_pin(parent, child) if root
 
-          if table && (!root || !terminated)
+          if table && (!root || !terminated) && reusable?(table, pin, index)
             @joined_tables[remaining_reflection_chain] = [table, root] if root
+            pin.joined_as = table if pin && root
             next table, true
           end
 
-          index = child.reflection.chain.size - remaining_reflection_chain.size
-          pin = take_search_pin(parent, child) if root
           table = aliased_table_for(parent, reflection, index, pin)
           pin.joined_as = table if pin && root
 
@@ -204,21 +205,31 @@ module Ransack
           remaining = chain[index..]
           table, terminated = @joined_tables[remaining]
           root = reflection == node.reflection
+          pin = take_search_pin(parent, node) if root && !terminated_at
 
           if terminated_at
             table || reflection.klass.arel_table
-          elsif table && (!root || !terminated)
+          elsif table && (!root || !terminated) && reusable?(table, pin, index)
             @joined_tables[remaining] = [table, root] if root
+            pin.joined_as = table if pin && root
             terminated_at = index
             table
           else
-            pin = take_search_pin(parent, node) if root
             table = aliased_table_for(parent, reflection, index, pin)
             pin.joined_as = table if pin && root
             @joined_tables[remaining] ||= [table, root] if join_type == Arel::Nodes::OuterJoin
             table
           end
         }.tap { |tables| node.own_tables = tables.first(terminated_at || tables.size) }
+      end
+
+      # Whether a table an earlier join already provides can stand in for
+      # one position of a node's reflection chain. Not when a search pinned
+      # another alias there: the search's conditions name that one, so the
+      # node is joined on its own (#1776).
+      def reusable?(table, pin, index)
+        pinned = pin&.tables&.at(index)
+        pinned.nil? || pinned.name == table.name
       end
 
       # A new table for one position of a node's reflection chain: the one a
