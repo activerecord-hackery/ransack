@@ -134,7 +134,9 @@ module Ransack
                   # For scopes with arity 1, pass the array as a single argument instead of splatting
                   @object.public_send(scope, args)
                 else
-                  @object.public_send(scope, *args)
+                  # Only an Array is spread into several arguments. A bare
+                  # splat would call to_a, turning a Time into ten (#1769).
+                  @object.public_send(scope, *Array.wrap(args))
                 end
     end
 
