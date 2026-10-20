@@ -301,6 +301,15 @@ module Ransack
           expect(result.to_a).to eq [recommendation]
         end
 
+        # A search of the joined result shares the first search's join
+        # nodes; giving them the aliases the new relation needs must not
+        # change the ones the first result's conditions name.
+        it 'leaves the result as it was when a joined copy is searched again' do
+          result.joins("INNER JOIN #{t('people')} ON #{t('people')}.#{c('id')} = #{t('recommendations')}.#{c('target_person_id')}")
+            .ransack(person_name_eq: 'joins-after-p').result.to_a
+          expect(result.to_a).to eq [recommendation]
+        end
+
         # A string join's table name is its own, so the search's join is
         # aliased; the join nested under it follows the alias.
         it 'keeps a nested join on its parent after a string join' do

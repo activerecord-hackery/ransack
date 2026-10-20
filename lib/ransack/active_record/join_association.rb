@@ -11,8 +11,8 @@ module Ransack
         base.class_eval do
           attr_reader :join_type
           # The tables of the joins this node renders itself, as Ransack
-          # assigned them: its reflection chain up to the first table an
-          # earlier join already provides.
+          # first assigned them: its reflection chain up to the first table
+          # an earlier join already provides.
           attr_accessor :own_tables
         end
       end

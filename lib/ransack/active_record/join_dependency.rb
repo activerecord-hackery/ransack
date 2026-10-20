@@ -220,7 +220,12 @@ module Ransack
             @joined_tables[remaining] ||= [table, root] if join_type == Arel::Nodes::OuterJoin
             table
           end
-        }.tap { |tables| node.own_tables = tables.first(terminated_at || tables.size) }
+        }.tap do |tables|
+          # Kept from the search that built the node. A later search of the
+          # same result shares the node and may give it other aliases, but
+          # the first result's conditions still name these.
+          node.own_tables ||= tables.first(terminated_at || tables.size)
+        end
       end
 
       # Whether a table an earlier join already provides can stand in for
