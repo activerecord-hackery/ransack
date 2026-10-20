@@ -11,18 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Each supported Rails and the newest and oldest supported Ruby, not
-      # every pairing: Ransack has no native code, and the database jobs
-      # below run on the Ruby in between.
+      # The newest and oldest supported Ruby, not every Ruby: Ransack has no
+      # native code, and the database jobs below run on the Ruby in between.
       matrix:
         include:
           - rails: 8-1-stable
             ruby: 4.0.1
-          - rails: 8-0-stable
-            ruby: 3.3.10
-          # Active Record 8.0.0-8.0.2 take the older append_constraints
-          # signature; see JoinAssociation#append_constraints_to.
-          - rails: v8.0.2
+          - rails: 8-1-stable
             ruby: 3.3.10
     env:
       DB: sqlite3
@@ -44,7 +39,6 @@ jobs:
       matrix:
         rails:
           - 8-1-stable
-          - 8-0-stable
         ruby:
           - 3.4.8
     env:
@@ -108,7 +102,6 @@ jobs:
       matrix:
         rails:
           - 8-1-stable
-          - 8-0-stable
         ruby:
           - 3.4.8
     env:

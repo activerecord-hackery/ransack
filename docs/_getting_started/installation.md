@@ -5,7 +5,7 @@ nav_order: 1
 permalink: /getting-started/
 ---
 
-Ransack is supported for Rails 8.1 and 8.0 on Ruby 3.3 and later.
+Ransack is supported for Rails 8.1 on Ruby 3.3 and later.
 
 Add it to your Gemfile and run `bundle install`:
 
