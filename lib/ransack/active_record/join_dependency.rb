@@ -43,14 +43,28 @@ module Ransack
         end
 
         joins = make_join_constraints(join_root, join_type)
+        joined = joined_table_names(joins) << join_root.table.name
 
-        joins.concat joins_to_add.flat_map { |oj|
-          if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
-            walk join_root, oj.join_root, oj.join_type
-          else
-            make_join_constraints(oj.join_root, oj.join_type)
-          end
-        }
+        # A dependency Ransack adds under another join is rooted at that
+        # join's table, and its ON clause reads it, so it has to come after
+        # it. Active Record renders the eager load last, after every
+        # `left_outer_joins` dependency, so one hanging off an eager-loaded
+        # join waits until that join is in (#1767). The rest keep their order.
+        pending = joins_to_add.to_a
+        until pending.empty?
+          index = pending.index { |oj| joined.include?(oj.join_root.table.name) } || 0
+          oj = pending.delete_at(index)
+          added =
+            if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
+              walk join_root, oj.join_root, oj.join_type
+            else
+              make_join_constraints(oj.join_root, oj.join_type)
+            end
+          joined.merge(joined_table_names(added))
+          joins.concat added
+        end
+
+        joins
       end
 
       def construct_tables_for_association!(join_root, association, join_type = self.join_type)
@@ -60,6 +74,14 @@ module Ransack
       end
 
       private
+
+      # The names the joined tables go by in the query: the alias when they
+      # have one.
+      def joined_table_names(joins)
+        joins.each_with_object(Set.new) do |join, names|
+          names << join.left.name if join.left.respond_to?(:name)
+        end
+      end
 
       # The tables for a node's reflection chain, assigned the way Active
       # Record's JoinDependency#make_constraints assigns them, so that the
