@@ -297,6 +297,9 @@ module Ransack
       # Array, which their cast builds one value from.
       def spread_array_values!
         return unless predicate && values.any? { |v| v.value.is_a?(Array) }
+        # An incomplete or unsearchable attribute has no type to look up;
+        # valid? discards the condition instead.
+        return unless predicate.type || attributes.first&.valid?
         return if Value::ARRAY_CAST_TYPES.include?(default_type&.to_sym)
 
         @values = values.flat_map do |v|

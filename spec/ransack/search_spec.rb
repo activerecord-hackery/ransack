@@ -729,6 +729,12 @@ module Ransack
         it 'searches a one-element Array as its element for a single-value predicate' do
           expect(Search.new(Person, params('name', 'eq', ['x'])).result.to_sql).to include("= 'x'")
         end
+
+        it 'discards the condition when its attribute has no name' do
+          search = Search.new(Person, c: { '0' => { a: { '0' => {} }, p: 'in', v: { '0' => { value: [1, 2] } } } })
+          expect(search.base.conditions).to be_empty
+          expect(search.result.to_sql).not_to include('WHERE')
+        end
       end
 
       context 'combinator validation in strict mode' do
