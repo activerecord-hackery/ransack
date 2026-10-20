@@ -102,8 +102,7 @@ module Ransack
 
       def attribute_method_uncached?(str, klass)
         exists = false
-        if ransackable_attribute?(str, klass) ||
-           ransortable_attribute?(str, klass)
+        if allowlisted_attribute?(str, klass)
           exists = true
         elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
           remainder = []
@@ -124,6 +123,19 @@ module Ransack
         exists
       end
       private :attribute_method_uncached?
+
+      # A name on the allowlists is only taken for an attribute of `klass`
+      # when it is one: a column or `attribute` declaration, an
+      # `alias_attribute`, a ransacker or a `ransack_alias`. Anything else,
+      # such as `person_name` listed on Article, is left to be followed
+      # through the associations rather than bound as a missing column
+      # (#1774).
+      def allowlisted_attribute?(str, klass)
+        (ransackable_attribute?(str, klass) || ransortable_attribute?(str, klass)) &&
+          (klass.has_attribute?(str) || klass._ransackers.key?(str) ||
+           klass._ransack_aliases.key?(str))
+      end
+      private :allowlisted_attribute?
 
       def table_for(parent)
         parent.table
@@ -327,8 +339,7 @@ module Ransack
 
         attr_name = nil
 
-        if ransackable_attribute?(str, klassify(parent)) ||
-           ransortable_attribute?(str, klassify(parent))
+        if allowlisted_attribute?(str, klassify(parent))
           attr_name = str
         elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
           remainder = []

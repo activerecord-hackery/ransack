@@ -1200,6 +1200,41 @@ module Ransack
       end
     end
 
+    describe 'an association path listed in ransackable_attributes' do
+      # #1774: `person_name` on Article's allowlist was taken for a column
+      # of articles and bound as `articles.person_name`, which does not
+      # exist. Only a real attribute is bound on the model itself; any other
+      # name is followed through the association as usual (#756).
+      around do |example|
+        ::ActiveRecord::Base.transaction do
+          example.run
+          raise ::ActiveRecord::Rollback
+        end
+      end
+
+      before do
+        allow(Article).to receive(:ransackable_attributes).and_return(%w[title person_name orderId])
+      end
+
+      let!(:ernie) { Article.create!(person: Person.create!(name: 'issue-1774-ernie'), title: 'one') }
+      let!(:bert)  { Article.create!(person: Person.create!(name: 'issue-1774-bert'), title: 'two') }
+      let(:scope) { Article.where(id: [ernie.id, bert.id]) }
+
+      it 'searches through the association' do
+        expect(scope.ransack(person_name_cont: 'issue-1774-ernie').result.to_a).to eq [ernie]
+      end
+
+      it 'sorts through the association' do
+        expect(scope.ransack(s: 'person_name desc').result.to_a).to eq [ernie, bert]
+        expect(scope.ransack(s: 'person_name asc').result.to_a).to eq [bert, ernie]
+      end
+
+      it 'rejects a listed name that is neither an attribute nor a path' do
+        expect { Article.ransack!(orderId_eq: 'x') }
+          .to raise_error(InvalidSearchError, /Invalid search term orderId_eq/)
+      end
+    end
+
     describe 'a scope that shares a column name' do
       # Search#build already preferred the scope; the writer and reader used
       # by form builders went through method_missing, which did not (#1472).
