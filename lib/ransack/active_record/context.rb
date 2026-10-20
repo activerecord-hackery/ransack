@@ -420,9 +420,14 @@ module Ransack
         root.children.each { |child| adopt(mirror, root, child, Arel::Nodes::InnerJoin) }
         stashed.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
         graft(mirror, JoinDependency.new(relation.klass, relation.table, named_joins(left), Arel::Nodes::OuterJoin), Arel::Nodes::OuterJoin)
-        left.grep(JoinDependency).each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
+        after_eager, before_eager = left.grep(JoinDependency).partition(&:after_eager_load)
+        before_eager.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
         graft(mirror, eager_jd, Arel::Nodes::OuterJoin) if eager_jd
         graft(mirror, JoinDependency.new(relation.klass, relation.table, eager, Arel::Nodes::OuterJoin), Arel::Nodes::OuterJoin)
+        after_eager.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
+        # The joins this search adds are counted after the eager load, so
+        # they are rendered after it too (JoinDependencyExtensions#eager_load_first).
+        @eager_loading = !eager_jd.nil? || eager.any?
 
         mirror
       end
@@ -557,6 +562,8 @@ module Ransack
           Join.new(name, @join_type, klass),
           @join_type
         )
+        jd.added_by_search = true
+        jd.after_eager_load = @eager_loading
         found_association = jd.instance_variable_get(:@join_root).children.last
 
         @associations_pot[found_association] = parent

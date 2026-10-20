@@ -179,6 +179,31 @@ module Ransack
           expect(relation.to_sql).to include("JOIN #{t('organizations')} #{t('organizations_addresses')}").or include("JOIN #{t('organizations')} AS #{t('organizations_addresses')}")
           expect { relation.to_a }.not_to raise_error
         end
+
+        # The search names the joins it adds in the order it adds them, after
+        # the eager load's. A direct join to the same table as a nested one
+        # must not take the name the nested one was given.
+        it 'keeps apart a nested join and a direct one to the same table' do
+          ::ActiveRecord::Base.transaction do
+            person = Person.create!(name: 'eager-mixed')
+            nested = Article.create!(person: person, title: 'eager-mixed-nested')
+            match = Recommendation.create!(person: person, article: Article.create!(person: person, title: 'eager-mixed-direct'))
+            Recommendation.create!(person: person, article: nested)
+
+            [
+              { person_articles_title_cont: 'eager-mixed-nested', article_title_cont: 'eager-mixed-direct' },
+              { article_title_cont: 'eager-mixed-direct', person_articles_title_cont: 'eager-mixed-nested' }
+            ].each do |params|
+              expect(Recommendation.eager_load(:person).ransack(params).result.to_a).to eq [match]
+            end
+            raise ::ActiveRecord::Rollback
+          end
+        end
+
+        it 'keeps a nested join apart from an eager-loaded one to the same table' do
+          relation = Recommendation.eager_load(:article).ransack(person_articles_title_cont: 'x').result
+          expect { relation.to_a }.not_to raise_error
+        end
       end
 
       describe 'a previous search' do

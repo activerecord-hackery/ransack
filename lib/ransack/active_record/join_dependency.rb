@@ -6,6 +6,11 @@ module Ransack
     # and exposes the table aliasing Ransack needs to add one association at a
     # time to a relation that may already carry joins of its own.
     module JoinDependencyExtensions
+      # Set on a dependency Ransack stashes on a relation for an association
+      # a search added, and whether the search counted the relation's eager
+      # load first.
+      attr_accessor :added_by_search, :after_eager_load
+
       # Replaces ActiveRecord::Associations::JoinDependency#build
       def build(associations, base_klass)
         associations.map do |name, right|
@@ -43,28 +48,14 @@ module Ransack
         end
 
         joins = make_join_constraints(join_root, join_type)
-        joined = joined_table_names(joins) << join_root.table.name
 
-        # A dependency Ransack adds under another join is rooted at that
-        # join's table, and its ON clause reads it, so it has to come after
-        # it. Active Record renders the eager load last, after every
-        # `left_outer_joins` dependency, so one hanging off an eager-loaded
-        # join waits until that join is in (#1767). The rest keep their order.
-        pending = joins_to_add.to_a
-        until pending.empty?
-          index = pending.index { |oj| joined.include?(oj.join_root.table.name) } || 0
-          oj = pending.delete_at(index)
-          added =
-            if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
-              walk join_root, oj.join_root, oj.join_type
-            else
-              make_join_constraints(oj.join_root, oj.join_type)
-            end
-          joined.merge(joined_table_names(added))
-          joins.concat added
-        end
-
-        joins
+        joins.concat eager_load_first(joins_to_add.to_a).flat_map { |oj|
+          if join_root.match?(oj.join_root) && join_root.table.name == oj.join_root.table.name
+            walk join_root, oj.join_root, oj.join_type
+          else
+            make_join_constraints(oj.join_root, oj.join_type)
+          end
+        }
       end
 
       def construct_tables_for_association!(join_root, association, join_type = self.join_type)
@@ -75,12 +66,15 @@ module Ransack
 
       private
 
-      # The names the joined tables go by in the query: the alias when they
-      # have one.
-      def joined_table_names(joins)
-        joins.each_with_object(Set.new) do |join, names|
-          names << join.left.name if join.left.respond_to?(:name)
-        end
+      # Active Record renders the eager load last, after every
+      # `left_outer_joins` dependency. A search of a relation that eager
+      # loads counted the eager load's aliases before those of the joins it
+      # added, and may have rooted one of them at an eager-loaded join
+      # (#1767), so the eager load goes back in front of the first of them.
+      def eager_load_first(joins)
+        index = joins.index(&:after_eager_load)
+        joins.insert(index, joins.pop) if index && !joins.last.added_by_search
+        joins
       end
 
       # The tables for a node's reflection chain, assigned the way Active
