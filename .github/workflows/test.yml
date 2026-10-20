@@ -23,7 +23,7 @@ jobs:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -47,7 +47,7 @@ jobs:
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -80,7 +80,7 @@ jobs:
       MYSQL_PASSWORD: root
       MYSQL_HOST: 127.0.0.1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -126,7 +126,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
