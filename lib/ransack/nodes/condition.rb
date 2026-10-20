@@ -34,9 +34,15 @@ module Ransack
               m: combinator,
               v: predicate.wants_array ? Array(values) : [values]
             )
+            # An Array given to a single-value predicate is spread into
+            # several values by #build, so it fails the arity check here the
+            # same way the c: form does (#1772).
+            if condition.arity_failure?
+              raise condition.arity_error if context&.strict_conditions?
+              nil
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything. Tempted to go with "garbage in, garbage out" here.
-            if predicate.validate(condition.values, condition.default_type, condition.null_sentinel)
+            elsif predicate.validate(condition.values, condition.default_type, condition.null_sentinel)
               condition
             else
               nil
@@ -95,6 +101,21 @@ module Ransack
 
       def valid_arity?
         values.size <= 1 || predicate.wants_array
+      end
+
+      # A single-value predicate given several values is worth naming, so a
+      # strict search can say why the condition was dropped (#1724). It only
+      # counts once the predicate and an attribute have resolved; a condition
+      # that is invalid for another reason is not an arity failure.
+      def arity_failure?
+        predicate && attributes.any?(&:valid?) && !valid_arity?
+      end
+
+      def arity_error
+        InvalidSearchError.new(
+          "Predicate #{predicate_name} takes a single value, " \
+          "#{values.size} given for #{attributes.map(&:name).join(', ')}"
+        )
       end
 
       def attributes
@@ -258,8 +279,38 @@ module Ransack
             self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end
         end
+        spread_array_values!
 
         self
+      end
+
+      # An Array held by one value stands for several values: `[5, 6]` in one
+      # envelope of the c: form (#1771), or `name_eq: ['a', 'b']` in the short
+      # form, as a group of check boxes posts it (#1772). Cast as one value it
+      # became nil on a typed column, dropping the condition, or its string
+      # form elsewhere. Each element becomes a value of its own instead, so a
+      # predicate that wants an array gets them all, and a single-value
+      # predicate is held to its arity like any condition given several
+      # values; a one-element Array is just its element. Blank elements, such
+      # as the empty string a check box group posts alongside its choices, are
+      # dropped when blank values are ignored. Date and time types keep the
+      # Array, which their cast builds one value from.
+      def spread_array_values!
+        return unless predicate && values.any? { |v| v.value.is_a?(Array) }
+        # An incomplete or unsearchable attribute has no type to look up;
+        # valid? discards the condition instead.
+        return unless predicate.type || attributes.first&.valid?
+        return if Value::ARRAY_CAST_TYPES.include?(default_type&.to_sym)
+
+        @values = values.flat_map do |v|
+          next [v] unless v.value.is_a?(Array)
+
+          elements = v.value
+          if Ransack.options[:ignore_blank_values]
+            elements = elements.reject { |e| e.blank? && e != false && !e.nil? }
+          end
+          elements.map { |e| Value.new(@context, e) }
+        end
       end
 
       def persisted?

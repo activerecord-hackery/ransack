@@ -214,23 +214,14 @@ module Ransack
       # A condition is dropped when it fails validation, as an unknown
       # attribute or predicate would be. One failure is worth naming: a
       # single-value predicate given several values. A strict search raises
-      # for it, so the caller learns why the filter vanished (#1724). The
-      # check only applies once the predicate and an attribute have resolved;
-      # a condition that is invalid for another reason keeps its behaviour.
+      # for it, so the caller learns why the filter vanished (#1724).
       def add_condition(attrs)
         condition = Condition.new(@context).build(attrs)
         if condition.valid?
           self.conditions << condition
-        elsif @context.strict_conditions? && arity_failure?(condition)
-          raise InvalidSearchError,
-            "Predicate #{condition.predicate_name} takes a single value, " \
-            "#{condition.values.size} given for #{condition.attributes.map(&:name).join(', ')}"
+        elsif @context.strict_conditions? && condition.arity_failure?
+          raise condition.arity_error
         end
-      end
-
-      def arity_failure?(condition)
-        condition.predicate && condition.attributes.any?(&:valid?) &&
-          !condition.valid_arity?
       end
 
       def remove_duplicate_conditions!
