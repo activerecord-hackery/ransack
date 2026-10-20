@@ -1205,19 +1205,26 @@ module Ransack
       # of articles and bound as `articles.person_name`, which does not
       # exist. Only a real attribute is bound on the model itself; any other
       # name is followed through the association as usual (#756).
+      around do |example|
+        ::ActiveRecord::Base.transaction do
+          example.run
+          raise ::ActiveRecord::Rollback
+        end
+      end
+
       before do
         allow(Article).to receive(:ransackable_attributes).and_return(%w[title person_name orderId])
       end
 
       let!(:ernie) { Article.create!(person: Person.create!(name: 'issue-1774-ernie'), title: 'one') }
       let!(:bert)  { Article.create!(person: Person.create!(name: 'issue-1774-bert'), title: 'two') }
+      let(:scope) { Article.where(id: [ernie.id, bert.id]) }
 
       it 'searches through the association' do
-        expect(Article.ransack(person_name_cont: 'issue-1774-ernie').result.to_a).to eq [ernie]
+        expect(scope.ransack(person_name_cont: 'issue-1774-ernie').result.to_a).to eq [ernie]
       end
 
       it 'sorts through the association' do
-        scope = Article.where(id: [ernie.id, bert.id])
         expect(scope.ransack(s: 'person_name desc').result.to_a).to eq [ernie, bert]
         expect(scope.ransack(s: 'person_name asc').result.to_a).to eq [bert, ernie]
       end
