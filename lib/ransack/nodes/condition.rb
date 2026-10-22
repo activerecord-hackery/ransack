@@ -387,8 +387,8 @@ module Ransack
         # is an alias for `#call`. It actually invokes the proc, passing
         # the `Proc` class itself as the argument, and branches on whatever
         # comes back. `#respond_to?(:call)` is a real check, and it also
-        # catches a callable object that is not literally a Proc/lambda,
-        # which the old check could never detect.
+        # catches an object that defines `#call` but is neither a Proc nor
+        # a Method, which `=== Proc` treats as a method name.
         if predicate.arel_predicate.respond_to?(:call)
           values = casted_values_for_attribute(attr)
           unless predicate.wants_array
@@ -565,14 +565,28 @@ module Ransack
       # `attr_value` with one argument.
       def format_predicate_from_node(attribute)
         attr_value = attr_value_for_attribute(attribute)
+        # A sentinel-only search has no real values, so the builder gets no
+        # input and the condition is `IS NULL` alone.
+        return attr_value.eq(nil) if null_sentinel_requested? && validated_values.empty?
+
         values = formatted_values_without_blank_for_non_string(attribute)
         predicate = self.predicate.arel_node.call(attr_value, values)
+
+        # A nil result would drop the condition and a String would reach the
+        # SQL as raw text, both without an error.
+        unless predicate.is_a?(Arel::Nodes::Node)
+          raise ArgumentError,
+            "arel_node for '#{self.predicate.name}' must return an Arel node, " \
+            "got #{predicate.class}"
+        end
 
         if in_predicate?(predicate) && predicate.right.is_a?(Array)
           predicate.right = predicate.right.map do |pr|
             casted_array?(pr) ? format_values_for(pr) : pr
           end
         end
+
+        predicate = null_sentinel_requested? ? apply_null_sentinel(predicate, attr_value) : predicate
 
         unwrap_oversized_integers(predicate)
 

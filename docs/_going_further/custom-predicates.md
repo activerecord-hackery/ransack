@@ -69,6 +69,12 @@ Ransack.configure do |config|
 end
 ```
 
+`val` is user-submitted search input. Pass it only through Arel methods such
+as `attr.gteq(val)`, which quote it. Never interpolate it into a string or
+pass it to `Arel.sql`: that is an injection vector. The callable must return an
+Arel node, and Ransack raises `ArgumentError` for anything else, including
+`nil`.
+
 `arel_node` and `arel_predicate` are mutually exclusive on one predicate,
 and `arel_node` has no compound (`_any`/`_all`) form, since those are
 built by appending a suffix to an Arel method name.

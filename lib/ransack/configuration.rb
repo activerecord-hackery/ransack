@@ -57,6 +57,12 @@ module Ransack
           "not both"
       end
 
+      if opts[:arel_node] && !opts[:arel_node].respond_to?(:call)
+        raise ArgumentError,
+          "add_predicate '#{name}' needs :arel_node to be callable, " \
+          "got #{opts[:arel_node].class}"
+      end
+
       compounds = opts.delete(:compounds)
       compounds = true if compounds.nil?
       compounds = false if opts[:wants_array]

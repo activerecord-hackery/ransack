@@ -48,6 +48,14 @@ module Ransack
           end
         }.to raise_error ArgumentError
       end
+
+      it 'raises, naming the predicate, when arel_node is not callable' do
+        expect {
+          Ransack.configure do |config|
+            config.add_predicate :test_uncallable_node, arel_node: 'gteq'
+          end
+        }.to raise_error ArgumentError, /test_uncallable_node.*callable/
+      end
     end
 
     it 'avoids creating compound predicates if compounds: false' do

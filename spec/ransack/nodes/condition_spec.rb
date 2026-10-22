@@ -246,18 +246,99 @@ module Ransack
                    "OR #{qcol('life_start')} IS NULL)"
         end
 
-        it 'does not affect an unrelated predicate once registered' do
+        it 'leaves built-in predicates alone in the same search' do
           Ransack.configure do |config|
             config.add_predicate :test_gteq_or_null_regression_check,
               arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
           end
 
-          expect(where_clause(name_in: ['Aaron']))
-            .to eq "#{qcol('name')} IN (#{quote_value('Aaron')})"
-          expect(where_clause(name_eq: 'Aaron'))
-            .to eq "#{qcol('name')} = #{quote_value('Aaron')}"
-          expect(where_clause(salary_gteq: 5))
-            .to eq "#{qcol('salary')} >= 5"
+          expect(where_clause(
+            name_in: ['Aaron'], salary_test_gteq_or_null_regression_check: 5
+          )).to eq "(#{qcol('name')} IN (#{quote_value('Aaron')}) AND " \
+                   "(#{qcol('salary')} >= 5 OR #{qcol('salary')} IS NULL))"
+        end
+
+        it 'raises when the builder returns nil' do
+          Ransack.configure do |config|
+            config.add_predicate :test_nil_node,
+              arel_node: ->(attr, val) { attr.gteq(val) if val.nil? }
+          end
+
+          expect { where_clause(salary_test_nil_node: 5) }
+            .to raise_error ArgumentError, /test_nil_node.*Arel node.*NilClass/
+        end
+
+        it 'raises when the builder returns a String' do
+          Ransack.configure do |config|
+            config.add_predicate :test_string_node,
+              arel_node: ->(_attr, _val) { '1=1' }
+          end
+
+          expect { where_clause(salary_test_string_node: 5) }
+            .to raise_error ArgumentError, /test_string_node.*Arel node.*String/
+        end
+
+        it 'passes an In node holding an Array of Arrays through the value rewrite' do
+          Ransack.configure do |config|
+            config.add_predicate :test_nested_in,
+              arel_node: ->(attr, val) { attr.in([val]) },
+              wants_array: true
+          end
+
+          expect(where_clause(name_test_nested_in: ['Aaron', 'Ernie']))
+            .to eq "#{qcol('name')} IN (#{quote_value('Aaron')}, " \
+                   "#{quote_value('Ernie')})"
+        end
+
+        context 'with a null sentinel' do
+          around do |example|
+            original = Ransack.predicates['in']
+            example.run
+          ensure
+            Ransack.predicates['in'] = original
+          end
+
+          def sentinel_where(hash)
+            sql = Person.ransack(hash, null_sentinel: '__null__').result.to_sql
+            sql.split(/\bWHERE\b/, 2).last.to_s
+               .split(/\bORDER BY\b/).first.to_s.strip
+          end
+
+          before do
+            Ransack.configure do |config|
+              config.add_predicate :in,
+                arel_node: ->(attr, val) { attr.in(val) },
+                wants_array: true
+            end
+          end
+
+          it 'adds IS NULL beside the real values for a built-in sentinel name' do
+            expect(sentinel_where(name_in: ['Aaron', '__null__']))
+              .to eq "(#{qcol('name')} IN (#{quote_value('Aaron')}) " \
+                     "OR #{qcol('name')} IS NULL)"
+          end
+
+          it 'matches IS NULL alone when the sentinel is the only value' do
+            expect(sentinel_where(name_in: ['__null__']))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+
+          it 'does not call the builder when the sentinel is the only value' do
+            Ransack.configure do |config|
+              config.add_predicate :in,
+                arel_node: ->(attr, val) { attr.in([val.fetch(0)]) },
+                wants_array: true
+            end
+
+            expect(sentinel_where(name_in: ['__null__']))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+
+          it 'treats the sentinel as a literal value without a configured sentinel' do
+            expect(where_clause(name_in: ['Aaron', '__null__']))
+              .to eq "#{qcol('name')} IN (#{quote_value('Aaron')}, " \
+                     "#{quote_value('__null__')})"
+          end
         end
 
         it 'does not raise for an integer out of range in the builder result' do
@@ -331,11 +412,10 @@ module Ransack
 
         context 'the arel_predicate callable-detection fix' do
           it 'detects a callable that is not a literal Proc or lambda' do
-            # `Proc === anything` is the only class in Ruby whose `#===` is
-            # aliased to `#call`. A `Method` object, or any other object
-            # responding to `#call`, is never a Proc, so the old
-            # `arel_predicate === Proc` check never detected it: it fell
-            # through to `attr_value.public_send(dispatcher, values)`,
+            # `Proc#===` and `Method#===` call the receiver, but an object
+            # that only defines `#call` has no such `#===`. An
+            # `arel_predicate === Proc` check treats it as a method name and
+            # falls through to `attr_value.public_send(dispatcher, values)`,
             # which raises because `public_send` needs a Symbol or String.
             dispatcher = Object.new
             def dispatcher.call(values)
@@ -349,6 +429,25 @@ module Ransack
 
             expect(where_clause(name_test_callable_object_predicate: 'Aaron'))
               .to eq "#{qcol('name')} = #{quote_value('Aaron')}"
+          end
+
+          it 'detects a callable that is not a Proc for the _any compound' do
+            # The compound is built by `arel_predicate_with_suffix`, which has
+            # its own copy of the callable check.
+            dispatcher = Object.new
+            def dispatcher.call(_values)
+              'eq'
+            end
+
+            Ransack.configure do |config|
+              config.add_predicate :test_callable_object_compound,
+                arel_predicate: dispatcher
+            end
+
+            expect(where_clause(
+              name_test_callable_object_compound_any: ['Aaron', 'Ernie']
+            )).to eq "(#{qcol('name')} = #{quote_value('Aaron')} " \
+                     "OR #{qcol('name')} = #{quote_value('Ernie')})"
           end
 
           it 'calls the proc with the real values, not a Proc-class probe' do
