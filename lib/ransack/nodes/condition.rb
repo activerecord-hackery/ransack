@@ -562,11 +562,13 @@ module Ransack
         values = formatted_values_for_attribute(attribute)
         predicate = self.predicate.arel_node.call(attr_value, values)
 
-        if in_predicate?(predicate)
+        if in_predicate?(predicate) && predicate.right.is_a?(Array)
           predicate.right = predicate.right.map do |pr|
             casted_array?(pr) ? format_values_for(pr) : pr
           end
         end
+
+        unwrap_oversized_integers(predicate)
 
         predicate
       end
@@ -637,18 +639,21 @@ module Ransack
         end
       end
 
-      # Walks a predicate node for the shapes `#arel_predicate` can produce
-      # (a single Binary, an In/NotIn holding an Array, or several of these
-      # combined with Grouping/And/Or) and replaces each integer Casted
-      # value it finds with the plain integer, in place.
+      # Walks a predicate node for the shapes `#arel_predicate` or an
+      # `arel_node` builder can produce (a single Binary, an In/NotIn
+      # holding an Array, a Between, or several of these combined with
+      # Grouping/Not/And/Or) and replaces each integer Casted value it
+      # finds with the plain integer, in place.
       def unwrap_oversized_integers(node)
         case node
-        when Arel::Nodes::Grouping
+        when Arel::Nodes::Grouping, Arel::Nodes::Not
           unwrap_oversized_integers(node.expr)
         when Arel::Nodes::And, Arel::Nodes::Or
           # Both are Nary: `grouping_any` (behind every `_any` predicate)
           # builds a single Or with one child per value, not a pairwise
           # chain, so `left`/`right` alone would miss the third value on.
+          # A BETWEEN keeps its two bounds as Casted children of an And.
+          node.children.map! { |child| plain_integer(child) || child }
           node.children.each { |child| unwrap_oversized_integers(child) }
         when Arel::Nodes::In, Arel::Nodes::NotIn
           if node.right.is_a?(Array)
@@ -660,6 +665,7 @@ module Ransack
           end
         when Arel::Nodes::Binary
           unwrap_binary_right(node)
+          unwrap_oversized_integers(node.right) if node.right.is_a?(Arel::Nodes::And)
         end
       end
 

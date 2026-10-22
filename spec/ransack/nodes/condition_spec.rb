@@ -260,6 +260,49 @@ module Ransack
             .to eq "#{qcol('salary')} >= 5"
         end
 
+        it 'does not raise for an integer out of range in the builder result' do
+          Ransack.configure do |config|
+            config.add_predicate :test_gteq_or_null_big,
+              arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
+          end
+          big = '99999999999999999999'
+
+          expect(where_clause(salary_test_gteq_or_null_big: big))
+            .to eq "(#{qcol('salary')} >= #{big} OR #{qcol('salary')} IS NULL)"
+        end
+
+        it 'does not raise for an integer out of range under a NOT' do
+          Ransack.configure do |config|
+            config.add_predicate :test_not_big,
+              arel_node: ->(attr, val) { attr.eq(val).or(attr.eq(nil)).not }
+          end
+          big = '99999999999999999999'
+
+          expect(where_clause(salary_test_not_big: big)).to include big
+        end
+
+        it 'does not raise for an integer out of range inside a BETWEEN' do
+          Ransack.configure do |config|
+            config.add_predicate :test_between_big,
+              arel_node: ->(attr, val) { attr.between(1..val) }
+          end
+          big = '99999999999999999999'
+
+          expect(where_clause(salary_test_between_big: big)).to include big
+        end
+
+        it 'passes an In node holding a subquery through unchanged' do
+          Ransack.configure do |config|
+            config.add_predicate :test_in_subquery,
+              arel_node: ->(attr, val) {
+                attr.in(Person.select(:id).where(name: val).arel)
+              }
+          end
+
+          expect(where_clause(id_test_in_subquery: 'Aaron'))
+            .to include "#{qcol('id')} IN (SELECT "
+        end
+
         context 'the arel_predicate callable-detection fix' do
           it 'detects a callable that is not a literal Proc or lambda' do
             # `Proc === anything` is the only class in Ruby whose `#===` is
