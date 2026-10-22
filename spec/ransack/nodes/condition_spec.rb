@@ -291,6 +291,32 @@ module Ransack
           expect(where_clause(salary_test_between_big: big)).to include big
         end
 
+        it 'drops an empty-string value on a column that is not string-like' do
+          Ransack.configure do |config|
+            config.add_predicate :test_blank_node,
+              arel_node: ->(attr, val) { attr.eq_any(val) },
+              formatter: proc { |_| [nil, ''] },
+              validator: proc { true },
+              type: :string
+          end
+
+          expect(where_clause(salary_test_blank_node: '1'))
+            .to eq "(#{qcol('salary')} IS NULL)"
+        end
+
+        it 'keeps an empty-string value on a string-like column' do
+          Ransack.configure do |config|
+            config.add_predicate :test_blank_node_string,
+              arel_node: ->(attr, val) { attr.eq_any(val) },
+              formatter: proc { |_| [nil, ''] },
+              validator: proc { true },
+              type: :string
+          end
+
+          expect(where_clause(name_test_blank_node_string: '1'))
+            .to eq "(#{qcol('name')} IS NULL OR #{qcol('name')} = #{quote_value('')})"
+        end
+
         it 'passes an In node holding a subquery through unchanged' do
           Ransack.configure do |config|
             config.add_predicate :test_in_subquery,

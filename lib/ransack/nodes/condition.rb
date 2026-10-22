@@ -489,16 +489,7 @@ module Ransack
         return format_predicate_from_node(attribute) if predicate.arel_node
 
         arel_pred = arel_predicate_for_attribute(attribute)
-        arel_values = formatted_values_for_attribute(attribute)
-
-        # The `present` / `blank` predicate formatters produce `[nil, '']` regardless
-        # of column type. The empty-string half has no meaning on non-string columns:
-        # ActiveRecord casts `''` to NULL for those types, producing the
-        # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
-        # empty string when the attribute is not a string-like column.
-        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
-          arel_values = arel_values.reject { |v| v == ''.freeze }
-        end
+        arel_values = formatted_values_without_blank_for_non_string(attribute)
 
         # A length predicate compares LENGTH(column) rather than the column.
         attr_value = length_predicate? ? length_function_for_attribute(attribute) : attr_value_for_attribute(attribute)
@@ -553,13 +544,28 @@ module Ransack
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
       end
 
+      # The `present` / `blank` predicate formatters produce `[nil, '']` regardless
+      # of column type. The empty-string half has no meaning on non-string columns:
+      # ActiveRecord casts `''` to NULL for those types, producing the
+      # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
+      # empty string when the attribute is not a string-like column.
+      def formatted_values_without_blank_for_non_string(attribute)
+        arel_values = formatted_values_for_attribute(attribute)
+
+        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
+          arel_values = arel_values.reject { |v| v == ''.freeze }
+        end
+
+        arel_values
+      end
+
       # `arel_node` receives the attribute node and the already cast and
       # formatted values, and returns a finished Arel node directly,
       # instead of naming a method `#format_predicate` sends to
       # `attr_value` with one argument.
       def format_predicate_from_node(attribute)
         attr_value = attr_value_for_attribute(attribute)
-        values = formatted_values_for_attribute(attribute)
+        values = formatted_values_without_blank_for_non_string(attribute)
         predicate = self.predicate.arel_node.call(attr_value, values)
 
         if in_predicate?(predicate) && predicate.right.is_a?(Array)
