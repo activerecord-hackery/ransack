@@ -383,7 +383,13 @@ module Ransack
       end
 
       def arel_predicate_for_attribute(attr)
-        if predicate.arel_predicate === Proc
+        # `.arel_predicate === Proc` reads as a class check, but `Proc#===`
+        # is an alias for `#call`. It actually invokes the proc, passing
+        # the `Proc` class itself as the argument, and branches on whatever
+        # comes back. `#respond_to?(:call)` is a real check, and it also
+        # catches an object that defines `#call` but is neither a Proc nor
+        # a Method, which `=== Proc` treats as a method name.
+        if predicate.arel_predicate.respond_to?(:call)
           values = casted_values_for_attribute(attr)
           unless predicate.wants_array
             values = values.first
@@ -480,17 +486,10 @@ module Ransack
       end
 
       def format_predicate(attribute)
-        arel_pred = arel_predicate_for_attribute(attribute)
-        arel_values = formatted_values_for_attribute(attribute)
+        return format_predicate_from_node(attribute) if predicate.arel_node
 
-        # The `present` / `blank` predicate formatters produce `[nil, '']` regardless
-        # of column type. The empty-string half has no meaning on non-string columns:
-        # ActiveRecord casts `''` to NULL for those types, producing the
-        # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
-        # empty string when the attribute is not a string-like column.
-        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
-          arel_values = arel_values.reject { |v| v == ''.freeze }
-        end
+        arel_pred = arel_predicate_for_attribute(attribute)
+        arel_values = formatted_values_without_blank_for_non_string(attribute)
 
         # A length predicate compares LENGTH(column) rather than the column.
         attr_value = length_predicate? ? length_function_for_attribute(attribute) : attr_value_for_attribute(attribute)
@@ -543,6 +542,55 @@ module Ransack
       def in_predicate?(predicate)
         return unless defined?(Arel::Nodes::Casted)
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
+      end
+
+      # The `present` / `blank` predicate formatters produce `[nil, '']` regardless
+      # of column type. The empty-string half has no meaning on non-string columns:
+      # ActiveRecord casts `''` to NULL for those types, producing the
+      # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
+      # empty string when the attribute is not a string-like column.
+      def formatted_values_without_blank_for_non_string(attribute)
+        arel_values = formatted_values_for_attribute(attribute)
+
+        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
+          arel_values = arel_values.reject { |v| v == ''.freeze }
+        end
+
+        arel_values
+      end
+
+      # `arel_node` receives the attribute node and the already cast and
+      # formatted values, and returns a finished Arel node directly,
+      # instead of naming a method `#format_predicate` sends to
+      # `attr_value` with one argument.
+      def format_predicate_from_node(attribute)
+        attr_value = attr_value_for_attribute(attribute)
+        # A sentinel-only search has no real values, so the builder gets no
+        # input and the condition is `IS NULL` alone.
+        return attr_value.eq(nil) if null_sentinel_requested? && validated_values.empty?
+
+        values = formatted_values_without_blank_for_non_string(attribute)
+        predicate = self.predicate.arel_node.call(attr_value, values)
+
+        # A nil result would drop the condition and a String would reach the
+        # SQL as raw text, both without an error.
+        unless predicate.is_a?(Arel::Nodes::Node)
+          raise ArgumentError,
+            "arel_node for '#{self.predicate.name}' must return an Arel node, " \
+            "got #{predicate.class}"
+        end
+
+        if in_predicate?(predicate) && predicate.right.is_a?(Array)
+          predicate.right = predicate.right.map do |pr|
+            casted_array?(pr) ? format_values_for(pr) : pr
+          end
+        end
+
+        predicate = null_sentinel_requested? ? apply_null_sentinel(predicate, attr_value) : predicate
+
+        unwrap_oversized_integers(predicate)
+
+        predicate
       end
 
       LIKE_PREDICATES = %w[
@@ -611,18 +659,21 @@ module Ransack
         end
       end
 
-      # Walks a predicate node for the shapes `#arel_predicate` can produce
-      # (a single Binary, an In/NotIn holding an Array, or several of these
-      # combined with Grouping/And/Or) and replaces each integer Casted
-      # value it finds with the plain integer, in place.
+      # Walks a predicate node for the shapes `#arel_predicate` or an
+      # `arel_node` builder can produce (a single Binary, an In/NotIn
+      # holding an Array, a Between, or several of these combined with
+      # Grouping/Not/And/Or) and replaces each integer Casted value it
+      # finds with the plain integer, in place.
       def unwrap_oversized_integers(node)
         case node
-        when Arel::Nodes::Grouping
+        when Arel::Nodes::Grouping, Arel::Nodes::Not
           unwrap_oversized_integers(node.expr)
         when Arel::Nodes::And, Arel::Nodes::Or
           # Both are Nary: `grouping_any` (behind every `_any` predicate)
           # builds a single Or with one child per value, not a pairwise
           # chain, so `left`/`right` alone would miss the third value on.
+          # A BETWEEN keeps its two bounds as Casted children of an And.
+          node.children.map! { |child| plain_integer(child) || child }
           node.children.each { |child| unwrap_oversized_integers(child) }
         when Arel::Nodes::In, Arel::Nodes::NotIn
           if node.right.is_a?(Array)
@@ -634,6 +685,7 @@ module Ransack
           end
         when Arel::Nodes::Binary
           unwrap_binary_right(node)
+          unwrap_oversized_integers(node.right) if node.right.is_a?(Arel::Nodes::And)
         end
       end
 
