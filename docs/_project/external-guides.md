@@ -1,7 +1,7 @@
 ---
 title: External resources
 description: Screencasts, related gems and blog posts about Ransack.
-nav_order: 5
+nav_order: 6
 redirect_from:
 - "/going-further/external-guides/"
 ---
