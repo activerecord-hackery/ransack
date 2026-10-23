@@ -229,12 +229,11 @@ module Ransack
 
         private
 
+          # Indifferent access, so RESERVED_URL_OPTIONS also matches the string
+          # keys of a plain Hash.
           def parameters_hash(params)
-            if params.respond_to?(:to_unsafe_h)
-              params.to_unsafe_h
-            else
-              params
-            end
+            params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
+            params.with_indifferent_access
           end
 
           def extract_sort_fields_and_mutate_args!(args)
