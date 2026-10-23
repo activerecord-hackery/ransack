@@ -819,7 +819,9 @@ module Ransack
       describe "#sort_link ignores url options in params" do
         {
           'only_path' => { only_path: nil },
+          'host' => { only_path: nil, host: 'other_domain' },
           'domain' => { only_path: nil, domain: 'other_domain' },
+          'tld_length' => { only_path: nil, tld_length: '0' },
           'subdomain' => { only_path: nil, subdomain: 'other_domain' },
           'protocol' => { only_path: nil, protocol: 'ftp' },
           'port' => { only_path: nil, port: '8080' },
@@ -850,9 +852,11 @@ module Ransack
       # A routing proxy builds a full URL, so these need no `?only_path`.
       describe "#sort_link via a routing proxy ignores url options" do
         {
+          'host' => { host: 'other_domain' },
           'domain' => { domain: 'other_domain' },
           'protocol' => { protocol: 'ftp' },
-          'port' => { port: '8080' }
+          'port' => { port: '8080' },
+          'script_name' => { script_name: '//other_domain' }
         }.each do |name, url_params|
           context "with #{name}" do
             before do
@@ -909,6 +913,44 @@ module Ransack
         }
 
         it { should match /\A\/people\?q(%5B|\[)s(%5D|\])=name\+asc\z/ }
+      end
+
+      # The reflected XSS: script_name is prepended to the path unvalidated.
+      describe "#sort_link and #sort_url ignore a javascript: script_name" do
+        %i[script_name original_script_name].each do |key|
+          context "in #{key}" do
+            before do
+              @controller.view_context.params[key] =
+                'javascript:alert(document.domain)//'
+            end
+
+            it {
+              expect(
+                @controller.view_context
+                .sort_link(Person.ransack, :name, controller: 'people')
+              ).to match /href="\/people\?q(%5B|\[)s(%5D|\])=name\+asc"/
+            }
+
+            it {
+              expect(
+                @controller.view_context
+                .sort_url(Person.ransack, :name, controller: 'people')
+              ).to match /\A\/people\?q(%5B|\[)s(%5D|\])=name\+asc\z/
+            }
+          end
+        end
+      end
+
+      describe "SortLink with a plain Hash of params" do
+        subject {
+          FormHelper::SortLink.new(
+            Person.ransack, :name, [],
+            'script_name' => 'javascript:alert(1)//', 'page' => '2'
+          ).url_options
+        }
+
+        it { should_not have_key 'script_name' }
+        it { should include 'page' => '2' }
       end
 
       describe '#search_form_for with default format' do
