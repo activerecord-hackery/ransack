@@ -45,6 +45,7 @@
 - [How Ransack is built](https://activerecord-hackery.github.io/ransack/project/architecture/): The pieces of Ransack and where it depends on Active Record's internals.
 - [Documentation](https://activerecord-hackery.github.io/ransack/project/documentation/): Build and preview this site locally, and add a page.
 - [Versions and releases](https://activerecord-hackery.github.io/ransack/project/release_process/): Semantic versioning and how a Ransack release is cut and published.
+- [Security](https://activerecord-hackery.github.io/ransack/project/security/): How to report a security vulnerability in Ransack, and how maintainers handle a report from triage to disclosure.
 - [External resources](https://activerecord-hackery.github.io/ransack/project/external-guides/): Screencasts, related gems and blog posts about Ransack.
 - [Wiki contributors](https://activerecord-hackery.github.io/ransack/project/wiki-contributors/): The people who wrote the original Ransack wiki.
 - [Ransack 3.0.0 announcement](https://activerecord-hackery.github.io/ransack/project/ransack-3-0-0/): The 3.0.0 announcement.
