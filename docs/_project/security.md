@@ -115,10 +115,15 @@ Push the fix to a branch of the fork, and open a pull request against the fork's
 * **Branch protection isn't enforced** when the pull request is merged, so get the
   review you would normally require.
 
-For each earlier release line you're fixing, cherry-pick the fix onto its stable
-branch with `git cherry-pick -x` and run that line's suite. Push the backport branches
-to the fork for review, but don't open pull requests into the fork's `main` for
-them. They're released from the stable branches in step 4.
+The pull request puts the fix on `main` for the next minor release. **Patch
+releases never come from `main`,** because `main` usually holds unreleased features
+and compatibility changes. For every release line you're fixing, the current one
+included, cherry-pick the fix with `git cherry-pick -x` onto that line's stable
+branch. If the current line has no stable branch yet, start one from its latest
+tag, e.g. `git switch -c 6-0-stable v6.0.0`. Run that line's suite against each
+Rails version it supports. Push each backport to the fork for review as a
+`backport-x-y-stable` branch, without opening a pull request. Step 4 releases them
+from the stable branches.
 
 ### 4. Release and disclose
 
@@ -128,10 +133,9 @@ On that day, follow these steps in order:
 1. **Merge the fix.** On the advisory, click *Merge pull request(s)*. The fork's
    pull request lands on `main`.
 2. **Release each line.** Follow [Versions and releases](../_project/release_process.md):
-   * For `main`: a version pull request, then a GitHub Release targeting `main`.
-   * For each earlier line: push the backport and a `Version x.y.z` commit to its
-     `x-y-stable` branch, then create a GitHub Release targeting that branch. Leave
-     *Set as the latest release* unchecked.
+   For each line, push the backport and a `Version x.y.z` commit to its
+   `x-y-stable` branch, then create a GitHub Release targeting that branch.
+   *Set as the latest release* is checked only for the current line's release.
 
    Start each release's notes with "Security release.", followed by a one-paragraph
    description of the problem, the GHSA identifier and the other versions that
