@@ -1633,25 +1633,37 @@ Person.ransack(name_in_list: &apos;Aaron;Ernie&apos;).result.to_sql
 Returning `&quot;Aaron&apos;,&apos;Ernie&quot;` instead gives `IN (&apos;Aaron&apos;&apos;,&apos;&apos;Ernie&apos;)`: the string
 is one value, and treating it as SQL would be an injection vector.
 
-If Arel does not have the predicate you are looking for, consider monkey patching it:
+### Combining two conditions: `arel_node`
+
+`arel_predicate` names one Arel method with one argument, so it cannot
+combine two conditions on its own. For a predicate like `gteq_or_null`,
+pass `arel_node` instead: a two-argument callable that receives the
+attribute and the formatted values, and returns a finished Arel node
+directly.
 
 ```ruby
 # config/initializers/ransack.rb
 
-module Arel
-  module Predications
-    def gteq_or_null(other)
-      left = gteq(other)
-      right = eq(nil)
-      left.or(right)
-    end
-  end
-end
-
 Ransack.configure do |config|
-  config.add_predicate &apos;gteq_or_null&apos;, arel_predicate: &apos;gteq_or_null&apos;
+  config.add_predicate &apos;gteq_or_null&apos;,
+    arel_node: -&gt;(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
 end
 ```
+
+`val` is user-submitted search input. Pass it only through Arel methods such
+as `attr.gteq(val)`, which quote it. Never interpolate it into a string or
+pass it to `Arel.sql`: that is an injection vector. The callable must return an
+Arel node, and Ransack raises `ArgumentError` for anything else, including
+`nil`.
+
+`arel_node` and `arel_predicate` are mutually exclusive on one predicate,
+and `arel_node` has no compound (`_any`/`_all`) form, since those are
+built by appending a suffix to an Arel method name.
+
+Avoid monkey patching `Arel::Predications` to add a method like
+`gteq_or_null` instead: the module is undocumented in every version of
+ActiveRecord Ransack supports, and its internals differ between
+versions.
 </textarea>
     
     <p>If you’d like to add your own custom Ransack predicates:</p>
@@ -1700,24 +1712,36 @@ element:</p>
 <p>Returning <code class="language-plaintext highlighter-rouge">"Aaron','Ernie"</code> instead gives <code class="language-plaintext highlighter-rouge">IN ('Aaron'',''Ernie')</code>: the string
 is one value, and treating it as SQL would be an injection vector.</p>
 
-<p>If Arel does not have the predicate you are looking for, consider monkey patching it:</p>
+<h3 id="combining-two-conditions-arel_node">Combining two conditions: <code class="language-plaintext highlighter-rouge">arel_node</code></h3>
+
+<p><code class="language-plaintext highlighter-rouge">arel_predicate</code> names one Arel method with one argument, so it cannot
+combine two conditions on its own. For a predicate like <code class="language-plaintext highlighter-rouge">gteq_or_null</code>,
+pass <code class="language-plaintext highlighter-rouge">arel_node</code> instead: a two-argument callable that receives the
+attribute and the formatted values, and returns a finished Arel node
+directly.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/ransack.rb</span>
 
-<span class="k">module</span> <span class="nn">Arel</span>
-  <span class="k">module</span> <span class="nn">Predications</span>
-    <span class="k">def</span> <span class="nf">gteq_or_null</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-      <span class="n">left</span> <span class="o">=</span> <span class="n">gteq</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-      <span class="n">right</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="kp">nil</span><span class="p">)</span>
-      <span class="n">left</span><span class="p">.</span><span class="nf">or</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
-    <span class="k">end</span>
-  <span class="k">end</span>
-<span class="k">end</span>
-
 <span class="no">Ransack</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'gteq_or_null'</span><span class="p">,</span> <span class="ss">arel_predicate: </span><span class="s1">'gteq_or_null'</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">add_predicate</span> <span class="s1">'gteq_or_null'</span><span class="p">,</span>
+    <span class="ss">arel_node: </span><span class="o">-&gt;</span><span class="p">(</span><span class="kp">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="p">{</span> <span class="kp">attr</span><span class="p">.</span><span class="nf">gteq</span><span class="p">(</span><span class="n">val</span><span class="p">).</span><span class="nf">or</span><span class="p">(</span><span class="kp">attr</span><span class="p">.</span><span class="nf">eq</span><span class="p">(</span><span class="kp">nil</span><span class="p">))</span> <span class="p">}</span>
 <span class="k">end</span>
 </code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">val</code> is user-submitted search input. Pass it only through Arel methods such
+as <code class="language-plaintext highlighter-rouge">attr.gteq(val)</code>, which quote it. Never interpolate it into a string or
+pass it to <code class="language-plaintext highlighter-rouge">Arel.sql</code>: that is an injection vector. The callable must return an
+Arel node, and Ransack raises <code class="language-plaintext highlighter-rouge">ArgumentError</code> for anything else, including
+<code class="language-plaintext highlighter-rouge">nil</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">arel_node</code> and <code class="language-plaintext highlighter-rouge">arel_predicate</code> are mutually exclusive on one predicate,
+and <code class="language-plaintext highlighter-rouge">arel_node</code> has no compound (<code class="language-plaintext highlighter-rouge">_any</code>/<code class="language-plaintext highlighter-rouge">_all</code>) form, since those are
+built by appending a suffix to an Arel method name.</p>
+
+<p>Avoid monkey patching <code class="language-plaintext highlighter-rouge">Arel::Predications</code> to add a method like
+<code class="language-plaintext highlighter-rouge">gteq_or_null</code> instead: the module is undocumented in every version of
+ActiveRecord Ransack supports, and its internals differ between
+versions.</p>
 
   </div>
 </main>
