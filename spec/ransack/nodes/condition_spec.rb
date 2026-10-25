@@ -224,6 +224,251 @@ module Ransack
         end
       end
 
+      context 'with an arel_node' do
+        def where_clause(hash)
+          sql = Person.ransack(hash).result.to_sql
+          sql.split(/\bWHERE\b/, 2).last.to_s
+             .split(/\bORDER BY\b/).first.to_s.strip
+        end
+
+        def qcol(col)
+          "#{quote_table_name('people')}.#{quote_column_name(col)}"
+        end
+
+        it 'builds a finished Arel node, the documented gteq_or_null example' do
+          Ransack.configure do |config|
+            config.add_predicate :test_gteq_or_null,
+              arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
+          end
+
+          expect(where_clause(life_start_test_gteq_or_null: '2020-01-01'))
+            .to eq "(#{qcol('life_start')} >= #{quote_value('2020-01-01')} " \
+                   "OR #{qcol('life_start')} IS NULL)"
+        end
+
+        it 'leaves built-in predicates alone in the same search' do
+          Ransack.configure do |config|
+            config.add_predicate :test_gteq_or_null_regression_check,
+              arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
+          end
+
+          expect(where_clause(
+            name_in: ['Aaron'], salary_test_gteq_or_null_regression_check: 5
+          )).to eq "(#{qcol('name')} IN (#{quote_value('Aaron')}) AND " \
+                   "(#{qcol('salary')} >= 5 OR #{qcol('salary')} IS NULL))"
+        end
+
+        it 'raises when the builder returns nil' do
+          Ransack.configure do |config|
+            config.add_predicate :test_nil_node,
+              arel_node: ->(attr, val) { attr.gteq(val) if val.nil? }
+          end
+
+          expect { where_clause(salary_test_nil_node: 5) }
+            .to raise_error ArgumentError, /test_nil_node.*Arel node.*NilClass/
+        end
+
+        it 'raises when the builder returns a String' do
+          Ransack.configure do |config|
+            config.add_predicate :test_string_node,
+              arel_node: ->(_attr, _val) { '1=1' }
+          end
+
+          expect { where_clause(salary_test_string_node: 5) }
+            .to raise_error ArgumentError, /test_string_node.*Arel node.*String/
+        end
+
+        it 'passes an In node holding an Array of Arrays through the value rewrite' do
+          Ransack.configure do |config|
+            config.add_predicate :test_nested_in,
+              arel_node: ->(attr, val) { attr.in([val]) },
+              wants_array: true
+          end
+
+          expect(where_clause(name_test_nested_in: ['Aaron', 'Ernie']))
+            .to eq "#{qcol('name')} IN (#{quote_value('Aaron')}, " \
+                   "#{quote_value('Ernie')})"
+        end
+
+        context 'with a null sentinel' do
+          around do |example|
+            original = Ransack.predicates['in']
+            example.run
+          ensure
+            Ransack.predicates['in'] = original
+          end
+
+          def sentinel_where(hash)
+            sql = Person.ransack(hash, null_sentinel: '__null__').result.to_sql
+            sql.split(/\bWHERE\b/, 2).last.to_s
+               .split(/\bORDER BY\b/).first.to_s.strip
+          end
+
+          before do
+            Ransack.configure do |config|
+              config.add_predicate :in,
+                arel_node: ->(attr, val) { attr.in(val) },
+                wants_array: true
+            end
+          end
+
+          it 'adds IS NULL beside the real values for a built-in sentinel name' do
+            expect(sentinel_where(name_in: ['Aaron', '__null__']))
+              .to eq "(#{qcol('name')} IN (#{quote_value('Aaron')}) " \
+                     "OR #{qcol('name')} IS NULL)"
+          end
+
+          it 'matches IS NULL alone when the sentinel is the only value' do
+            expect(sentinel_where(name_in: ['__null__']))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+
+          it 'does not call the builder when the sentinel is the only value' do
+            Ransack.configure do |config|
+              config.add_predicate :in,
+                arel_node: ->(attr, val) { attr.in([val.fetch(0)]) },
+                wants_array: true
+            end
+
+            expect(sentinel_where(name_in: ['__null__']))
+              .to eq "#{qcol('name')} IS NULL"
+          end
+
+          it 'treats the sentinel as a literal value without a configured sentinel' do
+            expect(where_clause(name_in: ['Aaron', '__null__']))
+              .to eq "#{qcol('name')} IN (#{quote_value('Aaron')}, " \
+                     "#{quote_value('__null__')})"
+          end
+        end
+
+        it 'does not raise for an integer out of range in the builder result' do
+          Ransack.configure do |config|
+            config.add_predicate :test_gteq_or_null_big,
+              arel_node: ->(attr, val) { attr.gteq(val).or(attr.eq(nil)) }
+          end
+          big = '99999999999999999999'
+
+          expect(where_clause(salary_test_gteq_or_null_big: big))
+            .to eq "(#{qcol('salary')} >= #{big} OR #{qcol('salary')} IS NULL)"
+        end
+
+        it 'does not raise for an integer out of range under a NOT' do
+          Ransack.configure do |config|
+            config.add_predicate :test_not_big,
+              arel_node: ->(attr, val) { attr.eq(val).or(attr.eq(nil)).not }
+          end
+          big = '99999999999999999999'
+
+          expect(where_clause(salary_test_not_big: big)).to include big
+        end
+
+        it 'does not raise for an integer out of range inside a BETWEEN' do
+          Ransack.configure do |config|
+            config.add_predicate :test_between_big,
+              arel_node: ->(attr, val) { attr.between(1..val) }
+          end
+          big = '99999999999999999999'
+
+          expect(where_clause(salary_test_between_big: big)).to include big
+        end
+
+        it 'drops an empty-string value on a column that is not string-like' do
+          Ransack.configure do |config|
+            config.add_predicate :test_blank_node,
+              arel_node: ->(attr, val) { attr.eq_any(val) },
+              formatter: proc { |_| [nil, ''] },
+              validator: proc { true },
+              type: :string
+          end
+
+          expect(where_clause(salary_test_blank_node: '1'))
+            .to eq "(#{qcol('salary')} IS NULL)"
+        end
+
+        it 'keeps an empty-string value on a string-like column' do
+          Ransack.configure do |config|
+            config.add_predicate :test_blank_node_string,
+              arel_node: ->(attr, val) { attr.eq_any(val) },
+              formatter: proc { |_| [nil, ''] },
+              validator: proc { true },
+              type: :string
+          end
+
+          expect(where_clause(name_test_blank_node_string: '1'))
+            .to eq "(#{qcol('name')} IS NULL OR #{qcol('name')} = #{quote_value('')})"
+        end
+
+        it 'passes an In node holding a subquery through unchanged' do
+          Ransack.configure do |config|
+            config.add_predicate :test_in_subquery,
+              arel_node: ->(attr, val) {
+                attr.in(Person.select(:id).where(name: val).arel)
+              }
+          end
+
+          expect(where_clause(id_test_in_subquery: 'Aaron'))
+            .to include "#{qcol('id')} IN (SELECT "
+        end
+
+        context 'the arel_predicate callable-detection fix' do
+          it 'detects a callable that is not a literal Proc or lambda' do
+            # `Proc#===` and `Method#===` call the receiver, but an object
+            # that only defines `#call` has no such `#===`. An
+            # `arel_predicate === Proc` check treats it as a method name and
+            # falls through to `attr_value.public_send(dispatcher, values)`,
+            # which raises because `public_send` needs a Symbol or String.
+            dispatcher = Object.new
+            def dispatcher.call(values)
+              values.present? ? 'eq' : 'not_eq'
+            end
+
+            Ransack.configure do |config|
+              config.add_predicate :test_callable_object_predicate,
+                arel_predicate: dispatcher
+            end
+
+            expect(where_clause(name_test_callable_object_predicate: 'Aaron'))
+              .to eq "#{qcol('name')} = #{quote_value('Aaron')}"
+          end
+
+          it 'detects a callable that is not a Proc for the _any compound' do
+            # The compound is built by `arel_predicate_with_suffix`, which has
+            # its own copy of the callable check.
+            dispatcher = Object.new
+            def dispatcher.call(_values)
+              'eq'
+            end
+
+            Ransack.configure do |config|
+              config.add_predicate :test_callable_object_compound,
+                arel_predicate: dispatcher
+            end
+
+            expect(where_clause(
+              name_test_callable_object_compound_any: ['Aaron', 'Ernie']
+            )).to eq "(#{qcol('name')} = #{quote_value('Aaron')} " \
+                     "OR #{qcol('name')} = #{quote_value('Ernie')})"
+          end
+
+          it 'calls the proc with the real values, not a Proc-class probe' do
+            # `arel_predicate === Proc` calls the proc once with the `Proc`
+            # class itself as the argument, to decide whether to treat it
+            # as callable at all, before calling it again with the real
+            # values. A proc whose return value depends on its input can
+            # be misrouted by that first, bogus call.
+            picker = proc { |v| v == Proc ? false : 'eq' }
+
+            Ransack.configure do |config|
+              config.add_predicate :test_proc_class_probe_predicate,
+                arel_predicate: picker
+            end
+
+            expect(where_clause(name_test_proc_class_probe_predicate: 'Aaron'))
+              .to eq "#{qcol('name')} = #{quote_value('Aaron')}"
+          end
+        end
+      end
+
       context 'with an alias' do
         subject {
           Condition.extract(
