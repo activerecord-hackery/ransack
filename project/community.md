@@ -56,8 +56,6 @@ Alumni maintainers:
 * [Jon Atack](http://twitter.com/jonatack)
 * [Ryan Bigg](http://twitter.com/ryanbigg)
 
-Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).
-
 This project exists thanks to all the people who contribute.
 
 <img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" alt="Contributors">
