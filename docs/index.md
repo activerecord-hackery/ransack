@@ -8,10 +8,10 @@ hero:
   text: Search for Active Record
   tagline: Search forms and sortable columns for your Rails app, in plain Ruby and ERB. No search server, no extra infrastructure.
   image:
-    src: /assets/logo/ransack.svg
-    alt: Ransack
-    width: 320
-    height: 333
+    src: /assets/logo/activerecord-hackery.png
+    alt: ActiveRecord Hackery
+    width: 300
+    height: 300
   actions:
     - theme: brand
       text: Get started
