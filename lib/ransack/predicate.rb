@@ -1,7 +1,7 @@
 module Ransack
   class Predicate
-    attr_reader :name, :arel_predicate, :type, :formatter, :validator,
-                :compound, :wants_array, :case_insensitive
+    attr_reader :name, :arel_predicate, :arel_node, :type, :formatter,
+                :validator, :compound, :wants_array, :case_insensitive
 
     # Consulted at search time rather than captured at predicate-definition
     # time, so that `Ransack.options[:ignore_blank_values]` set in an
@@ -58,6 +58,7 @@ module Ransack
     def initialize(opts = {})
       @name = opts[:name]
       @arel_predicate = opts[:arel_predicate]
+      @arel_node = opts[:arel_node]
       @type = opts[:type]
       @formatter = opts[:formatter]
       @validator = opts[:validator] || DEFAULT_VALIDATOR
