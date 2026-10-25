@@ -20,11 +20,8 @@ Before filing an issue or a pull request, read the
 
 ## Security
 
-To report a security vulnerability, use the
-[Tidelift security contact](https://tidelift.com/security). Tidelift will
-coordinate the fix and disclosure. See the
-[Security Policy](https://github.com/activerecord-hackery/ransack/security/policy)
-for supported versions.
+Report a security vulnerability privately, never in a public issue. See
+[Security](../_project/security.md) for how to report one and which versions are supported.
 
 ## Supporting Ransack
 

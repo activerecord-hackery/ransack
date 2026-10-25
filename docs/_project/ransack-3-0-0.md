@@ -1,7 +1,7 @@
 ---
 title: Ransack 3.0.0 announcement
 description: The 3.0.0 announcement.
-nav_order: 7
+nav_order: 8
 redirect_from:
 - "/blog/ransack-3-0-0/"
 - "/blog/"

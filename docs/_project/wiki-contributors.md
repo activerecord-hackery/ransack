@@ -1,7 +1,7 @@
 ---
 title: Wiki contributors
 description: The people who wrote the original Ransack wiki.
-nav_order: 6
+nav_order: 7
 redirect_from:
 - "/going-further/wiki-contributors/"
 ---

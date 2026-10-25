@@ -40,8 +40,10 @@ and more. The site is built from the Markdown under [`docs/`](docs/).
 * Questions belong in [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions).
 * Reproducible bugs belong in [Issues](https://github.com/activerecord-hackery/ransack/issues).
   Read the [Contributing Guide](CONTRIBUTING.md) first; a failing test is the best bug report.
-* Report security vulnerabilities through the [Tidelift security contact](https://tidelift.com/security).
-  See the [Security Policy](.github/SECURITY.md) for supported versions.
+* Report security vulnerabilities privately, through GitHub
+  [private vulnerability reporting](https://github.com/activerecord-hackery/ransack/security/advisories/new)
+  or the [Tidelift security contact](https://tidelift.com/security). See the
+  [Security Policy](.github/SECURITY.md) for supported versions.
 
 Ransack is maintained by volunteers. If it is useful to you, please consider
 supporting us via [Open Collective](https://opencollective.com/ransack), or
