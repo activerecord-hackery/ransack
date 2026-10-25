@@ -30,30 +30,37 @@ jekyll_vitepress:
   branding:
     site_title: Ransack
     logo:
-      default: /assets/logo/ransack.svg
-      alt: Ransack
+      default: /assets/logo/activerecord-hackery.png
+      alt: ActiveRecord Hackery
       width: 24
-      height: 25
+      height: 24
   syntax:
     light_theme: github
     dark_theme: github.dark
-  # The logo's blues: rgb(51, 51, 180) and rgb(132, 132, 220).
+  # The ActiveRecord Hackery logo's reds: the Rails crimson rgb(176, 40, 58),
+  # its dark maroon rgb(136, 8, 40) and the axe head's rgb(232, 48, 48).
+  # Brand buttons are white text on --vp-c-brand-3, so it stays dark enough
+  # for contrast in both themes.
   tokens:
     light:
-      --vp-c-brand-1: "#3333b4"
-      --vp-c-brand-2: "#4747c2"
-      --vp-c-brand-3: "#2a2a96"
-      --vp-c-brand-soft: "rgba(51, 51, 180, 0.14)"
+      --vp-c-brand-1: "#b0283a"
+      --vp-c-brand-2: "#c43344"
+      --vp-c-brand-3: "#880828"
+      --vp-c-brand-soft: "rgba(176, 40, 58, 0.14)"
       --vp-home-hero-name-color: "transparent"
-      --vp-home-hero-name-background: "linear-gradient(120deg, #3333b4 30%, #8484dc)"
-      --vp-home-hero-image-background-image: "linear-gradient(-45deg, #8484dc 50%, #3333b4 50%)"
+      --vp-home-hero-name-background: "linear-gradient(120deg, #b0283a 30%, #e83030)"
+      --vp-home-hero-image-background-image: "linear-gradient(-45deg, #e83030 50%, #b0283a 50%)"
       --vp-home-hero-image-filter: "blur(56px)"
     dark:
-      --vp-c-brand-1: "#8484dc"
-      --vp-c-brand-2: "#a0a0e6"
-      --vp-c-brand-3: "#6b6bd0"
-      --vp-c-brand-soft: "rgba(132, 132, 220, 0.16)"
-      --vp-home-hero-name-background: "linear-gradient(120deg, #8484dc 30%, #c4c4f4)"
+      --vp-c-brand-1: "#f06470"
+      --vp-c-brand-2: "#f4858f"
+      --vp-c-brand-3: "#c83442"
+      --vp-c-brand-soft: "rgba(240, 100, 112, 0.16)"
+      --vp-home-hero-name-background: "linear-gradient(120deg, #f06470 30%, #ffb3b8)"
+      # brand-1 and brand-2 are light enough for links on a dark page, too light
+      # behind a button's white text, which they are by default on hover and press.
+      --vp-button-brand-hover-bg: "#a82838"
+      --vp-button-brand-active-bg: "#880828"
   github_star:
     repository: activerecord-hackery/ransack
   seo:
