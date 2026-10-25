@@ -149,6 +149,10 @@ On that day, follow these steps in order:
    description of the problem, the GHSA identifier and the other versions that
    contain the fix.
 3. **Check the gems are live** on [RubyGems](https://rubygems.org/gems/ransack/versions).
-4. **Publish the advisory.** It becomes public, the CVE is assigned, and Dependabot
-   starts alerting affected apps.
-5. **Close the loop.** Tell the reporters and Tidelift that the advisory is public.
+4. **Publish the advisory.** It becomes public, Dependabot starts alerting affected
+   apps, and GitHub reviews the CVE request. Add the CVE to the release notes once
+   it's assigned. Publishing also deletes the temporary private fork and its pull
+   request.
+5. **Close the loop.** Tell Tidelift and the reporters that the advisory is public.
+   Since the fork is gone, comment on the merged commit on `main` to reach a reporter
+   whose pull request was merged.
