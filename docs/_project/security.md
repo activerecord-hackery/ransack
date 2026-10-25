@@ -112,8 +112,11 @@ Push the fix to a branch of the fork, and open a pull request against the fork's
 * **CI doesn't run** in the fork. Before merging, run the whole suite locally against
   every database (SQLite, PostgreSQL, MySQL) and every supported Rails version. See
   the [Contributing Guide](https://github.com/activerecord-hackery/ransack/blob/main/CONTRIBUTING.md).
-* **Branch protection isn't enforced** when the pull request is merged, so get the
-  review you would normally require.
+* **`main`'s required status checks can't pass,** because CI doesn't run. Merging
+  needs an admin to tick *Merge and bypass branch protections*, so get the review
+  you would normally require first.
+* **Ignore *Compare & pull request*** when GitHub offers it for a backport branch.
+  That pull request would target the fork's `main` and block the merge.
 
 The pull request puts the fix on `main` for the next minor release. **Patch
 releases never come from `main`,** because `main` usually holds unreleased features
@@ -130,8 +133,8 @@ from the stable branches.
 Agree on a release date with the reporters, and with Tidelift if it's coordinating.
 On that day, follow these steps in order:
 
-1. **Merge the fix.** On the advisory, click *Merge pull request(s)*. The fork's
-   pull request lands on `main`.
+1. **Merge the fix.** On the advisory, tick *Merge and bypass branch protections*
+   and click *Merge pull request*. The fork's pull request lands on `main`.
 2. **Release each line.** Follow [Versions and releases](../_project/release_process.md):
    For each line, push the backport and a `Version x.y.z` commit to its
    `x-y-stable` branch, then create a GitHub Release targeting that branch.
