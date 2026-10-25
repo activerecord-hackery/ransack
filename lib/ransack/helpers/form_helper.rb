@@ -162,6 +162,17 @@ module Ransack
         end
 
       class SortLink
+        # Keys url_for reads as instructions for building the link, not as
+        # query params. The request's params are carried over into the link,
+        # so a crafted query string could otherwise change its scheme, host,
+        # port, path prefix or route (GHSA-58rx-96gf-w92x). Userinfo needs
+        # :user and :password together, so dropping :password is enough to
+        # keep a ?user= filter.
+        RESERVED_URL_OPTIONS = (
+          ActionDispatch::Routing::RouteSet::RESERVED_OPTIONS +
+          %i[password use_route _recall]
+        ).freeze
+
         def initialize(search, attribute, args, params)
           @search         = search
           @params         = parameters_hash(params)
@@ -195,7 +206,7 @@ module Ransack
         end
 
         def url_options
-          @params.except(:host).merge(
+          @params.except(*RESERVED_URL_OPTIONS).merge(
             @options.except(:class, :data, :host).merge(
               @search.context.search_key => search_and_sort_params))
         end
@@ -218,12 +229,11 @@ module Ransack
 
         private
 
+          # Indifferent access, so RESERVED_URL_OPTIONS also matches the string
+          # keys of a plain Hash.
           def parameters_hash(params)
-            if params.respond_to?(:to_unsafe_h)
-              params.to_unsafe_h
-            else
-              params
-            end
+            params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
+            params.with_indifferent_access
           end
 
           def extract_sort_fields_and_mutate_args!(args)
