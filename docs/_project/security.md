@@ -140,6 +140,11 @@ On that day, follow these steps in order:
    `x-y-stable` branch, then create a GitHub Release targeting that branch.
    *Set as the latest release* is checked only for the current line's release.
 
+   A release only starts the publish workflow if the tagged commit contains
+   `.github/workflows/release.yml`, and `4-4-stable` doesn't. For a line like that,
+   run the workflow from `main` with the tag as input:
+   `gh workflow run release.yml --ref main -f tag=v4.4.4`.
+
    Start each release's notes with "Security release.", followed by a one-paragraph
    description of the problem, the GHSA identifier and the other versions that
    contain the fix.
