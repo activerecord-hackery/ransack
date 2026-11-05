@@ -361,7 +361,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map { |v| v.cast(predicate.type || attr.type) }
+        validated_values.map { |v| v.cast(value_type_for_attribute(attr)) }
       end
 
       def formatted_values_for_attribute(attr)
@@ -415,7 +415,8 @@ module Ransack
       end
 
       def default_type
-        predicate.type || (attributes.first && attributes.first.type)
+        attribute = attributes.first
+        predicate.type || (attribute && value_type_for_attribute(attribute))
       end
 
       def inspect
@@ -485,6 +486,23 @@ module Ransack
         combinator === Constants::OR ? :or : :and
       end
 
+      # The type a value is cast to for this attribute. A LIKE compares text,
+      # so its value stays text whatever the column's type: cast to an integer,
+      # 'Alpha' becomes 0 and the pattern '%0%' matches unrelated rows, and cast
+      # to a date it becomes nil, which either drops the condition or gives the
+      # pattern '%%' (#1793). A ransacker's formatter is still given the type
+      # the ransacker declares, as it may depend on it, and an Array still goes
+      # to the attribute's cast: a multiparameter date has to be assembled, and
+      # #spread_array_values! decides from this type whether to keep the Array.
+      def value_type_for_attribute(attr)
+        return predicate.type if predicate.type
+        return attr.type unless like_predicate?(predicate.arel_predicate)
+        return attr.type if attr.ransacker&.formatter
+        return attr.type if values.any? { |v| v.value.is_a?(Array) }
+
+        :string
+      end
+
       def format_predicate(attribute)
         return format_predicate_from_node(attribute) if predicate.arel_node
 
@@ -548,11 +566,13 @@ module Ransack
       # of column type. The empty-string half has no meaning on non-string columns:
       # ActiveRecord casts `''` to NULL for those types, producing the
       # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
-      # empty string when the attribute is not a string-like column.
+      # empty string when the attribute is not a string-like column. A LIKE
+      # keeps it: its value stays text, so `''` is a pattern like any other.
       def formatted_values_without_blank_for_non_string(attribute)
         arel_values = formatted_values_for_attribute(attribute)
 
-        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
+        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) &&
+           !string_like_attribute?(attribute) && !like_predicate?(predicate.arel_predicate)
           arel_values = arel_values.reject { |v| v == ''.freeze }
         end
 
