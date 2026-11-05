@@ -260,7 +260,7 @@ module Ransack
         raise 'Ransack encountered an unexpected arel structure' unless correlation
 
         inner_key, outer_key = correlated_keys(correlation)
-        subquery = Arel::SelectManager.new(association.base_klass)
+        subquery = Arel::SelectManager.new(association.base_klass.arel_table)
         subquery.from(join_root.left)
         subquery.project(inner_key)
         join_constraints.each do |j|
