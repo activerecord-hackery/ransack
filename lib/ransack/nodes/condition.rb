@@ -491,12 +491,16 @@ module Ransack
       # 'Alpha' becomes 0 and the pattern '%0%' matches unrelated rows, and cast
       # to a date it becomes nil, which either drops the condition or gives the
       # pattern '%%' (#1793). A ransacker's formatter is still given the type
-      # the ransacker declares, as it may depend on it.
+      # the ransacker declares, as it may depend on it, and an Array still goes
+      # to the attribute's cast: a multiparameter date has to be assembled, and
+      # #spread_array_values! decides from this type whether to keep the Array.
       def value_type_for_attribute(attr)
         return predicate.type if predicate.type
         return attr.type unless like_predicate?(predicate.arel_predicate)
+        return attr.type if attr.ransacker&.formatter
+        return attr.type if values.any? { |v| v.value.is_a?(Array) }
 
-        attr.ransacker&.formatter ? attr.type : :string
+        :string
       end
 
       def format_predicate(attribute)
@@ -562,11 +566,13 @@ module Ransack
       # of column type. The empty-string half has no meaning on non-string columns:
       # ActiveRecord casts `''` to NULL for those types, producing the
       # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
-      # empty string when the attribute is not a string-like column.
+      # empty string when the attribute is not a string-like column. A LIKE
+      # keeps it: its value stays text, so `''` is a pattern like any other.
       def formatted_values_without_blank_for_non_string(attribute)
         arel_values = formatted_values_for_attribute(attribute)
 
-        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
+        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) &&
+           !string_like_attribute?(attribute) && !like_predicate?(predicate.arel_predicate)
           arel_values = arel_values.reject { |v| v == ''.freeze }
         end
 

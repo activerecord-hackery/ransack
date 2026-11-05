@@ -139,6 +139,50 @@ module Ransack
           expect(received).to eq 12
         end
 
+        describe 'a multiparameter date' do
+          let(:params) do
+            { 'life_start_cont(1i)' => '2024', 'life_start_cont(2i)' => '1', 'life_start_cont(3i)' => '2' }
+          end
+
+          it 'is assembled into one value before the pattern is built' do
+            expect(Person.ransack(params).result.to_sql).to match(like_of('life_start', '%2024-01-02%'))
+          end
+
+          it 'shows the date when the search form is re-rendered' do
+            expect(Person.ransack(params).life_start_cont).to eq Date.new(2024, 1, 2)
+          end
+
+          it 'drops the condition for a date that does not exist' do
+            sql = Person.ransack(params.merge('life_start_cont(2i)' => '13')).result.to_sql
+            expect(sql).not_to include('LIKE')
+          end
+        end
+
+        context 'when ignore_blank_values is false' do
+          around do |example|
+            Ransack.configure { |c| c.ignore_blank_values = false }
+            example.run
+          ensure
+            Ransack.configure { |c| c.ignore_blank_values = true }
+          end
+
+          it 'keeps a blank pattern in a compound predicate' do
+            sql = Person.ransack(salary_matches_all: ['', '12']).result.to_sql
+            expect(sql).to match(like_of('salary', ''))
+            expect(sql).to match(like_of('salary', '12'))
+          end
+
+          it 'keeps a compound predicate given only a blank pattern' do
+            sql = Person.ransack(salary_matches_any: ['']).result.to_sql
+            expect(sql).to match(like_of('salary', ''))
+          end
+
+          it 'keeps a blank pattern in a negated compound predicate' do
+            sql = Person.ransack(salary_does_not_match_all: ['', '12']).result.to_sql
+            expect(sql.scan(/NOT I?LIKE/).size).to eq 2
+          end
+        end
+
         it 'leaves the cast of the other predicates alone' do
           expect(Person.ransack(salary_eq: 'Alpha').result.to_sql)
             .to include("#{col('people', 'salary')} = 0")
