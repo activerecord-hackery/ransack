@@ -361,7 +361,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map { |v| v.cast(predicate.type || attr.type) }
+        validated_values.map { |v| v.cast(value_type_for_attribute(attr)) }
       end
 
       def formatted_values_for_attribute(attr)
@@ -415,7 +415,8 @@ module Ransack
       end
 
       def default_type
-        predicate.type || (attributes.first && attributes.first.type)
+        attribute = attributes.first
+        predicate.type || (attribute && value_type_for_attribute(attribute))
       end
 
       def inspect
@@ -483,6 +484,19 @@ module Ransack
 
       def combinator_method
         combinator === Constants::OR ? :or : :and
+      end
+
+      # The type a value is cast to for this attribute. A LIKE compares text,
+      # so its value stays text whatever the column's type: cast to an integer,
+      # 'Alpha' becomes 0 and the pattern '%0%' matches unrelated rows, and cast
+      # to a date it becomes nil, which either drops the condition or gives the
+      # pattern '%%' (#1793). A ransacker's formatter is still given the type
+      # the ransacker declares, as it may depend on it.
+      def value_type_for_attribute(attr)
+        return predicate.type if predicate.type
+        return attr.type unless like_predicate?(predicate.arel_predicate)
+
+        attr.ransacker&.formatter ? attr.type : :string
       end
 
       def format_predicate(attribute)

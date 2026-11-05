@@ -60,6 +60,107 @@ module Ransack
         expect(sql).not_to match(/LIKE 0/)
       end
 
+      # #1793: a term cast to the column's type before the LIKE pattern was
+      # built became 0 on an integer column (LIKE '%0%', matching any id with a
+      # 0 in it) and nil on a date column (the condition dropped, or LIKE '%%').
+      describe 'LIKE predicates on a column that does not hold text' do
+        def like_of(column, pattern)
+          /#{Regexp.escape(col('people', column))}\)? I?LIKE '#{Regexp.escape(pattern)}'/
+        end
+
+        it 'does not turn a non-numeric term into 0 on an integer column' do
+          sql = Person.ransack(salary_or_name_cont: 'Alpha').result.to_sql
+          expect(sql).to match(like_of('salary', '%Alpha%'))
+          expect(sql).to match(like_of('name', '%Alpha%'))
+          expect(sql).not_to include("'%0%'")
+        end
+
+        it 'does not depend on the order of the attributes' do
+          sql = Person.ransack(name_or_salary_cont: 'Alpha').result.to_sql
+          expect(sql).to match(like_of('salary', '%Alpha%'))
+          expect(sql).to match(like_of('name', '%Alpha%'))
+        end
+
+        it 'keeps the term as given rather than as the number it parses to' do
+          expect(Person.ransack(salary_cont: '012').result.to_sql).to match(like_of('salary', '%012%'))
+          expect(Person.ransack(salary_cont: '12abc').result.to_sql).to match(like_of('salary', '%12abc%'))
+        end
+
+        {
+          salary_not_cont: 'NOT I?LIKE \'%Alpha%\'',
+          salary_start: 'I?LIKE \'Alpha%\'',
+          salary_end: 'I?LIKE \'%Alpha\'',
+          salary_matches: 'I?LIKE \'Alpha\'',
+          salary_cont_any: 'I?LIKE \'%Alpha%\'',
+          salary_i_cont: 'I?LIKE \'%alpha%\''
+        }.each do |key, pattern|
+          it "keeps the term as text for #{key}" do
+            expect(Person.ransack(key => 'Alpha').result.to_sql).to match(/#{pattern}/)
+          end
+        end
+
+        it 'keeps every term as text for a compound predicate' do
+          sql = Person.ransack(salary_not_cont_all: %w[Alpha Beta]).result.to_sql
+          expect(sql).to include("'%Alpha%'", "'%Beta%'")
+        end
+
+        it 'keeps the condition for a term that is not a date on a date column' do
+          [
+            { life_start_or_name_cont: 'Alpha' }, { name_or_life_start_cont: 'Alpha' }
+          ].each do |params|
+            sql = Person.ransack(params).result.to_sql
+            expect(sql).to match(like_of('life_start', '%Alpha%'))
+            expect(sql).to match(like_of('name', '%Alpha%'))
+          end
+        end
+
+        it 'keeps the condition for a term that is not a boolean on a boolean column' do
+          sql = Person.ransack(awesome_or_name_cont: 'Alpha').result.to_sql
+          expect(sql).to match(like_of('awesome', '%Alpha%'))
+          expect(sql).to match(like_of('name', '%Alpha%'))
+        end
+
+        it 'shows the term as given when the search form is re-rendered' do
+          expect(Person.ransack(salary_or_name_cont: 'Alpha').salary_or_name_cont).to eq 'Alpha'
+        end
+
+        it 'still ignores a blank term' do
+          expect(Person.ransack(salary_or_name_cont: ' ').result.to_sql).not_to include('LIKE')
+        end
+
+        it 'gives a ransacker formatter the type the ransacker declares' do
+          received = nil
+          stub_const('PersonWithFormattedSalary', Class.new(Person) {
+            ransacker(:formatted_salary, type: :integer, formatter: proc { |v| received = v }) do |parent|
+              parent.table[:salary]
+            end
+          })
+          PersonWithFormattedSalary.ransack(formatted_salary_cont: '12').result.to_sql
+          expect(received).to eq 12
+        end
+
+        it 'leaves the cast of the other predicates alone' do
+          expect(Person.ransack(salary_eq: 'Alpha').result.to_sql)
+            .to include("#{col('people', 'salary')} = 0")
+        end
+
+        # PostgreSQL has no LIKE operator for an integer column, so the rows
+        # can only be checked on the databases that compare it as text.
+        context 'with the rows', unless: ::ActiveRecord::Base.connection_db_config.adapter == 'postgresql' do
+          let!(:with_zero) { Person.create!(name: 'issue-1793-beta', salary: 10) }
+          let!(:without_zero) { Person.create!(name: 'issue-1793-alpha', salary: 21) }
+
+          it 'finds only the record whose text column matches' do
+            expect(Person.ransack(salary_or_name_cont: 'issue-1793-alpha').result.to_a).to eq [without_zero]
+          end
+
+          it 'still finds a record by the digits of its integer column' do
+            expect(Person.ransack(salary_or_name_cont: '21').result.to_a).to include(without_zero)
+            expect(Person.ransack(salary_or_name_cont: '21').result.to_a).not_to include(with_zero)
+          end
+        end
+      end
+
       # #400: an unchecked check box for a `_true` condition submits "0",
       # which raised "undefined method `name' for nil:NilClass".
       it 'treats the strings a check box submits for a _true condition as booleans' do
