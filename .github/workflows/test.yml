@@ -11,24 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Each supported Rails and the newest and oldest supported Ruby, not
-      # every pairing: Ransack has no native code, and the database jobs
-      # below run on the Ruby in between.
+      # The newest and oldest supported Ruby, not every Ruby: Ransack has no
+      # native code, and the database jobs below run on the Ruby in between.
       matrix:
         include:
           - rails: 8-1-stable
             ruby: 4.0.1
-          - rails: 8-0-stable
-            ruby: 3.3.10
-          # Active Record 8.0.0-8.0.2 take the older append_constraints
-          # signature; see JoinAssociation#append_constraints_to.
-          - rails: v8.0.2
+          - rails: 8-1-stable
             ruby: 3.3.10
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -44,7 +39,6 @@ jobs:
       matrix:
         rails:
           - 8-1-stable
-          - 8-0-stable
         ruby:
           - 3.4.8
     env:
@@ -53,7 +47,7 @@ jobs:
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -86,7 +80,7 @@ jobs:
       MYSQL_PASSWORD: root
       MYSQL_HOST: 127.0.0.1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -108,7 +102,6 @@ jobs:
       matrix:
         rails:
           - 8-1-stable
-          - 8-0-stable
         ruby:
           - 3.4.8
     env:
@@ -133,7 +126,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -142,5 +135,29 @@ jobs:
       - name: Setup databases
         run: |
           psql -h localhost -p 5432 -W postgres -c 'create database ransack;' -U postgres;
+      - name: Run tests
+        run: bundle exec rspec
+
+  # Rails main, to see a change in the next Rails before it is released. It
+  # runs on every PR so a failure is seen in the checks list. It is allowed to
+  # fail and is not a required check, so a break on Rails main never blocks a
+  # merge. One database is enough: an Active Record change like the one behind
+  # #1795 breaks every adapter alike.
+  rails-main:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      DB: sqlite3
+      RAILS: main
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 4.0.1
+      # No bundler cache: there is no Gemfile.lock, so a cache keyed on the
+      # Gemfile would keep testing whichever Rails main commit it first saw.
+      - name: Install dependencies
+        run: bundle install
       - name: Run tests
         run: bundle exec rspec

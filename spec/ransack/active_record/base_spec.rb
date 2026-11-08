@@ -85,6 +85,19 @@ module Ransack
             expect(s.result.to_sql).to (include mysql? ? %q{age > '18'} : 'age > 18')
           end
 
+          # #1769: a Time responds to to_a, so splatting it handed the scope
+          # ten arguments instead of the Time itself.
+          it 'passes Time values to scopes' do
+            s = Person.ransack('over_age' => Time.utc(2015, 1, 2, 3, 4, 5))
+            expect(s.result.to_sql).to include '2015-01-02 03:04:05'
+          end
+
+          it 'passes TimeWithZone values to scopes' do
+            time = Time.utc(2015, 1, 2, 3, 4, 5).in_time_zone('UTC')
+            s = Person.ransack('over_age' => time)
+            expect(s.result.to_sql).to include '2015-01-02 03:04:05'
+          end
+
           it 'chains scopes' do
             s = Person.ransack('over_age' => 18, 'active' => true)
             expect(s.result.to_sql).to (include mysql? ? %q{age > '18'} : 'age > 18')

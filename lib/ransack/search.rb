@@ -7,7 +7,7 @@ require 'ransack/nodes/sort'
 require 'ransack/nodes/grouping'
 require 'ransack/context'
 require 'ransack/naming'
-require 'ransack/invalid_search_error'
+require 'ransack/errors'
 
 module Ransack
   class Search
@@ -57,14 +57,23 @@ module Ransack
       @context.evaluate(self, opts)
     end
 
+    GROUPING_KEYS = %w[g c m groupings conditions combinator].to_set.freeze
+    private_constant :GROUPING_KEYS
+
     def build(params)
       collapse_multiparameter_attributes!(params).each do |key, value|
         if ['s'.freeze, 'sorts'.freeze].freeze.include?(key)
           send("#{key}=", value)
         elsif @context.ransackable_scope?(key, @context.object)
           add_scope(key, value)
-        elsif base.attribute_method?(key)
+        elsif GROUPING_KEYS.include?(key)
           base.send("#{key}=", value)
+        elsif base.attribute_method?(key)
+          # Straight to the writer: going through the grouping's
+          # method_missing would check the key a second time, and would
+          # send a key that happens to name one of its own writers
+          # (`i18n_words`) there instead of building a condition.
+          base.send(:write_attribute, key, value)
         elsif !Ransack.options[:ignore_unknown_conditions] || !@ignore_unknown_conditions
           raise InvalidSearchError, "Invalid search term #{key}"
         end
@@ -79,11 +88,12 @@ module Ransack
       case args
       when Array
         args.each do |sort|
-          if sort.kind_of? Hash
-            sort = Nodes::Sort.new(@context).build(sort)
-          else
-            sort = Nodes::Sort.extract(@context, sort)
-          end
+          sort =
+            case sort
+            when Hash then Nodes::Sort.new(@context).build(sort)
+            when String, Symbol, nil then Nodes::Sort.extract(@context, sort.to_s)
+            else raise InvalidSearchError, "Invalid argument (#{sort.class}) supplied to sorts="
+            end
           add_sort(sort) if sort
         end
       when Hash
@@ -118,9 +128,9 @@ module Ransack
     # params hash is built (#1472).
     def method_missing(method_id, *args)
       method_name = method_id.to_s
-      getter_name = method_name.sub(/=$/, ''.freeze)
+      getter_name = method_name.sub(/=\z/, ''.freeze)
       if @context.ransackable_scope?(getter_name, @context.object)
-        if method_name =~ /=$/
+        if method_name.end_with?('=')
           add_scope getter_name, args.size == 1 ? args.first : args
         else
           @scope_args[method_name]
@@ -137,7 +147,7 @@ module Ransack
     # before calling. Mirror method_missing so a search_form_with field is
     # pre-filled the same way a search_form_for one is.
     def respond_to_missing?(method_id, include_private = false)
-      getter_name = method_id.to_s.sub(/=$/, ''.freeze)
+      getter_name = method_id.to_s.sub(/=\z/, ''.freeze)
       base.attribute_method?(getter_name) ||
         @context.ransackable_scope?(getter_name, @context.object) ||
         super
@@ -202,6 +212,7 @@ module Ransack
           real_attribute, position = k.split(/\(|\)/)
           value = attrs.delete(k)
           next if position.nil?
+          next if value.is_a?(Array) || value.is_a?(Hash)
 
           cast = Constants::A_S_I.include?(position.last) ? position.last : nil
           position = position.to_i - 1

@@ -20,15 +20,15 @@ module Ransack
       # Attributes API rather than the schema column, so that
       # `attribute :starts_at, :datetime` on a date column is honoured (#1028);
       # a column with no attribute override reports its column type.
+      #
+      # There is no separate check that the table exists: the schema cache
+      # does not list temporary tables, and matches names case-sensitively
+      # where SQLite does not, so it rejected tables Active Record queries
+      # fine (#1770, #657, #668). A table that really is missing fails when
+      # the model loads its columns, with Active Record's own error.
       def type_for(attr)
         return nil unless attr && attr.valid?
-        relation     = attr.arel_attribute.relation
-        name         = attr.arel_attribute.name.to_s
-        table        = relation.respond_to?(:table_name) ? relation.table_name : relation.name
-        schema_cache = self.klass.connection_pool.schema_cache
-        unless schema_cache.send(:data_source_exists?, table)
-          raise "No table named #{table} exists."
-        end
+        name = attr.arel_attribute.name.to_s
         return nil unless attr.klass.attribute_types.key?(name)
 
         attr.klass.type_for_attribute(name).type
@@ -87,12 +87,22 @@ module Ransack
         opts[:distinct] ? relation.distinct : relation
       end
 
+      # Asked for the same names over and over while a search is built, and
+      # answered from the allowlists, so kept per model for the life of the
+      # context and dropped with them.
       def attribute_method?(str, klass = @klass)
         return false unless key_within_depth_limit?(str)
 
+        cache = ((@attribute_methods ||= {})[klass] ||= {})
+        key = str.to_s
+        return cache[key] if cache.key?(key)
+
+        cache[key] = attribute_method_uncached?(key, klass)
+      end
+
+      def attribute_method_uncached?(str, klass)
         exists = false
-        if ransackable_attribute?(str, klass) ||
-           ransortable_attribute?(str, klass)
+        if allowlisted_attribute?(str, klass)
           exists = true
         elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
           remainder = []
@@ -103,7 +113,7 @@ module Ransack
               segments.join(Constants::UNDERSCORE)
               )
             if found_assoc = traversable_association(assoc, poly_class, klass)
-              exists = attribute_method?(
+              exists = attribute_method_uncached?(
                 remainder.join(Constants::UNDERSCORE),
                 poly_class || found_assoc.klass
                 )
@@ -112,6 +122,20 @@ module Ransack
         end
         exists
       end
+      private :attribute_method_uncached?
+
+      # A name on the allowlists is only taken for an attribute of `klass`
+      # when it is one: a column or `attribute` declaration, an
+      # `alias_attribute`, a ransacker or a `ransack_alias`. Anything else,
+      # such as `person_name` listed on Article, is left to be followed
+      # through the associations rather than bound as a missing column
+      # (#1774).
+      def allowlisted_attribute?(str, klass)
+        (ransackable_attribute?(str, klass) || ransortable_attribute?(str, klass)) &&
+          (klass.has_attribute?(str) || klass._ransackers.key?(str) ||
+           klass._ransack_aliases.key?(str))
+      end
+      private :allowlisted_attribute?
 
       def table_for(parent)
         parent.table
@@ -188,6 +212,12 @@ module Ransack
         use_association(parent_of(association)) if association
       end
 
+      # Whether the association hangs directly off the model searched,
+      # rather than off another association.
+      def root_association?(association)
+        parent_of(association).equal?(@base)
+      end
+
       # Kept for callers of the 6.0.0 API. Evaluation now keeps only the
       # joins the search reads, so a join nothing reads is already left out.
       def remove_association(_association); end
@@ -230,7 +260,7 @@ module Ransack
         raise 'Ransack encountered an unexpected arel structure' unless correlation
 
         inner_key, outer_key = correlated_keys(correlation)
-        subquery = Arel::SelectManager.new(association.base_klass)
+        subquery = Arel::SelectManager.new(association.base_klass.arel_table)
         subquery.from(join_root.left)
         subquery.project(inner_key)
         join_constraints.each do |j|
@@ -315,8 +345,7 @@ module Ransack
 
         attr_name = nil
 
-        if ransackable_attribute?(str, klassify(parent)) ||
-           ransortable_attribute?(str, klassify(parent))
+        if allowlisted_attribute?(str, klassify(parent))
           attr_name = str
         elsif (segments = str.split(Constants::UNDERSCORE)).size > 1
           remainder = []
@@ -377,7 +406,9 @@ module Ransack
       # agree. Ransack stashes the joins it adds through `left_outer_joins`,
       # one dependency per association in the order they are added, which is
       # where they fall in that order; a join the relation already has is
-      # reused rather than added again.
+      # reused rather than added again. Their aliases are pinned, so a join
+      # added to the result later, which renders ahead of them, is aliased
+      # around them instead (see JoinDependencyExtensions#pin_search_tables).
       #
       # The relation's own joins keep their tree shape in the mirror. A node
       # Ransack adds sits directly under the mirror root whatever its depth,
@@ -403,14 +434,24 @@ module Ransack
         # `where(assoc: { ... })` records the association name as a reference,
         # and Active Record then aliases that join to the name (#1437).
         mirror.instance_variable_set(:@references, referenced_aliases(relation))
+        # Before any join is given an alias, so the joins an earlier search
+        # added keep theirs (#1776).
+        mirror.pin_search_tables(left.grep(JoinDependency))
         root = mirror.instance_variable_get(:@join_root)
 
         root.children.each { |child| adopt(mirror, root, child, Arel::Nodes::InnerJoin) }
         stashed.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
         graft(mirror, JoinDependency.new(relation.klass, relation.table, named_joins(left), Arel::Nodes::OuterJoin), Arel::Nodes::OuterJoin)
-        left.grep(JoinDependency).each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
+        # The joins a search added after counting the eager load are rendered
+        # after it (JoinDependencyExtensions#eager_load_first), as long as the
+        # relation still eager loads; otherwise they keep their order. Those
+        # this search adds are counted after it too.
+        @eager_loading = !eager_jd.nil? || eager.any?
+        after_eager, before_eager = left.grep(JoinDependency).partition { |jd| @eager_loading && jd.after_eager_load }
+        before_eager.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
         graft(mirror, eager_jd, Arel::Nodes::OuterJoin) if eager_jd
         graft(mirror, JoinDependency.new(relation.klass, relation.table, eager, Arel::Nodes::OuterJoin), Arel::Nodes::OuterJoin)
+        after_eager.each { |jd| graft(mirror, jd, jd.instance_variable_get(:@join_type)) }
 
         mirror
       end
@@ -480,9 +521,13 @@ module Ransack
       end
 
       # The nodes that hang off a parent: the relation's own joins under it,
-      # plus the ones Ransack added under it.
+      # plus the ones Ransack added under it. The nodes Ransack added all sit
+      # under the mirror root whatever their parent, so the root's children
+      # are filtered to the relation's own; otherwise a nested `person` would
+      # be found as the root's `person` too (#1775).
       def children_of(parent)
-        parent.children + @associations_pot.select { |_node, node_parent| node_parent.equal?(parent) }.keys
+        parent.children.reject { |node| @associations_pot.key?(node) } +
+          @associations_pot.select { |_node, node_parent| node_parent.equal?(parent) }.keys
       end
 
       # Collects the associations the block's evaluation reads. Saved and
@@ -545,6 +590,8 @@ module Ransack
           Join.new(name, @join_type, klass),
           @join_type
         )
+        jd.added_by_search = true
+        jd.after_eager_load = @eager_loading
         found_association = jd.instance_variable_get(:@join_root).children.last
 
         @associations_pot[found_association] = parent

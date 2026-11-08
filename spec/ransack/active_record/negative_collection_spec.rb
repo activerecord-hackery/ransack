@@ -465,6 +465,107 @@ module Ransack
           expect(search.result.order_values).to eq search.result.order_values
         end
       end
+
+      # #1773: a negative condition on a collection the model has directly
+      # is a subquery whatever the collection is called. It used to be built
+      # only when the association's name started with its table's, so an
+      # STI, scoped, self-referential or through collection fell back to a
+      # join with a row-level `!=`: a record was returned through any row
+      # that did not match, and one with no rows at all was dropped (#925).
+      describe 'on a collection not named after its table' do
+        let(:suffix) { SecureRandom.hex(4) }
+        let(:match)  { "match #{suffix}" }
+        let(:other)  { "other #{suffix}" }
+
+        # Rows persist across examples, and other specs count them.
+        after do
+          Comment.unscoped.where('body LIKE ?', "%#{suffix}%").delete_all
+          Article.unscoped.where('title LIKE ?', "%#{suffix}%").delete_all
+          Person.unscoped.where('name LIKE ?', "%#{suffix}%").delete_all
+        end
+
+        def person(label) = Person.create!(name: "#{label} #{suffix}")
+
+        def people(among, params)
+          Person.where(id: among.map(&:id)).ransack(params).result.to_a
+        end
+
+        it 'drops the join for each kind of collection' do
+          %w[
+            story_articles_title published_articles_title
+            children_name authored_article_comments_body
+          ].each do |attribute|
+            sql = expect_stable(Person.ransack("#{attribute}_not_eq" => 'x'))
+            expect(subquery_count(sql)).to eq 1
+            expect(outer_query(sql)).not_to include('JOIN')
+          end
+        end
+
+        it 'returns the right records for an STI subclass collection (#925)' do
+          both = person('both')
+          [match, other].each { |title| StoryArticle.create!(person: both, title: title) }
+          other_only = person('other').tap { |p| StoryArticle.create!(person: p, title: other) }
+          plain = person('plain').tap { |p| Article.create!(person: p, title: match) }
+          none = person('none')
+          everyone = [both, other_only, plain, none]
+
+          expect(people(everyone, story_articles_title_not_eq: match)).to match_array [other_only, plain, none]
+          expect(people(everyone, story_articles_title_not_in: [match])).to match_array [other_only, plain, none]
+          expect(people(everyone, story_articles_title_not_cont: 'match')).to match_array [other_only, plain, none]
+          expect(people(everyone, articles_title_not_eq: match)).to match_array [other_only, none]
+        end
+
+        it 'returns the right records for a scoped collection' do
+          both = person('both').tap { |p| [match, other].each { |title| p.articles.create!(title: title) } }
+          unpublished = person('unpublished').tap do |p|
+            p.articles.create!(title: match, published: false)
+            p.articles.create!(title: other)
+          end
+          none = person('none')
+
+          result = people([both, unpublished, none], published_articles_title_not_eq: match)
+          expect(result).to match_array [unpublished, none]
+        end
+
+        it 'returns the right records for a self-referential collection' do
+          both = person('both').tap { |p| [match, other].each { |name| p.children.create!(name: name) } }
+          other_only = person('other').tap { |p| p.children.create!(name: other) }
+          childless = person('childless')
+
+          result = people([both, other_only, childless], children_name_not_eq: match)
+          expect(result).to match_array [other_only, childless]
+        end
+
+        it 'returns the right records for a has_many :through' do
+          commented = lambda do |label, *bodies, disabled: false|
+            person(label).tap do |p|
+              article = p.articles.create!(title: "article #{suffix}")
+              bodies.each { |body| article.comments.create!(body: body, disabled: disabled) }
+            end
+          end
+          both = commented.call('both', match, other)
+          other_only = commented.call('other', other)
+          hidden = commented.call('hidden', match, disabled: true)
+          uncommented = commented.call('uncommented')
+          none = person('none')
+
+          result = people([both, other_only, hidden, uncommented, none], authored_article_comments_body_not_eq: match)
+          expect(result).to match_array [other_only, hidden, uncommented, none]
+        end
+
+        # A negative condition nested under another collection keeps its
+        # join on purpose (#1411), whatever the collections are called.
+        it 'still joins a collection nested under another' do
+          sql = expect_stable(Person.ransack(story_articles_comments_body_not_eq: 'x'))
+          expect(subquery_count(sql)).to eq 0
+          expect(sql).to include("JOIN #{t('comments')}")
+
+          author = person('author')
+          article = author.articles.create!(title: "article #{suffix}")
+          [match, other].each { |body| article.comments.create!(body: body) }
+          expect(people([author], articles_comments_body_not_in: [match])).to eq [author]
+        end
+      end
     end
 
     describe Context do

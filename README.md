@@ -1,89 +1,63 @@
-# ![Ransack](./docs/assets/logo/ransack-h.png "Ransack")
+# Ransack
+
+> Search everywhere and in a hurry!
 
 [![Build Status](https://github.com/activerecord-hackery/ransack/workflows/test/badge.svg)](https://github.com/activerecord-hackery/ransack/actions)
 [![Gem Version](https://badge.fury.io/rb/ransack.svg)](http://badge.fury.io/rb/ransack)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/activerecord-hackery/ransack)
-[![Code Climate](https://codeclimate.com/github/activerecord-hackery/ransack/badges/gpa.svg)](https://codeclimate.com/github/activerecord-hackery/ransack)
 
-# Introduction
+Ransack adds **searching and sorting to your Rails application** with plain Ruby
+and ERB, without a search server or any other infrastructure.
 
-Ransack will help you easily add **searching to your Rails application**, without any additional dependencies.
+Ransack is supported for Rails 8.1 on Ruby 3.4 and later, on Postgres, MySQL, Trilogy and SQLite.
 
-There are advanced searching solutions around, like ElasticSearch or Algolia. **Ransack** will do the job for many Rails websites, without the need to run additional infrastructure or work in a different language. With Ransack you do it all with standard Ruby and ERB.
-
-Ready to move beyond the basics? Use **advanced features** like i18n and extensive configuration options.
-
-Ransack is supported for Rails 8.1 and 8.0 on Ruby 3.3 and later.
-
-## Installation
-
-To install `ransack` and add it to your Gemfile, run
-
-```ruby title='Gemfile'
+```ruby
 gem 'ransack'
 ```
 
-### Bleeding edge
-
-If you would like to use the latest updates not yet published to RubyGems, use the `main` branch:
-
-```ruby title='Gemfile'
-gem 'ransack', :github => 'activerecord-hackery/ransack', :branch => 'main'
+```ruby
+@q = Post.ransack(params[:q])
+@posts = @q.result
 ```
 
-### Documentation
+```erb
+<%= search_form_for @q do |f| %>
+  <%= f.search_field :title_cont %>
+<% end %>
+<%= sort_link(@q, :published_at) %>
+```
 
-There is [extensive documentation on Ransack](https://activerecord-hackery.github.io/ransack/), built with [Jekyll](https://jekyllrb.com/) and [Just the Docs](https://just-the-docs.com/) from the Markdown under `docs/` and published as a GitHub Pages site. Alternatively there is [AI Generated documentation](https://deepwiki.com/activerecord-hackery/ransack/1-overview) produced by [devin.ai](https://devin.ai/).
+## Documentation
 
-This [gist](https://gist.github.com/raghubetina/d5fc3df67ddbadcac271) has a quick-start cheatsheet, created by [@raghubetina](https://gist.github.com/raghubetina)
+**[activerecord-hackery.github.io/ransack](https://activerecord-hackery.github.io/ransack/)**:
+[getting started](https://activerecord-hackery.github.io/ransack/getting-started/),
+[authorization](https://activerecord-hackery.github.io/ransack/getting-started/authorization/),
+[predicates](https://activerecord-hackery.github.io/ransack/getting-started/search-matches/),
+[upgrading](https://activerecord-hackery.github.io/ransack/getting-started/upgrading/)
+and more. The site is built from the Markdown under [`docs/`](docs/).
 
-## Issue tracker
+## Getting help and contributing
 
-* Before filing an issue, please read the [Contributing Guide](CONTRIBUTING.md).
-* File an issue if a bug is caused by Ransack, is new (has not already been reported), and _can be reproduced from the information you provide_.
-* Please consider creating a pull request with a failing test that demonstrates the problem.
-* Contributions are welcome. :smiley:
-* Please do not use the issue tracker for personal support requests. Stack Overflow or [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) is a better place for that where a wider community can help you!
+* Questions belong in [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions).
+* Reproducible bugs belong in [Issues](https://github.com/activerecord-hackery/ransack/issues).
+  Read the [Contributing Guide](CONTRIBUTING.md) first; a failing test is the best bug report.
+* Report security vulnerabilities privately, through GitHub
+  [private vulnerability reporting](https://github.com/activerecord-hackery/ransack/security/advisories/new)
+  or the [Tidelift security contact](https://tidelift.com/security). See the
+  [Security Policy](.github/SECURITY.md) for supported versions.
 
-
-## Contributions
-
-To support the project:
-
-* Consider supporting us via [Open Collective](https://opencollective.com/ransack)
-* Use Ransack in your apps, and let us know if you encounter anything that's
-broken or missing. A failing spec to demonstrate the issue is awesome. A pull
-request with passing tests is even better!
-* Before filing an issue or pull request, be sure to read and follow the
-[Contributing Guide](CONTRIBUTING.md).
-* Please use Stack Overflow or [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions) for questions or discussion not
-directly related to bug reports, pull requests, or documentation improvements.
-* Spread the word on social media if Ransack's been useful
-to you. The more people who are using the project, the quicker we can find and
-fix bugs!
-
-## Ransack for enterprise
-
-Available as part of the [Tidelift Subscription](https://tidelift.com/subscription/pkg/rubygems-ransack?utm_source=rubygems-ransack&utm_medium=referral&utm_campaign=enterprise&utm_term=repo).
-
-The maintainers of Ransack and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/rubygems-ransack?utm_source=rubygems-ransack&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
-
-## Security contact information
-
-To report a security vulnerability, please use the [Tidelift security contact](https://tidelift.com/security). Tidelift will coordinate the fix and disclosure. See the [Security Policy](.github/SECURITY.md) for supported versions.
+Ransack is maintained by volunteers. If it is useful to you, please consider
+supporting us via [Open Collective](https://opencollective.com/ransack), or
+through the [Tidelift Subscription](https://tidelift.com/subscription/pkg/rubygems-ransack?utm_source=rubygems-ransack&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
+for commercial support.
 
 ## Contributors
 
-Ransack was created by [Ernie Miller](http://twitter.com/erniemiller) and is developed and maintained by:
-* [Sean Carroll](https://github.com/scarroll32)
-* [Deivid Rodriguez](https://github.com/deivid-rodriguez)
-* [Greg Molnar](https://github.com/gregmolnar)
-* [A great group of contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
-- Ransack's logo is designed by [Anıl Kılıç](https://github.com/anilkilic).
+Ransack is maintained by [Sean Carroll](https://github.com/scarroll32),
+[Deivid Rodriguez](https://github.com/deivid-rodriguez),
+[Greg Molnar](https://github.com/gregmolnar) and
+[a great group of contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
+It was created by [Ernie Miller](http://twitter.com/erniemiller). See
+[Community and support](https://activerecord-hackery.github.io/ransack/project/community/)
+for the full list.
 
-Alumni Maintainers
-- [Jon Atack](http://twitter.com/jonatack)
-- [Ryan Bigg](http://twitter.com/ryanbigg)
-
-This project exists thanks to all the people who contribute. <img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" />
-
+<img src="https://opencollective.com/ransack/contributors.svg?width=890&button=false" />

@@ -1,7 +1,7 @@
 module Ransack
   class Predicate
-    attr_reader :name, :arel_predicate, :type, :formatter, :validator,
-                :compound, :wants_array, :case_insensitive
+    attr_reader :name, :arel_predicate, :arel_node, :type, :formatter,
+                :validator, :compound, :wants_array, :case_insensitive
 
     # Consulted at search time rather than captured at predicate-definition
     # time, so that `Ransack.options[:ignore_blank_values]` set in an
@@ -28,14 +28,26 @@ module Ransack
         detect_from_string str, chomp: true
       end
 
+      # The longest registered predicate the key ends with, as `_<name>`.
+      # Only the tail a predicate name can fill is looked at, and each
+      # underscore there is one hash lookup, so the cost depends on neither
+      # the length of the key nor the number of predicates. The first
+      # underscore found gives the longest candidate, which is the one the
+      # longest-first scan this replaces would have picked.
       def detect_from_string(str, chomp: false)
         return unless str
 
-        Ransack.predicates.sorted_names_with_underscores.each do |predicate, underscored|
-          if str.end_with? underscored
-            str.chomp! underscored if chomp
-            return predicate
+        str = str.to_s unless chomp
+        predicates = Ransack.predicates
+        from = str.length - predicates.max_name_length - 1
+        underscore = str.index(Constants::UNDERSCORE, from.negative? ? 0 : from)
+        while underscore
+          name = str[(underscore + 1)..]
+          if predicates.has_key?(name)
+            str.slice!(underscore..) if chomp
+            return name
           end
+          underscore = str.index(Constants::UNDERSCORE, underscore + 1)
         end
 
         nil
@@ -46,6 +58,7 @@ module Ransack
     def initialize(opts = {})
       @name = opts[:name]
       @arel_predicate = opts[:arel_predicate]
+      @arel_node = opts[:arel_node]
       @type = opts[:type]
       @formatter = opts[:formatter]
       @validator = opts[:validator] || DEFAULT_VALIDATOR

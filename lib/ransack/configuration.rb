@@ -7,11 +7,12 @@ module Ransack
     mattr_accessor :predicates, :options
 
     class PredicateCollection
-      attr_reader :sorted_names_with_underscores
+      attr_reader :sorted_names_with_underscores, :max_name_length
 
       def initialize
         @collection = {}
         @sorted_names_with_underscores = []
+        @max_name_length = 0
       end
 
       delegate :[], :keys, :has_key?, to: :@collection
@@ -20,6 +21,7 @@ module Ransack
         @sorted_names_with_underscores << [key, '_' + key]
         @sorted_names_with_underscores.sort! { |(a, _), (b, _)| b.length <=> a.length }
 
+        @max_name_length = key.length if key.length > @max_name_length
         @collection[key] = value
       end
     end
@@ -48,9 +50,26 @@ module Ransack
     def add_predicate(name, opts = {})
       name = name.to_s
       opts[:name] = name
+
+      if opts[:arel_predicate] && opts[:arel_node]
+        raise ArgumentError,
+          "add_predicate '#{name}' takes :arel_predicate or :arel_node, " \
+          "not both"
+      end
+
+      if opts[:arel_node] && !opts[:arel_node].respond_to?(:call)
+        raise ArgumentError,
+          "add_predicate '#{name}' needs :arel_node to be callable, " \
+          "got #{opts[:arel_node].class}"
+      end
+
       compounds = opts.delete(:compounds)
       compounds = true if compounds.nil?
       compounds = false if opts[:wants_array]
+      # _any/_all are built by appending a suffix to an Arel method name
+      # (see #arel_predicate_with_suffix below), which an arel_node builder
+      # has none of.
+      compounds = false if opts[:arel_node]
 
       self.predicates[name] = Predicate.new(opts)
 
@@ -279,7 +298,11 @@ module Ransack
     end
 
     def arel_predicate_with_suffix(arel_predicate, suffix)
-      if arel_predicate === Proc
+      # `arel_predicate === Proc` reads as a class check, but `Proc#===` is
+      # an alias for `#call`: it invokes the proc, passing the `Proc`
+      # class itself as the argument, and branches on whatever comes
+      # back. `#respond_to?(:call)` is a real check.
+      if arel_predicate.respond_to?(:call)
         proc { |v| "#{arel_predicate.call(v)}#{suffix}" }
       else
         "#{arel_predicate}#{suffix}"

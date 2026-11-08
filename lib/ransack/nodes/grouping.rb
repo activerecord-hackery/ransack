@@ -99,7 +99,7 @@ module Ransack
             self.groupings << grouping_object if grouping_object.values.any?
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{groupings.class}) supplied to groupings="
         end
       end
@@ -107,7 +107,7 @@ module Ransack
 
       def method_missing(method_id, *args)
         method_name = method_id.to_s.dup
-        writer = method_name.sub!(/\=$/, ''.freeze)
+        writer = method_name.sub!(/=\z/, ''.freeze)
         if attribute_method?(method_name)
           if writer
             write_attribute(method_name, *args)
@@ -126,7 +126,7 @@ module Ransack
         return true if @context.attribute_method?(stripped_name) ||
                        @context.attribute_method?(name)
         case stripped_name
-        when /^(g|c|m|groupings|conditions|combinator)=?$/
+        when /\A(g|c|m|groupings|conditions|combinator)=?\z/
           true
         else
           stripped_name
@@ -147,9 +147,9 @@ module Ransack
       end
 
       def build(params)
-        params.with_indifferent_access.each do |key, value|
+        indifferent_params(params, 'grouping').each do |key, value|
           case key
-          when /^(g|c|m|groupings|conditions|combinator)$/
+          when /\A(g|c|m|groupings|conditions|combinator)\z/
             self.send("#{key}=", value)
           else
             if @context.ransackable_scope?(key, @context.object)
@@ -214,23 +214,14 @@ module Ransack
       # A condition is dropped when it fails validation, as an unknown
       # attribute or predicate would be. One failure is worth naming: a
       # single-value predicate given several values. A strict search raises
-      # for it, so the caller learns why the filter vanished (#1724). The
-      # check only applies once the predicate and an attribute have resolved;
-      # a condition that is invalid for another reason keeps its behaviour.
+      # for it, so the caller learns why the filter vanished (#1724).
       def add_condition(attrs)
         condition = Condition.new(@context).build(attrs)
         if condition.valid?
           self.conditions << condition
-        elsif @context.strict_conditions? && arity_failure?(condition)
-          raise InvalidSearchError,
-            "Predicate #{condition.predicate_name} takes a single value, " \
-            "#{condition.values.size} given for #{condition.attributes.map(&:name).join(', ')}"
+        elsif @context.strict_conditions? && condition.arity_failure?
+          raise condition.arity_error
         end
-      end
-
-      def arity_failure?(condition)
-        condition.predicate && condition.attributes.any?(&:valid?) &&
-          !condition.valid_arity?
       end
 
       def remove_duplicate_conditions!

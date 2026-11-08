@@ -8,7 +8,13 @@ module Ransack
     # collection uses the same aliases as the outer query.
     module JoinAssociationExtensions
       def self.prepended(base)
-        base.class_eval { attr_reader :join_type }
+        base.class_eval do
+          attr_reader :join_type
+          # The tables of the joins this node renders itself, as Ransack
+          # first assigned them: its reflection chain up to the first table
+          # an earlier join already provides.
+          attr_accessor :own_tables
+        end
       end
 
       def initialize(reflection, children, polymorphic_class = nil, join_type = Arel::Nodes::InnerJoin)
@@ -75,7 +81,7 @@ module Ransack
 
           if others && !others.empty?
             joins.concat arel.join_sources
-            append_constraints_to(joins.last, others)
+            append_constraints(joins.last, others)
           end
 
           # The current table in this iteration becomes the foreign table in the next
@@ -83,21 +89,6 @@ module Ransack
         end
 
         joins
-      end
-
-      private
-
-      # Active Record's private append_constraints takes a leading connection
-      # argument in 8.0.0–8.0.2, and none in 8.0.3+ and 8.1; the arity says
-      # which is loaded.
-      def append_constraints_to(join, constraints)
-        if method(:append_constraints).arity == 3
-          base_klass.with_connection do |connection|
-            append_constraints(connection, join, constraints)
-          end
-        else
-          append_constraints(join, constraints)
-        end
       end
     end
   end

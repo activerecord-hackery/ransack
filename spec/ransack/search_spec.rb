@@ -394,9 +394,16 @@ module Ransack
         #     AND "articles"."title" = 'Test' AND "articles"."published" = 't' AND ('default_scope' = 'default_scope')
         # ) ORDER BY "people"."id" DESC
 
+        # #1773: the scope has to be inside the subquery. Checking only that
+        # `published` appeared passed for a LEFT OUTER JOIN with a
+        # row-level `!=` too, which is what the search fell back to.
         s = Search.new(Person, published_articles_title_not_eq: 'Test')
-        expect(s.result.to_sql).to include 'default_scope'
-        expect(s.result.to_sql).to include 'published'
+        outer, subquery = s.result.to_sql.split('NOT IN (SELECT', 2)
+        expect(subquery).not_to be_nil
+        expect(outer).not_to include 'JOIN'
+        expect(subquery).to include "#{quote_table_name('articles')}.#{quote_column_name('published')} = "
+        expect(subquery).to include "('default_scope' = 'default_scope')"
+        expect(subquery).to include "#{quote_table_name('articles')}.#{quote_column_name('title')} != 'Test'"
       end
 
       it 'discards empty conditions' do
@@ -660,6 +667,80 @@ module Ransack
             search = Search.new(Person, params)
             expect(search.base.conditions).to be_empty
           end
+        end
+      end
+
+      # #1772: a group of check boxes posts `q[name_eq][]=a&q[name_eq][]=b`.
+      # The short form compared the column with the Array's string form, or
+      # cast it to nil on a typed column and dropped it without a word.
+      context 'a single-value predicate given an Array in the short form' do
+        it 'drops the condition in the default lenient mode' do
+          search = Search.new(Person, name_eq: ['Sleep', 'Use'])
+          expect(search.base.conditions).to be_empty
+          expect(search.result.to_sql).not_to include('Sleep')
+        end
+
+        it 'raises in strict mode, naming the predicate and attribute' do
+          expect { Search.new(Person, { name_eq: ['Sleep', 'Use'] }, ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+          expect { Person.ransack!(salary_eq: [1, 2]) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for salary')
+        end
+
+        # #1216
+        it 'searches a one-element Array as its element' do
+          expect(Search.new(Person, name_eq: ['x']).result.to_sql)
+            .to include("#{quote_table_name('people')}.#{quote_column_name('name')} = 'x'")
+          expect(Search.new(Person, doubled_name_gteq: ['36']).result.to_sql)
+            .to match(/>= '36'/)
+        end
+
+        it 'ignores the blank value a check box group posts with its choices' do
+          expect(Search.new(Person, name_eq: ['', 'Sleep']).result.to_sql).to include("= 'Sleep'")
+        end
+
+        it 'keeps the Array a multiparameter date is collapsed into' do
+          search = Search.new(Person, 'created_at_gteq(1i)' => '2020', 'created_at_gteq(2i)' => '3',
+            'created_at_gteq(3i)' => '4')
+          expect(search.base.conditions.size).to eq 1
+          expect(search.result.to_sql).to include('2020-03-04')
+        end
+      end
+
+      # #1771: an Array inside one value envelope of the c: API was cast as a
+      # single value, so it matched every row or a stringified Array.
+      context 'an Array inside one value envelope' do
+        def params(attribute, predicate, value)
+          { c: { '0' => { a: { '0' => { name: attribute } }, p: predicate, v: { '0' => { value: value } } } } }
+        end
+
+        it 'is spread into one value per element for a predicate that wants an array' do
+          ids = Person.order(:id).limit(2).pluck(:id)
+          expect(Search.new(Person, params('id', 'in', ids)).result.pluck(:id)).to match_array ids
+          expect(Person.ransack!(params('id', 'in', ids)).result.pluck(:id)).to match_array ids
+          expect(Search.new(Person, params('name', 'in', %w[a b])).result.to_sql).to match(/IN \('a', 'b'\)/)
+          expect(Search.new(Person, params('name', 'not_eq_all', %w[a b])).result.to_sql)
+            .to match(/!= 'a' AND .*!= 'b'/)
+        end
+
+        it 'is dropped for a single-value predicate in the default lenient mode' do
+          search = Search.new(Person, params('name', 'eq', %w[a b]))
+          expect(search.base.conditions).to be_empty
+        end
+
+        it 'raises for a single-value predicate in strict mode' do
+          expect { Search.new(Person, params('name', 'eq', %w[a b]), ignore_unknown_conditions: false) }
+            .to raise_error(InvalidSearchError, 'Predicate eq takes a single value, 2 given for name')
+        end
+
+        it 'searches a one-element Array as its element for a single-value predicate' do
+          expect(Search.new(Person, params('name', 'eq', ['x'])).result.to_sql).to include("= 'x'")
+        end
+
+        it 'discards the condition when its attribute has no name' do
+          search = Search.new(Person, c: { '0' => { a: { '0' => {} }, p: 'in', v: { '0' => { value: [1, 2] } } } })
+          expect(search.base.conditions).to be_empty
+          expect(search.result.to_sql).not_to include('WHERE')
         end
       end
 
@@ -1095,6 +1176,48 @@ module Ransack
         expect(normalize_join_aliases.call(real_query)).to eq normalize_join_aliases.call(expected_query)
       end
 
+      # #1775: a table joined both directly and through another association.
+      # With the nested association searched first, the direct one was taken
+      # to be the nested join, so its join was never added and its condition
+      # was bound to the nested join's table.
+      describe 'a direct and a nested association to the same table' do
+        around do |example|
+          ::ActiveRecord::Base.transaction do
+            example.run
+            raise ::ActiveRecord::Rollback
+          end
+        end
+
+        let(:author)  { Person.create!(name: 'issue-1775-author') }
+        let(:article) { Article.create!(person: author, title: 'issue-1775-article') }
+
+        it 'binds each condition to its own join, in either param order' do
+          comment = Comment.create!(article: article, person: Person.create!(name: 'issue-1775-commenter'), body: 'issue-1775')
+          params = { article_person_name_eq: author.name, person_name_eq: 'issue-1775-commenter' }
+
+          [params, params.to_a.reverse.to_h].each do |ordered|
+            expect(Comment.ransack(ordered).result.to_a).to eq [comment]
+          end
+        end
+
+        it 'binds each condition to its own join from the other side too' do
+          Comment.create!(article: article, person: Person.create!(name: 'issue-1775-commenter'), body: 'issue-1775')
+          params = { comments_person_name_eq: 'issue-1775-commenter', person_name_eq: author.name }
+
+          [params, params.to_a.reverse.to_h].each do |ordered|
+            expect(Article.ransack(ordered).result.to_a).to eq [article]
+          end
+        end
+
+        it 'sorts on the direct association after a condition on the nested one' do
+          later = Comment.create!(article: article, person: Person.create!(name: 'issue-1775-z'), body: 'issue-1775')
+          sooner = Comment.create!(article: article, person: Person.create!(name: 'issue-1775-a'), body: 'issue-1775')
+
+          result = Comment.ransack(article_person_name_eq: author.name, s: 'person_name asc').result
+          expect(result.to_a).to eq [sooner, later]
+        end
+      end
+
       it 'evaluates compound conditions contextually' do
         s = Search.new(Person, children_name_or_name_eq: 'Ernie').result
         expect(s).to be_an ::ActiveRecord::Relation
@@ -1197,6 +1320,41 @@ module Ransack
         expect(Person.ransack!(stop_and_or_end_eq: 'x').result.to_sql).to include('= \'x\'')
       ensure
         Person._ransackers.delete('stop_and_or_end')
+      end
+    end
+
+    describe 'an association path listed in ransackable_attributes' do
+      # #1774: `person_name` on Article's allowlist was taken for a column
+      # of articles and bound as `articles.person_name`, which does not
+      # exist. Only a real attribute is bound on the model itself; any other
+      # name is followed through the association as usual (#756).
+      around do |example|
+        ::ActiveRecord::Base.transaction do
+          example.run
+          raise ::ActiveRecord::Rollback
+        end
+      end
+
+      before do
+        allow(Article).to receive(:ransackable_attributes).and_return(%w[title person_name orderId])
+      end
+
+      let!(:ernie) { Article.create!(person: Person.create!(name: 'issue-1774-ernie'), title: 'one') }
+      let!(:bert)  { Article.create!(person: Person.create!(name: 'issue-1774-bert'), title: 'two') }
+      let(:scope) { Article.where(id: [ernie.id, bert.id]) }
+
+      it 'searches through the association' do
+        expect(scope.ransack(person_name_cont: 'issue-1774-ernie').result.to_a).to eq [ernie]
+      end
+
+      it 'sorts through the association' do
+        expect(scope.ransack(s: 'person_name desc').result.to_a).to eq [ernie, bert]
+        expect(scope.ransack(s: 'person_name asc').result.to_a).to eq [bert, ernie]
+      end
+
+      it 'rejects a listed name that is neither an attribute nor a path' do
+        expect { Article.ransack!(orderId_eq: 'x') }
+          .to raise_error(InvalidSearchError, /Invalid search term orderId_eq/)
       end
     end
 

@@ -1,4 +1,4 @@
-require 'ransack/invalid_search_error'
+require 'ransack/errors'
 
 module Ransack
   module Nodes
@@ -34,9 +34,15 @@ module Ransack
               m: combinator,
               v: predicate.wants_array ? Array(values) : [values]
             )
+            # An Array given to a single-value predicate is spread into
+            # several values by #build, so it fails the arity check here the
+            # same way the c: form does (#1772).
+            if condition.arity_failure?
+              raise condition.arity_error if context&.strict_conditions?
+              nil
             # TODO: Figure out what to do with multiple types of attributes,
             # if anything. Tempted to go with "garbage in, garbage out" here.
-            if predicate.validate(condition.values, condition.default_type, condition.null_sentinel)
+            elsif predicate.validate(condition.values, condition.default_type, condition.null_sentinel)
               condition
             else
               nil
@@ -97,6 +103,21 @@ module Ransack
         values.size <= 1 || predicate.wants_array
       end
 
+      # A single-value predicate given several values is worth naming, so a
+      # strict search can say why the condition was dropped (#1724). It only
+      # counts once the predicate and an attribute have resolved; a condition
+      # that is invalid for another reason is not an arity failure.
+      def arity_failure?
+        predicate && attributes.any?(&:valid?) && !valid_arity?
+      end
+
+      def arity_error
+        InvalidSearchError.new(
+          "Predicate #{predicate_name} takes a single value, " \
+          "#{values.size} given for #{attributes.map(&:name).join(', ')}"
+        )
+      end
+
       def attributes
         @attributes ||= []
       end
@@ -115,10 +136,11 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
+            attrs = indifferent_params(attrs, 'attribute')
             build_attributes(attrs[:name], attrs[:ransacker_args])
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{args.class}) supplied to attributes="
         end
       end
@@ -140,11 +162,11 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
-            val = Value.new(@context, attrs[:value])
+            val = Value.new(@context, indifferent_params(attrs, 'value')[:value])
             self.values << val
           end
         else
-          raise ArgumentError,
+          raise InvalidSearchError,
             "Invalid argument (#{args.class}) supplied to values="
         end
       end
@@ -196,6 +218,7 @@ module Ransack
       # compound's combinator (#1728). Left alone, the alias passed `valid?`
       # by being allowlisted and bound a column that does not exist.
       def build_attributes(name, ransacker_args = [])
+        scalar_param(name, 'an attribute name')
         return build_attribute(name, ransacker_args) if name.blank? || @context.nil?
 
         resolved = @context.resolve_aliases(name.to_s)
@@ -251,13 +274,43 @@ module Ransack
       }.freeze
 
       def build(params)
-        params.with_indifferent_access.each do |key, value|
-          if key.match(/^(a|v|p|m|attributes|values|predicate|predicate_name|combinator)$/)
+        indifferent_params(params, 'condition').each do |key, value|
+          if key.match(/\A(a|v|p|m|attributes|values|predicate|predicate_name|combinator)\z/)
             self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end
         end
+        spread_array_values!
 
         self
+      end
+
+      # An Array held by one value stands for several values: `[5, 6]` in one
+      # envelope of the c: form (#1771), or `name_eq: ['a', 'b']` in the short
+      # form, as a group of check boxes posts it (#1772). Cast as one value it
+      # became nil on a typed column, dropping the condition, or its string
+      # form elsewhere. Each element becomes a value of its own instead, so a
+      # predicate that wants an array gets them all, and a single-value
+      # predicate is held to its arity like any condition given several
+      # values; a one-element Array is just its element. Blank elements, such
+      # as the empty string a check box group posts alongside its choices, are
+      # dropped when blank values are ignored. Date and time types keep the
+      # Array, which their cast builds one value from.
+      def spread_array_values!
+        return unless predicate && values.any? { |v| v.value.is_a?(Array) }
+        # An incomplete or unsearchable attribute has no type to look up;
+        # valid? discards the condition instead.
+        return unless predicate.type || attributes.first&.valid?
+        return if Value::ARRAY_CAST_TYPES.include?(default_type&.to_sym)
+
+        @values = values.flat_map do |v|
+          next [v] unless v.value.is_a?(Array)
+
+          elements = v.value
+          if Ransack.options[:ignore_blank_values]
+            elements = elements.reject { |e| e.blank? && e != false && !e.nil? }
+          end
+          elements.map { |e| Value.new(@context, e) }
+        end
       end
 
       def persisted?
@@ -283,7 +336,7 @@ module Ransack
       end
 
       def predicate_name=(name)
-        self.predicate = Predicate.named(name)
+        self.predicate = Predicate.named(scalar_param(name, 'a predicate'))
         @predicate
       end
       alias :p= :predicate_name=
@@ -308,7 +361,7 @@ module Ransack
       end
 
       def casted_values_for_attribute(attr)
-        validated_values.map { |v| v.cast(predicate.type || attr.type) }
+        validated_values.map { |v| v.cast(value_type_for_attribute(attr)) }
       end
 
       def formatted_values_for_attribute(attr)
@@ -330,7 +383,13 @@ module Ransack
       end
 
       def arel_predicate_for_attribute(attr)
-        if predicate.arel_predicate === Proc
+        # `.arel_predicate === Proc` reads as a class check, but `Proc#===`
+        # is an alias for `#call`. It actually invokes the proc, passing
+        # the `Proc` class itself as the argument, and branches on whatever
+        # comes back. `#respond_to?(:call)` is a real check, and it also
+        # catches an object that defines `#call` but is neither a Proc nor
+        # a Method, which `=== Proc` treats as a method name.
+        if predicate.arel_predicate.respond_to?(:call)
           values = casted_values_for_attribute(attr)
           unless predicate.wants_array
             values = values.first
@@ -356,7 +415,8 @@ module Ransack
       end
 
       def default_type
-        predicate.type || (attributes.first && attributes.first.type)
+        attribute = attributes.first
+        predicate.type || (attribute && value_type_for_attribute(attribute))
       end
 
       def inspect
@@ -379,9 +439,8 @@ module Ransack
       def arel_predicate
         attributes.map { |attribute|
           association = attribute.parent
-          parent_table = association.table
 
-          predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute, parent_table)
+          predicate = if negative? && attribute.associated_collection? && not_nested_condition(attribute)
             outer_key, query = context.correlated_subquery(association)
             context.use_ancestors_of(association)
 
@@ -410,8 +469,15 @@ module Ransack
         }.reduce(combinator_method)
       end
 
-      def not_nested_condition(attribute, parent_table)
-        parent_table.class != Arel::Nodes::TableAlias && attribute.name.starts_with?(parent_table.name)
+      # Whether the attribute is on a collection the searched model has
+      # directly, rather than one nested under another association. A
+      # negative condition on a nested collection keeps its join (#1411).
+      # Told apart by the association's depth, not by its name: the name of
+      # an STI, scoped, aliased or through collection need not start with
+      # its table's (#1773). The table argument is no longer used, and is
+      # kept for callers of the 4.4.0 API.
+      def not_nested_condition(attribute, _parent_table = nil)
+        context.root_association?(attribute.parent)
       end
 
       private
@@ -420,18 +486,28 @@ module Ransack
         combinator === Constants::OR ? :or : :and
       end
 
-      def format_predicate(attribute)
-        arel_pred = arel_predicate_for_attribute(attribute)
-        arel_values = formatted_values_for_attribute(attribute)
+      # The type a value is cast to for this attribute. A LIKE compares text,
+      # so its value stays text whatever the column's type: cast to an integer,
+      # 'Alpha' becomes 0 and the pattern '%0%' matches unrelated rows, and cast
+      # to a date it becomes nil, which either drops the condition or gives the
+      # pattern '%%' (#1793). A ransacker's formatter is still given the type
+      # the ransacker declares, as it may depend on it, and an Array still goes
+      # to the attribute's cast: a multiparameter date has to be assembled, and
+      # #spread_array_values! decides from this type whether to keep the Array.
+      def value_type_for_attribute(attr)
+        return predicate.type if predicate.type
+        return attr.type unless like_predicate?(predicate.arel_predicate)
+        return attr.type if attr.ransacker&.formatter
+        return attr.type if values.any? { |v| v.value.is_a?(Array) }
 
-        # The `present` / `blank` predicate formatters produce `[nil, '']` regardless
-        # of column type. The empty-string half has no meaning on non-string columns:
-        # ActiveRecord casts `''` to NULL for those types, producing the
-        # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
-        # empty string when the attribute is not a string-like column.
-        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) && !string_like_attribute?(attribute)
-          arel_values = arel_values.reject { |v| v == ''.freeze }
-        end
+        :string
+      end
+
+      def format_predicate(attribute)
+        return format_predicate_from_node(attribute) if predicate.arel_node
+
+        arel_pred = arel_predicate_for_attribute(attribute)
+        arel_values = formatted_values_without_blank_for_non_string(attribute)
 
         # A length predicate compares LENGTH(column) rather than the column.
         attr_value = length_predicate? ? length_function_for_attribute(attribute) : attr_value_for_attribute(attribute)
@@ -484,6 +560,57 @@ module Ransack
       def in_predicate?(predicate)
         return unless defined?(Arel::Nodes::Casted)
         predicate.class == Arel::Nodes::In || predicate.class == Arel::Nodes::NotIn
+      end
+
+      # The `present` / `blank` predicate formatters produce `[nil, '']` regardless
+      # of column type. The empty-string half has no meaning on non-string columns:
+      # ActiveRecord casts `''` to NULL for those types, producing the
+      # always-UNKNOWN `column != NULL` (or `column = NULL`) clause. Strip the
+      # empty string when the attribute is not a string-like column. A LIKE
+      # keeps it: its value stays text, so `''` is a pattern like any other.
+      def formatted_values_without_blank_for_non_string(attribute)
+        arel_values = formatted_values_for_attribute(attribute)
+
+        if arel_values.is_a?(Array) && arel_values.include?(''.freeze) &&
+           !string_like_attribute?(attribute) && !like_predicate?(predicate.arel_predicate)
+          arel_values = arel_values.reject { |v| v == ''.freeze }
+        end
+
+        arel_values
+      end
+
+      # `arel_node` receives the attribute node and the already cast and
+      # formatted values, and returns a finished Arel node directly,
+      # instead of naming a method `#format_predicate` sends to
+      # `attr_value` with one argument.
+      def format_predicate_from_node(attribute)
+        attr_value = attr_value_for_attribute(attribute)
+        # A sentinel-only search has no real values, so the builder gets no
+        # input and the condition is `IS NULL` alone.
+        return attr_value.eq(nil) if null_sentinel_requested? && validated_values.empty?
+
+        values = formatted_values_without_blank_for_non_string(attribute)
+        predicate = self.predicate.arel_node.call(attr_value, values)
+
+        # A nil result would drop the condition and a String would reach the
+        # SQL as raw text, both without an error.
+        unless predicate.is_a?(Arel::Nodes::Node)
+          raise ArgumentError,
+            "arel_node for '#{self.predicate.name}' must return an Arel node, " \
+            "got #{predicate.class}"
+        end
+
+        if in_predicate?(predicate) && predicate.right.is_a?(Array)
+          predicate.right = predicate.right.map do |pr|
+            casted_array?(pr) ? format_values_for(pr) : pr
+          end
+        end
+
+        predicate = null_sentinel_requested? ? apply_null_sentinel(predicate, attr_value) : predicate
+
+        unwrap_oversized_integers(predicate)
+
+        predicate
       end
 
       LIKE_PREDICATES = %w[
@@ -552,18 +679,21 @@ module Ransack
         end
       end
 
-      # Walks a predicate node for the shapes `#arel_predicate` can produce
-      # (a single Binary, an In/NotIn holding an Array, or several of these
-      # combined with Grouping/And/Or) and replaces each integer Casted
-      # value it finds with the plain integer, in place.
+      # Walks a predicate node for the shapes `#arel_predicate` or an
+      # `arel_node` builder can produce (a single Binary, an In/NotIn
+      # holding an Array, a Between, or several of these combined with
+      # Grouping/Not/And/Or) and replaces each integer Casted value it
+      # finds with the plain integer, in place.
       def unwrap_oversized_integers(node)
         case node
-        when Arel::Nodes::Grouping
+        when Arel::Nodes::Grouping, Arel::Nodes::Not
           unwrap_oversized_integers(node.expr)
         when Arel::Nodes::And, Arel::Nodes::Or
           # Both are Nary: `grouping_any` (behind every `_any` predicate)
           # builds a single Or with one child per value, not a pairwise
           # chain, so `left`/`right` alone would miss the third value on.
+          # A BETWEEN keeps its two bounds as Casted children of an And.
+          node.children.map! { |child| plain_integer(child) || child }
           node.children.each { |child| unwrap_oversized_integers(child) }
         when Arel::Nodes::In, Arel::Nodes::NotIn
           if node.right.is_a?(Array)
@@ -575,6 +705,7 @@ module Ransack
           end
         when Arel::Nodes::Binary
           unwrap_binary_right(node)
+          unwrap_oversized_integers(node.right) if node.right.is_a?(Arel::Nodes::And)
         end
       end
 
