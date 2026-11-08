@@ -137,3 +137,27 @@ jobs:
           psql -h localhost -p 5432 -W postgres -c 'create database ransack;' -U postgres;
       - name: Run tests
         run: bundle exec rspec
+
+  # Rails main, to see a change in the next Rails before it is released. It
+  # runs on every PR so a failure is seen in the checks list. It is allowed to
+  # fail and is not a required check, so a break on Rails main never blocks a
+  # merge. One database is enough: an Active Record change like the one behind
+  # #1795 breaks every adapter alike.
+  rails-main:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      DB: sqlite3
+      RAILS: main
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 4.0.1
+      # No bundler cache: there is no Gemfile.lock, so a cache keyed on the
+      # Gemfile would keep testing whichever Rails main commit it first saw.
+      - name: Install dependencies
+        run: bundle install
+      - name: Run tests
+        run: bundle exec rspec
