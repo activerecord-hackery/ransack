@@ -144,6 +144,21 @@ module Ransack
       end
 
       describe '#build_correlated_subquery' do
+        # Rails 8.2's TreeManager#to_sql finds its connection through the
+        # table a manager was built from (`table.klass`). Built from the model
+        # class rather than its Arel table, the subquery raised NoMethodError
+        # there. Rails 8.1 ignores that argument, so this checks what is
+        # passed rather than relying on `to_sql` to raise.
+        it 'builds the subquery from an Arel table, not a model class' do
+          search = Search.new(Person, { articles_title_not_eq: 'some_title' }, context: subject)
+          association = search.conditions.first.attributes.first.parent
+          allow(Arel::SelectManager).to receive(:new).and_call_original
+
+          subject.build_correlated_subquery(association)
+
+          expect(Arel::SelectManager).not_to have_received(:new).with(an_instance_of(Class))
+        end
+
         it 'build correlated subquery for Root STI model' do
           search = Search.new(Person, { articles_title_not_eq: 'some_title' }, context: subject)
           attribute = search.conditions.first.attributes.first
