@@ -8,7 +8,7 @@ on:
 
 jobs:
   sqlite3:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       # The newest and oldest supported Ruby, not every Ruby: Ransack has no
@@ -33,7 +33,7 @@ jobs:
         run: bundle exec rspec
 
   mysql:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +64,7 @@ jobs:
         run: bundle exec rspec
 
   trilogy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -96,7 +96,7 @@ jobs:
         run: bundle exec rspec
 
   postgres:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -144,7 +144,7 @@ jobs:
   # merge. One database is enough: an Active Record change like the one behind
   # #1795 breaks every adapter alike.
   rails-main:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     continue-on-error: true
     env:
       DB: sqlite3
