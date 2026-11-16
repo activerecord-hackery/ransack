@@ -136,7 +136,7 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
-            attrs = indifferent_params(attrs, 'attribute')
+            attrs = indifferent_params(attrs, 'an attribute')
             build_attributes(attrs[:name], attrs[:ransacker_args])
           end
         else
@@ -162,7 +162,7 @@ module Ransack
           end
         when Hash
           args.each do |index, attrs|
-            val = Value.new(@context, indifferent_params(attrs, 'value')[:value])
+            val = Value.new(@context, indifferent_params(attrs, 'a value')[:value])
             self.values << val
           end
         else
@@ -274,7 +274,7 @@ module Ransack
       }.freeze
 
       def build(params)
-        indifferent_params(params, 'condition').each do |key, value|
+        indifferent_params(params, 'a condition').each do |key, value|
           if key.match(/\A(a|v|p|m|attributes|values|predicate|predicate_name|combinator)\z/)
             self.send("#{LONG_KEYS.fetch(key, key)}=", value)
           end

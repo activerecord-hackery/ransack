@@ -61,6 +61,8 @@ module Ransack
         .to raise_error(InvalidSearchError, 'Invalid argument (String) supplied to groupings=')
       expect { Person.ransack(params('q[c][0]=x')) }
         .to raise_error(InvalidSearchError, 'Invalid argument (String) supplied for a condition')
+      expect { Person.ransack(params('q[c][0][a][0]=x')) }
+        .to raise_error(InvalidSearchError, 'Invalid argument (String) supplied for an attribute')
     end
 
     it 'is still an ArgumentError, for code that rescues that' do

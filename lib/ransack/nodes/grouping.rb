@@ -147,7 +147,7 @@ module Ransack
       end
 
       def build(params)
-        indifferent_params(params, 'grouping').each do |key, value|
+        indifferent_params(params, 'a grouping').each do |key, value|
           case key
           when /\A(g|c|m|groupings|conditions|combinator)\z/
             self.send("#{key}=", value)
