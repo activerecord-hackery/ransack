@@ -9,6 +9,9 @@ AllCops:
   Exclude:
     - "docs/**/*"
 
+Layout/DefEndAlignment:
+  Enabled: true
+
 Layout/EmptyLineAfterMagicComment:
   Enabled: true
 

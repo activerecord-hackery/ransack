@@ -47,11 +47,15 @@ module Ransack
       # Search params usually come from the request, so a grouping, condition
       # or sort given as something other than a hash (`q[g]=x`) is a malformed
       # search, not a programming error, whether or not the search is strict.
+      # Strong parameters are unwrapped as `Search#initialize` unwraps them, so
+      # `build_grouping(params[:g])` takes what `ransack(params[:q])` does. That
+      # does not make the search permitted: only `Search#initialize` reads it.
       def indifferent_params(params, node_name)
+        params = params.to_unsafe_h if params.respond_to?(:to_unsafe_h)
         return params.with_indifferent_access if params.respond_to?(:with_indifferent_access)
 
         raise InvalidSearchError,
-          "Invalid argument (#{params.class}) supplied for a #{node_name}"
+          "Invalid argument (#{params.class}) supplied for #{node_name}"
       end
 
       # A name, predicate, direction or combinator is a single value. Given an
@@ -63,7 +67,6 @@ module Ransack
 
         raise InvalidSearchError, "Invalid argument (#{value.class}) supplied for #{field}"
       end
-
     end
   end
 end

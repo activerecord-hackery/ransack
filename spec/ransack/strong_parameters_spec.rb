@@ -134,5 +134,47 @@ module Ransack
         expect(Listed.ransack(permitted(s: 'only_sort asc')).result.to_sql).not_to include 'only_sort'
       end
     end
+
+    # `Search#initialize` unwraps strong parameters. The builders that take
+    # params once the search exists did not, and turned them away as malformed.
+    context 'given to a builder once the search exists' do
+      let(:name) { "#{quote_table_name("people")}.#{quote_column_name("name")}" }
+
+      it 'builds a grouping from them' do
+        search = Person.ransack
+        search.build_grouping(unpermitted(name_eq: 'x'))
+        expect(search.result.to_sql).to match(/#{name} = 'x'/)
+      end
+
+      it 'builds a grouping from nested params' do
+        search = Person.ransack
+        search.build_grouping(
+          unpermitted(c: { '0' => { a: { '0' => { name: 'name' } }, p: 'eq', v: { '0' => { value: 'x' } } } })
+        )
+        expect(search.result.to_sql).to match(/#{name} = 'x'/)
+      end
+
+      it 'builds a sort from them' do
+        search = Person.ransack
+        search.build_sort(unpermitted(name: 'name', dir: 'desc'))
+        expect(search.result.to_sql).to match(/ORDER BY #{name} DESC/)
+      end
+
+      it 'still applies the allowlist of the model' do
+        search = Person.ransack
+        search.build_grouping(permitted(only_sort_eq: 'x'))
+        expect(search.result.to_sql).not_to include 'only_sort'
+      end
+
+      # Only the params the search was built from decide whether it is
+      # permitted; permitted params handed to a builder later do not.
+      it 'does not make a search of a model with no allowlist permitted' do
+        search = Unlisted.ransack
+        expect {
+          search.build_grouping(permitted(only_sort_eq: 'x'))
+          search.result
+        }.to raise_error(RuntimeError, /explicitly allowlisted/)
+      end
+    end
   end
 end

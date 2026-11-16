@@ -15,7 +15,7 @@ module Ransack
       end
 
       def build(params)
-        indifferent_params(params, 'sort').each do |key, value|
+        indifferent_params(params, 'a sort').each do |key, value|
           if key.match(/\A(name|dir|ransacker_args)\z/)
             self.send("#{key}=", value)
           end
