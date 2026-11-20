@@ -6,8 +6,12 @@ on:
       - main
   pull_request:
 
+# Job names leave out the Ruby and Rails versions on purpose: branch protection
+# on main requires these checks by name, so a version in the name would block
+# every PR that bumps it until the required checks were edited to match.
 jobs:
   sqlite3:
+    name: sqlite3 (${{ matrix.label }} Ruby)
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -15,10 +19,12 @@ jobs:
       # native code, and the database jobs below run on the Ruby in between.
       matrix:
         include:
-          - rails: 8-1-stable
-            ruby: 4.0.1
-          - rails: 8-1-stable
-            ruby: 3.3.10
+          - label: newest
+            rails: 8-1-stable
+            ruby: 4.0.10
+          - label: oldest
+            rails: 8-1-stable
+            ruby: 3.3.14
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -33,6 +39,7 @@ jobs:
         run: bundle exec rspec
 
   mysql:
+    name: mysql
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -40,7 +47,7 @@ jobs:
         rails:
           - 8-1-stable
         ruby:
-          - 3.4.8
+          - 3.4.13
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -64,6 +71,7 @@ jobs:
         run: bundle exec rspec
 
   trilogy:
+    name: trilogy
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -72,7 +80,7 @@ jobs:
         rails:
           - 8-1-stable
         ruby:
-          - 3.4.8
+          - 3.4.13
     env:
       DB: trilogy
       RAILS: ${{ matrix.rails }}
@@ -96,6 +104,7 @@ jobs:
         run: bundle exec rspec
 
   postgres:
+    name: postgres
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -103,7 +112,7 @@ jobs:
         rails:
           - 8-1-stable
         ruby:
-          - 3.4.8
+          - 3.4.13
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
@@ -154,7 +163,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.1
+          ruby-version: 4.0.10
       # No bundler cache: there is no Gemfile.lock, so a cache keyed on the
       # Gemfile would keep testing whichever Rails main commit it first saw.
       - name: Install dependencies

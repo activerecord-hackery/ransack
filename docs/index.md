@@ -86,6 +86,6 @@ WHERE "posts"."title" LIKE '%ransack%' ESCAPE '\'
 ORDER BY "posts"."published_at" DESC
 ```
 
-Ransack supports Rails 8.1 and 8.0 on Ruby 3.3 and later, on PostgreSQL,
+Ransack supports Rails 8.1 on Ruby 3.3 and later, on PostgreSQL,
 MySQL, MariaDB and SQLite. See [Installation](_getting_started/installation.md)
 to add it to your app.

@@ -7,14 +7,11 @@ Gem::Specification.new do |s|
   s.name        = "ransack"
   s.version     = Ransack::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Ernie Miller", "Ryan Bigg", "Jon Atack", "Sean Carroll", "David Rodríguez"]
-  s.email       = ["ernie@erniemiller.org", "radarlistener@gmail.com", "jonnyatack@gmail.com", "sean@immersive-app.com"]
+  s.authors     = ["Sean Carroll", "David Rodríguez", "Ernie Miller"]
+  s.email       = ["sean@immersive-app.com"]
   s.homepage    = "https://github.com/activerecord-hackery/ransack"
   s.summary     = %q{Object-based searching for Active Record.}
   s.description = %q{Powerful object-based searching and filtering for Active Record with advanced features like complex boolean queries, association searching, custom predicates and i18n support.}
-  # Ruby 3.1 reached end of life in March 2025 and its ecosystem has moved on
-  # (no sqlite3 with the CVE-2026-54619 fix supports it). Raising this floor
-  # is a breaking change and belongs in a major release only.
   s.required_ruby_version = '>= 3.3'
   s.license     = 'MIT'
   

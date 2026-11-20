@@ -15,7 +15,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4.8
+          ruby-version: 3.4.13
       - name: Install gems
         run: bundle install --jobs 4 --retry 3
       - name: Run RuboCop
