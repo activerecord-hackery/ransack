@@ -16,9 +16,9 @@ jobs:
       matrix:
         include:
           - rails: 8-1-stable
-            ruby: 4.0.1
+            ruby: 4.0.10
           - rails: 8-1-stable
-            ruby: 3.3.10
+            ruby: 3.3.14
     env:
       DB: sqlite3
       RAILS: ${{ matrix.rails }}
@@ -40,7 +40,7 @@ jobs:
         rails:
           - 8-1-stable
         ruby:
-          - 3.4.8
+          - 3.4.13
     env:
       DB: mysql
       RAILS: ${{ matrix.rails }}
@@ -72,7 +72,7 @@ jobs:
         rails:
           - 8-1-stable
         ruby:
-          - 3.4.8
+          - 3.4.13
     env:
       DB: trilogy
       RAILS: ${{ matrix.rails }}
@@ -103,7 +103,7 @@ jobs:
         rails:
           - 8-1-stable
         ruby:
-          - 3.4.8
+          - 3.4.13
     env:
       DB: postgres
       RAILS: ${{ matrix.rails }}
@@ -154,7 +154,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.1
+          ruby-version: 4.0.10
       # No bundler cache: there is no Gemfile.lock, so a cache keyed on the
       # Gemfile would keep testing whichever Rails main commit it first saw.
       - name: Install dependencies
