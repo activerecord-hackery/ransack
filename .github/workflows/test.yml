@@ -6,8 +6,12 @@ on:
       - main
   pull_request:
 
+# Job names leave out the Ruby and Rails versions on purpose: branch protection
+# on main requires these checks by name, so a version in the name would block
+# every PR that bumps it until the required checks were edited to match.
 jobs:
   sqlite3:
+    name: sqlite3 (${{ matrix.label }} Ruby)
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -15,9 +19,11 @@ jobs:
       # native code, and the database jobs below run on the Ruby in between.
       matrix:
         include:
-          - rails: 8-1-stable
+          - label: newest
+            rails: 8-1-stable
             ruby: 4.0.10
-          - rails: 8-1-stable
+          - label: oldest
+            rails: 8-1-stable
             ruby: 3.3.14
     env:
       DB: sqlite3
@@ -33,6 +39,7 @@ jobs:
         run: bundle exec rspec
 
   mysql:
+    name: mysql
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -64,6 +71,7 @@ jobs:
         run: bundle exec rspec
 
   trilogy:
+    name: trilogy
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -96,6 +104,7 @@ jobs:
         run: bundle exec rspec
 
   postgres:
+    name: postgres
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
