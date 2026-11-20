@@ -53,8 +53,7 @@ for commercial support.
 ## Contributors
 
 Ransack is maintained by [Sean Carroll](https://github.com/scarroll32),
-[Deivid Rodriguez](https://github.com/deivid-rodriguez),
-[Greg Molnar](https://github.com/gregmolnar) and
+[Deivid Rodriguez](https://github.com/deivid-rodriguez) and
 [a great group of contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors).
 It was created by [Ernie Miller](http://twitter.com/erniemiller). See
 [Community and support](https://activerecord-hackery.github.io/ransack/project/community/)

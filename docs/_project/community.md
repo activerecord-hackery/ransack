@@ -48,7 +48,6 @@ Ransack is maintained by:
 
 * [Sean Carroll](https://github.com/scarroll32)
 * [Deivid Rodriguez](https://github.com/deivid-rodriguez)
-* [Greg Molnar](https://github.com/gregmolnar)
 * [A great group of contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors)
 
 Alumni maintainers:
@@ -56,6 +55,7 @@ Alumni maintainers:
 * [Ernie Miller](http://twitter.com/erniemiller) (original author)
 * [Jon Atack](http://twitter.com/jonatack)
 * [Ryan Bigg](http://twitter.com/ryanbigg)
+* [Greg Molnar](https://github.com/gregmolnar)
 
 This project exists thanks to all the people who contribute.
 
