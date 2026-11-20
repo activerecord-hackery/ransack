@@ -35,6 +35,16 @@ gem 'ransack'
 [upgrading](https://activerecord-hackery.github.io/ransack/getting-started/upgrading/)
 and more. The site is built from the Markdown under [`docs/`](docs/).
 
+## We love ❤️ these projects
+
+* [ActiveAdmin](https://github.com/activeadmin/activeadmin), the Rails admin framework whose filters are built on Ransack
+* [Avo](https://github.com/avo-hq/avo), admin panels and internal tools for Rails, with search powered by Ransack
+* [Spree](https://github.com/spree/spree), the open source commerce platform, which uses Ransack for its search and filtering
+* [Solidus](https://github.com/solidusio/solidus), the open source eCommerce framework, which uses Ransack for its search and filtering
+* [mobility-ransack](https://github.com/shioyama/mobility-ransack), which searches attributes translated with [Mobility](https://github.com/shioyama/mobility)
+* [ransack_memory](https://github.com/richardrails/ransack_memory), which saves and restores Ransack's search params in the session
+* [Ransack demo](https://github.com/activerecord-hackery/ransack_demo), an app showing advanced search forms built with Ransack
+
 ## Getting help and contributing
 
 * Questions belong in [GitHub Discussions](https://github.com/activerecord-hackery/ransack/discussions).
