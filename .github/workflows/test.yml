@@ -6,9 +6,11 @@ on:
       - main
   pull_request:
 
-# Job names leave out the Ruby and Rails versions on purpose: branch protection
-# on main requires these checks by name, so a version in the name would block
-# every PR that bumps it until the required checks were edited to match.
+# Check names leave out the Ruby and Rails versions on purpose: branch
+# protection on main requires these checks by name, so a version in the name
+# would block every PR that bumps it until the required checks were edited to
+# match. GitHub appends the matrix values to the name of a matrix job unless the
+# name uses one, so the single-version jobs below have no matrix.
 jobs:
   sqlite3:
     name: sqlite3 (${{ matrix.label }} Ruby)
@@ -41,16 +43,9 @@ jobs:
   mysql:
     name: mysql
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        rails:
-          - 8-1-stable
-        ruby:
-          - 3.4.13
     env:
       DB: mysql
-      RAILS: ${{ matrix.rails }}
+      RAILS: 8-1-stable
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: root
     steps:
@@ -58,7 +53,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
+          ruby-version: 3.4.13
           bundler-cache: true
       - name: Startup MySQL
         run: |
@@ -73,17 +68,10 @@ jobs:
   trilogy:
     name: trilogy
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        # Same MySQL server as the mysql jobs; this covers the adapter.
-        rails:
-          - 8-1-stable
-        ruby:
-          - 3.4.13
+    # Same MySQL server as the mysql jobs; this covers the adapter.
     env:
       DB: trilogy
-      RAILS: ${{ matrix.rails }}
+      RAILS: 8-1-stable
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: root
       MYSQL_HOST: 127.0.0.1
@@ -92,7 +80,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
+          ruby-version: 3.4.13
           bundler-cache: true
       - name: Startup MySQL
         run: |
@@ -106,16 +94,9 @@ jobs:
   postgres:
     name: postgres
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        rails:
-          - 8-1-stable
-        ruby:
-          - 3.4.13
     env:
       DB: postgres
-      RAILS: ${{ matrix.rails }}
+      RAILS: 8-1-stable
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: 127.0.0.1
@@ -139,7 +120,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
+          ruby-version: 3.4.13
           bundler-cache: true
       - name: Setup databases
         run: |
