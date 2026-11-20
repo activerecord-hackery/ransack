@@ -51,7 +51,7 @@ WHERE "posts"."title" LIKE '%ransack%' ESCAPE '\'
 ORDER BY "posts"."published_at" DESC
 ```
 
-Ransack supports Rails 8.1 and 8.0 on Ruby 3.3 and later, on PostgreSQL,
+Ransack supports Rails 8.1 on Ruby 3.3 and later, on PostgreSQL,
 MySQL, MariaDB and SQLite. See [Installation](_getting_started/installation.md)
 to add it to your app.
 
@@ -1878,7 +1878,7 @@ changes in every release is in the
 
 ### Ruby 3.3 and Rails 8.1 or later are required
 
-Ruby 3.2 reached end of life in March 2026, Rails 7.2 in August 2026 and
+Ruby 3.2 reached end of life in April 2026, Rails 7.2 in August 2026 and
 Rails 8.0 in November 2026; none of them receives security fixes any more.
 Ransack 6.1 requires Ruby 3.3 or later and Active Record 8.1 or later. Nothing
 else changes: if you are on a supported Ruby and Rails, upgrading needs no code
@@ -3765,7 +3765,6 @@ Ransack is maintained by:
 
 * [Sean Carroll](https://github.com/scarroll32)
 * [Deivid Rodriguez](https://github.com/deivid-rodriguez)
-* [Greg Molnar](https://github.com/gregmolnar)
 * [A great group of contributors](https://github.com/activerecord-hackery/ransack/graphs/contributors)
 
 Alumni maintainers:
@@ -3773,6 +3772,7 @@ Alumni maintainers:
 * [Ernie Miller](http://twitter.com/erniemiller) (original author)
 * [Jon Atack](http://twitter.com/jonatack)
 * [Ryan Bigg](http://twitter.com/ryanbigg)
+* [Greg Molnar](https://github.com/gregmolnar)
 
 This project exists thanks to all the people who contribute.
 
