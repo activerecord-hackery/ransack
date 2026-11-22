@@ -57,6 +57,23 @@ module Ransack
         postgresql?
       end
 
+      # Whether LIKE against a column with this collation already ignores
+      # case, so a case-insensitive predicate need not lower the column.
+      #
+      # MySQL and MariaDB compare with the column's collation, and the
+      # default ones (utf8mb4_0900_ai_ci, utf8mb4_general_ci and the like)
+      # are case-insensitive: their names end in `_ci`. Lowering such a
+      # column changes no result, and it keeps a prefix LIKE from using the
+      # column's index, so a search on `i_start` scans the whole table.
+      # A `_bin` or `_cs` column, or one with no collation at all, is still
+      # lowered, since there LIKE is case-sensitive.
+      #
+      # Elsewhere the collation is not consulted: PostgreSQL has ILIKE, and
+      # SQLite's LIKE ignores the column's collation.
+      def case_insensitive_collation?(collation)
+        mysql? && collation.to_s.end_with?('_ci'.freeze)
+      end
+
       # CHAR_LENGTH is the SQL standard spelling and what PostgreSQL and MySQL
       # use; their LENGTH counts bytes on MySQL. SQLite has no CHAR_LENGTH,
       # and neither does Oracle, while both count characters with LENGTH, so

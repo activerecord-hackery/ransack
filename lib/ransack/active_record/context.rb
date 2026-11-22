@@ -34,6 +34,15 @@ module Ransack
         attr.klass.type_for_attribute(name).type
       end
 
+      # The collation of the column behind this attribute, as the schema
+      # reports it, or nil when there is none: a ransacker, a column the
+      # adapter reports no collation for, or a non-string column.
+      def collation_for(attr)
+        return nil unless attr && attr.valid? && !attr.ransacker
+        column = attr.klass.columns_hash[attr.arel_attribute.name.to_s]
+        column.collation if column.respond_to?(:collation)
+      end
+
       # Evaluating a search leaves the context as it was, so the search can
       # be evaluated again, or given another condition or sort, and still
       # line up with the query Active Record builds (#1745, #1750).
