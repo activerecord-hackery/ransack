@@ -76,6 +76,28 @@ module Ransack::ActiveRecord
       end
     end
 
+    describe '#case_insensitive_collation?' do
+      it 'is true for a MySQL _ci collation' do
+        mysql = Dialect.new(:mysql)
+        expect(mysql.case_insensitive_collation?('utf8mb4_0900_ai_ci')).to be true
+        expect(mysql.case_insensitive_collation?('utf8mb3_general_ci')).to be true
+        expect(mysql.case_insensitive_collation?('uca1400_ai_ci')).to be true
+      end
+
+      it 'is false for a case-sensitive, binary or missing collation' do
+        mysql = Dialect.new(:mysql)
+        expect(mysql.case_insensitive_collation?('utf8mb4_bin')).to be false
+        expect(mysql.case_insensitive_collation?('utf8mb4_0900_as_cs')).to be false
+        expect(mysql.case_insensitive_collation?(nil)).to be false
+      end
+
+      it 'is false outside MySQL' do
+        %i[postgresql sqlite generic].each do |name|
+          expect(Dialect.new(name).case_insensitive_collation?('und-x-icu_ci')).to be false
+        end
+      end
+    end
+
     describe '#length_function' do
       it 'uses CHAR_LENGTH where it exists and LENGTH elsewhere' do
         expect(Dialect.new(:postgresql).length_function).to eq 'CHAR_LENGTH'

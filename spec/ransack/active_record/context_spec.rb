@@ -22,6 +22,29 @@ module Ransack
         end
       end
 
+      describe '#collation_for' do
+        def attribute_for(params)
+          Search.new(Person, params, context: subject).base.conditions.first.attributes.first
+        end
+
+        it "reports a string column's collation as the schema has it" do
+          expected = Person.columns_hash['name'].collation
+          expect(subject.collation_for(attribute_for(name_i_cont: 'x'))).to eq expected
+        end
+
+        it 'reports the database default collation on MySQL', if: RansackHelper.dialect.mysql? do
+          expect(subject.collation_for(attribute_for(name_i_cont: 'x'))).to end_with '_ci'
+        end
+
+        it 'is nil for a ransacker' do
+          expect(subject.collation_for(attribute_for(doubled_name_i_cont: 'x'))).to be_nil
+        end
+
+        it 'is nil for a non-string column' do
+          expect(subject.collation_for(attribute_for(salary_eq: 1))).to be_nil
+        end
+      end
+
       describe '#type_for with the Attributes API' do
         # A column redeclared with `attribute` is cast by its declared type,
         # not the schema column's (#1028).

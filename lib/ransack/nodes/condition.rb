@@ -401,17 +401,27 @@ module Ransack
       end
 
       # The column (or ransacker expression) a predicate compares against.
-      # A case-insensitive predicate lowers it, unless the dialect has a
-      # case-insensitive LIKE of its own (ILIKE), in which case the lowering
-      # is left to the database. LOWER() is applied as a function rather than
-      # through Arel's Attribute#lower so that a ransacker returning any Arel
-      # node — a SQL literal, an infix operation — is lowered too (#1357).
+      # A case-insensitive predicate lowers it, unless the database already
+      # matches it case-insensitively: the dialect has a case-insensitive
+      # LIKE of its own (ILIKE), or the column's collation ignores case (a
+      # `_ci` collation on MySQL). Leaving such a column bare keeps a prefix
+      # LIKE able to use its index. LOWER() is applied as a function rather
+      # than through Arel's Attribute#lower so that a ransacker returning any
+      # Arel node — a SQL literal, an infix operation — is lowered too (#1357).
       def attr_value_for_attribute(attr)
-        if predicate.case_insensitive && !context.dialect.case_insensitive_like?
+        if predicate.case_insensitive && !case_insensitive_like_for?(attr)
           Arel::Nodes::NamedFunction.new('LOWER'.freeze, [attr.attr])
         else
           attr.attr
         end
+      end
+
+      def case_insensitive_like_for?(attr)
+        dialect = context.dialect
+        return true if dialect.case_insensitive_like?
+
+        context.respond_to?(:collation_for) &&
+          dialect.case_insensitive_collation?(context.collation_for(attr))
       end
 
       def default_type
